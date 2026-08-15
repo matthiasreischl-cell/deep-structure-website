@@ -55,14 +55,45 @@ export const memories = {
 };
 
 export const channels = [
-  { id: 'soundcloud', label: 'SoundCloud', mark: 'SC', url: '#' },
-  { id: 'spotify', label: 'Spotify', mark: 'SP', url: '#' },
+  {
+    id: 'spotify',
+    label: 'Spotify',
+    mark: 'SP',
+    url: 'https://open.spotify.com/intl-de/artist/7D3ibrgZdvhQDorWcjcR8T'
+  },
+  {
+    id: 'soundcloud',
+    label: 'SoundCloud',
+    mark: 'SC',
+    url: 'https://soundcloud.com/deepstructure-269845164'
+  },
+  {
+    id: 'youtube',
+    label: 'YouTube',
+    mark: 'YT',
+    url: 'https://www.youtube.com/channel/UCXFT31NeGwDTmFq6G8YT84g'
+  },
+  {
+    id: 'youtube-2',
+    label: 'YouTube — Deep Structure',
+    mark: 'Y2',
+    url: 'https://www.youtube.com/@DeepStructure-k8u'
+  },
+  {
+    id: 'bandcamp',
+    label: 'Bandcamp',
+    mark: 'BC',
+    url: 'https://deepstructures.bandcamp.com/'
+  },
+  {
+    id: 'tiktok',
+    label: 'TikTok',
+    mark: 'TT',
+    url: 'https://www.tiktok.com/@deep.structure'
+  },
   { id: 'amazon-music', label: 'Amazon Music', mark: 'AM', url: '#' },
-  { id: 'youtube', label: 'YouTube', mark: 'YT', url: '#' },
   { id: 'youtube-music', label: 'YouTube Music', mark: 'YM', url: '#' },
-  { id: 'apple-music', label: 'Apple Music / iTunes', mark: 'AP', url: '#' },
-  { id: 'tiktok', label: 'TikTok', mark: 'TT', url: '#' },
-  { id: 'bandcamp', label: 'Bandcamp', mark: 'BC', url: '#' }
+  { id: 'apple-music', label: 'Apple Music / iTunes', mark: 'AP', url: '#' }
 ];
 
 // 24/7 stream configuration. Add the future AzuraCast/Icecast stream URL here.

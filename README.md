@@ -1,8 +1,8 @@
-# Deep Structure — Landing Page Prototype
+# Deep Structure — Interactive World Prototype
 
-Experimental single-screen entrance for the Deep Structure website.
+Experimental entrance and first interior world for the Deep Structure website.
 
-## Current prototype
+## Entrance
 
 - Full-screen dark liquid/WebGL surface
 - Persistent object-centered displacement and ripple field
@@ -15,23 +15,62 @@ Experimental single-screen entrance for the Deep Structure website.
 - Responsive behavior for desktop and touch devices
 - Reduced-motion fallback
 
-The original bitmap logo is no longer used as the visible entrance object. The current symbol is generated from 3D geometry at runtime.
+## Deep Structure World V1
+
+After the entrance transition, the visitor enters a dark spatial navigation scene rather than a conventional menu.
+
+Current world objects:
+
+- 5 floating vinyl records — entrances to album worlds
+  - Das Theater der Wirklichkeit
+  - Kintsugi
+  - Faust – The Deep Structure Deception
+  - It Works
+  - Die roten Schuhe
+- 1 suspended archival photo — entrance to Memories
+- 1 floating door — entrance to Channels
+- subtle pointer parallax and object float
+- restrained hover responses
+- minimal `INDEX` fallback navigation
+- first-level detail overlays for albums, Memories and Channels
+- mobile layout and reduced-motion handling
+
+Album covers are used only as compact vinyl-label/detail references, not as flat billboards in the main world.
+
+## Channels
+
+The Channels view is prepared for:
+
+- SoundCloud
+- Spotify
+- Amazon Music
+- YouTube
+- YouTube Music
+- Apple Music / iTunes
+- TikTok
+- Bandcamp
+
+URLs are currently placeholders in `data/world-data.js`. Real external URLs will open in a new tab once entered.
 
 ## Runtime dependency
 
 The prototype imports Three.js as an ES module from unpkg. No framework or build process is required for the current GitHub Pages version.
 
-## Files
+## Main files
 
-- `index.html` — semantic scene shell and transition UI
-- `styles.css` — composition, typography, cursor and visual layers
-- `app.js` — WebGL water shader, Three.js symbol and interaction logic
-- `CODEX_TASK.md` — canonical design/technical specification for further Codex work
-- `assets/deep-structure-logo.webp` — legacy/reference asset only
+- `index.html` — entrance shell, transition and World V1 host markup
+- `styles.css` — entrance composition, symbol stage and compass
+- `app.js` — WebGL water shader and entrance interaction
+- `symbol-v2.js` — corrected procedural 3D Deep Structure symbol
+- `world.css` — interior world, vinyl/photo/door objects and detail panels
+- `world.js` — World V1 rendering, navigation, parallax and overlays
+- `data/world-data.js` — albums, memories and channel configuration
+- `data/assets/*.js` — compact embedded WebP references supplied for this prototype
+- `CODEX_TASK.md` — design/technical specification for further Codex work
 
 ## Local preview
 
-Because `app.js` is an ES module, preview through a small local web server rather than opening `index.html` directly:
+Preview through a small local web server:
 
 ```bash
 python3 -m http.server 8080
@@ -39,6 +78,6 @@ python3 -m http.server 8080
 
 Then open `http://localhost:8080`.
 
-## Future hand-off
+## Event hand-off
 
-The entrance transition dispatches `deepstructure:entered` and sets the URL hash to `#inside`. That remains the hand-off point for the future interior website/navigation.
+The entrance transition dispatches `deepstructure:entered` and sets the URL hash to `#inside`. `world.js` listens for that event and activates the interior scene.

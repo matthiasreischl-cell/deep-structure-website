@@ -3,24 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#020407" />
+  <meta name="theme-color" content="#010305" />
   <meta name="description" content="Deep Structure — enter the world beneath the surface." />
   <title>Deep Structure</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
+  <div class="depth-vignette" aria-hidden="true"></div>
   <div class="noise" aria-hidden="true"></div>
 
   <main class="landing" id="landing">
     <button class="logo-button" id="enterButton" type="button" aria-label="Enter Deep Structure">
-      <span class="logo-aura" aria-hidden="true"></span>
-      <img class="logo" src="assets/deep-structure-logo.webp" alt="Deep Structure" draggable="false" />
+      <span class="water-shadow" aria-hidden="true"></span>
+      <span class="logo-float" id="logoFloat">
+        <img class="logo" src="assets/deep-structure-logo.webp" alt="Deep Structure" draggable="false" />
+        <span class="logo-glint" aria-hidden="true"></span>
+      </span>
+      <span class="logo-reflection" aria-hidden="true">
+        <img src="assets/deep-structure-logo.webp" alt="" draggable="false" />
+      </span>
     </button>
   </main>
 
   <div class="transition" id="transition" aria-hidden="true">
-    <div class="transition-ring" aria-hidden="true"></div>
+    <div class="transition-ripple" aria-hidden="true"></div>
     <p class="transition-copy">The World you get in.</p>
   </div>
 

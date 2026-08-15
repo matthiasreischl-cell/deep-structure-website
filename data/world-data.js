@@ -64,3 +64,15 @@ export const channels = [
   { id: 'tiktok', label: 'TikTok', mark: 'TT', url: '#' },
   { id: 'bandcamp', label: 'Bandcamp', mark: 'BC', url: '#' }
 ];
+
+// 24/7 stream configuration. Add the future AzuraCast/Icecast stream URL here.
+export const radio = {
+  id: 'radio',
+  title: 'Deep Structure Radio',
+  caption: '24/7 Deep Structure — the catalogue as a continuous signal.',
+  streamUrl: '',
+  metadataUrl: '',
+  stationLabel: 'DEEP STRUCTURE RADIO',
+  nowPlayingFallback: 'Continuous transmission',
+  tunerMark: 'DS'
+};

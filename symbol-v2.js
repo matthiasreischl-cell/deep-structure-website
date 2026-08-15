@@ -5,7 +5,7 @@ const button = document.getElementById('enterButton');
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Replace the earlier procedural approximation created by app.js.
-// app.js still owns the water shader, compass cursor and entrance transition.
+// app.js continues to own the water shader, compass cursor and entrance transition.
 for (const canvas of stage.querySelectorAll('canvas')) canvas.remove();
 
 stage.style.transform = 'none';
@@ -40,7 +40,7 @@ const envTexture = new THREE.CanvasTexture(env);
 envTexture.mapping = THREE.EquirectangularReflectionMapping;
 scene.environment = envTexture;
 
-// Deliberately generous framing: the outer ring remains visible at maximum tilt.
+// Generous framing keeps the outer ring visible even at maximum tilt.
 const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
 camera.position.set(0, 0, 9.35);
 
@@ -65,7 +65,7 @@ scene.add(lowerLight);
 const root = new THREE.Group();
 scene.add(root);
 
-// Materials: very shallow 3D, not a free-form reinterpretation.
+// Materials stay shallow and controlled so the mark retains its 2D identity.
 const ringMetal = new THREE.MeshPhysicalMaterial({
   color: 0xa7bac4,
   metalness: 0.80,
@@ -122,7 +122,7 @@ function annulus(innerRadius, outerRadius, depth, material) {
   return new THREE.Mesh(extrude(shape, depth, 0.006, 160), material);
 }
 
-// Subtle contact glow only; geometry remains visually dominant.
+// Very subtle contact glow; geometry remains visually dominant.
 const glow = new THREE.Mesh(
   new THREE.CircleGeometry(2.34, 128),
   new THREE.MeshBasicMaterial({
@@ -136,13 +136,7 @@ const glow = new THREE.Mesh(
 glow.position.z = -0.32;
 root.add(glow);
 
-/*
-Reference-derived geometry.
-The supplied reference contains FOUR concentric ring bands.
-Approximate measured center-radius ratios from the reference:
-119.5 : 142.5 : 166.5 : 191 pixels.
-Scaled here to an outer ring center radius of 2.14.
-*/
+// FOUR concentric metallic ring bands, derived from the supplied reference.
 const ringRadii = [1.34, 1.60, 1.87, 2.14];
 const ringBandWidth = 0.132;
 const ringDepth = 0.050;
@@ -158,7 +152,7 @@ ringRadii.forEach((radius, index) => {
   root.add(ring);
 });
 
-// The opening inside the innermost ring is intentionally almost black.
+// The opening inside the innermost ring remains almost black.
 const openingRadius = 1.265;
 const darkDisc = new THREE.Mesh(
   new THREE.CircleGeometry(openingRadius, 160),
@@ -168,16 +162,14 @@ darkDisc.position.z = -0.052;
 root.add(darkDisc);
 
 /*
-Filled central triangle.
-Reference-derived proportions:
-top ≈ +1.18
-base y ≈ -0.64
-half base width ≈ 1.06
+Central filled triangle.
+The triangle is deliberately separated from the lower circular segment:
+all three sides, including the complete lower edge, remain freely visible.
 */
 const triangleShape = new THREE.Shape();
-triangleShape.moveTo(0, 1.18);
-triangleShape.lineTo(-1.06, -0.64);
-triangleShape.lineTo(1.06, -0.64);
+triangleShape.moveTo(0, 1.12);
+triangleShape.lineTo(-0.98, -0.44);
+triangleShape.lineTo(0.98, -0.44);
 triangleShape.closePath();
 
 const triangle = new THREE.Mesh(
@@ -188,12 +180,12 @@ triangle.position.z = 0.032;
 root.add(triangle);
 
 /*
-Lower filled circular segment:
-same visual opening as the inner ring, with a straight upper chord
-aligned to the triangle base.
+Lower filled circular segment.
+Its straight upper chord sits well below the triangle base, leaving a clearly
+visible dark separation zone. It never touches or overlaps the triangle.
 */
-const segmentRadius = 1.255;
-const chordY = -0.64;
+const segmentRadius = 1.08;
+const chordY = -0.74;
 const chordX = Math.sqrt(segmentRadius * segmentRadius - chordY * chordY);
 const rightAngle = Math.atan2(chordY, chordX);
 const leftAngle = -Math.PI - rightAngle;
@@ -218,15 +210,15 @@ const lowerSegment = new THREE.Mesh(
 lowerSegment.position.z = 0.034;
 root.add(lowerSegment);
 
-// Fine straight edge reinforces the reference's clean chord.
+// Clean straight upper edge of the lower segment.
 const chord = new THREE.Mesh(
-  new THREE.BoxGeometry(chordX * 2, 0.020, 0.055),
+  new THREE.BoxGeometry(chordX * 2, 0.018, 0.055),
   brightMetal
 );
-chord.position.set(0, chordY + 0.006, 0.044);
+chord.position.set(0, chordY + 0.005, 0.044);
 root.add(chord);
 
-// Pointer-driven motion stays intentionally subtle.
+// Pointer-driven motion remains intentionally subtle.
 let nx = 0;
 let ny = 0;
 let proximity = 0;
@@ -278,7 +270,6 @@ function frame(now) {
   const idleFloat = reduced ? 0 : Math.sin(time * 0.82) * 0.030;
   const idleYaw = reduced ? 0 : Math.sin(time * 0.38) * 0.006;
 
-  // Reduced tilt: enough to reveal depth without deforming the logo identity.
   const targetRX = -ny * proximity * 0.080;
   const targetRY = nx * proximity * 0.105 + idleYaw;
   const targetX = nx * proximity * 0.040;
@@ -293,8 +284,6 @@ function frame(now) {
 
   root.rotation.set(rx, ry, 0);
   root.position.set(px, py, pz);
-
-  // Slightly smaller base scale plus wider camera margin prevents clipping.
   root.scale.setScalar(0.94 + proximity * 0.008);
 
   glow.material.opacity = 0.020 + proximity * 0.018;

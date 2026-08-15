@@ -37,6 +37,10 @@
     <span class="compass-dot"></span>
   </div>
 
-  <script type="module" src="app.js"></script>
+  <script type="module">
+    await import('./app.js?v=3');
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    await import('./symbol-v2.js?v=2');
+  </script>
 </body>
 </html>

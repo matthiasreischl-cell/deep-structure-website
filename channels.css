@@ -44,6 +44,7 @@
 .channel-link:nth-child(4) { --channel-accent: 255, 0, 0; }
 .channel-link:nth-child(5) { --channel-accent: 98, 154, 169; }
 .channel-link:nth-child(6) { --channel-accent: 37, 244, 238; }
+.channel-link:nth-child(7) { --channel-accent: 110, 92, 255; }
 .channel-link:nth-child(8) { --channel-accent: 255, 0, 51; }
 
 .channel-link:nth-child(1) .channel-mark,
@@ -117,6 +118,32 @@
   filter: drop-shadow(0 0 8px rgba(var(--channel-accent), .38));
 }
 
+/* Amazon Music uses the supplied full-colour square artwork rather than a monochrome mask. */
+.channel-link:nth-child(7) .channel-mark {
+  overflow: hidden;
+  border-radius: 9px;
+  font-size: 0;
+  color: transparent;
+}
+
+.channel-link:nth-child(7) .channel-mark::before {
+  content: "";
+  display: block;
+  width: 30px;
+  height: 30px;
+  background: url("assets/channels/amazon-music.svg") center / contain no-repeat;
+  opacity: .58;
+  filter: grayscale(.72) brightness(.82) saturate(.72);
+  transition: opacity .28s ease, filter .28s ease, transform .28s ease;
+}
+
+.channel-link:nth-child(7):hover .channel-mark::before,
+.channel-link:nth-child(7):focus-visible .channel-mark::before {
+  opacity: 1;
+  filter: grayscale(0) brightness(1.06) saturate(1.08) drop-shadow(0 0 8px rgba(110, 92, 255, .4));
+  transform: scale(1.04);
+}
+
 @media (pointer: coarse) {
   .channel-link:nth-child(1) .channel-mark::before { background: #1db954; opacity: .9; }
   .channel-link:nth-child(2) .channel-mark::before { background: #ff5500; opacity: .9; }
@@ -124,5 +151,6 @@
   .channel-link:nth-child(4) .channel-mark::before { background: #ff0000; opacity: .9; }
   .channel-link:nth-child(5) .channel-mark::before { background: #629aa9; opacity: .9; }
   .channel-link:nth-child(6) .channel-mark::before { background: linear-gradient(135deg, #25f4ee 0 40%, #f6fbfc 44% 56%, #fe2c55 60% 100%); opacity: .95; }
+  .channel-link:nth-child(7) .channel-mark::before { opacity: .95; filter: grayscale(0) brightness(1.02) saturate(1.02); }
   .channel-link:nth-child(8) .channel-mark::before { background: #ff0033; opacity: .72; }
 }

@@ -96,6 +96,14 @@ export const channels = [
   { id: 'apple-music', label: 'Apple Music / iTunes', mark: 'AP', url: '#' }
 ];
 
+export const couch = {
+  id: 'couch',
+  title: 'The Couch',
+  caption: 'Ein ruhiger Ort für Gedanken, Haltung und Austausch auf Augenhöhe.',
+  intro: 'Ein eigener Raum innerhalb von Deep Structure. Hier können Gedanken hinter der Musik, persönliche Haltung, Situationen, Philosophie, Zukunft und Möglichkeiten ihren Platz bekommen — ohne klassische Social-Media-Logik.',
+  topics: ['Musik', 'Haltung', 'Situationen', 'Philosophie', 'Zukunft', 'Möglichkeiten']
+};
+
 // 24/7 stream configuration. Add the future AzuraCast/Icecast stream URL here.
 export const radio = {
   id: 'radio',

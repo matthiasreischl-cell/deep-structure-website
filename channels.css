@@ -118,7 +118,7 @@
   filter: drop-shadow(0 0 8px rgba(var(--channel-accent), .38));
 }
 
-/* Amazon Music uses the supplied full-colour square artwork rather than a monochrome mask. */
+/* Amazon Music uses a true vector asset so it stays crisp at every display density. */
 .channel-link:nth-child(7) .channel-mark {
   overflow: hidden;
   border-radius: 9px;
@@ -129,11 +129,11 @@
 .channel-link:nth-child(7) .channel-mark::before {
   content: "";
   display: block;
-  width: 30px;
-  height: 30px;
-  background: url("assets/channels/amazon-music.svg") center / contain no-repeat;
-  opacity: .58;
-  filter: grayscale(.72) brightness(.82) saturate(.72);
+  width: 28px;
+  height: 28px;
+  background: url("assets/channels/amazon-music.svg?v=2") center / contain no-repeat;
+  opacity: .68;
+  filter: grayscale(.55) brightness(.9) saturate(.8);
   transition: opacity .28s ease, filter .28s ease, transform .28s ease;
 }
 

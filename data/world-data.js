@@ -44,6 +44,14 @@ export const albums = [
     tone: 'redshoes',
     caption: 'Märchen, Zwang, Verführung und Kontrollverlust.',
     sections: ['Music', 'Story / Concept', 'Idea', 'Merchandise', 'Vinyl / Elastic Stage']
+  },
+  {
+    id: 'world-i-let-in',
+    title: 'The World I Let In',
+    image: 'assets/albums/the-world-i-let-in.webp',
+    tone: 'worldin',
+    caption: 'Wahrnehmung, Aufmerksamkeit und die Welt, die wir in uns hineinlassen.',
+    sections: ['Music', 'Story / Concept', 'Idea', 'Experience / Perception Game', 'Merchandise', 'Vinyl / Elastic Stage']
   }
 ];
 

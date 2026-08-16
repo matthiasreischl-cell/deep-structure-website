@@ -687,6 +687,7 @@ function skipExperience01() {
 }
 
 const observer = new MutationObserver(() => {
+  if (panelCard.querySelector('.perception-game')) return;
   stopTimer();
   window.requestAnimationFrame(enhanceAlbum);
 });

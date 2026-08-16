@@ -1,0 +1,34 @@
+/* The World I Let In — additional album object placement and aura. */
+.world-object[data-world-id="world-i-let-in"] {
+  --x: 46%;
+  --y: 84%;
+  --z: 72px;
+}
+
+.world-object[data-tone="worldin"] {
+  --aura: rgba(181, 139, 76, .22);
+}
+
+.world-object[data-tone="worldin"] .vinyl-disc {
+  box-shadow:
+    0 24px 35px rgba(0, 0, 0, .68),
+    0 0 0 1px rgba(255,255,255,.025) inset,
+    0 0 30px rgba(181, 139, 76, .13),
+    0 0 42px rgba(73, 126, 145, .07);
+}
+
+.world-object[data-tone="worldin"]:hover .vinyl-disc,
+.world-object[data-tone="worldin"]:focus-visible .vinyl-disc {
+  box-shadow:
+    0 30px 42px rgba(0,0,0,.78),
+    0 0 34px rgba(181, 139, 76, .24),
+    0 0 52px rgba(73, 126, 145, .12);
+}
+
+@media (max-width: 760px) {
+  .world-object[data-world-id="world-i-let-in"] {
+    --x: 27%;
+    --y: 64%;
+    --z: 22px;
+  }
+}

@@ -1,4 +1,4 @@
-import { albums, memories, channels, radio } from './data/world-data.js?v=2';
+import { albums, memories, channels, couch, radio } from './data/world-data.js?v=3';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -19,18 +19,20 @@ const desktopLayout = {
   'red-shoes': [62, 70, 48],
   memories: [12, 54, 18],
   channels: [84, 54, 68],
-  radio: [50, 48, 138]
+  radio: [50, 48, 138],
+  couch: [82, 81, 102]
 };
 
 const mobileLayout = {
-  theater: [28, 9, 15],
-  kintsugi: [72, 19, 30],
-  faust: [28, 31, 15],
-  memories: [73, 40, 10],
-  'it-works': [27, 54, 25],
-  'red-shoes': [72, 64, 18],
-  radio: [50, 78, 36],
-  channels: [50, 94, 24]
+  theater: [28, 8, 15],
+  kintsugi: [72, 18, 30],
+  faust: [28, 29, 15],
+  memories: [73, 39, 10],
+  'it-works': [27, 52, 25],
+  'red-shoes': [72, 63, 18],
+  radio: [50, 75, 36],
+  couch: [50, 86, 30],
+  channels: [50, 97, 24]
 };
 
 const interactiveObjects = [];
@@ -43,6 +45,7 @@ let panelOpen = false;
 let radioObject = null;
 let radioStatusText = null;
 let radioControlButton = null;
+let couchObject = null;
 
 const radioAudio = new Audio();
 radioAudio.preload = 'none';
@@ -112,6 +115,34 @@ function createDoor() {
   return button;
 }
 
+function buildCouchSymbol() {
+  const symbol = el('span', 'couch-symbol');
+  symbol.append(
+    el('span', 'couch-glow'),
+    el('span', 'couch-back'),
+    el('span', 'couch-seat'),
+    el('span', 'couch-arm couch-arm--left'),
+    el('span', 'couch-arm couch-arm--right'),
+    el('span', 'couch-leg couch-leg--left'),
+    el('span', 'couch-leg couch-leg--right')
+  );
+  return symbol;
+}
+
+function createCouch() {
+  const button = el('button', 'world-object world-object--couch');
+  button.type = 'button';
+  button.dataset.worldId = couch.id;
+  button.dataset.depth = '.72';
+  button.dataset.phase = '4.45';
+  button.setAttribute('aria-label', `Open ${couch.title}`);
+  button.style.setProperty('--couch-proximity', '0');
+  button.append(buildCouchSymbol(), label(couch.title, couch.caption));
+  button.addEventListener('click', openCouch);
+  couchObject = button;
+  return button;
+}
+
 function createRadio() {
   const button = el('button', 'world-object world-object--radio');
   button.type = 'button';
@@ -154,7 +185,7 @@ function createRadio() {
 function renderWorld() {
   const fragment = document.createDocumentFragment();
   albums.forEach((album, index) => fragment.append(createVinyl(album, index)));
-  fragment.append(createMemory(), createDoor(), createRadio());
+  fragment.append(createMemory(), createDoor(), createRadio(), createCouch());
   objectsLayer.replaceChildren(fragment);
   interactiveObjects.splice(0, interactiveObjects.length, ...objectsLayer.querySelectorAll('.world-object'));
   applyLayout();
@@ -192,6 +223,13 @@ function renderIndex() {
     openRadio();
   });
 
+  const couchButton = el('button', '', couch.title);
+  couchButton.type = 'button';
+  couchButton.addEventListener('click', () => {
+    indexPanel.classList.remove('is-open');
+    openCouch();
+  });
+
   const memoryButton = el('button', '', 'Memories');
   memoryButton.type = 'button';
   memoryButton.addEventListener('click', () => {
@@ -206,7 +244,7 @@ function renderIndex() {
     openChannels();
   });
 
-  fragment.append(radioButton, memoryButton, channelsButton);
+  fragment.append(radioButton, couchButton, memoryButton, channelsButton);
   indexPanel.replaceChildren(fragment);
 }
 
@@ -256,6 +294,27 @@ function openMemories() {
   copy.append(el('h2', '', memories.title));
   copy.append(el('p', 'detail-intro', memories.intro));
   copy.append(el('p', 'detail-intro', 'Hier entsteht kein klassischer Blog, sondern ein Archiv aus Fotos, Textfragmenten, Hintergründen und persönlichen Erinnerungen.'));
+
+  detail.append(visual, copy);
+  openPanel(detail);
+}
+
+function openCouch() {
+  const detail = el('article', 'couch-detail');
+  const visual = el('div', 'couch-detail-visual');
+  const symbolWrap = el('div', 'couch-detail-symbol');
+  symbolWrap.append(buildCouchSymbol());
+  visual.append(symbolWrap, el('span', 'couch-detail-room-label', 'A PLACE TO SIT WITH AN IDEA'));
+
+  const copy = el('div', 'couch-detail-copy');
+  copy.append(el('p', 'detail-kicker', 'Safe Space'));
+  copy.append(el('h2', '', couch.title));
+  copy.append(el('p', 'detail-intro', couch.intro));
+
+  const topics = el('div', 'couch-topics');
+  couch.topics.forEach((topic) => topics.append(el('span', '', topic)));
+  copy.append(topics);
+  copy.append(el('p', 'couch-status', 'Die Couch ist zunächst als Zugang und inhaltlicher Raum angelegt. Eine echte Dialog- oder Beitragsfunktion benötigt später eine eigene technische Ebene hinter der statischen GitHub-Pages-Seite.'));
 
   detail.append(visual, copy);
   openPanel(detail);
@@ -384,10 +443,35 @@ radioAudio.addEventListener('playing', () => syncRadioState());
 radioAudio.addEventListener('pause', () => syncRadioState());
 radioAudio.addEventListener('error', () => syncRadioState('Stream-Verbindung fehlgeschlagen.'));
 
+function updateCouchProximity(event) {
+  if (!couchObject || event.pointerType === 'touch') return;
+
+  const rect = couchObject.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
+  const radius = Math.max(190, Math.min(340, innerWidth * .24));
+  const proximity = Math.max(0, Math.min(1, 1 - distance / radius));
+
+  couchObject.style.setProperty('--couch-proximity', proximity.toFixed(3));
+  couchObject.classList.toggle('is-near', proximity > .16);
+}
+
+function resetCouchProximity() {
+  if (!couchObject) return;
+  couchObject.style.setProperty('--couch-proximity', '0');
+  couchObject.classList.remove('is-near');
+}
+
 function onPointerMove(event) {
-  if (!active || reducedMotion) return;
-  pointerNX = (event.clientX / innerWidth - .5) * 2;
-  pointerNY = (event.clientY / innerHeight - .5) * 2;
+  if (!active) return;
+
+  if (!reducedMotion) {
+    pointerNX = (event.clientX / innerWidth - .5) * 2;
+    pointerNY = (event.clientY / innerHeight - .5) * 2;
+  }
+
+  updateCouchProximity(event);
 }
 
 function animate(now) {
@@ -425,6 +509,8 @@ addEventListener('keydown', (event) => {
 });
 
 addEventListener('pointermove', onPointerMove, { passive: true });
+world.addEventListener('pointerleave', resetCouchProximity, { passive: true });
+world.addEventListener('pointercancel', resetCouchProximity, { passive: true });
 mobileQuery.addEventListener?.('change', applyLayout);
 
 addEventListener('deepstructure:entered', () => {

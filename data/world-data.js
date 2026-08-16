@@ -3,7 +3,6 @@ import { kintsugiImage } from './assets/kintsugi.js';
 import { faustImage } from './assets/faust.js';
 import { itWorksImage } from './assets/it-works.js';
 import { redShoesImage } from './assets/red-shoes.js';
-import { portraitImage } from './assets/portrait.js';
 
 export const albums = [
   {
@@ -50,7 +49,7 @@ export const albums = [
 
 export const memories = {
   title: 'Memories',
-  image: portraitImage,
+  image: 'assets/memories/matthias-memories.jpg',
   intro: 'Erinnerungen, persönliche Hintergründe, Fragmente und Geschichten hinter Deep Structure.'
 };
 

@@ -1,0 +1,128 @@
+.channels-grid {
+  perspective: 900px;
+}
+
+.channel-link {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.channel-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 16% 50%, rgba(var(--channel-accent, 130, 205, 224), .16), transparent 52%);
+  transition: opacity .28s ease;
+}
+
+.channel-link:hover::after,
+.channel-link:focus-visible::after {
+  opacity: 1;
+}
+
+.channel-mark {
+  position: relative;
+  flex: 0 0 auto;
+  transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+}
+
+.channel-link:hover .channel-mark,
+.channel-link:focus-visible .channel-mark {
+  transform: translateY(-1px) scale(1.08);
+  border-color: rgba(var(--channel-accent, 160, 211, 225), .38);
+  box-shadow: 0 0 22px rgba(var(--channel-accent, 160, 211, 225), .14);
+}
+
+/* SVG icons are used as masks so the original uploaded files stay untouched. */
+.channel-link:nth-child(1) { --channel-accent: 29, 185, 84; }
+.channel-link:nth-child(2) { --channel-accent: 255, 85, 0; }
+.channel-link:nth-child(3),
+.channel-link:nth-child(4) { --channel-accent: 255, 0, 0; }
+.channel-link:nth-child(5) { --channel-accent: 98, 154, 169; }
+.channel-link:nth-child(6) { --channel-accent: 37, 244, 238; }
+.channel-link:nth-child(8) { --channel-accent: 255, 0, 51; }
+
+.channel-link:nth-child(1) .channel-mark,
+.channel-link:nth-child(2) .channel-mark,
+.channel-link:nth-child(3) .channel-mark,
+.channel-link:nth-child(4) .channel-mark,
+.channel-link:nth-child(5) .channel-mark,
+.channel-link:nth-child(6) .channel-mark,
+.channel-link:nth-child(8) .channel-mark {
+  font-size: 0;
+  color: transparent;
+}
+
+.channel-link:nth-child(1) .channel-mark::before,
+.channel-link:nth-child(2) .channel-mark::before,
+.channel-link:nth-child(3) .channel-mark::before,
+.channel-link:nth-child(4) .channel-mark::before,
+.channel-link:nth-child(5) .channel-mark::before,
+.channel-link:nth-child(6) .channel-mark::before,
+.channel-link:nth-child(8) .channel-mark::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  opacity: .58;
+  background: rgba(219, 238, 243, .9);
+  -webkit-mask: var(--channel-icon) center / contain no-repeat;
+  mask: var(--channel-icon) center / contain no-repeat;
+  transition: opacity .28s ease, background .28s ease, filter .28s ease;
+}
+
+.channel-link:nth-child(1) .channel-mark::before { --channel-icon: url("assets/channels/spotify.svg"); }
+.channel-link:nth-child(2) .channel-mark::before { --channel-icon: url("assets/channels/soundcloud.svg"); }
+.channel-link:nth-child(3) .channel-mark::before,
+.channel-link:nth-child(4) .channel-mark::before { --channel-icon: url("assets/channels/youtube.svg"); }
+.channel-link:nth-child(5) .channel-mark::before { --channel-icon: url("assets/channels/bandcamp.svg"); }
+.channel-link:nth-child(6) .channel-mark::before { --channel-icon: url("assets/channels/tiktok.svg"); }
+.channel-link:nth-child(8) .channel-mark::before { --channel-icon: url("assets/channels/youtubemusic.svg"); }
+
+.channel-link:nth-child(1):hover .channel-mark::before,
+.channel-link:nth-child(1):focus-visible .channel-mark::before { background: #1db954; }
+.channel-link:nth-child(2):hover .channel-mark::before,
+.channel-link:nth-child(2):focus-visible .channel-mark::before { background: #ff5500; }
+.channel-link:nth-child(3):hover .channel-mark::before,
+.channel-link:nth-child(3):focus-visible .channel-mark::before,
+.channel-link:nth-child(4):hover .channel-mark::before,
+.channel-link:nth-child(4):focus-visible .channel-mark::before { background: #ff0000; }
+.channel-link:nth-child(5):hover .channel-mark::before,
+.channel-link:nth-child(5):focus-visible .channel-mark::before { background: #629aa9; }
+.channel-link:nth-child(6):hover .channel-mark::before,
+.channel-link:nth-child(6):focus-visible .channel-mark::before {
+  background: linear-gradient(135deg, #25f4ee 0 40%, #f6fbfc 44% 56%, #fe2c55 60% 100%);
+}
+.channel-link:nth-child(8):hover .channel-mark::before,
+.channel-link:nth-child(8):focus-visible .channel-mark::before { background: #ff0033; }
+
+.channel-link:nth-child(1):hover .channel-mark::before,
+.channel-link:nth-child(1):focus-visible .channel-mark::before,
+.channel-link:nth-child(2):hover .channel-mark::before,
+.channel-link:nth-child(2):focus-visible .channel-mark::before,
+.channel-link:nth-child(3):hover .channel-mark::before,
+.channel-link:nth-child(3):focus-visible .channel-mark::before,
+.channel-link:nth-child(4):hover .channel-mark::before,
+.channel-link:nth-child(4):focus-visible .channel-mark::before,
+.channel-link:nth-child(5):hover .channel-mark::before,
+.channel-link:nth-child(5):focus-visible .channel-mark::before,
+.channel-link:nth-child(6):hover .channel-mark::before,
+.channel-link:nth-child(6):focus-visible .channel-mark::before,
+.channel-link:nth-child(8):hover .channel-mark::before,
+.channel-link:nth-child(8):focus-visible .channel-mark::before {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(var(--channel-accent), .38));
+}
+
+@media (pointer: coarse) {
+  .channel-link:nth-child(1) .channel-mark::before { background: #1db954; opacity: .9; }
+  .channel-link:nth-child(2) .channel-mark::before { background: #ff5500; opacity: .9; }
+  .channel-link:nth-child(3) .channel-mark::before,
+  .channel-link:nth-child(4) .channel-mark::before { background: #ff0000; opacity: .9; }
+  .channel-link:nth-child(5) .channel-mark::before { background: #629aa9; opacity: .9; }
+  .channel-link:nth-child(6) .channel-mark::before { background: linear-gradient(135deg, #25f4ee 0 40%, #f6fbfc 44% 56%, #fe2c55 60% 100%); opacity: .95; }
+  .channel-link:nth-child(8) .channel-mark::before { background: #ff0033; opacity: .72; }
+}

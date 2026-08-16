@@ -91,7 +91,12 @@ export const channels = [
     mark: 'TT',
     url: 'https://www.tiktok.com/@deep.structure'
   },
-  { id: 'amazon-music', label: 'Amazon Music', mark: 'AM', url: '#' },
+  {
+    id: 'amazon-music',
+    label: 'Amazon Music',
+    mark: 'AM',
+    url: 'https://music.amazon.de/artists/B0H6SPJ4P1'
+  },
   { id: 'youtube-music', label: 'YouTube Music', mark: 'YM', url: '#' },
   { id: 'apple-music', label: 'Apple Music / iTunes', mark: 'AP', url: '#' }
 ];

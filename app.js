@@ -4,6 +4,7 @@ const transition = document.getElementById('transition');
 const inside = document.getElementById('inside');
 const compass = document.getElementById('compass');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const coarsePointer = matchMedia('(pointer: coarse)').matches;
 
 let pointerX = innerWidth * 0.5;
 let pointerY = innerHeight * 0.5;
@@ -36,9 +37,11 @@ function updateHoverState() {
   const radius = Math.max(1, Math.min(rect.width, rect.height) * 0.42);
   const dist = Math.hypot(dx, dy);
 
-  hoverTarget = dist < radius
-    ? 1
-    : Math.max(0, 1 - (dist - radius) / (radius * 0.9));
+  hoverTarget = coarsePointer
+    ? 0
+    : (dist < radius
+      ? 1
+      : Math.max(0, 1 - (dist - radius) / (radius * 0.9)));
 
   cursorState.normX = Math.max(-1, Math.min(1, dx / radius));
   cursorState.normY = Math.max(-1, Math.min(1, dy / radius));
@@ -59,14 +62,22 @@ function onPointerMove(event) {
   document.body.classList.add('pointer-ready');
   updateHoverState();
 
-  if (!reducedMotion && speed > 0.075 && waterReady) {
+  // Desktop mouse motion creates sparse, shallow disturbances only.
+  // Touch movement is ignored here; touch gets one stronger impulse on contact.
+  if (
+    !reducedMotion &&
+    !coarsePointer &&
+    event.pointerType !== 'touch' &&
+    speed > 0.13 &&
+    waterReady
+  ) {
     const now = performance.now();
-    if (now - lastPointerImpulse > 42) {
+    if (now - lastPointerImpulse > 105) {
       queueRipple(
         pointerX / Math.max(1, innerWidth),
         1 - pointerY / Math.max(1, innerHeight),
-        -Math.min(0.24, 0.060 + speed * 0.10),
-        0.014 + Math.min(0.010, speed * 0.006)
+        -Math.min(0.075, 0.026 + speed * 0.030),
+        0.012 + Math.min(0.004, speed * 0.0025)
       );
       lastPointerImpulse = now;
     }
@@ -110,9 +121,11 @@ function enter() {
   if (entering) return;
   entering = true;
 
+  // One clear central disturbance on entry, followed by a smaller opposite
+  // impulse. The heightfield turns this into a short train of shallow waves.
   const [x, y] = objectUv();
-  queueRipple(x, y, -0.58, 0.038);
-  queueRipple(x + 0.012, y - 0.008, 0.26, 0.024);
+  queueRipple(x, y, -0.23, 0.026);
+  queueRipple(x + 0.008, y - 0.005, 0.075, 0.017);
 
   document.body.classList.add('entering');
   transition.setAttribute('aria-hidden', 'false');
@@ -128,12 +141,16 @@ function enter() {
 }
 
 button.addEventListener('pointerdown', (event) => {
-  if (reducedMotion) return;
+  if (reducedMotion || !waterReady) return;
+
+  // Touch gets a clearer tactile-looking disturbance. Mouse clicks remain
+  // restrained because the entry impulse above supplies the main wave.
+  const touchLike = event.pointerType === 'touch' || coarsePointer;
   queueRipple(
     event.clientX / Math.max(1, innerWidth),
     1 - event.clientY / Math.max(1, innerHeight),
-    -0.34,
-    0.022
+    touchLike ? -0.16 : -0.065,
+    touchLike ? 0.021 : 0.014
   );
 });
 
@@ -156,10 +173,9 @@ function applyCssMotion() {
 }
 
 // ===== GPU heightfield water =====
-// The water state is stored as height + velocity in a pair of RGBA textures.
-// Each fixed simulation step solves a damped 2D wave equation. Disturbances are
-// local dimples; expanding rings are produced by the simulation itself rather
-// than drawn as light circles.
+// Height + vertical velocity are stored in two ping-pong textures. The shader
+// solves a damped 2D wave equation. Aspect correction keeps wave fronts circular
+// in screen space on both portrait phones and landscape desktops.
 const gl = canvas.getContext('webgl', {
   antialias: false,
   alpha: false,
@@ -168,7 +184,7 @@ const gl = canvas.getContext('webgl', {
   powerPreference: 'high-performance'
 });
 
-const SIM_SIZE = matchMedia('(pointer: coarse)').matches || innerWidth < 900 ? 256 : 384;
+const SIM_SIZE = coarsePointer || innerWidth < 900 ? 256 : 384;
 const NEUTRAL = 128 / 255;
 const FIXED_STEP = 1000 / 60;
 const rippleQueue = [];
@@ -183,19 +199,24 @@ let waterReady = false;
 let lastWaterTime = performance.now();
 let simulationAccumulator = 0;
 let lastPointerImpulse = 0;
-let nextObjectPulse = performance.now() + 1200;
-let lastObjectX = 0;
-let lastObjectY = 0;
+let nextObjectPulse = performance.now() + 1800;
 
 function queueRipple(x, y, strength, radius) {
   if (!waterReady || reducedMotion) return;
+
+  // Clamp injected energy before it enters the simulation. This prevents the
+  // accumulating dark holes seen when many impulses overlap.
+  const maxStrength = coarsePointer ? 0.24 : 0.18;
   rippleQueue.push({
-    x: Math.max(0.01, Math.min(0.99, x)),
-    y: Math.max(0.01, Math.min(0.99, y)),
-    strength,
-    radius
+    x: Math.max(0.015, Math.min(0.985, x)),
+    y: Math.max(0.015, Math.min(0.985, y)),
+    strength: Math.max(-maxStrength, Math.min(maxStrength, strength)),
+    radius: Math.max(0.010, Math.min(0.032, radius))
   });
-  if (rippleQueue.length > 12) rippleQueue.shift();
+
+  // A short queue is intentional: old input is discarded rather than turning
+  // the whole surface into persistent turbulence.
+  if (rippleQueue.length > 6) rippleQueue.shift();
 }
 
 function compileShader(type, source) {
@@ -283,6 +304,7 @@ if (gl) {
     uniform vec2 uImpulsePos;
     uniform float uImpulse;
     uniform float uImpulseRadius;
+    uniform float uAspect;
 
     const float neutral = ${NEUTRAL.toFixed(10)};
 
@@ -300,25 +322,38 @@ if (gl) {
       float downH  = heightAt(vUv - vec2(0.0, uTexel.y));
       float upH    = heightAt(vUv + vec2(0.0, uTexel.y));
 
-      float laplacian = leftH + rightH + downH + upH - 4.0 * h;
-      velocity += laplacian * 0.285;
-      velocity *= 0.996;
+      float horizontalWeight = 1.0 / max(0.20, uAspect * uAspect);
+      float laplacian = (leftH + rightH - 2.0 * h) * horizontalWeight
+        + (downH + upH - 2.0 * h);
+
+      velocity += laplacian * 0.245;
+      velocity *= 0.988;
 
       if (abs(uImpulse) > 0.0001) {
         vec2 d = vUv - uImpulsePos;
+        d.x *= uAspect;
         float gaussian = exp(-dot(d, d) / max(0.000001, uImpulseRadius * uImpulseRadius));
         velocity += uImpulse * gaussian;
       }
 
-      h += velocity * 0.62;
+      h += velocity * 0.50;
+
+      // Local soft limiter: enough amplitude for readable crests, but no deep
+      // pits or runaway velocity when several disturbances overlap.
+      float energy = abs(h) + abs(velocity) * 0.85;
+      if (energy > 0.40) {
+        float limiter = 0.40 / energy;
+        h *= limiter;
+        velocity *= limiter;
+      }
 
       float edge = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
-      float edgeMask = smoothstep(0.0, 0.055, edge);
-      h *= mix(0.90, 1.0, edgeMask);
-      velocity *= mix(0.84, 1.0, edgeMask);
+      float edgeMask = smoothstep(0.0, 0.065, edge);
+      h *= mix(0.84, 1.0, edgeMask);
+      velocity *= mix(0.72, 1.0, edgeMask);
 
-      h = clamp(h, -0.94, 0.94);
-      velocity = clamp(velocity, -0.94, 0.94);
+      h = clamp(h, -0.32, 0.32);
+      velocity = clamp(velocity, -0.26, 0.26);
 
       gl_FragColor = vec4(
         h * 0.5 + neutral,
@@ -358,72 +393,75 @@ if (gl) {
       );
     }
 
-    float fbm(vec2 p) {
-      float value = 0.0;
-      float amplitude = 0.5;
-      mat2 rotation = mat2(0.86, -0.51, 0.51, 0.86);
-      for (int i = 0; i < 4; i++) {
-        value += noise(p) * amplitude;
-        p = rotation * p * 2.03 + 11.7;
-        amplitude *= 0.5;
-      }
-      return value;
-    }
-
     float heightAt(vec2 uv) {
       return (texture2D(uState, uv).r - neutral) * 2.0;
     }
 
+    float velocityAt(vec2 uv) {
+      return (texture2D(uState, uv).g - neutral) * 2.0;
+    }
+
     void main() {
       vec2 uv = vUv;
+      float aspect = uResolution.x / max(1.0, uResolution.y);
       float h = heightAt(uv);
+      float velocity = velocityAt(uv);
       float hL = heightAt(uv - vec2(uTexel.x, 0.0));
       float hR = heightAt(uv + vec2(uTexel.x, 0.0));
       float hD = heightAt(uv - vec2(0.0, uTexel.y));
       float hU = heightAt(uv + vec2(0.0, uTexel.y));
 
-      vec2 gradient = vec2(hL - hR, hD - hU);
-      vec3 normal = normalize(vec3(gradient * 9.2, 0.34));
-      float slope = min(1.0, length(gradient) * 9.5);
-      float curvature = abs(hL + hR + hD + hU - 4.0 * h);
+      // Use physical screen-space slope so portrait and landscape devices read
+      // the same way visually.
+      vec2 gradient = vec2((hL - hR) / max(0.25, aspect), hD - hU);
+      float slope = min(1.0, length(gradient) * 8.0);
+      float curvature = abs((hL + hR - 2.0 * h) / max(0.20, aspect * aspect)
+        + hD + hU - 2.0 * h);
+      float motion = min(1.0, abs(velocity) * 5.0 + slope * 0.85);
 
-      vec2 reflectedUv = uv + normal.xy * 0.045;
-      vec2 aspectP = reflectedUv - 0.5;
-      aspectP.x *= uResolution.x / max(1.0, uResolution.y);
+      vec3 normal = normalize(vec3(gradient * 6.2, 0.62));
+      vec2 reflectedUv = uv + vec2(normal.x / max(0.35, aspect), normal.y) * 0.018 * motion;
 
-      float t = uTime * 0.055;
-      float broadReflection = fbm(aspectP * 2.25 + vec2(t, -t * 0.55));
-      float fineReflection = fbm(aspectP * 5.4 - vec2(t * 0.42, t * 0.31));
-      float reflectionField = broadReflection * 0.72 + fineReflection * 0.28;
+      vec2 p = reflectedUv - 0.5;
+      p.x *= aspect;
 
-      vec3 deepBlack = vec3(0.0025, 0.007, 0.010);
-      vec3 deepWater = vec3(0.014, 0.038, 0.050);
-      vec3 coldReflection = vec3(0.38, 0.50, 0.55);
-      vec3 silver = vec3(0.88, 0.96, 1.00);
+      // The idle surface is intentionally almost featureless. A very low level
+      // broad variation keeps it alive without reading as silver noise.
+      float t = uTime * 0.025;
+      float broad = noise(p * 2.0 + vec2(t, -t * 0.55));
+      float idleSheen = (broad - 0.5) * 0.018;
 
-      float verticalLight = smoothstep(0.05, 0.92, reflectedUv.y);
-      vec3 col = mix(deepBlack, deepWater, 0.64 + reflectionField * 0.32 + verticalLight * 0.10);
+      vec3 blackWater = vec3(0.002, 0.0055, 0.0075);
+      vec3 deepWater = vec3(0.008, 0.020, 0.026);
+      vec3 cold = vec3(0.28, 0.39, 0.43);
+      vec3 silver = vec3(0.78, 0.90, 0.94);
 
-      float reflection = smoothstep(0.45, 0.78, reflectionField + normal.y * 0.18);
-      col += coldReflection * reflection * (0.075 + slope * 0.19);
+      vec3 col = mix(blackWater, deepWater, 0.58 + idleSheen);
 
-      vec3 lightDir = normalize(vec3(-0.34, 0.52, 0.78));
-      float specular = pow(max(dot(normal, lightDir), 0.0), 22.0);
-      float grazing = pow(clamp(1.0 - normal.z, 0.0, 1.0), 1.45);
-      float crest = smoothstep(0.010, 0.10, curvature) * slope;
-      col += silver * (specular * 0.31 + grazing * 0.16 + crest * 0.15);
+      // Reflections only wake up where the simulated surface is moving.
+      vec3 lightDir = normalize(vec3(-0.30, 0.50, 0.81));
+      float specular = pow(max(dot(normal, lightDir), 0.0), 30.0) * motion;
+      float crest = smoothstep(0.012, 0.075, curvature) * smoothstep(0.07, 0.65, motion);
+      float grazing = pow(clamp(1.0 - normal.z, 0.0, 1.0), 1.8) * motion;
+      col += cold * slope * motion * 0.085;
+      col += silver * (specular * 0.25 + crest * 0.19 + grazing * 0.065);
+
+      // A subtle highlight around the active wave field adds readability, but
+      // the height value itself never darkens the surface into a black pit.
+      col += vec3(0.06, 0.10, 0.11) * abs(h) * 0.20;
 
       vec2 objectDelta = uv - uObjectPos;
-      objectDelta.x *= uResolution.x / max(1.0, uResolution.y);
-      float objectShadow = exp(-dot(objectDelta, objectDelta) * 42.0);
-      col *= 1.0 - objectShadow * (0.055 + uHover * 0.025);
+      objectDelta.x *= aspect;
+      float objectContact = exp(-dot(objectDelta, objectDelta) * 52.0);
+      col += vec3(0.014, 0.024, 0.027) * objectContact * (0.35 + uHover * 0.25);
 
-      float vignette = smoothstep(0.86, 0.20, length(aspectP));
-      col *= 0.80 + vignette * 0.34;
+      float vignette = smoothstep(0.92, 0.24, length(p));
+      col *= 0.84 + vignette * 0.18;
 
-      float grain = (hash(gl_FragCoord.xy + uTime * 0.7) - 0.5) * 0.006;
+      float grain = (hash(gl_FragCoord.xy + uTime * 0.31) - 0.5) * 0.0025;
       col += grain;
-      gl_FragColor = vec4(max(col, 0.0), 1.0);
+      col = max(col, vec3(0.0018, 0.0045, 0.0060));
+      gl_FragColor = vec4(col, 1.0);
     }
   `;
 
@@ -484,6 +522,10 @@ function simulateStep(impulse = null) {
   gl.bindTexture(gl.TEXTURE_2D, stateTextures[source]);
   gl.uniform1i(gl.getUniformLocation(simulationProgram, 'uState'), 0);
   gl.uniform2f(gl.getUniformLocation(simulationProgram, 'uTexel'), 1 / SIM_SIZE, 1 / SIM_SIZE);
+  gl.uniform1f(
+    gl.getUniformLocation(simulationProgram, 'uAspect'),
+    Math.max(0.35, Math.min(3.2, innerWidth / Math.max(1, innerHeight)))
+  );
 
   if (impulse) {
     gl.uniform2f(gl.getUniformLocation(simulationProgram, 'uImpulsePos'), impulse.x, impulse.y);
@@ -513,43 +555,23 @@ resizeWater();
 function addObjectDisturbance(now) {
   if (!waterReady || reducedMotion || now < nextObjectPulse) return;
 
-  const energy = 0.045 + hoverCurrent * 0.085;
-  const offsetX = (Math.random() - 0.5) * 0.032;
-  const offsetY = (Math.random() - 0.5) * 0.018;
+  // Calm idle water: the symbol adds only an occasional, low-energy contact
+  // disturbance. Hover increases it enough to become visible, not chaotic.
+  const energy = 0.013 + hoverCurrent * 0.024;
+  const offsetX = (Math.random() - 0.5) * 0.018;
+  const offsetY = (Math.random() - 0.5) * 0.010;
   const [x, y] = objectUv(offsetX, offsetY);
-  queueRipple(x, y, -energy, 0.021 + Math.random() * 0.009);
+  queueRipple(x, y, -energy, 0.015 + Math.random() * 0.004);
 
-  if (hoverCurrent > 0.42 && Math.random() > 0.55) {
-    queueRipple(
-      x + (Math.random() - 0.5) * 0.024,
-      y + (Math.random() - 0.5) * 0.014,
-      energy * 0.52,
-      0.015
-    );
-  }
-
-  nextObjectPulse = now + (hoverCurrent > 0.25
-    ? 850 + Math.random() * 850
-    : 2100 + Math.random() * 1800);
-}
-
-function addObjectMotionRipple() {
-  if (!waterReady || reducedMotion) return;
-  const [x, y] = objectUv();
-  const movement = Math.hypot(x - lastObjectX, y - lastObjectY);
-
-  if (lastObjectX !== 0 && movement > 0.0007) {
-    queueRipple(x, y, -Math.min(0.14, movement * 22), 0.020);
-  }
-  lastObjectX = x;
-  lastObjectY = y;
+  nextObjectPulse = now + (hoverCurrent > 0.20
+    ? 1350 + Math.random() * 900
+    : 3000 + Math.random() * 1800);
 }
 
 function renderWater(now) {
   if (!waterReady) return;
 
   addObjectDisturbance(now);
-  addObjectMotionRipple();
 
   const elapsed = Math.min(50, Math.max(0, now - lastWaterTime));
   lastWaterTime = now;

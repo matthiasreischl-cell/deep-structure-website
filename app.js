@@ -65,8 +65,8 @@ function onPointerMove(event) {
       queueRipple(
         pointerX / Math.max(1, innerWidth),
         1 - pointerY / Math.max(1, innerHeight),
-        -Math.min(0.13, 0.035 + speed * 0.055),
-        0.010 + Math.min(0.007, speed * 0.004)
+        -Math.min(0.24, 0.060 + speed * 0.10),
+        0.014 + Math.min(0.010, speed * 0.006)
       );
       lastPointerImpulse = now;
     }
@@ -111,8 +111,8 @@ function enter() {
   entering = true;
 
   const [x, y] = objectUv();
-  queueRipple(x, y, -0.34, 0.032);
-  queueRipple(x + 0.012, y - 0.008, 0.15, 0.019);
+  queueRipple(x, y, -0.58, 0.038);
+  queueRipple(x + 0.012, y - 0.008, 0.26, 0.024);
 
   document.body.classList.add('entering');
   transition.setAttribute('aria-hidden', 'false');
@@ -132,8 +132,8 @@ button.addEventListener('pointerdown', (event) => {
   queueRipple(
     event.clientX / Math.max(1, innerWidth),
     1 - event.clientY / Math.max(1, innerHeight),
-    -0.19,
-    0.017
+    -0.34,
+    0.022
   );
 });
 
@@ -302,7 +302,7 @@ if (gl) {
 
       float laplacian = leftH + rightH + downH + upH - 4.0 * h;
       velocity += laplacian * 0.285;
-      velocity *= 0.991;
+      velocity *= 0.996;
 
       if (abs(uImpulse) > 0.0001) {
         vec2 d = vUv - uImpulsePos;
@@ -310,12 +310,12 @@ if (gl) {
         velocity += uImpulse * gaussian;
       }
 
-      h += velocity * 0.54;
+      h += velocity * 0.62;
 
       float edge = min(min(vUv.x, 1.0 - vUv.x), min(vUv.y, 1.0 - vUv.y));
       float edgeMask = smoothstep(0.0, 0.055, edge);
-      h *= mix(0.87, 1.0, edgeMask);
-      velocity *= mix(0.78, 1.0, edgeMask);
+      h *= mix(0.90, 1.0, edgeMask);
+      velocity *= mix(0.84, 1.0, edgeMask);
 
       h = clamp(h, -0.94, 0.94);
       velocity = clamp(velocity, -0.94, 0.94);
@@ -383,11 +383,11 @@ if (gl) {
       float hU = heightAt(uv + vec2(0.0, uTexel.y));
 
       vec2 gradient = vec2(hL - hR, hD - hU);
-      vec3 normal = normalize(vec3(gradient * 5.8, 0.42));
-      float slope = min(1.0, length(gradient) * 6.0);
+      vec3 normal = normalize(vec3(gradient * 9.2, 0.34));
+      float slope = min(1.0, length(gradient) * 9.5);
       float curvature = abs(hL + hR + hD + hU - 4.0 * h);
 
-      vec2 reflectedUv = uv + normal.xy * 0.027;
+      vec2 reflectedUv = uv + normal.xy * 0.045;
       vec2 aspectP = reflectedUv - 0.5;
       aspectP.x *= uResolution.x / max(1.0, uResolution.y);
 
@@ -396,32 +396,32 @@ if (gl) {
       float fineReflection = fbm(aspectP * 5.4 - vec2(t * 0.42, t * 0.31));
       float reflectionField = broadReflection * 0.72 + fineReflection * 0.28;
 
-      vec3 deepBlack = vec3(0.0015, 0.0045, 0.0065);
-      vec3 deepWater = vec3(0.008, 0.022, 0.029);
-      vec3 coldReflection = vec3(0.23, 0.31, 0.34);
-      vec3 silver = vec3(0.70, 0.82, 0.86);
+      vec3 deepBlack = vec3(0.0025, 0.007, 0.010);
+      vec3 deepWater = vec3(0.014, 0.038, 0.050);
+      vec3 coldReflection = vec3(0.38, 0.50, 0.55);
+      vec3 silver = vec3(0.88, 0.96, 1.00);
 
-      float verticalLight = smoothstep(0.08, 0.95, reflectedUv.y);
-      vec3 col = mix(deepBlack, deepWater, 0.56 + reflectionField * 0.25 + verticalLight * 0.06);
+      float verticalLight = smoothstep(0.05, 0.92, reflectedUv.y);
+      vec3 col = mix(deepBlack, deepWater, 0.64 + reflectionField * 0.32 + verticalLight * 0.10);
 
-      float reflection = smoothstep(0.56, 0.88, reflectionField + normal.y * 0.12);
-      col += coldReflection * reflection * (0.035 + slope * 0.10);
+      float reflection = smoothstep(0.45, 0.78, reflectionField + normal.y * 0.18);
+      col += coldReflection * reflection * (0.075 + slope * 0.19);
 
       vec3 lightDir = normalize(vec3(-0.34, 0.52, 0.78));
-      float specular = pow(max(dot(normal, lightDir), 0.0), 28.0);
-      float grazing = pow(clamp(1.0 - normal.z, 0.0, 1.0), 1.7);
-      float crest = smoothstep(0.015, 0.13, curvature) * slope;
-      col += silver * (specular * 0.17 + grazing * 0.085 + crest * 0.075);
+      float specular = pow(max(dot(normal, lightDir), 0.0), 22.0);
+      float grazing = pow(clamp(1.0 - normal.z, 0.0, 1.0), 1.45);
+      float crest = smoothstep(0.010, 0.10, curvature) * slope;
+      col += silver * (specular * 0.31 + grazing * 0.16 + crest * 0.15);
 
       vec2 objectDelta = uv - uObjectPos;
       objectDelta.x *= uResolution.x / max(1.0, uResolution.y);
       float objectShadow = exp(-dot(objectDelta, objectDelta) * 42.0);
-      col *= 1.0 - objectShadow * (0.07 + uHover * 0.035);
+      col *= 1.0 - objectShadow * (0.055 + uHover * 0.025);
 
-      float vignette = smoothstep(0.83, 0.22, length(aspectP));
-      col *= 0.70 + vignette * 0.36;
+      float vignette = smoothstep(0.86, 0.20, length(aspectP));
+      col *= 0.80 + vignette * 0.34;
 
-      float grain = (hash(gl_FragCoord.xy + uTime * 0.7) - 0.5) * 0.008;
+      float grain = (hash(gl_FragCoord.xy + uTime * 0.7) - 0.5) * 0.006;
       col += grain;
       gl_FragColor = vec4(max(col, 0.0), 1.0);
     }
@@ -513,18 +513,18 @@ resizeWater();
 function addObjectDisturbance(now) {
   if (!waterReady || reducedMotion || now < nextObjectPulse) return;
 
-  const energy = 0.026 + hoverCurrent * 0.044;
+  const energy = 0.045 + hoverCurrent * 0.085;
   const offsetX = (Math.random() - 0.5) * 0.032;
   const offsetY = (Math.random() - 0.5) * 0.018;
   const [x, y] = objectUv(offsetX, offsetY);
-  queueRipple(x, y, -energy, 0.018 + Math.random() * 0.007);
+  queueRipple(x, y, -energy, 0.021 + Math.random() * 0.009);
 
   if (hoverCurrent > 0.42 && Math.random() > 0.55) {
     queueRipple(
       x + (Math.random() - 0.5) * 0.024,
       y + (Math.random() - 0.5) * 0.014,
-      energy * 0.42,
-      0.012
+      energy * 0.52,
+      0.015
     );
   }
 
@@ -539,7 +539,7 @@ function addObjectMotionRipple() {
   const movement = Math.hypot(x - lastObjectX, y - lastObjectY);
 
   if (lastObjectX !== 0 && movement > 0.0007) {
-    queueRipple(x, y, -Math.min(0.075, movement * 16), 0.016);
+    queueRipple(x, y, -Math.min(0.14, movement * 22), 0.020);
   }
   lastObjectX = x;
   lastObjectY = y;

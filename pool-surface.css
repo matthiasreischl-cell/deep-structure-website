@@ -53,6 +53,17 @@
   mix-blend-mode: screen;
 }
 
+/* Desktop-only calibration.
+   The mobile rendering is the visual reference and remains untouched.
+   On fine-pointer devices the same shader gets a modest presentation boost:
+   brighter water bands, slightly clearer petrol/cyan separation and crisper crests,
+   without changing timing, geometry or interaction. */
+@media (hover: hover) and (pointer: fine) and (min-width: 761px) {
+  #fluid {
+    filter: brightness(1.20) contrast(1.045) saturate(1.09);
+  }
+}
+
 @media (max-width: 760px) {
   .water-shadow {
     width: min(60vw, 360px);

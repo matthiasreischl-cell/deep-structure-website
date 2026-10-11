@@ -162,7 +162,6 @@ function renderWorld() {
     button.addEventListener('click', action);
     indexPanel.append(button);
   });
-  document.getElementById('worldShopLink').href = shop.url;
 }
 
 function applyLayout() {

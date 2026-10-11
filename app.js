@@ -2,7 +2,6 @@ const canvas = document.getElementById('fluid');
 const button = document.getElementById('enterButton');
 const transition = document.getElementById('transition');
 const inside = document.getElementById('inside');
-const compass = document.getElementById('compass');
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarsePointer = matchMedia('(pointer: coarse)').matches;
@@ -63,10 +62,6 @@ function onPointerMove(event) {
   const dy = pointerY - previousY;
   speed = Math.min(1.25, Math.hypot(dx, dy) / 34);
 
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-  compass.style.setProperty('--needle-angle', `${angle}deg`);
-  compass.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
-  document.body.classList.add('pointer-ready');
   if (document.body.classList.contains('entered')) return;
   updateHoverState();
 
@@ -77,7 +72,6 @@ function onPointerMove(event) {
 
 addEventListener('pointermove', onPointerMove, { passive: true });
 addEventListener('pointerleave', () => {
-  document.body.classList.remove('pointer-ready');
   hoverTarget = 0;
 });
 addEventListener('resize', () => {

@@ -12,7 +12,8 @@
   <link rel="stylesheet" href="radio.css?v=1" />
   <link rel="stylesheet" href="channels.css?v=3" />
   <link rel="stylesheet" href="perception-game.css?v=1" />
-  <link rel="stylesheet" href="story-world.css?v=4" />
+  <link rel="stylesheet" href="story-world.css?v=5" />
+  <link rel="stylesheet" href="cursor.css?v=1" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
@@ -26,6 +27,7 @@
       <span class="symbol-reflection" aria-hidden="true"></span>
       <span class="wordmark">DEEP STRUCTURE</span>
     </button>
+    <nav class="landing-legal" aria-label="Rechtliches"><a href="./impressum.html">Impressum</a></nav>
   </main>
 
   <div class="transition" id="transition" aria-hidden="true">
@@ -47,7 +49,7 @@
       </header>
       <footer class="world-footer">
         <span>Dunkle Geschichten. Drum &amp; Bass. Eigene Welten.</span>
-        <a id="worldShopLink" href="https://yhzrzs-j1.myshopify.com/" target="_blank" rel="noopener noreferrer">Webshop ↗</a>
+        <a href="./impressum.html">Impressum</a>
       </footer>
 
       <div class="world-panel" id="worldPanel" role="dialog" aria-modal="true" aria-label="Deep Structure – Bereich" aria-hidden="true">
@@ -59,21 +61,15 @@
     </section>
   </div>
 
-  <div class="compass" id="compass" aria-hidden="true">
-    <span class="compass-ring"></span>
-    <span class="compass-needle"></span>
-    <span class="compass-dot"></span>
-  </div>
-
   <script type="module">
-    await import('./app.js?v=9');
+    await import('./app.js?v=10');
     if (location.hash === '#inside') {
       document.body.classList.add('entered');
       document.getElementById('inside').setAttribute('aria-hidden', 'false');
     } else {
       await import('./symbol-v2.js?v=5');
     }
-    await import('./world.js?v=9');
+    await import('./world.js?v=10');
     await import('./perception-game.js?v=2');
   </script>
 </body>

@@ -1,4 +1,7 @@
 const STORAGE_KEY = 'deepStructure.worldIletIn.v1';
+const STORAGE_CONSENT_KEY = 'deepStructure.worldIletIn.storageConsent.v1';
+let storageAllowed = false;
+let memoryState = defaultState();
 
 const TOTAL_OBSERVATION_MS = 14 * 60 * 1000;
 
@@ -175,6 +178,7 @@ function defaultState() {
 }
 
 function loadState() {
+  if (!storageAllowed) return structuredClone(memoryState);
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!saved || saved.version !== 1) return defaultState();
@@ -184,12 +188,18 @@ function loadState() {
       experience01: { ...defaultState().experience01, ...(saved.experience01 || {}) }
     };
   } catch {
-    return defaultState();
+    return structuredClone(memoryState);
   }
 }
 
 function saveState(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  memoryState = structuredClone(state);
+  if (!storageAllowed) return;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch {
+    storageAllowed = false;
+    try { localStorage.removeItem(STORAGE_CONSENT_KEY); } catch {}
+  }
 }
 
 function stopTimer() {
@@ -247,10 +257,12 @@ function unlock02(state) {
 }
 
 function showGameIntro() {
+  try { storageAllowed = localStorage.getItem(STORAGE_CONSENT_KEY) === 'yes'; }
+  catch { storageAllowed = false; }
   const state = loadState();
   const { root, inner } = screen('THE WORLD I LET IN', 'A PERCEPTION GAME', [
     '16 experiences. 4 chapters. The website guides you; the experience happens in the world around you.',
-    'Your answers are stored only in this browser. They are used to reflect this playthrough, not to diagnose you.'
+    'Your answers stay in this browser and are never sent to us. They reflect this playthrough, not a diagnosis.'
   ]);
 
   const meta = el('div', 'pg-meta-grid');
@@ -261,11 +273,47 @@ function showGameIntro() {
   });
   inner.append(meta, el('p', 'pg-manifesto', 'There is nothing to win. There is something to notice.'));
 
+  const storageChoice = el('label', 'pg-storage-choice');
+  const storageToggle = el('input');
+  storageToggle.type = 'checkbox';
+  storageToggle.checked = storageAllowed;
+  storageChoice.append(storageToggle, document.createTextNode('Save my progress on this device (optional)'));
+  const storageHelp = el('p', 'pg-copy pg-muted', 'Without this option, progress lasts only until you leave or reload this page. You can withdraw permission and delete saved progress here at any time.');
+  const storagePrivacy = el('a', 'pg-text-button', 'Privacy');
+  storagePrivacy.href = './datenschutz.html#spiel';
+  storagePrivacy.target = '_blank';
+  storagePrivacy.rel = 'noopener noreferrer';
+  storageToggle.addEventListener('change', () => {
+    memoryState = loadState();
+    storageAllowed = storageToggle.checked;
+    try {
+      if (storageAllowed) {
+        localStorage.setItem(STORAGE_CONSENT_KEY, 'yes');
+        if (!localStorage.getItem(STORAGE_KEY)) saveState(memoryState);
+      } else {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(STORAGE_CONSENT_KEY);
+      }
+    } catch { storageAllowed = false; }
+    showGameIntro();
+  });
+  const erase = button('DELETE LOCAL PROGRESS', 'pg-text-button');
+  erase.addEventListener('click', () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STORAGE_CONSENT_KEY);
+    } catch {}
+    storageAllowed = false;
+    memoryState = defaultState();
+    showGameIntro();
+  });
+  inner.append(storageChoice, storageHelp, storagePrivacy);
+
   const start = button(state.experience01.status === 'in-progress' ? 'CONTINUE' : 'BEGIN');
   start.addEventListener('click', showChapterIntro);
   const back = button('BACK TO APPS & GAMES', 'pg-text-button');
   back.addEventListener('click', returnToProgrammes);
-  addActions(inner, start, back);
+  addActions(inner, start, back, erase);
   clearAndRender(root);
 }
 

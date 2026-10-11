@@ -1,4 +1,4 @@
-import * as THREE from 'https://unpkg.com/three@0.166.1/build/three.module.js';
+import * as THREE from './assets/vendor/three/three.module.min.js';
 
 const stage = document.getElementById('symbolStage');
 const button = document.getElementById('enterButton');

@@ -500,3 +500,8 @@
   .pg-option { transition: none; }
   .pg-recognition-pulse { animation: none; }
 }
+
+.pg-storage-choice { display: flex; align-items: flex-start; gap: 12px; font-size: 14px; line-height: 1.6; margin: 24px 0 12px; }
+.pg-storage-choice input { width: 18px; height: 18px; flex: 0 0 18px; margin-top: 3px; accent-color: #c8ad80; }
+.pg-storage-choice input:focus-visible { outline: 2px solid #e8d6b3; outline-offset: 4px; }
+.pg-inner > .pg-text-button { display: inline-block; margin: 8px 16px 8px 0; }

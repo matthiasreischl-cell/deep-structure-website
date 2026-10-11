@@ -126,3 +126,8 @@ body:has(.world-panel.is-open) .vinyl-disc { animation-play-state: paused; }
 .landing-legal a { color: #e4d6bc; padding: 12px; text-underline-offset: 5px; }
 .landing-legal a:focus-visible { outline: 1px solid #c2a167; outline-offset: 4px; }
 body.entered .landing-legal { display: none; }
+
+.world-legal, .landing-legal { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
+.landing-legal { width: max-content; max-width: 95vw; }
+.radio-privacy-note { color: #d1c1a1; font-size: 12px; line-height: 1.6; margin: 20px 0 12px; }
+.radio-privacy-note a { color: #eddfc3; text-underline-offset: 3px; }

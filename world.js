@@ -28,6 +28,8 @@ let radioControlButton = null;
 let radioNowText = null;
 let metadataTimer = 0;
 let metadataLoading = false;
+let metadataController = null;
+let radioEnabled = false;
 let lastRadioTitle = radio.nowPlayingFallback;
 let lastFocusedElement = null;
 
@@ -283,23 +285,24 @@ function syncRadioState(message = '') {
 
 async function refreshRadioMetadata() {
   clearTimeout(metadataTimer);
-  if (metadataLoading || document.hidden || !radio.metadataUrl) return;
-  if (radioAudio.paused && !(panelOpen && radioNowText?.isConnected)) return;
+  if (!radioEnabled || metadataLoading || document.hidden || !radio.metadataUrl) return;
   metadataLoading = true;
   const controller = new AbortController();
+  metadataController = controller;
   const timeout = setTimeout(() => controller.abort(), 10000);
   try {
     const response = await fetch(radio.metadataUrl, { signal: controller.signal });
     if (!response.ok) throw new Error(`Radio metadata: ${response.status}`);
     const data = await response.json();
     lastRadioTitle = data.now_playing?.song?.title || radio.nowPlayingFallback;
-    if (radioNowText?.isConnected) radioNowText.textContent = lastRadioTitle;
+    if (radioEnabled && radioNowText?.isConnected) radioNowText.textContent = lastRadioTitle;
   } catch {
     // A metadata outage must never interrupt the audio stream.
   } finally {
     clearTimeout(timeout);
     metadataLoading = false;
-    if (!document.hidden && (!radioAudio.paused || (panelOpen && radioNowText?.isConnected))) {
+    metadataController = null;
+    if (radioEnabled && !document.hidden) {
       metadataTimer = setTimeout(refreshRadioMetadata, 15000);
     }
   }
@@ -312,6 +315,7 @@ async function startRadio() {
   }
 
   try {
+    radioEnabled = true;
     syncRadioState('Verbindung wird aufgebaut …');
     if (radioAudio.src !== radio.streamUrl) {
       radioAudio.src = radio.streamUrl;
@@ -321,12 +325,16 @@ async function startRadio() {
     syncRadioState();
     refreshRadioMetadata();
   } catch (error) {
+    stopRadio();
     console.error('Deep Structure Radio playback failed:', error);
     syncRadioState('Stream konnte nicht gestartet werden.');
   }
 }
 
 function stopRadio() {
+  radioEnabled = false;
+  clearTimeout(metadataTimer);
+  metadataController?.abort();
   radioAudio.pause();
   radioAudio.removeAttribute('src');
   radioAudio.load();
@@ -363,7 +371,13 @@ function openRadio() {
   radioControlButton.type = 'button';
   radioControlButton.addEventListener('click', toggleRadio);
 
-  copy.append(radioControlButton, radioStatusText);
+  const privacyNotice = el('p', 'radio-privacy-note', 'Mit PLAY verbindest du dich mit Asura Hosting. Dabei werden deine IP-Adresse und technische Verbindungsdaten übertragen. STOP beendet die Verbindung. ');
+  const privacyLink = el('a', '', 'Datenschutz');
+  privacyLink.href = './datenschutz.html#radio';
+  privacyLink.target = '_blank';
+  privacyLink.rel = 'noopener noreferrer';
+  privacyNotice.append(privacyLink);
+  copy.append(privacyNotice, radioControlButton, radioStatusText);
   const volumeLabel = el('label', 'radio-volume', 'Lautstärke');
   const volume = el('input');
   volume.type = 'range';
@@ -377,7 +391,7 @@ function openRadio() {
   const playerLink = el('a', 'radio-endpoint-note', 'Radio in einem eigenen Fenster öffnen ↗');
   playerLink.href = radio.playerUrl;
   playerLink.target = '_blank';
-  playerLink.rel = 'noopener';
+  playerLink.rel = 'noopener noreferrer';
   copy.append(playerLink);
   const platforms = el('div', 'music-platforms');
   channels.filter(channel => channel.url !== '#').forEach(channel => {
@@ -388,12 +402,12 @@ function openRadio() {
   detail.append(visual, copy);
   openPanel(detail);
   syncRadioState();
-  refreshRadioMetadata();
+  if (radioEnabled) refreshRadioMetadata();
 }
 
 radioAudio.addEventListener('playing', () => syncRadioState());
 radioAudio.addEventListener('pause', () => syncRadioState());
-radioAudio.addEventListener('error', () => syncRadioState('Stream-Verbindung fehlgeschlagen.'));
+radioAudio.addEventListener('error', () => { stopRadio(); syncRadioState('Stream-Verbindung fehlgeschlagen.'); });
 radioAudio.addEventListener('waiting', () => syncRadioState('Stream wird gepuffert …'));
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) refreshRadioMetadata();

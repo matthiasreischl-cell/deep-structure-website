@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'deepStructure.worldIletIn.v1';
-const ALBUM_ID = 'world-i-let-in';
+
 const TOTAL_OBSERVATION_MS = 14 * 60 * 1000;
 
 const panelCard = document.getElementById('worldPanelCard');
@@ -200,6 +200,8 @@ function stopTimer() {
 function clearAndRender(node) {
   stopTimer();
   panelCard.replaceChildren(node);
+  node.setAttribute('lang', 'en');
+  node.querySelector('button')?.focus({ preventScroll: true });
 }
 
 function el(tag, className = '', text = '') {
@@ -234,51 +236,14 @@ function notifyPhaseChange() {
   if ('vibrate' in navigator) navigator.vibrate(45);
 }
 
-function returnToAlbum() {
+function returnToProgrammes() {
   stopTimer();
-  document.querySelector(`.world-object[data-world-id="${ALBUM_ID}"]`)?.click();
+  window.dispatchEvent(new Event('deepstructure:programmes'));
 }
 
 function unlock02(state) {
   if (!state.unlocked.includes('02')) state.unlocked.push('02');
   saveState(state);
-}
-
-function enhanceAlbum() {
-  const title = panelCard.querySelector('.album-detail-copy h2');
-  if (!title || title.textContent.trim() !== 'The World I Let In') return;
-  if (panelCard.querySelector('.perception-entry-card')) return;
-
-  const copy = panelCard.querySelector('.album-detail-copy');
-  const sectionList = copy?.querySelector('.album-sections');
-  if (!copy || !sectionList) return;
-
-  const state = loadState();
-  const card = el('section', 'perception-entry-card');
-  card.append(el('p', 'pg-kicker', 'EXPERIENCE'));
-  card.append(el('h3', 'perception-entry-title', 'The World I Let In — A Perception Game'));
-  card.append(el('p', 'perception-entry-copy', '4 chapters · 16 experiences · about 20 minutes each. The real world is the playing field.'));
-  card.append(el('p', 'perception-entry-line', 'There is nothing to win. There is something to notice.'));
-
-  const status = el('div', 'perception-entry-status');
-  if (state.experience01.status === 'completed') {
-    status.textContent = 'NOTICE / 01 completed · NOTICE / 02 unlocked';
-  } else if (state.experience01.status === 'skipped') {
-    status.textContent = 'NOTICE / 01 skipped · NOTICE / 02 unlocked';
-  } else if (state.experience01.status === 'in-progress') {
-    status.textContent = 'NOTICE / 01 in progress';
-  } else {
-    status.textContent = 'NOTICE / 01 ready';
-  }
-  card.append(status);
-
-  const enter = button(
-    state.experience01.status === 'in-progress' ? 'RESUME EXPERIENCE' : 'ENTER EXPERIENCE',
-    'pg-button perception-entry-button'
-  );
-  enter.addEventListener('click', showGameIntro);
-  card.append(enter);
-  sectionList.insertAdjacentElement('afterend', card);
 }
 
 function showGameIntro() {
@@ -298,8 +263,8 @@ function showGameIntro() {
 
   const start = button(state.experience01.status === 'in-progress' ? 'CONTINUE' : 'BEGIN');
   start.addEventListener('click', showChapterIntro);
-  const back = button('BACK TO ALBUM', 'pg-text-button');
-  back.addEventListener('click', returnToAlbum);
+  const back = button('BACK TO APPS & GAMES', 'pg-text-button');
+  back.addEventListener('click', returnToProgrammes);
   addActions(inner, start, back);
   clearAndRender(root);
 }
@@ -648,8 +613,8 @@ function showProgress() {
 
   const next = button('NOTICE / 02');
   next.addEventListener('click', showExperience02Placeholder);
-  const album = button('RETURN TO ALBUM', 'pg-text-button');
-  album.addEventListener('click', returnToAlbum);
+  const album = button('RETURN TO APPS & GAMES', 'pg-text-button');
+  album.addEventListener('click', returnToProgrammes);
   addActions(inner, next, album);
   clearAndRender(root);
 }
@@ -661,8 +626,8 @@ function showExperience02Placeholder() {
   ]);
   const back = button('BACK TO MY WORLD');
   back.addEventListener('click', showProgress);
-  const album = button('RETURN TO ALBUM', 'pg-text-button');
-  album.addEventListener('click', returnToAlbum);
+  const album = button('RETURN TO APPS & GAMES', 'pg-text-button');
+  album.addEventListener('click', returnToProgrammes);
   addActions(inner, back, album);
   clearAndRender(root);
 }
@@ -689,7 +654,7 @@ function skipExperience01() {
 const observer = new MutationObserver(() => {
   if (panelCard.querySelector('.perception-game')) return;
   stopTimer();
-  window.requestAnimationFrame(enhanceAlbum);
+
 });
 observer.observe(panelCard, { childList: true, subtree: true });
 
@@ -697,4 +662,4 @@ window.addEventListener('visibilitychange', () => {
   if (!document.hidden && panelCard.querySelector('.pg-timed-screen')) showTimedObservation();
 });
 
-window.requestAnimationFrame(enhanceAlbum);
+window.addEventListener('deepstructure:perception-game', () => { stopTimer(); showGameIntro(); });

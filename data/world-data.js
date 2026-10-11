@@ -1,64 +1,18 @@
-import { theaterImage } from './assets/theater.js';
-import { kintsugiImage } from './assets/kintsugi.js';
-import { faustImage } from './assets/faust.js';
-import { itWorksImage } from './assets/it-works.js';
-import { redShoesImage } from './assets/red-shoes.js';
+// Only released physical records belong in this collection.
+export const vinylReleases = [{
+  id: 'forest',
+  title: 'The Forest Does Not Forget',
+  published: true,
+  image: './assets/albums/the-forest-does-not-forget.jpg',
+  labelImage: './assets/albums/the-forest-does-not-forget-label.png',
+  caption: 'Dunkle Folklore trifft auf Drum & Bass. Märchen, Erinnerung und Schatten — auf Vinyl, mit eigenem Booklet.',
+  features: ['12″ Vinyl + Booklet', 'Limited Edition', '12 Tracks · 42 Minuten'],
+  purchaseUrl: 'https://elasticstage.com/deep-structure/releases/the-forest-does-not-forget-album'
+}];
 
-export const albums = [
-  {
-    id: 'theater',
-    title: 'Das Theater der Wirklichkeit',
-    image: theaterImage,
-    tone: 'theater',
-    caption: 'Bühne, Maske, Wahrnehmung und Wirklichkeit.',
-    sections: ['Music', 'Story / Concept', 'Idea', 'Merchandise', 'Vinyl / Elastic Stage']
-  },
-  {
-    id: 'kintsugi',
-    title: 'Kintsugi',
-    image: kintsugiImage,
-    tone: 'kintsugi',
-    caption: 'Bruch, Gold, Heilung und das Sichtbarbleiben der Geschichte.',
-    sections: ['Music', 'Story / Concept', 'Idea', 'Merchandise', 'Vinyl / Elastic Stage']
-  },
-  {
-    id: 'faust',
-    title: 'Faust – The Deep Structure Deception',
-    image: faustImage,
-    tone: 'faust',
-    caption: 'Täuschung, Daten, Kontrolle und die Struktur hinter dem System.',
-    sections: ['Music', 'Story / Concept', 'Idea', 'Merchandise', 'Vinyl / Elastic Stage']
-  },
-  {
-    id: 'it-works',
-    title: 'It Works',
-    image: itWorksImage,
-    tone: 'itworks',
-    caption: 'Post-Punk, Zerfall, Reibung und die Frage, was tatsächlich funktioniert.',
-    sections: ['Music', 'Story / Concept', 'Idea', 'Merchandise', 'Vinyl / Elastic Stage']
-  },
-  {
-    id: 'red-shoes',
-    title: 'Die roten Schuhe',
-    image: redShoesImage,
-    tone: 'redshoes',
-    caption: 'Märchen, Zwang, Verführung und Kontrollverlust.',
-    sections: ['Music', 'Story / Concept', 'Idea', 'Merchandise', 'Vinyl / Elastic Stage']
-  },
-  {
-    id: 'world-i-let-in',
-    title: 'The World I Let In',
-    image: 'assets/albums/the-world-i-let-in.webp',
-    tone: 'worldin',
-    caption: 'Wahrnehmung, Aufmerksamkeit und die Welt, die wir in uns hineinlassen.',
-    sections: ['Music', 'Story / Concept', 'Idea', 'Experience / Perception Game', 'Merchandise', 'Vinyl / Elastic Stage']
-  }
-];
-
-export const memories = {
-  title: 'Memories',
-  image: 'assets/memories/matthias-memories.jpg',
-  intro: 'Erinnerungen, persönliche Hintergründe, Fragmente und Geschichten hinter Deep Structure.'
+export const shop = {
+  title: 'Deep Structure Webshop',
+  url: 'https://yhzrzs-j1.myshopify.com/'
 };
 
 export const channels = [
@@ -104,17 +58,7 @@ export const channels = [
     mark: 'AM',
     url: 'https://music.amazon.de/artists/B0H6SPJ4P1'
   },
-  { id: 'youtube-music', label: 'YouTube Music', mark: 'YM', url: '#' },
-  { id: 'apple-music', label: 'Apple Music / iTunes', mark: 'AP', url: '#' }
 ];
-
-export const couch = {
-  id: 'couch',
-  title: 'The Couch',
-  caption: 'Ein ruhiger Ort für Gedanken, Haltung und Austausch auf Augenhöhe.',
-  intro: 'Ein eigener Raum innerhalb von Deep Structure. Hier können Gedanken hinter der Musik, persönliche Haltung, Situationen, Philosophie, Zukunft und Möglichkeiten ihren Platz bekommen — ohne klassische Social-Media-Logik.',
-  topics: ['Musik', 'Haltung', 'Situationen', 'Philosophie', 'Zukunft', 'Möglichkeiten']
-};
 
 // Public listener endpoints; no administration credentials belong in this file.
 export const radio = {

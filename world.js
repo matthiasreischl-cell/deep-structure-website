@@ -1,4 +1,4 @@
-import { albums, memories, channels, couch, radio } from './data/world-data.js?v=4';
+import { vinylReleases, channels, shop, radio } from './data/world-data.js?v=5';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -6,37 +6,13 @@ const objectsLayer = document.getElementById('worldObjects');
 const panel = document.getElementById('worldPanel');
 const panelCard = document.getElementById('worldPanelCard');
 const panelClose = document.getElementById('worldPanelClose');
-const indexButton = document.getElementById('worldIndexButton');
 const indexPanel = document.getElementById('worldIndex');
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const header = document.querySelector('.world-header');
+const footer = document.querySelector('.world-footer');
+const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 const mobileQuery = matchMedia('(max-width: 760px)');
-
-const desktopLayout = {
-  theater: [18, 25, 55],
-  kintsugi: [40, 18, 92],
-  faust: [70, 27, 30],
-  'it-works': [29, 72, 84],
-  'red-shoes': [62, 70, 48],
-  'world-i-let-in': [47, 83, 48],
-  memories: [12, 54, 18],
-  channels: [84, 54, 68],
-  radio: [50, 48, 138],
-  couch: [82, 81, 102]
-};
-
-const mobileLayout = {
-  theater: [28, 8, 15],
-  kintsugi: [72, 18, 30],
-  faust: [28, 29, 15],
-  memories: [73, 39, 10],
-  'it-works': [27, 52, 25],
-  'red-shoes': [72, 63, 18],
-  'world-i-let-in': [28, 74, 15],
-  radio: [72, 82, 36],
-  couch: [28, 93, 30],
-  channels: [72, 101, 24]
-};
-
+const desktopLayout = { forest: [25, 49, 35], radio: [50, 49, 90], programmes: [76, 49, 25] };
+const mobileLayout = { radio: [50, 25, 0], forest: [50, 56, 0], programmes: [50, 84, 0] };
 const interactiveObjects = [];
 let active = false;
 let pointerNX = 0;
@@ -44,10 +20,11 @@ let pointerNY = 0;
 let smoothX = 0;
 let smoothY = 0;
 let panelOpen = false;
+let animationFrame = 0;
+let lastAnimation = 0;
 let radioObject = null;
 let radioStatusText = null;
 let radioControlButton = null;
-let couchObject = null;
 let radioNowText = null;
 let metadataTimer = 0;
 let metadataLoading = false;
@@ -72,81 +49,41 @@ function label(title, caption) {
   return wrapper;
 }
 
-function createVinyl(album, index) {
+function externalLink(title, url, className = 'world-link') {
+  const link = el('a', className, title + ' ↗');
+  link.href = url;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  return link;
+}
+
+function createVinyl(release) {
   const button = el('button', 'world-object world-object--vinyl');
   button.type = 'button';
-  button.dataset.worldId = album.id;
-  button.dataset.tone = album.tone;
-  button.setAttribute('aria-label', `Open album world: ${album.title}`);
-  button.style.setProperty('--cover', `url("${album.image}")`);
-  button.dataset.depth = String(.55 + index * .09);
-  button.dataset.phase = String(index * 1.17);
-
+  button.dataset.worldId = release.id;
+  button.dataset.depth = '.48';
+  button.dataset.phase = '0';
+  button.setAttribute('aria-label', 'Vinyl: ' + release.title);
+  button.style.setProperty('--cover', 'url("' + release.labelImage + '")');
   const disc = el('span', 'vinyl-disc');
   disc.append(el('span', 'vinyl-label'));
-  button.append(disc, label(album.title, album.caption));
-  button.addEventListener('click', () => openAlbum(album));
+  button.append(disc, label('Vinyl', release.title));
+  button.addEventListener('click', openVinyl);
   return button;
 }
 
-function createMemory() {
-  const button = el('button', 'world-object world-object--memory');
+function createProgrammes() {
+  const button = el('button', 'world-object world-object--programmes');
   button.type = 'button';
-  button.dataset.worldId = 'memories';
-  button.dataset.depth = '.48';
-  button.dataset.phase = '5.7';
-  button.setAttribute('aria-label', 'Open memories');
-
-  const photo = el('span', 'memory-photo');
-  const img = document.createElement('img');
-  img.src = memories.image;
-  img.alt = '';
-  photo.append(img);
-  button.append(photo, label('Memories', 'Erinnerungen und persönliche Fragmente.'));
-  button.addEventListener('click', openMemories);
-  return button;
-}
-
-function createDoor() {
-  const button = el('button', 'world-object world-object--door');
-  button.type = 'button';
-  button.dataset.worldId = 'channels';
-  button.dataset.depth = '.62';
-  button.dataset.phase = '3.3';
-  button.setAttribute('aria-label', 'Open channels');
-
-  const frame = el('span', 'door-frame');
-  frame.append(el('span', 'door-light'), el('span', 'door-panel'));
-  button.append(frame, label('Channels', 'Die Tür nach draußen.'));
-  button.addEventListener('click', openChannels);
-  return button;
-}
-
-function buildCouchSymbol() {
-  const symbol = el('span', 'couch-symbol');
-  symbol.append(
-    el('span', 'couch-glow'),
-    el('span', 'couch-back'),
-    el('span', 'couch-seat'),
-    el('span', 'couch-arm couch-arm--left'),
-    el('span', 'couch-arm couch-arm--right'),
-    el('span', 'couch-leg couch-leg--left'),
-    el('span', 'couch-leg couch-leg--right')
-  );
-  return symbol;
-}
-
-function createCouch() {
-  const button = el('button', 'world-object world-object--couch');
-  button.type = 'button';
-  button.dataset.worldId = couch.id;
-  button.dataset.depth = '.72';
-  button.dataset.phase = '4.45';
-  button.setAttribute('aria-label', `Open ${couch.title}`);
-  button.style.setProperty('--couch-proximity', '0');
-  button.append(buildCouchSymbol(), label(couch.title, couch.caption));
-  button.addEventListener('click', openCouch);
-  couchObject = button;
+  button.dataset.worldId = 'programmes';
+  button.dataset.depth = '.4';
+  button.dataset.phase = '4.2';
+  button.setAttribute('aria-label', 'Apps & Spiele öffnen');
+  const terminal = el('span', 'programme-terminal');
+  terminal.setAttribute('aria-hidden', 'true');
+  terminal.append(el('span', 'programme-screen', '> _'), el('span', 'programme-stand'));
+  button.append(terminal, label('Apps & Spiele', 'Ideen, die erlebbar werden.'));
+  button.addEventListener('click', openProgrammes);
   return button;
 }
 
@@ -156,7 +93,7 @@ function createRadio() {
   button.dataset.worldId = 'radio';
   button.dataset.depth = '.82';
   button.dataset.phase = '2.25';
-  button.setAttribute('aria-label', 'Open Deep Structure Radio');
+  button.setAttribute('aria-label', 'Musik: Deep Structure Radio öffnen');
 
   const shell = el('span', 'radio-shell');
   const handle = el('span', 'radio-handle');
@@ -181,7 +118,7 @@ function createRadio() {
   const brand = el('span', 'radio-brand', 'DEEP STRUCTURE');
   face.append(speaker, tuner, controls, onAir, brand);
   shell.append(handle, face);
-  button.append(shell, label(radio.title, radio.caption));
+  button.append(shell, label('Musik', 'Deep Structure Radio · Live hören'));
   button.addEventListener('click', openRadio);
 
   radioObject = button;
@@ -189,175 +126,119 @@ function createRadio() {
   return button;
 }
 
+
 function renderWorld() {
   const fragment = document.createDocumentFragment();
-  albums.forEach((album, index) => fragment.append(createVinyl(album, index)));
-  fragment.append(createMemory(), createDoor(), createRadio(), createCouch());
+  vinylReleases.filter(release => release.published).forEach(release => fragment.append(createVinyl(release)));
+  fragment.append(createRadio(), createProgrammes());
   objectsLayer.replaceChildren(fragment);
-  interactiveObjects.splice(0, interactiveObjects.length, ...objectsLayer.querySelectorAll('.world-object'));
+  interactiveObjects.push(...objectsLayer.querySelectorAll('.world-object'));
   applyLayout();
-  renderIndex();
+  [['Musik', openRadio], ['Vinyl', openVinyl], ['Apps & Spiele', openProgrammes]].forEach(([title, action]) => {
+    const button = el('button', '', title);
+    button.type = 'button';
+    button.addEventListener('click', action);
+    indexPanel.append(button);
+  });
+  document.getElementById('worldShopLink').href = shop.url;
 }
 
 function applyLayout() {
   const layout = mobileQuery.matches ? mobileLayout : desktopLayout;
-  interactiveObjects.forEach((node) => {
+  interactiveObjects.forEach(node => {
     const position = layout[node.dataset.worldId];
-    if (!position) return;
-    node.style.setProperty('--x', `${position[0]}%`);
-    node.style.setProperty('--y', `${position[1]}%`);
-    node.style.setProperty('--z', `${position[2]}px`);
+    node.style.setProperty('--x', position[0] + '%');
+    node.style.setProperty('--y', position[1] + '%');
+    node.style.setProperty('--z', position[2] + 'px');
   });
-}
-
-function renderIndex() {
-  const fragment = document.createDocumentFragment();
-  albums.forEach((album) => {
-    const button = el('button', '', album.title);
-    button.type = 'button';
-    button.addEventListener('click', () => {
-      indexPanel.classList.remove('is-open');
-      openAlbum(album);
-    });
-    fragment.append(button);
-  });
-  fragment.append(document.createElement('hr'));
-
-  const radioButton = el('button', '', 'Deep Structure Radio');
-  radioButton.type = 'button';
-  radioButton.addEventListener('click', () => {
-    indexPanel.classList.remove('is-open');
-    openRadio();
-  });
-
-  const couchButton = el('button', '', couch.title);
-  couchButton.type = 'button';
-  couchButton.addEventListener('click', () => {
-    indexPanel.classList.remove('is-open');
-    openCouch();
-  });
-
-  const memoryButton = el('button', '', 'Memories');
-  memoryButton.type = 'button';
-  memoryButton.addEventListener('click', () => {
-    indexPanel.classList.remove('is-open');
-    openMemories();
-  });
-
-  const channelsButton = el('button', '', 'Channels');
-  channelsButton.type = 'button';
-  channelsButton.addEventListener('click', () => {
-    indexPanel.classList.remove('is-open');
-    openChannels();
-  });
-
-  fragment.append(radioButton, couchButton, memoryButton, channelsButton);
-  indexPanel.replaceChildren(fragment);
+  updateMotion();
 }
 
 function openPanel(content) {
-  lastFocusedElement = document.activeElement;
+  if (!panelOpen) lastFocusedElement = document.activeElement;
+  panelCard.querySelectorAll('video').forEach(video => video.pause());
   panelCard.replaceChildren(content);
   panel.classList.add('is-open');
   panel.setAttribute('aria-hidden', 'false');
   panelOpen = true;
+  scene.inert = header.inert = footer.inert = true;
   panelClose.focus({ preventScroll: true });
+  requestAnimationFrame(() => { if (panelOpen) panelClose.focus({ preventScroll: true }); });
+  updateMotion();
 }
 
 function closePanel() {
+  panelCard.querySelectorAll('video').forEach(video => video.pause());
   panel.classList.remove('is-open');
   panel.setAttribute('aria-hidden', 'true');
   panelOpen = false;
+  scene.inert = header.inert = footer.inert = false;
   if (radioAudio.paused) clearTimeout(metadataTimer);
   lastFocusedElement?.focus({ preventScroll: true });
+  updateMotion();
 }
 
-function openAlbum(album) {
-  const detail = el('article', 'album-detail');
-  const visual = el('div', 'album-detail-visual');
-  visual.style.setProperty('--detail-cover', `url("${album.image}")`);
-
-  const copy = el('div', 'album-detail-copy');
-  copy.append(el('p', 'detail-kicker', 'Album World'));
-  copy.append(el('h2', '', album.title));
-  copy.append(el('p', 'detail-intro', album.caption));
-
-  const sectionList = el('div', 'album-sections');
-  album.sections.forEach((section) => sectionList.append(el('span', '', section)));
-  copy.append(sectionList);
-  copy.append(el('p', 'detail-intro', 'Diese erste Ebene ist vorbereitet. Musik, Geschichte, Idee, Merchandise und Vinyl können im nächsten Schritt als eigene Räume innerhalb dieser Album-Welt ausgebaut werden.'));
-
-  detail.append(visual, copy);
+function openVinyl() {
+  const detail = el('article', 'vinyl-detail');
+  const release = vinylReleases.find(item => item.published);
+  if (!release) {
+    detail.append(el('h2', '', 'Vinyl'), el('p', 'detail-intro', 'Neue Veröffentlichungen folgen.'));
+    openPanel(detail);
+    return;
+  }
+  const image = el('img', 'vinyl-cover');
+  image.src = release.image;
+  image.alt = 'Originalcover: ' + release.title;
+  image.width = 908;
+  image.height = 900;
+  const copy = el('div', 'vinyl-detail-copy');
+  copy.append(el('p', 'detail-kicker', 'Vinyl / Veröffentlicht'));
+  copy.append(el('h2', '', release.title));
+  copy.append(el('p', 'detail-intro', release.caption));
+  const facts = el('ul', 'vinyl-facts');
+  release.features.forEach(feature => facts.append(el('li', '', feature)));
+  copy.append(facts, externalLink('Vinyl & Booklet bei elasticStage', release.purchaseUrl, 'world-link world-link--primary'));
+  copy.append(externalLink('Deep Structure Webshop', shop.url));
+  detail.append(image, copy);
   openPanel(detail);
 }
 
-function openMemories() {
-  const detail = el('article', 'memory-detail');
-  const visual = el('div', 'memory-detail-visual');
-  const img = document.createElement('img');
-  img.src = memories.image;
-  img.alt = 'Portrait — memory archive reference';
-  visual.append(img);
-
-  const copy = el('div', 'memory-detail-copy');
-  copy.append(el('p', 'detail-kicker', 'Archive'));
-  copy.append(el('h2', '', memories.title));
-  copy.append(el('p', 'detail-intro', memories.intro));
-  copy.append(el('p', 'detail-intro', 'Hier entsteht kein klassischer Blog, sondern ein Archiv aus Fotos, Textfragmenten, Hintergründen und persönlichen Erinnerungen.'));
-
-  detail.append(visual, copy);
-  openPanel(detail);
-}
-
-function openCouch() {
-  const detail = el('article', 'couch-detail');
-  const visual = el('div', 'couch-detail-visual');
-  const symbolWrap = el('div', 'couch-detail-symbol');
-  symbolWrap.append(buildCouchSymbol());
-  visual.append(symbolWrap, el('span', 'couch-detail-room-label', 'A PLACE TO SIT WITH AN IDEA'));
-
-  const copy = el('div', 'couch-detail-copy');
-  copy.append(el('p', 'detail-kicker', 'Safe Space'));
-  copy.append(el('h2', '', couch.title));
-  copy.append(el('p', 'detail-intro', couch.intro));
-
-  const topics = el('div', 'couch-topics');
-  couch.topics.forEach((topic) => topics.append(el('span', '', topic)));
-  copy.append(topics);
-  copy.append(el('p', 'couch-status', 'Die Couch ist zunächst als Zugang und inhaltlicher Raum angelegt. Eine echte Dialog- oder Beitragsfunktion benötigt später eine eigene technische Ebene hinter der statischen GitHub-Pages-Seite.'));
-
-  detail.append(visual, copy);
-  openPanel(detail);
-}
-
-function openChannels() {
-  const detail = el('article', 'channels-detail');
-  detail.append(el('p', 'detail-kicker', 'Outside'));
-  detail.append(el('h2', '', 'Channels'));
-  detail.append(el('p', 'detail-intro', 'Die Tür führt zu den Plattformen außerhalb der Deep-Structure-Welt. Die Zieladressen sind in einer zentralen Datenstruktur vorbereitet und können später einfach ersetzt werden.'));
-
-  const grid = el('div', 'channels-grid');
-  const status = el('p', 'channel-note', 'Prototype: platform URLs are still placeholders.');
-
-  channels.forEach((channel) => {
-    const link = document.createElement('a');
-    link.className = 'channel-link';
-    link.href = channel.url;
-    link.append(el('span', 'channel-mark', channel.mark), el('span', '', channel.label));
-
-    if (channel.url !== '#') {
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-    } else {
-      link.addEventListener('click', (event) => {
-        event.preventDefault();
-        status.textContent = `${channel.label}: Link noch nicht eingetragen.`;
-      });
-    }
-    grid.append(link);
+function openProgrammes() {
+  const detail = el('article', 'programmes-detail');
+  detail.append(el('p', 'detail-kicker', 'Programme / Anwendungen / Spiele'));
+  detail.append(el('h2', '', 'Apps & Spiele'));
+  detail.append(el('p', 'detail-intro', 'Ein eigener Raum für interaktive Ideen von Deep Structure.'));
+  const pitch = el('section', 'games-pitch');
+  pitch.append(el('h3', '', 'Deep Structure Games'));
+  const video = el('video', 'games-pitch-video');
+  video.controls = true;
+  video.playsInline = true;
+  video.preload = 'metadata';
+  video.tabIndex = 0;
+  video.setAttribute('aria-label', 'Pitch-Video für Deep Structure Games');
+  const source = el('source');
+  source.src = './assets/games/deep-structure-games-pitch.mp4';
+  source.type = 'video/mp4';
+  video.append(source, externalLink('Pitch-Video öffnen', source.src));
+  const playVideo = el('button', 'world-link world-link--primary', 'Pitch-Video abspielen');
+  playVideo.type = 'button';
+  playVideo.addEventListener('click', async () => {
+    stopRadio();
+    try { await video.play(); } catch { playVideo.textContent = 'Video erneut starten'; }
   });
-
-  detail.append(grid, status);
+  video.addEventListener('play', () => { playVideo.hidden = true; video.focus({ preventScroll: true }); });
+  video.addEventListener('ended', () => { playVideo.hidden = false; });
+  pitch.append(video, playVideo);
+  detail.append(pitch);
+  const game = el('section', 'programme-project');
+  game.append(el('p', 'project-status', 'Spiel / In Entwicklung'));
+  game.append(el('h3', '', 'The World I Let In'));
+  game.append(el('p', '', 'Ein Wahrnehmungsspiel, das dich in die Welt um dich herum führt. Die erste Erfahrung kannst du hier ausprobieren.'));
+  const launch = el('button', 'world-link world-link--primary', 'Wahrnehmungsspiel öffnen');
+  launch.type = 'button';
+  launch.addEventListener('click', () => window.dispatchEvent(new Event('deepstructure:perception-game')));
+  game.append(launch);
+  detail.append(game, el('p', 'programmes-note', 'Weitere Anwendungen und Spiele folgen.'));
   openPanel(detail);
 }
 
@@ -368,7 +249,7 @@ function syncRadioState(message = '') {
 
   if (radioControlButton) {
     radioControlButton.textContent = playing ? 'STOP' : 'PLAY';
-    radioControlButton.setAttribute('aria-label', playing ? 'Stop Deep Structure Radio' : 'Play Deep Structure Radio');
+    radioControlButton.setAttribute('aria-label', playing ? 'Deep Structure Radio stoppen' : 'Deep Structure Radio abspielen');
   }
 
   if (radioStatusText) {
@@ -486,6 +367,11 @@ function openRadio() {
   playerLink.target = '_blank';
   playerLink.rel = 'noopener';
   copy.append(playerLink);
+  const platforms = el('div', 'music-platforms');
+  channels.filter(channel => channel.url !== '#').forEach(channel => {
+    platforms.append(externalLink(channel.label, channel.url));
+  });
+  copy.append(el('p', 'detail-kicker', 'Mehr Musik von Deep Structure'), platforms);
 
   detail.append(visual, copy);
   openPanel(detail);
@@ -501,85 +387,83 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden) refreshRadioMetadata();
 });
 
-function updateCouchProximity(event) {
-  if (!couchObject || event.pointerType === 'touch') return;
-
-  const rect = couchObject.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
-  const distance = Math.hypot(event.clientX - centerX, event.clientY - centerY);
-  const radius = Math.max(190, Math.min(340, innerWidth * .24));
-  const proximity = Math.max(0, Math.min(1, 1 - distance / radius));
-
-  couchObject.style.setProperty('--couch-proximity', proximity.toFixed(3));
-  couchObject.classList.toggle('is-near', proximity > .16);
-}
-
-function resetCouchProximity() {
-  if (!couchObject) return;
-  couchObject.style.setProperty('--couch-proximity', '0');
-  couchObject.classList.remove('is-near');
-}
 
 function onPointerMove(event) {
-  if (!active) return;
+  if (!active || panelOpen || motionQuery.matches || mobileQuery.matches) return;
+  pointerNX = (event.clientX / innerWidth - .5) * 2;
+  pointerNY = (event.clientY / innerHeight - .5) * 2;
+}
 
-  if (!reducedMotion) {
-    pointerNX = (event.clientX / innerWidth - .5) * 2;
-    pointerNY = (event.clientY / innerHeight - .5) * 2;
+function canAnimate() {
+  return active && !motionQuery.matches && !document.hidden && !panelOpen && !mobileQuery.matches;
+}
+
+function updateMotion() {
+  cancelAnimationFrame(animationFrame);
+  animationFrame = 0;
+  document.body.classList.toggle('world-motion-paused', !canAnimate());
+  if (canAnimate()) {
+    lastAnimation = 0;
+    animationFrame = requestAnimationFrame(animate);
+  } else {
+    world.style.setProperty('--world-x', '0px');
+    world.style.setProperty('--world-y', '0px');
+    interactiveObjects.forEach(node => {
+      ['--local-x', '--local-y'].forEach(prop => node.style.setProperty(prop, '0px'));
+      ['--tilt-x', '--tilt-y'].forEach(prop => node.style.setProperty(prop, '0deg'));
+    });
   }
-
-  updateCouchProximity(event);
 }
 
 function animate(now) {
-  if (active && !reducedMotion && !document.hidden && !panelOpen && !mobileQuery.matches) {
-    smoothX += (pointerNX - smoothX) * .055;
-    smoothY += (pointerNY - smoothY) * .055;
-    world.style.setProperty('--world-x', `${(-smoothX * 7).toFixed(2)}px`);
-    world.style.setProperty('--world-y', `${(-smoothY * 5).toFixed(2)}px`);
-
-    const t = now * .001;
-    interactiveObjects.forEach((node) => {
-      const depth = Number(node.dataset.depth || .5);
-      const phase = Number(node.dataset.phase || 0);
-      const floatY = Math.sin(t * (.55 + depth * .18) + phase) * (2.4 + depth * 2.8);
-      const floatX = Math.cos(t * .37 + phase) * 1.5;
-      node.style.setProperty('--local-x', `${(smoothX * depth * 8 + floatX).toFixed(2)}px`);
-      node.style.setProperty('--local-y', `${(smoothY * depth * 5 + floatY).toFixed(2)}px`);
-      node.style.setProperty('--tilt-x', `${(-smoothY * depth * 1.7).toFixed(2)}deg`);
-      node.style.setProperty('--tilt-y', `${(smoothX * depth * 2.2).toFixed(2)}deg`);
-    });
-  }
-  requestAnimationFrame(animate);
+  if (!canAnimate()) return;
+  animationFrame = requestAnimationFrame(animate);
+  if (lastAnimation && now - lastAnimation < 32) return;
+  lastAnimation = now;
+  smoothX += (pointerNX - smoothX) * .14;
+  smoothY += (pointerNY - smoothY) * .14;
+  world.style.setProperty('--world-x', (-smoothX * 3).toFixed(2) + 'px');
+  world.style.setProperty('--world-y', (-smoothY * 2).toFixed(2) + 'px');
+  interactiveObjects.forEach(node => {
+    const depth = Number(node.dataset.depth);
+    const phase = Number(node.dataset.phase);
+    node.style.setProperty('--local-x', (smoothX * depth * 4).toFixed(2) + 'px');
+    node.style.setProperty('--local-y', (smoothY * depth * 3 + Math.sin(now * .00055 + phase) * 2).toFixed(2) + 'px');
+    node.style.setProperty('--tilt-x', (-smoothY * depth).toFixed(2) + 'deg');
+    node.style.setProperty('--tilt-y', (smoothX * depth).toFixed(2) + 'deg');
+  });
 }
 
-indexButton.addEventListener('click', () => indexPanel.classList.toggle('is-open'));
 panelClose.addEventListener('click', closePanel);
-panel.addEventListener('click', (event) => {
-  if (event.target === panel) closePanel();
+panel.addEventListener('click', event => { if (event.target === panel) closePanel(); });
+addEventListener('keydown', event => {
+  if (!panelOpen) return;
+  if (event.key === 'Escape') closePanel();
+  if (event.key !== 'Tab') return;
+  const controls = [...panel.querySelectorAll('button, a[href], input, textarea, select, [tabindex="0"]')]
+    .filter(node => !node.disabled && node.getClientRects().length);
+  const first = controls[0];
+  const last = controls.at(-1);
+  if (!panel.contains(document.activeElement)) {
+    event.preventDefault(); first.focus();
+  } else if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault(); last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault(); first.focus();
+  }
 });
-
-addEventListener('keydown', (event) => {
-  if (event.key !== 'Escape') return;
-  if (panelOpen) closePanel();
-  else indexPanel.classList.remove('is-open');
-});
-
 addEventListener('pointermove', onPointerMove, { passive: true });
-world.addEventListener('pointerleave', resetCouchProximity, { passive: true });
-world.addEventListener('pointercancel', resetCouchProximity, { passive: true });
-mobileQuery.addEventListener?.('change', applyLayout);
-
+document.addEventListener('visibilitychange', updateMotion);
+mobileQuery.addEventListener('change', applyLayout);
+motionQuery.addEventListener('change', updateMotion);
+addEventListener('deepstructure:programmes', openProgrammes);
 addEventListener('deepstructure:entered', () => {
   active = true;
   world.classList.add('is-ready');
+  updateMotion();
 });
-
 if (location.hash === '#inside' || document.body.classList.contains('entered')) {
   active = true;
   world.classList.add('is-ready');
 }
-
 renderWorld();
-requestAnimationFrame(animate);

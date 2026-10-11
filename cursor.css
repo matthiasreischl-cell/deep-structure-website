@@ -1,0 +1,10 @@
+/* The SVG tip at (3, 37) is the actual click point. Native cursor rendering avoids a moving DOM overlay. */
+@media (pointer: fine) {
+  body, body button, body a, body [role="button"], body summary, body input[type="range"] {
+    cursor: url("./assets/cursor/comic-quill.svg") 3 37, auto !important;
+  }
+  body button:hover:not(:disabled), body a:hover, body [role="button"]:hover, body summary:hover, body input[type="range"]:hover {
+    cursor: url("./assets/cursor/comic-quill-active.svg") 3 37, pointer !important;
+  }
+  body button:disabled { cursor: not-allowed !important; }
+}

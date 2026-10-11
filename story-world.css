@@ -121,3 +121,8 @@ body:has(.world-panel.is-open) .vinyl-disc { animation-play-state: paused; }
   *, *::before, *::after { scroll-behavior: auto !important; }
   .world-object, .world-scene { transition: none; }
 }
+
+.landing-legal { position: absolute; z-index: 5; bottom: 24px; left: 50%; transform: translateX(-50%); font-size: 12px; }
+.landing-legal a { color: #e4d6bc; padding: 12px; text-underline-offset: 5px; }
+.landing-legal a:focus-visible { outline: 1px solid #c2a167; outline-offset: 4px; }
+body.entered .landing-legal { display: none; }

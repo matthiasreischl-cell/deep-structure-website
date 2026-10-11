@@ -22,3 +22,8 @@ p { margin: 12px 0; }
 .skip-link:focus { transform: none; }
 @media (max-width: 480px) { .legal-header { padding: 28px 20px; flex-wrap: wrap; gap: 16px; } .legal-content { padding: 36px 20px; } .legal-footer { padding: 24px 20px; } }
 @media print { :root { color-scheme: light; color: #000; background: #fff; } body { background: none; } a, h2, .legal-note, .legal-intro, .legal-kicker, .legal-footer { color: #000; } .legal-header, .legal-footer, .skip-link { display: none; } .legal-contact { background: none; border-color: #000; } .legal-content { max-width: none; padding: 0; } }
+
+.legal-contents { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 24px 0 32px; font-size: 13px; }
+.legal-content code { font-size: .82em; overflow-wrap: anywhere; }
+.legal-content h1 { overflow-wrap: anywhere; }
+.legal-content h2 { scroll-margin-top: 24px; }

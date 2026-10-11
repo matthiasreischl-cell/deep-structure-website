@@ -12,8 +12,6 @@ let pointerX = innerWidth * 0.5;
 let pointerY = innerHeight * 0.5;
 let previousX = pointerX;
 let previousY = pointerY;
-let cursorX = pointerX;
-let cursorY = pointerY;
 let speed = 0;
 let pointerEnergy = 0;
 let entering = false;
@@ -67,7 +65,9 @@ function onPointerMove(event) {
 
   const angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
   compass.style.setProperty('--needle-angle', `${angle}deg`);
+  compass.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`;
   document.body.classList.add('pointer-ready');
+  if (document.body.classList.contains('entered')) return;
   updateHoverState();
 
   if (!coarsePointer && event.pointerType !== 'touch') {
@@ -90,14 +90,6 @@ button.addEventListener('mouseenter', () => {
   refreshRect();
   updateHoverState();
 });
-
-function animateCursor() {
-  cursorX += (pointerX - cursorX) * 0.22;
-  cursorY += (pointerY - cursorY) * 0.22;
-  compass.style.transform = `translate3d(${cursorX}px, ${cursorY}px, 0)`;
-  requestAnimationFrame(animateCursor);
-}
-animateCursor();
 
 function objectUv() {
   const x = rect.left + rect.width * 0.5;
@@ -157,7 +149,7 @@ function applyCssMotion() {
 // Stylised slow water inspired by broad hand-drawn ripple bands.
 // The surface is procedural and continuous across the viewport; interaction
 // only perturbs it locally, so it reads as water rather than an effect cloud.
-const gl = canvas.getContext('webgl', {
+const gl = location.hash === '#inside' ? null : canvas.getContext('webgl', {
   antialias: false,
   alpha: false,
   depth: false,
@@ -394,7 +386,7 @@ if (gl) {
 
 function resizeWater() {
   if (!gl) return;
-  const dpr = Math.min(devicePixelRatio || 1, coarsePointer ? 1.45 : 1.65);
+  const dpr = Math.min(devicePixelRatio || 1, 1.25, Math.sqrt(1100000 / Math.max(1, innerWidth * innerHeight)));
   canvas.width = Math.max(1, Math.round(innerWidth * dpr));
   canvas.height = Math.max(1, Math.round(innerHeight * dpr));
   canvas.style.width = `${innerWidth}px`;
@@ -435,14 +427,25 @@ function renderWater(now) {
 refreshRect();
 updateHoverState();
 
+let entranceFrame = 0;
+let previousWaterFrame = 0;
 function animate(now) {
-  applyCssMotion();
-  refreshRect();
+  entranceFrame = 0;
+  if (document.hidden || document.body.classList.contains('entered')) return;
   updateHoverState();
-  renderWater(now);
+  applyCssMotion();
+  if (now - previousWaterFrame >= 1000 / 30) {
+    renderWater(now);
+    previousWaterFrame = now;
+  }
   pointerEnergy *= 0.92;
   speed *= 0.91;
-  requestAnimationFrame(animate);
+  if (!reducedMotion) entranceFrame = requestAnimationFrame(animate);
 }
 
-requestAnimationFrame(animate);
+addEventListener('visibilitychange', () => {
+  if (!document.hidden && !entranceFrame && !document.body.classList.contains('entered')) {
+    entranceFrame = requestAnimationFrame(animate);
+  }
+});
+entranceFrame = requestAnimationFrame(animate);

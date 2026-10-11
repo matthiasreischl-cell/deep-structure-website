@@ -1,0 +1,36 @@
+/* A quiet literary backdrop shared with the public radio page. */
+.world {
+  background: linear-gradient(rgba(4, 4, 5, .38), rgba(4, 4, 5, .38)),
+    url('./assets/deep-structure-radio-background.png') center / cover no-repeat #050505;
+  color: #e4d6bc;
+}
+.world::before { opacity: .08; transition: none; }
+.world::after { opacity: .18; }
+.world-scene { transition: none; }
+.world-core { opacity: .14; }
+.world-panel { backdrop-filter: none; background: rgba(0, 0, 0, .84); }
+.world-panel-card { background: #090909; border-color: rgba(194, 161, 103, .22); }
+.radio-detail-copy h2, .album-detail-copy h2 { color: #e4d6bc; }
+.radio-now-playing { border-color: rgba(194, 161, 103, .46); }
+.radio-now-label { color: #c2a167; }
+.radio-play-button { color: #eadbc0; border-color: rgba(194, 161, 103, .4); background: rgba(194, 161, 103, .06); }
+.radio-play-button:hover, .radio-play-button:focus-visible { border-color: #c2a167; background: rgba(194, 161, 103, .13); }
+.radio-volume { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin: 22px 0; font-size: .78rem; color: #c6b99f; }
+.radio-volume input { max-width: 190px; accent-color: #c2a167; }
+a.radio-endpoint-note { display: inline-block; color: #bba781; text-underline-offset: 4px; }
+.compass-needle { transition: none; }
+body.entered .landing, body.entered #fluid, body.entered .noise, body.entered .depth-vignette { display: none; }
+body:has(.world-panel.is-open) .vinyl-disc { animation-play-state: paused; }
+@media (pointer: fine) {
+  .compass { filter: none; }
+}
+@media (max-width: 760px) {
+  .world { background-attachment: scroll; background-position: center top; }
+  .world-scene { min-height: 1260px; }
+  .world-panel-card { max-width: 100%; }
+  .radio-detail-copy { padding: 28px 24px 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; }
+  .world-object, .world-scene { transition: none; }
+}

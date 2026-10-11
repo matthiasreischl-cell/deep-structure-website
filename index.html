@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="memories.css?v=1" />
   <link rel="stylesheet" href="world-i-let-in.css?v=1" />
   <link rel="stylesheet" href="perception-game.css?v=1" />
+  <link rel="stylesheet" href="story-world.css?v=1" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
@@ -62,10 +63,14 @@
   </div>
 
   <script type="module">
-    await import('./app.js?v=8');
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    await import('./symbol-v2.js?v=4');
-    await import('./world.js?v=5');
+    await import('./app.js?v=9');
+    if (location.hash === '#inside') {
+      document.body.classList.add('entered');
+      document.getElementById('inside').setAttribute('aria-hidden', 'false');
+    } else {
+      await import('./symbol-v2.js?v=5');
+    }
+    await import('./world.js?v=6');
     await import('./perception-game.js?v=1');
   </script>
 </body>

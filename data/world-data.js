@@ -116,14 +116,15 @@ export const couch = {
   topics: ['Musik', 'Haltung', 'Situationen', 'Philosophie', 'Zukunft', 'Möglichkeiten']
 };
 
-// 24/7 stream configuration. Add the future AzuraCast/Icecast stream URL here.
+// Public listener endpoints; no administration credentials belong in this file.
 export const radio = {
   id: 'radio',
   title: 'Deep Structure Radio',
-  caption: '24/7 Deep Structure — the catalogue as a continuous signal.',
-  streamUrl: '',
-  metadataUrl: '',
+  caption: 'Dunkle Märchen, Tragödien und Drum & Bass. Jede Geschichte läuft Kapitel für Kapitel.',
+  streamUrl: 'https://a10.asurahosting.com:9170/radio.mp3',
+  metadataUrl: 'https://a10.asurahosting.com/api/nowplaying/deep_structure_radio',
+  playerUrl: 'https://a10.asurahosting.com/public/deep_structure_radio',
   stationLabel: 'DEEP STRUCTURE RADIO',
-  nowPlayingFallback: 'Continuous transmission',
+  nowPlayingFallback: 'Deep Structure — Geschichten in ihrer Reihenfolge',
   tunerMark: 'DS'
 };

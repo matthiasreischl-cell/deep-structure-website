@@ -1,4 +1,4 @@
-import { albums, memories, channels, couch, radio } from './data/world-data.js?v=3';
+import { albums, memories, channels, couch, radio } from './data/world-data.js?v=4';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -17,6 +17,7 @@ const desktopLayout = {
   faust: [70, 27, 30],
   'it-works': [29, 72, 84],
   'red-shoes': [62, 70, 48],
+  'world-i-let-in': [47, 83, 48],
   memories: [12, 54, 18],
   channels: [84, 54, 68],
   radio: [50, 48, 138],
@@ -30,9 +31,10 @@ const mobileLayout = {
   memories: [73, 39, 10],
   'it-works': [27, 52, 25],
   'red-shoes': [72, 63, 18],
-  radio: [50, 75, 36],
-  couch: [50, 86, 30],
-  channels: [50, 97, 24]
+  'world-i-let-in': [28, 74, 15],
+  radio: [72, 82, 36],
+  couch: [28, 93, 30],
+  channels: [72, 101, 24]
 };
 
 const interactiveObjects = [];
@@ -46,6 +48,11 @@ let radioObject = null;
 let radioStatusText = null;
 let radioControlButton = null;
 let couchObject = null;
+let radioNowText = null;
+let metadataTimer = 0;
+let metadataLoading = false;
+let lastRadioTitle = radio.nowPlayingFallback;
+let lastFocusedElement = null;
 
 const radioAudio = new Audio();
 radioAudio.preload = 'none';
@@ -249,6 +256,7 @@ function renderIndex() {
 }
 
 function openPanel(content) {
+  lastFocusedElement = document.activeElement;
   panelCard.replaceChildren(content);
   panel.classList.add('is-open');
   panel.setAttribute('aria-hidden', 'false');
@@ -260,6 +268,8 @@ function closePanel() {
   panel.classList.remove('is-open');
   panel.setAttribute('aria-hidden', 'true');
   panelOpen = false;
+  if (radioAudio.paused) clearTimeout(metadataTimer);
+  lastFocusedElement?.focus({ preventScroll: true });
 }
 
 function openAlbum(album) {
@@ -354,6 +364,7 @@ function openChannels() {
 function syncRadioState(message = '') {
   const playing = !radioAudio.paused && Boolean(radioAudio.src);
   radioObject?.classList.toggle('is-playing', playing);
+  document.body.classList.toggle('radio-playing', playing);
 
   if (radioControlButton) {
     radioControlButton.textContent = playing ? 'STOP' : 'PLAY';
@@ -362,9 +373,33 @@ function syncRadioState(message = '') {
 
   if (radioStatusText) {
     if (message) radioStatusText.textContent = message;
-    else if (playing) radioStatusText.textContent = 'ON AIR — receiving live stream';
-    else if (radio.streamUrl) radioStatusText.textContent = 'READY — stream connected';
+    else if (playing) radioStatusText.textContent = 'ON AIR — Live-Stream läuft';
+    else if (radio.streamUrl) radioStatusText.textContent = 'Bereit zum Anhören';
     else radioStatusText.textContent = 'STREAM ENDPOINT NOT CONNECTED';
+  }
+}
+
+async function refreshRadioMetadata() {
+  clearTimeout(metadataTimer);
+  if (metadataLoading || document.hidden || !radio.metadataUrl) return;
+  if (radioAudio.paused && !(panelOpen && radioNowText?.isConnected)) return;
+  metadataLoading = true;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(radio.metadataUrl, { signal: controller.signal });
+    if (!response.ok) throw new Error(`Radio metadata: ${response.status}`);
+    const data = await response.json();
+    lastRadioTitle = data.now_playing?.song?.title || radio.nowPlayingFallback;
+    if (radioNowText?.isConnected) radioNowText.textContent = lastRadioTitle;
+  } catch {
+    // A metadata outage must never interrupt the audio stream.
+  } finally {
+    clearTimeout(timeout);
+    metadataLoading = false;
+    if (!document.hidden && (!radioAudio.paused || (panelOpen && radioNowText?.isConnected))) {
+      metadataTimer = setTimeout(refreshRadioMetadata, 15000);
+    }
   }
 }
 
@@ -375,12 +410,14 @@ async function startRadio() {
   }
 
   try {
+    syncRadioState('Verbindung wird aufgebaut …');
     if (radioAudio.src !== radio.streamUrl) {
       radioAudio.src = radio.streamUrl;
       radioAudio.load();
     }
     await radioAudio.play();
     syncRadioState();
+    refreshRadioMetadata();
   } catch (error) {
     console.error('Deep Structure Radio playback failed:', error);
     syncRadioState('Stream konnte nicht gestartet werden.');
@@ -423,7 +460,9 @@ function openRadio() {
   copy.append(el('p', 'detail-intro', radio.caption));
 
   const now = el('div', 'radio-now-playing');
-  now.append(el('span', 'radio-now-label', 'NOW PLAYING'), el('strong', '', radio.nowPlayingFallback));
+  radioNowText = el('strong', '', lastRadioTitle);
+  radioNowText.setAttribute('aria-live', 'polite');
+  now.append(el('span', 'radio-now-label', 'JETZT IM RADIO'), radioNowText);
   copy.append(now);
 
   radioStatusText = el('p', 'radio-stream-status');
@@ -432,16 +471,35 @@ function openRadio() {
   radioControlButton.addEventListener('click', toggleRadio);
 
   copy.append(radioControlButton, radioStatusText);
-  copy.append(el('p', 'radio-endpoint-note', 'Der spätere AzuraCast/Icecast-Stream wird zentral in data/world-data.js unter radio.streamUrl eingetragen.'));
+  const volumeLabel = el('label', 'radio-volume', 'Lautstärke');
+  const volume = el('input');
+  volume.type = 'range';
+  volume.min = '0';
+  volume.max = '1';
+  volume.step = '.05';
+  volume.value = String(radioAudio.volume);
+  volume.addEventListener('input', () => { radioAudio.volume = Number(volume.value); });
+  volumeLabel.append(volume);
+  copy.append(volumeLabel);
+  const playerLink = el('a', 'radio-endpoint-note', 'Radio in einem eigenen Fenster öffnen ↗');
+  playerLink.href = radio.playerUrl;
+  playerLink.target = '_blank';
+  playerLink.rel = 'noopener';
+  copy.append(playerLink);
 
   detail.append(visual, copy);
   openPanel(detail);
   syncRadioState();
+  refreshRadioMetadata();
 }
 
 radioAudio.addEventListener('playing', () => syncRadioState());
 radioAudio.addEventListener('pause', () => syncRadioState());
 radioAudio.addEventListener('error', () => syncRadioState('Stream-Verbindung fehlgeschlagen.'));
+radioAudio.addEventListener('waiting', () => syncRadioState('Stream wird gepuffert …'));
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refreshRadioMetadata();
+});
 
 function updateCouchProximity(event) {
   if (!couchObject || event.pointerType === 'touch') return;
@@ -475,7 +533,7 @@ function onPointerMove(event) {
 }
 
 function animate(now) {
-  if (active && !reducedMotion) {
+  if (active && !reducedMotion && !document.hidden && !panelOpen && !mobileQuery.matches) {
     smoothX += (pointerNX - smoothX) * .055;
     smoothY += (pointerNY - smoothY) * .055;
     world.style.setProperty('--world-x', `${(-smoothX * 7).toFixed(2)}px`);

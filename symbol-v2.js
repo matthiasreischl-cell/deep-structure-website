@@ -264,7 +264,10 @@ function resize() {
 addEventListener('resize', resize, { passive: true });
 resize();
 
+let symbolFrame = 0;
 function frame(now) {
+  symbolFrame = 0;
+  if (document.hidden || document.body.classList.contains('entered')) return;
   const time = now * 0.001;
 
   const idleFloat = reduced ? 0 : Math.sin(time * 0.82) * 0.030;
@@ -290,7 +293,12 @@ function frame(now) {
   lowerLight.intensity = 1.30 + proximity * 0.34;
 
   renderer.render(scene, camera);
-  requestAnimationFrame(frame);
+  if (!reduced) symbolFrame = requestAnimationFrame(frame);
 }
 
-requestAnimationFrame(frame);
+addEventListener('visibilitychange', () => {
+  if (!document.hidden && !symbolFrame && !document.body.classList.contains('entered')) {
+    symbolFrame = requestAnimationFrame(frame);
+  }
+});
+symbolFrame = requestAnimationFrame(frame);

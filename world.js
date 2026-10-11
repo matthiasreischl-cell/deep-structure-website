@@ -11,8 +11,8 @@ const header = document.querySelector('.world-header');
 const footer = document.querySelector('.world-footer');
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 const mobileQuery = matchMedia('(max-width: 760px)');
-const desktopLayout = { forest: [25, 49, 35], radio: [50, 49, 90], programmes: [76, 49, 25] };
-const mobileLayout = { radio: [50, 25, 0], forest: [50, 56, 0], programmes: [50, 84, 0] };
+const desktopLayout = { forest: [21, 47, 25], radio: [50, 42, 65], programmes: [79, 47, 20], shop: [50, 77, 10] };
+const mobileLayout = { radio: [50, 22, 0], forest: [50, 44, 0], programmes: [50, 65, 0], shop: [50, 85, 0] };
 const interactiveObjects = [];
 let active = false;
 let pointerNX = 0;
@@ -87,56 +87,78 @@ function createProgrammes() {
   return button;
 }
 
+function radioIllustration(className) {
+  const image = el('img', className);
+  image.src = './assets/radio/deep-structure-comic-radio.png';
+  image.alt = '';
+  image.width = 1536;
+  image.height = 1024;
+  image.decoding = 'async';
+  return image;
+}
+
 function createRadio() {
-  const button = el('button', 'world-object world-object--radio');
+  const button = el('button', 'world-object world-object--radio world-object--comic-radio');
   button.type = 'button';
   button.dataset.worldId = 'radio';
-  button.dataset.depth = '.82';
+  button.dataset.depth = '.65';
   button.dataset.phase = '2.25';
   button.setAttribute('aria-label', 'Musik: Deep Structure Radio öffnen');
-
-  const shell = el('span', 'radio-shell');
-  const handle = el('span', 'radio-handle');
-  const face = el('span', 'radio-face');
-  const speaker = el('span', 'radio-speaker');
-  const controls = el('span', 'radio-controls');
-  const knobA = el('span', 'radio-knob');
-  const knobB = el('span', 'radio-knob');
-  controls.append(knobA, knobB);
-
-  const tuner = el('span', 'radio-tuner');
-  const scale = el('span', 'radio-scale');
-  ['88', '92', '96', radio.tunerMark, '104', '108'].forEach((mark) => {
-    scale.append(el('span', mark === radio.tunerMark ? 'radio-scale-mark is-ds' : 'radio-scale-mark', mark));
-  });
-  const needle = el('span', 'radio-needle');
-  tuner.append(scale, needle);
-
-  const onAir = el('span', 'radio-onair');
-  onAir.append(el('span', 'radio-onair-lamp'), el('span', 'radio-onair-text', 'ON AIR'));
-
-  const brand = el('span', 'radio-brand', 'DEEP STRUCTURE');
-  face.append(speaker, tuner, controls, onAir, brand);
-  shell.append(handle, face);
-  button.append(shell, label('Musik', 'Deep Structure Radio · Live hören'));
+  button.append(radioIllustration('comic-radio-image'), label('Musik', 'Deep Structure Radio · Live hören'));
   button.addEventListener('click', openRadio);
-
   radioObject = button;
   syncRadioState();
   return button;
 }
 
+function shopSign() {
+  const sign = el('span', 'shop-sign');
+  sign.setAttribute('aria-hidden', 'true');
+  sign.append(el('span', 'shop-sign-brand', 'DEEP STRUCTURE'), el('span', 'shop-sign-title', 'WEBSHOP'), el('span', 'shop-sign-arrow', 'ENTDECKEN ↗'));
+  return sign;
+}
+
+function createShop() {
+  const button = el('button', 'world-object world-object--shop');
+  button.type = 'button';
+  button.dataset.worldId = 'shop';
+  button.dataset.depth = '.3';
+  button.dataset.phase = '3.6';
+  button.setAttribute('aria-label', 'Deep Structure Webshop öffnen');
+  button.append(shopSign());
+  button.addEventListener('click', openShop);
+  return button;
+}
+
+function openShop() {
+  const detail = el('article', 'shop-detail');
+  const visual = el('div', 'shop-detail-visual');
+  visual.append(shopSign());
+  const copy = el('div', 'shop-detail-copy');
+  copy.append(el('p', 'detail-kicker', 'Deep Structure Collective'));
+  copy.append(el('h2', '', 'Webshop'));
+  copy.append(el('p', 'detail-intro', 'Entdecke die Produkte von Deep Structure im eigenen Webshop.'));
+  copy.append(externalLink('Zum Webshop', shop.url, 'world-link world-link--primary'));
+  copy.append(el('p', 'shop-detail-note', 'Du suchst die Schallplatte?'));
+  const vinyl = el('button', 'world-link', 'The Forest Does Not Forget ansehen');
+  vinyl.type = 'button';
+  vinyl.addEventListener('click', openVinyl);
+  copy.append(vinyl);
+  detail.append(visual, copy);
+  openPanel(detail);
+}
 
 function renderWorld() {
   const fragment = document.createDocumentFragment();
   vinylReleases.filter(release => release.published).forEach(release => fragment.append(createVinyl(release)));
-  fragment.append(createRadio(), createProgrammes());
+  fragment.append(createRadio(), createProgrammes(), createShop());
   objectsLayer.replaceChildren(fragment);
   interactiveObjects.push(...objectsLayer.querySelectorAll('.world-object'));
   applyLayout();
-  [['Musik', openRadio], ['Vinyl', openVinyl], ['Apps & Spiele', openProgrammes]].forEach(([title, action]) => {
+  [['Musik', openRadio], ['Vinyl', openVinyl], ['Apps & Spiele', openProgrammes], ['Webshop', openShop]].forEach(([title, action]) => {
     const button = el('button', '', title);
     button.type = 'button';
+    if (title === 'Webshop') button.className = 'shop-nav-link';
     button.addEventListener('click', action);
     indexPanel.append(button);
   });
@@ -321,19 +343,10 @@ function toggleRadio() {
 function openRadio() {
   const detail = el('article', 'radio-detail');
 
-  const visual = el('div', 'radio-detail-visual');
-  const receiver = el('div', 'radio-detail-receiver');
-  const tuner = el('div', 'radio-detail-tuner');
-  const scale = el('div', 'radio-detail-scale');
-  ['88', '92', '96', radio.tunerMark, '104', '108'].forEach((mark) => {
-    scale.append(el('span', mark === radio.tunerMark ? 'is-ds' : '', mark));
-  });
-  tuner.append(scale, el('span', 'radio-detail-needle'));
-  const speaker = el('div', 'radio-detail-speaker');
-  const lamp = el('div', 'radio-detail-onair');
-  lamp.append(el('span', 'radio-detail-lamp'), el('span', '', 'ON AIR'));
-  receiver.append(tuner, speaker, lamp);
-  visual.append(receiver);
+  const visual = el('div', 'radio-detail-visual radio-detail-visual--comic');
+  visual.append(radioIllustration('comic-radio-detail-image'));
+  const live = el('span', 'comic-radio-live', 'DEEP STRUCTURE / LIVE RADIO');
+  visual.append(live);
 
   const copy = el('div', 'radio-detail-copy');
   copy.append(el('p', 'detail-kicker', '24 / 7 Transmission'));

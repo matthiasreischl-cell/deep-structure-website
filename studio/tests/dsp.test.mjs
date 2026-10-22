@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const htmlPath = process.argv[2] || path.join(here, '..', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const grab = name => { const m = html.match(new RegExp('const ' + name + ' = String\\.raw`([\\s\\S]*?)`;')); if (!m) throw new Error(name + ' nicht gefunden'); return m[1]; };
-const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData};')();
+const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair};')();
 
 let pass = 0, fail = 0; const rows = [];
 function check(name, ok, detail) { rows.push([ok ? 'PASS' : 'FAIL', name, detail]); ok ? pass++ : fail++; }
@@ -132,6 +132,38 @@ for (const bpm of [75, 90, 128, 140, 174]) {
 { const x = song(128), g = gd(x, { bpm: 128, downbeatPhase: 2 }); check('Spiel-Daten: Taktanfang lässt sich verschieben', g.downbeatPhase === 2, 'Phase ' + g.downbeatPhase); }
 { const x = noise(44100, 30, 0.2, 11), g = gd(x); check('Spiel-Daten: Rauschen ohne Rhythmus → Raster als unsicher markiert', g.bpmConfidence < 0.3, 'Sicherheit ' + g.bpmConfidence.toFixed(2)); }
 { const g = gd(sine(44100, 2, 440, 0.1)); check('Spiel-Daten: zu kurzer Song → verständliche Meldung statt Fehler', typeof g.error === 'string', g.error || '–'); }
+
+/* 10  Drum-Reparatur: Testmix mit Kick, Snare (mit metallischem Nachklingen), HiHats, Bass-Tönen und gesangsähnlichem Ton */
+function drumMix(bpm = 96, bars = 12, sign = 1) {
+  const sr = 48000, beat = 60 / bpm, n = Math.round((bars * 4 * beat + 1) * sr), L = new Float32Array(n), r = rng(5), kicks = [], snares = [];
+  const add = (t, len, f) => { const i0 = Math.round(t * sr); for (let i = 0; i < len && i0 + i < n; i++) L[i0 + i] += f(i, i / sr); };
+  let ph = 0; for (let i = Math.round(4 * beat * sr); i < n; i++) { const t = i / sr; ph += 220 * (1 + 0.01 * Math.sin(2 * Math.PI * 5 * t)) / sr; let v = 0; for (let h = 1; h <= 20; h++) v += Math.sin(2 * Math.PI * h * ph) / h; L[i] += 0.04 * v; }
+  for (let b = 0; b < bars * 4; b++) { const t = 0.3 + b * beat;
+    if (b % 2 === 0) { kicks.push(t); let p = 0; add(t, sr * 0.4, (i, s) => { p += 2 * Math.PI * 55 * (1 + 2 * Math.exp(-s / 0.02)) / sr; return sign * 0.6 * Math.sin(p) * Math.exp(-s / 0.15); }); }
+    else { snares.push(t); add(t, sr * 0.25, (i, s) => 0.25 * Math.sin(2 * Math.PI * 190 * s) * Math.exp(-s / 0.04) + 0.3 * r() * 2 * Math.exp(-s / 0.07) + 0.06 * (Math.sin(2 * Math.PI * 3400 * s) + Math.sin(2 * Math.PI * 5900 * s)) * Math.exp(-s / 0.12)); }
+    for (const hh of [0, 0.5]) { let p1 = 0, p2 = 0; add(t + hh * beat, sr * 0.08, (i, s) => { const w = r() * 2, d1 = w - p1; p1 = w; const d2 = d1 - p2; p2 = d1; return 0.05 * d2 * Math.exp(-s / 0.02); }); }
+    add(t, Math.round(beat * sr * 0.9), (i, s) => 0.15 * Math.sin(2 * Math.PI * (b % 4 < 2 ? 73 : 82) * s) * Math.min(1, s / 0.01) * Math.max(0, 1 - s / (beat * 0.9))); }
+  return { L, R: L.slice(), sr, kicks, snares, beat };
+}
+const goertzel = (x, sr, f, wins) => { let e = 0; for (const [a, b] of wins) { const c = 2 * Math.cos(2 * Math.PI * f / sr); let s1 = 0, s2 = 0; for (let i = Math.round(a * sr); i < Math.round(b * sr); i++) { const s0 = x[i] + c * s1 - s2; s2 = s1; s1 = s0; } e += s1 * s1 + s2 * s2 - c * s1 * s2; } return 10 * Math.log10(e + 1e-20); };
+const hitRate = (det, tru) => [tru.filter(t => det.some(d => Math.abs(d.t - t) < 0.02)).length / tru.length, det.length ? det.filter(d => tru.some(t => Math.abs(d.t - t) < 0.02)).length / det.length : 0];
+{ const x = drumMix(), g = gd(x), d = D.drumDetect(x.L, x.R, x.sr, { sens: 0.5, beats: g.beats }), k = hitRate(d.kicks, x.kicks), s = hitRate(d.snares, x.snares);
+  check('Drums: Kick-Erkennung im Mix (Trefferquote ≥ 85 %, keine Bass-Töne)', k[0] >= 0.85 && k[1] >= 0.95, 'gefunden ' + (k[0] * 100).toFixed(0) + ' %, richtig ' + (k[1] * 100).toFixed(0) + ' %');
+  check('Drums: Snare-Erkennung im Mix (≥ 90 % gefunden, ≥ 85 % richtig)', s[0] >= 0.9 && s[1] >= 0.85, 'gefunden ' + (s[0] * 100).toFixed(0) + ' %, richtig ' + (s[1] * 100).toFixed(0) + ' %');
+  const off = D.drumRepair(x.L, x.R, x.sr, { det: d }); check('Drums: alles aus → bitgenau unverändert', off.L.every((v, i) => v === x.L[i]), off.report.changed ? 'verändert' : 'unverändert');
+  const r = D.drumRepair(x.L, x.R, x.sr, { det: d, metal: { on: true, amt: 0.6 } }), sw = x.snares.filter(t => t > 2.6).map(t => [t + 0.03, t + 0.15]), all = [[2.6, x.L.length / x.sr - 0.1]];
+  const ring = Math.min(goertzel(x.L, x.sr, 3400, sw) - goertzel(r.L, x.sr, 3400, sw), goertzel(x.L, x.sr, 5900, sw) - goertzel(r.L, x.sr, 5900, sw));
+  const voc = Math.max(...[1540, 2200, 2860].map(f => Math.abs(goertzel(r.L, x.sr, f, all) - goertzel(x.L, x.sr, f, all))));
+  check('Drums: Metall-Entferner senkt Nachklingen um ≥ 4 dB, Gesangs-Obertöne bleiben (±0,3 dB)', ring >= 4 && voc <= 0.3, 'Nachklingen −' + ring.toFixed(1) + ' dB, Gesang ±' + voc.toFixed(2) + ' dB, gefunden: ' + r.report.metalFreqs.join(', ') + ' Hz');
+  const lowE = (y, wins) => { let e = 0; const lp = y; for (const [a, b] of wins) for (let i = Math.round(a * x.sr); i < Math.round(b * x.sr); i++) e += lp[i] * lp[i]; return 10 * Math.log10(e); };
+  for (const sign of [1, -1]) { const y = sign === 1 ? x : drumMix(96, 12, -1), dy = sign === 1 ? d : D.drumDetect(y.L, y.R, y.sr, { sens: 0.5, beats: g.beats }), ry = D.drumRepair(y.L, y.R, y.sr, { det: dy, kick: { on: true, amt: 0.5 } }), kw = y.kicks.map(t => [t, t + 0.08]);
+    const gain = lowE(ry.L, kw) - lowE(y.L, kw); check('Drums: Kick unterlegen verstärkt statt auszulöschen (Polarität ' + (sign > 0 ? 'normal' : 'gedreht') + ')', gain > 1.5 && gain < 6, '+' + gain.toFixed(1) + ' dB im Kick-Bereich'); }
+  const rr = D.drumRepair(x.L, x.R, x.sr, { det: d, metal: { on: true, amt: 1 }, sand: { on: true, amt: 1 }, fill: { on: true, amt: 0.5 }, snare: { on: true, amt: 0.5 }, regions: [[3, 5]] });
+  let outside = 0; for (let i = 0; i < x.L.length; i++) { const t = i / x.sr; if (t < 2.9 || t > 5.1) outside = Math.max(outside, Math.abs(rr.L[i] - x.L[i])); }
+  check('Drums: „Nur Auswahl“ lässt den Rest unverändert', outside === 0, 'max. Abweichung außerhalb ' + outside); }
+{ const n = 48000 * 4, L = new Float32Array(n); for (let i = 0; i < n; i++) L[i] = 0.3 * Math.sin(2 * Math.PI * 1000 * i / 48000);
+  const r = D.drumRepair(L, L.slice(), 48000, { det: { kicks: [], snares: [], hats: [] }, metal: { on: true, amt: 1 }, sand: { on: true, amt: 1 } }); let m = 0; for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(r.L[i] - L[i]));
+  check('Drums: Ohne Schläge bleibt ein Ton unverändert (STFT verlustfrei)', m < 1e-5, 'max. Abweichung ' + (20 * Math.log10(m + 1e-12)).toFixed(0) + ' dBFS'); }
 
 const w = Math.max(...rows.map(r => r[1].length));
 console.log('\nDeep Structure Mastering Studio – DSP-Tests (' + path.basename(htmlPath) + ')\n');

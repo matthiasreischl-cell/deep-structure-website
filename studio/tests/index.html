@@ -162,6 +162,23 @@ async function gameData() {
   res.push(['Spiel-Daten: Godot-Code und Codex-Anleitung erzeugt', /class_name TrackData/.test(gd) && /func song_time/.test(gd) && /TECHNISCHE REGELN/.test(cx) && cx.includes('120 BPM'), gd.length + ' / ' + cx.length + ' Zeichen']);
   document.querySelector('#gmLevel').value = ''; showTab('check'); if (keep) await loadTrack(keep); return res;
 },
+async function drumRepairUI() {
+  const res = [], sr = 48000, beat = 0.6, n = sr * 20, L = new Float32Array(n); let seed = 3; const r = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296 - 0.5; };
+  for (let b = 0; b * beat < 19; b++) { const i0 = Math.round((0.3 + b * beat) * sr);
+    if (b % 2 === 0) { let p = 0; for (let i = 0; i < sr * 0.35 && i0 + i < n; i++) { const s = i / sr; p += 2 * Math.PI * 55 * (1 + 2 * Math.exp(-s / 0.02)) / sr; L[i0 + i] += 0.6 * Math.sin(p) * Math.exp(-s / 0.15); } }
+    else for (let i = 0; i < sr * 0.25 && i0 + i < n; i++) { const s = i / sr; L[i0 + i] += 0.25 * Math.sin(2 * Math.PI * 190 * s) * Math.exp(-s / 0.04) + 0.3 * r() * 2 * Math.exp(-s / 0.07) + 0.05 * Math.sin(2 * Math.PI * 3400 * s) * Math.exp(-s / 0.12); } }
+  const keep = S.track; await loadTrack({ sr, L, R: L.slice(), name: 'Drum-Test', demo: true });
+  for (let i = 0; i < 100 && !S.orig; i++) await sleep(100);
+  showTab('drums'); await drScan(); for (let i = 0; i < 200 && DRS.busy; i++) await sleep(100);
+  res.push(['Drums: Schläge im Testloop gefunden', drDetValid() && DRS.det.kicks.length >= 12 && DRS.det.snares.length >= 12, DRS.det ? DRS.det.kicks.length + ' Kicks, ' + DRS.det.snares.length + ' Snares' : '–']);
+  const before = S.track.L; await drApply(); for (let i = 0; i < 300 && DRS.busy; i++) await sleep(100);
+  res.push(['Drums: Anwenden erzeugt einen rückgängig machbaren Schritt', S.undo.length > 0 && /Drums repariert/.test(S.undo[S.undo.length - 1].label) && S.undo[S.undo.length - 1].L === before, S.undo.length ? S.undo[S.undo.length - 1].label : '–']);
+  const n1 = S.undo.length; document.querySelector('#drPunchOn').checked = true; await drApply(); for (let i = 0; i < 300 && DRS.busy; i++) await sleep(100);
+  res.push(['Drums: erneutes Anwenden ersetzt statt zu stapeln', S.undo.length === n1 && S.undo[S.undo.length - 1].L === before, 'Schritte ' + n1 + ' → ' + S.undo.length]);
+  drSetAB(true); const abOn = S.abuf === DRS.beforeBuf && document.querySelector('#drAB').getAttribute('aria-pressed') === 'true'; drSetAB(false);
+  res.push(['Drums: Vorher/Nachher schaltet den Abspiel-Puffer um', abOn && S.abuf !== DRS.beforeBuf, abOn ? 'ok' : 'nicht umgeschaltet']);
+  document.querySelector('#drPunchOn').checked = false; showTab('check'); if (keep) await loadTrack(keep); return res;
+},
 async function aiKeyStorage() {
   const res = []; try { localStorage.removeItem('dsms.aikey'); } catch (e) {}
   document.querySelector('#aiRemember').checked = false; document.querySelector('#aiKey').value = 'sk-ant-test-0000';

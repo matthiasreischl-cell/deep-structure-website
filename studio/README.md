@@ -1,6 +1,6 @@
 # Deep Structure Mastering Studio
 
-Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, Song-Check, KI-Artefakt-Suche, Mastering-Kette und Spiel-Daten-Export. Die gesamte Audioverarbeitung läuft lokal im Browser. Audiodateien verlassen das Gerät nie.
+Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, Song-Check, KI-Artefakt-Suche, Mastering-Kette, Drum-Reparatur und Spiel-Daten-Export. Die gesamte Audioverarbeitung läuft lokal im Browser. Audiodateien verlassen das Gerät nie.
 
 ## Dateien
 
@@ -73,6 +73,16 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - Export: JSON im Format `deepstructure.trackdata.v1`. Dazu gibt es GDScript (`TrackData`-Klasse mit `song_time()` nach Godot-Empfehlung) und eine Anleitung zum Einfügen in Codex. Mit „Klick“ läuft beim Abspielen ein Metronom am Mastering vorbei, um das Raster zu prüfen.
 - Grenzen: Tempowechsel innerhalb eines Songs werden nicht verfolgt (das Raster ist gleichmäßig). Die Abschnittstypen sind Vorschläge, kein Songtext-Verständnis.
 
+**Drum-Reparatur** (Reiter „Drums“, für typische KI-Drums im fertigen Stereo-Mix, ohne Stems):
+- Erkennung: Einsätze in Bändern (Kick < 110 Hz mit Quadratur-Hüllkurve, Snare 1,2–5 kHz, HiHat > 7 kHz). Kick nur mit Tonhöhenabfall (unterscheidet sie von Bass-Tönen). Snare nur bei breitbandigem Anstieg in mindestens 4 von 5 Bändern. Zusätzlich werden nur Rasterplätze behalten, an denen regelmäßig Snares liegen. Marken erscheinen in der Wellenform.
+- Metallklang: STFT 1024/256 mit Wurzel-Hann-Fenster. Eine schmale Frequenz wird abgesenkt, wenn sie bei einem Schlag gegenüber dem ruhigen Grundpegel neu aufklingt und dabei aus ihrer Umgebung herausragt. Stehende Töne wie Gesang, auch mit Vibrato, werden über einen Grundpegel-Verfolger mit Frequenz-Nachbarschaft geschont. Höchstens −12 dB.
+- Sand: Die körnige Feinstruktur der Höhen wird in Zeit und Frequenz geglättet (3 × 5 Nachbarn, nur Absenkung von Spitzen). Danach wird die Energie je Frame wiederhergestellt.
+- Ausklänge: Ein kurzer Raum (Freeverb-Prinzip) erhält nur die Höhen der ersten 60 ms jedes Schlags.
+- Punch: Anschlag-Hüllkurve im Bass- und Höhenband (Nullphasen-Filter, komplementär). Optional wird der Ausklang in den Höhen gekürzt.
+- Unterlegen: Eingebaute Kick und Snare oder eigenes Sample, Tonhöhe aus dem Song gemessen. Die Kick wird per Kreuzkorrelation zeitlich und in der Polarität ausgerichtet. Der Pegel folgt jedem einzelnen Schlag.
+- Anwenden erzeugt einen Bearbeitungsschritt mit Rückgängig. Erneutes Anwenden ersetzt ihn. „Vorher/Nachher“ tauscht nur den Abspiel-Puffer, die Wiedergabe läuft an derselben Stelle weiter. Mit allen Reglern aus bleibt der Song bitgenau unverändert.
+- Grenzen: Was der Generator nicht erzeugt hat, lässt sich nicht zurückholen. Die Erkennung ist heuristisch, deshalb gibt es Marken zum Prüfen und drei Empfindlichkeitsstufen.
+
 **Assistent:** Er korrigiert nur deutliche Abweichungen (Totzone ±2 dB, höchstens ±3 dB). Kompression setzt er nur bei großer Dynamik ein, Sättigung nie. Ein technisch sauberer Song bleibt nahezu unverändert.
 
 ## KI-Mastering und Datenschutz
@@ -91,6 +101,18 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.6.0 (Drum-Reparatur)
+
+- Neuer Reiter **Drums**:
+  - Metallklang entfernen
+  - Sand glätten
+  - Abgehackte Ausklänge füllen
+  - Punch
+  - Saubere Kick/Snare unterlegen (eingebaut oder eigenes Sample)
+- Kick-, Snare- und HiHat-Erkennung im fertigen Mix mit Marken in der Wellenform.
+- Vorher/Nachher ohne Unterbrechung der Wiedergabe.
+- Neue Tests: 8 DSP-Tests, 4 Browser-Tests. Bestehende Funktionen sind unverändert.
 
 ## Änderungen 1.5.0 (Spiel-Daten)
 

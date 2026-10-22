@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="perception-game.css?v=2" />
   <link rel="stylesheet" href="story-world.css?v=6" />
   <link rel="stylesheet" href="cursor.css?v=1" />
-  <link rel="stylesheet" href="landing-3d.css?v=1" />
+  <link rel="stylesheet" href="landing-3d.css?v=2" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
@@ -75,7 +75,7 @@
       document.getElementById('inside').setAttribute('aria-hidden', 'false');
     } else if (window.__DS_LANDING3D) {
       try {
-        await import('./landing-3d.js?v=1');
+        await import('./landing-3d.js?v=2');
       } catch (error) {
         console.warn('3D-Startseite nicht verfügbar, nutze Ersatz:', error);
         window.__DS_LANDING3D = false;

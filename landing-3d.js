@@ -168,7 +168,7 @@ const water = new THREE.Mesh(new THREE.PlaneGeometry(420, 420), new THREE.Shader
       }
       vec2 q = p - uLogo; q.y *= 1.6; float dc = length(q);
       h += sin(dc * 5.0 - t * 2.4) * exp(-dc * 0.42) * smoothstep(0.15, 1.0, dc) * uContact * 0.045;
-      h -= exp(-dc * dc * 1.5) * 0.05; // Mulde unter dem schwimmenden Logo
+      h -= exp(-dc * dc * 1.5) * 0.02; // leichte Mulde unter dem Logo
       return h;
     }
     float H(vec2 p){ return waves(p, uTime) + rings(p, uTime); }
@@ -229,7 +229,7 @@ function renderReflection() {
 }
 
 /* ---------- Kamera an das HTML-Layout anpassen (Logo sitzt dort, wo die Bühne ist) ---------- */
-let baseY = R * 0.9;
+let baseY = R * 1.04;
 function fit() {
   const W = innerWidth, Hh = innerHeight, dpr = Math.min(devicePixelRatio || 1, coarse ? 1.5 : 1.6);
   renderer.setPixelRatio(dpr); renderer.setSize(W, Hh, false);

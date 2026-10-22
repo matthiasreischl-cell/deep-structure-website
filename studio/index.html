@@ -251,6 +251,20 @@ textarea{font:400 14px var(--f-body);color:var(--text);background:var(--field);b
 details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 @media (max-width:640px){ .finding{grid-template-columns:4px minmax(0,1fr)} .finding button{grid-column:2;justify-self:start} }
 
+/* KI-Artefakte & Feedback */
+.artcard{gap:10px}
+.artlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+.artlist li{display:grid;grid-template-columns:auto minmax(0,1fr) 90px auto;gap:10px;align-items:center;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px}
+.artlist .ty{font:600 10px var(--f-display);letter-spacing:.12em;text-transform:uppercase;padding:2px 6px;border-radius:3px}
+.ty.shimmer{background:var(--gold);color:#1b1205}.ty.warble{background:var(--ref);color:#160d24}.ty.click{background:var(--hot);color:#1a0503}
+.artlist .bar{height:6px;border-radius:3px;background:#1c2a36;overflow:hidden}.artlist .bar i{display:block;height:100%;background:var(--gold)}
+.artlist button{min-height:28px;padding:0 9px}
+.stars{display:flex;gap:6px}
+.stars button{width:40px;padding:0;font-size:18px;color:var(--muted)}
+.stars button[aria-checked=true]{color:var(--gold);border-color:var(--gold)}
+a.btn{text-decoration:none}
+@media (max-width:640px){ .artlist li{grid-template-columns:auto minmax(0,1fr) auto} .artlist .bar{display:none} }
+
 @media (max-width:1100px){ .bands{grid-template-columns:repeat(4,minmax(0,1fr))} }
 @media (max-width:920px){
   .rack{grid-template-columns:minmax(0,1fr)}
@@ -287,6 +301,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
       <button id="btnSaveSet" title="Alle Regler-Einstellungen als Datei sichern">Einst. sichern</button>
       <button id="btnLoadSet" title="Gesicherte Einstellungen laden">Laden</button>
       <input type="file" id="setIn" accept=".json,application/json" hidden>
+      <button class="ghost" id="btnFeedback" title="Rückmeldung an Deep Structure schicken">Feedback</button>
       <button class="primary" id="btnExport">Exportieren</button>
     </div>
   </header>
@@ -359,11 +374,26 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
           <button class="primary" id="btnFixAll" disabled>Alle Vorschläge anwenden</button>
         </div>
         <ul class="findings" id="ckList"></ul>
+        <div class="card artcard" id="artCard">
+          <h3><span>KI-Artefakte</span><span class="mono small muted" id="artState">wird gesucht …</span></h3>
+          <p class="hint" id="artSummary">Sucht Stellen, die typisch für KI-generierte Musik sind: Glitzern und Zwitschern in den Höhen, flatterndes Stereobild und Knackser. Erkannte Stellen sind in der Wellenform oben farbig markiert.</p>
+          <ul class="artlist" id="artList"></ul>
+          <div class="grid2" id="artCtl"></div>
+          <div class="row">
+            <select id="artScope" aria-label="Bereich zum Glätten"><option value="regions">Nur verdächtige Stellen</option><option value="sel">Aktuelle Auswahl</option><option value="all">Ganzer Song</option></select>
+            <label class="chk"><input type="checkbox" id="artClicks" checked> Knackser reparieren</label>
+            <button class="primary" id="btnSmooth" disabled>Glätten</button>
+          </div>
+          <p class="hint">Glätten verändert den Song selbst. Mit Strg+Z hörst du die Fassung davor, mit Strg+Y wieder die geglättete.</p>
+        </div>
         <div class="card aicard" id="aiCard">
           <h3><span>KI-Mastering</span><span class="aibadge" id="aiBadge">wird geprüft …</span></h3>
           <p class="hint">Die KI bekommt alle Messwerte deines Songs und deinen Wunsch, stellt die ganze Mastering-Kette ein, lässt das Ergebnis nachmessen und bessert in einer zweiten Runde nach. Danach hörst du mit Master / Original selbst, ob es besser ist.</p>
+          <div id="aiMain">
           <label class="field" for="aiWish"><span>Wie soll dein Song klingen?</span><textarea id="aiWish" rows="2" placeholder="z. B. Drum &amp; Bass, dunkel und druckvoll, Bass vorne, Stimme klar, für Spotify"></textarea></label>
-          <div class="row"><button class="primary" id="btnAI" disabled>Mit KI mastern</button><button id="btnAIStop" hidden>Stopp</button><button id="btnAIUndo" hidden>Vorherige Einstellungen</button></div>
+          <div class="row" style="margin-top:8px"><button class="primary" id="btnAI" disabled>Mit KI mastern</button><button id="btnAIStop" hidden>Stopp</button><button id="btnAIUndo" hidden>Vorherige Einstellungen</button></div>
+          </div>
+          <p class="hint" id="aiOff" hidden>Hier ist keine KI verbunden. Song-Check, Artefakt-Suche und alle Werkzeuge funktionieren trotzdem. Das KI-Mastering gibt es in der Claude-Version des Studios oder hier mit einem eigenen API-Schlüssel.</p>
           <ol class="ailog" id="aiLog" hidden></ol>
           <div class="aiexp" id="aiExp" hidden></div>
           <details id="aiKeyBox" hidden>
@@ -503,6 +533,23 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
   </main>
 
   <div class="status" id="status" role="status" hidden></div>
+
+  <div class="modal" id="fbModal" hidden>
+    <div class="box" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+      <h2 id="fbTitle">Feedback an Deep Structure</h2>
+      <p class="hint">Danke fürs Testen! Was klingt besser, was schlechter, was fehlt, was ist unklar? Deine Rückmeldung geht direkt an den Entwickler.</p>
+      <div class="field"><span>Wie gut hilft dir das Studio?</span><div class="stars" id="fbStars" role="radiogroup" aria-label="Bewertung"></div></div>
+      <label class="field" for="fbGood"><span>Was gefällt dir?</span><textarea id="fbGood" rows="2"></textarea></label>
+      <label class="field" for="fbBad"><span>Was stört dich, was fehlt, was war unklar?</span><textarea id="fbBad" rows="3"></textarea></label>
+      <div class="opts">
+        <label class="field" for="fbName"><span>Name (optional)</span><input type="text" id="fbName" autocomplete="name"></label>
+        <label class="field" for="fbGenre"><span>Deine Musik (optional)</span><input type="text" id="fbGenre" placeholder="z. B. Suno, Drum &amp; Bass"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="fbTech" checked> Messwerte und Einstellungen anhängen (keine Audiodaten)</label>
+      <p class="hint">Senden öffnet dein E-Mail-Programm mit fertigem Text an <b class="mono" id="fbAddr">deepstructure846@gmail.com</b>. Ohne E-Mail-Programm: „Text kopieren“ und z. B. per WhatsApp schicken.</p>
+      <div class="row" style="justify-content:flex-end"><button id="fbCancel">Schließen</button><button id="fbCopy">Text kopieren</button><a class="btn primary" id="fbMail" href="#">Per E-Mail senden</a></div>
+    </div>
+  </div>
 
   <div class="modal" id="expModal" hidden>
     <div class="box" role="dialog" aria-modal="true" aria-labelledby="expTitle">
@@ -689,8 +736,124 @@ function encodeWav(L,R,sr,bits){
       if(bits===16){ v.setInt16(p,q,true); p+=2; } else { v.setUint8(p,q&255); v.setUint8(p+1,(q>>8)&255); v.setUint8(p+2,(q>>16)&255); p+=3; } } }
   return buf;
 }
+
+/* ---------- KI-Artefakte: Erkennung ---------- */
+var WIN={};
+function hannP(N,sq){ var key=N+(sq?'s':''); if(WIN[key]) return WIN[key]; var w=new Float64Array(N); for(var i=0;i<N;i++){ var v=0.5-0.5*Math.cos(2*Math.PI*i/N); w[i]=sq?Math.sqrt(v):v; } return WIN[key]=w; }
+function robust(arr){ var a=Array.prototype.slice.call(arr).filter(function(v){return isFinite(v);}).sort(function(x,y){return x-y;}); if(!a.length) return {med:0,mad:1};
+  var med=a[a.length>>1], d=a.map(function(v){return Math.abs(v-med);}).sort(function(x,y){return x-y;}); return {med:med,mad:Math.max(1e-6,d[d.length>>1])}; }
+function toRegions(idx,thr,base,hop,N,sr,minLen,gap,type){
+  var out=[],cur=null,f;
+  for(f=0;f<idx.length;f++){ if(idx[f]>thr){ var a=f*hop/sr,b=(f*hop+N)/sr,sc=idx[f]-base;
+      if(cur&&a-cur.b<gap){ cur.b=b; cur.s+=sc; cur.n++; } else { if(cur) out.push(cur); cur={a:a,b:b,s:sc,n:1,type:type}; } } }
+  if(cur) out.push(cur);
+  return out.filter(function(r){return r.b-r.a>=minLen;}).map(function(r){return {a:r.a,b:r.b,score:r.s/r.n,type:r.type};});
+}
+function artifacts(L,R,sr){
+  var N=2048,hop=1024,n=L.length,frames=Math.floor((n-N)/hop)+1,res={regions:[],clicks:[],cutoff:null,stats:{}};
+  if(frames<16) return res;
+  var w=hannP(N,false),half=N/2,bin=function(f){return Math.min(half-1,Math.round(f*N/sr));};
+  var k6=bin(6000),k16=bin(Math.min(16000,sr/2-500)),k1=bin(1000),k4=bin(4000),nHF=k16-k6+1,nM=k4-k1+1;
+  var lr=new Float64Array(N),li=new Float64Array(N),rr=new Float64Array(N),ri=new Float64Array(N);
+  var prevDb=new Float64Array(half),prevIpd=new Float64Array(half),prevMid=new Float64Array(half),avg=new Float64Array(half);
+  var shim=new Float64Array(frames),warb=new Float64Array(frames),gate=new Uint8Array(frames),prevTot=0,f,k,i;
+  for(f=0;f<frames;f++){
+    var o=f*hop; for(i=0;i<N;i++){ lr[i]=L[o+i]*w[i]; rr[i]=R[o+i]*w[i]; li[i]=0; ri[i]=0; }
+    fft(lr,li); fft(rr,ri);
+    var bf=0,tot=0,wsum=0,wv=0,mf=0,all=0;
+    for(k=1;k<half;k++){ var mr=(lr[k]+rr[k])*0.5,mi=(li[k]+ri[k])*0.5,m2=mr*mr+mi*mi; avg[k]+=m2; all+=m2;
+      if(k>=k1&&k<=k4){ var dm=10*Math.log10(m2+1e-14); mf+=Math.abs(dm-prevMid[k]); prevMid[k]=dm; }
+      if(k>=k6&&k<=k16){ var db=10*Math.log10(m2+1e-14); bf+=Math.abs(db-prevDb[k]); prevDb[k]=db; tot+=m2;
+        var cr=lr[k]*rr[k]+li[k]*ri[k], ci=li[k]*rr[k]-lr[k]*ri[k], ipd=Math.atan2(ci,cr), d=ipd-prevIpd[k];
+        while(d>Math.PI)d-=2*Math.PI; while(d<-Math.PI)d+=2*Math.PI; var mm=Math.sqrt(m2); wv+=Math.abs(d)*mm; wsum+=mm; prevIpd[k]=ipd; } }
+    var totDb=10*Math.log10(tot+1e-14), allDb=10*Math.log10(all+1e-14);
+    gate[f]=(f>0 && totDb-allDb>-42 && allDb>-80)?1:0;
+    shim[f]=f>0?(bf/nHF - Math.abs(totDb-prevTot) - 0.35*(mf/nM)):0;
+    warb[f]=wsum>0?wv/wsum:0; prevTot=totDb;
+  }
+  // Gleitender Mittelwert über ~0,5 s, nur über Frames mit hörbaren Höhen
+  var win=Math.max(5,Math.round(0.5*sr/hop)),hw=win>>1;
+  var sm=function(a){ var o2=new Float64Array(a.length); for(var j=0;j<a.length;j++){ var s2=0,c2=0; for(var q=-hw;q<=hw;q++){ var t=j+q; if(t>=0&&t<a.length&&gate[t]){ s2+=a[t]; c2++; } } o2[j]=c2>win*0.5?s2/c2:NaN; } return o2; };
+  var S1=sm(shim),W1=sm(warb);
+  var pc=function(a,q){ var v=Array.prototype.filter.call(a,function(x){return isFinite(x);}).sort(function(x,y){return x-y;}); return v.length?v[Math.min(v.length-1,Math.floor(q*v.length))]:Infinity; };
+  var tS=Math.max(2.4,pc(S1,0.9)),tW=Math.max(1.05,pc(W1,0.9));
+  var g1=new Float64Array(frames),g2=new Float64Array(frames);
+  for(f=0;f<frames;f++){ g1[f]=isFinite(S1[f])&&S1[f]>tS?1+(S1[f]-tS)/0.6:0; g2[f]=isFinite(W1[f])&&W1[f]>tW?1+(W1[f]-tW)/0.25:0; }
+  var regs=toRegions(g1,0.5,0,hop,N,sr,0.5,0.5,'shimmer').concat(toRegions(g2,0.5,0,hop,N,sr,0.8,0.5,'warble'));
+  regs.forEach(function(r){ r.score=Math.min(10,r.score*3); });
+  regs.sort(function(a,b){return b.score-a.score;}); regs=regs.slice(0,14).sort(function(a,b){return a.a-b.a;});
+  res.regions=regs;
+  var flagged=0; for(f=0;f<frames;f++) if(g1[f]>0||g2[f]>0) flagged++;
+  res.stats={suspectPct:Math.round(flagged/frames*1000)/10, shimmerLevel:Math.round(pc(S1,0.5)*100)/100, warbleLevel:Math.round(pc(W1,0.5)*1000)/1000};
+  // Knackser: zweite Ableitung gegen lokalen Pegel
+  var B=256,nb=Math.floor(n/B),lev=new Float64Array(nb),x0=0,x1=0;
+  for(i=0;i<nb*B;i++){ var x=(L[i]+R[i])*0.5,d2=x-2*x1+x0; lev[(i/B)|0]+=Math.abs(d2); x0=x1; x1=x; }
+  for(i=0;i<nb;i++) lev[i]/=B;
+  x0=0;x1=0; var last=-1e9;
+  for(i=0;i<nb*B;i++){ var xx=(L[i]+R[i])*0.5,dd=Math.abs(xx-2*x1+x0); x0=x1; x1=xx; var b=(i/B)|0, ref=Math.max(lev[b],lev[Math.max(0,b-1)],lev[Math.min(nb-1,b+1)],1e-5);
+    if(dd>0.03&&dd>ref*18&&i-last>sr*0.05&&i>70&&i<nb*B-70){ var cnt=0; for(var q=i-64;q<=i+64;q++){ var m0=(L[q]+R[q])*0.5,m1=(L[q-1]+R[q-1])*0.5,m2=(L[q-2]+R[q-2])*0.5; if(Math.abs(m0-2*m1+m2)>0.3*dd) cnt++; }
+      if(cnt<=4){ res.clicks.push(i/sr); last=i; if(res.clicks.length>=60) break; } } }
+  // Höhen-Grenze (z. B. 16 kHz bei komprimierter/KI-Quelle)
+  var ref=0,c=0; for(k=k1;k<=k4;k++){ ref+=10*Math.log10(avg[k]/frames+1e-20); c++; } ref/=c;
+  for(k=half-2;k>bin(8000);k--){ var lv=10*Math.log10(avg[k]/frames+1e-20); if(lv>ref-60){ res.cutoff=Math.round(k*sr/N); break; } }
+  return res;
+}
+/* ---------- KI-Artefakte: Glätter (spektrales Entglitzern in Mitte/Seite) ---------- */
+function smoothHF(L,R,sr,o){
+  if(o.regions&&o.regions.length&&!o._seg){ var n0=L.length,pad=Math.round(sr*0.6),segs=[],tot=0;
+    o.regions.forEach(function(r){ var a=Math.max(0,Math.round(r[0]*sr)-pad),b=Math.min(n0,Math.round(r[1]*sr)+pad); if(b-a<64) return;
+      if(segs.length&&a<=segs[segs.length-1][1]) segs[segs.length-1][1]=Math.max(segs[segs.length-1][1],b); else segs.push([a,b]); });
+    segs.forEach(function(g){ tot+=g[1]-g[0]; });
+    if(tot<n0*0.6){ var oL=new Float32Array(L),oR=new Float32Array(R);
+      segs.forEach(function(g){ var a=g[0],b=g[1],sub=smoothHF(L.subarray(a,b),R.subarray(a,b),sr,{strength:o.strength,freq:o.freq,_seg:true,
+          regions:o.regions.map(function(r){return [r[0]-a/sr,r[1]-a/sr];}).filter(function(r){return r[1]>0&&r[0]<(b-a)/sr;})});
+        oL.set(sub.L,a); oR.set(sub.R,a); });
+      if(o.clicks&&o.clicks.length) fixClicks(oL,oR,sr,o.clicks);
+      return {L:oL,R:oR}; } }
+  var N=2048,hop=1024,n=L.length,half=N/2,w=hannP(N,true),st=Math.max(0,Math.min(1,o.strength)),fs=o.freq||6000;
+  var thr=1+2.6*(1-st),floor=0.18,kS=Math.round((fs-1500)*N/sr),kE=Math.round(fs*N/sr);
+  var M=new Float32Array(n+2*N),Sd=new Float32Array(n+2*N),i;
+  for(i=0;i<n;i++){ M[i+N]=(L[i]+R[i])*0.5; Sd[i+N]=(L[i]-R[i])*0.5; }
+  function proc(X,side){
+    var out=new Float32Array(X.length),frames=Math.floor((X.length-N)/hop)+1,ring=[],f,k;
+    var g=new Float64Array(half+1),gs=new Float64Array(half+1),tmp5=new Float64Array(5);
+    function emit(fr){ var re=fr.re,im=fr.im,mg=fr.mag,t,j;
+      for(k=0;k<=half;k++){ var ramp=k<=kS?0:(k>=kE?1:(k-kS)/(kE-kS)); if(ramp===0){ g[k]=1; continue; }
+        var cnt=ring.length; for(j=0;j<cnt;j++){ var vv=ring[j].mag[k],pp=j; while(pp>0&&tmp5[pp-1]>vv){ tmp5[pp]=tmp5[pp-1]; pp--; } tmp5[pp]=vv; } var med=tmp5[cnt>>1];
+        var gg=mg[k]>1e-12?Math.min(1,thr*med/mg[k]):1; if(gg<floor)gg=floor; if(side) gg*=1-0.4*st; g[k]=1+(gg-1)*ramp; }
+      for(k=0;k<=half;k++) gs[k]=(g[Math.max(0,k-1)]+2*g[k]+g[Math.min(half,k+1)])/4;
+      for(k=0;k<=half;k++){ re[k]*=gs[k]; im[k]*=gs[k]; if(k>0&&k<half){ re[N-k]=re[k]; im[N-k]=-im[k]; } }
+      for(k=0;k<N;k++) im[k]=-im[k]; fft(re,im);
+      for(j=0;j<N;j++) out[fr.o+j]+=re[j]/N*w[j];
+    }
+    var pending=[];
+    for(f=0;f<frames;f++){ var o2=f*hop,re=new Float64Array(N),im=new Float64Array(N);
+      for(i=0;i<N;i++) re[i]=X[o2+i]*w[i]; fft(re,im);
+      var mag=new Float64Array(half+1); for(k=0;k<=half;k++) mag[k]=Math.sqrt(re[k]*re[k]+im[k]*im[k]);
+      var fr={re:re,im:im,mag:mag,o:o2}; ring.push(fr); if(ring.length>5) ring.shift(); pending.push(fr);
+      if(pending.length>2){ emit(pending.shift()); } }
+    while(pending.length){ emit(pending.shift()); if(ring.length>3) ring.shift(); }
+    return out;
+  }
+  var Mo=proc(M,false),So=proc(Sd,true),oL=new Float32Array(n),oR=new Float32Array(n);
+  for(i=0;i<n;i++){ var m=Mo[i+N],s=So[i+N]; oL[i]=m+s; oR[i]=m-s; }
+  // nur in Bereichen anwenden (weiche Übergänge)
+  if(o.regions&&o.regions.length){ var mask=new Float32Array(n),xf=Math.round(sr*0.12);
+    o.regions.forEach(function(r){ var a=Math.max(0,Math.round(r[0]*sr)),b=Math.min(n,Math.round(r[1]*sr));
+      for(var j=Math.max(0,a-xf);j<Math.min(n,b+xf);j++){ var v=j<a?(j-(a-xf))/xf:(j>=b?((b+xf)-j)/xf:1); if(v>mask[j]) mask[j]=v; } });
+    for(i=0;i<n;i++){ var mk=mask[i]; oL[i]=L[i]+(oL[i]-L[i])*mk; oR[i]=R[i]+(oR[i]-R[i])*mk; } }
+  if(o.clicks&&o.clicks.length&&!o._seg) fixClicks(oL,oR,sr,o.clicks);
+  return {L:oL,R:oR};
+}
+/* Knackser reparieren (Hermite-Brücke über ±12 Samples) */
+function fixClicks(oL,oR,sr,clicks){ var h=12,n=oL.length;
+  clicks.forEach(function(t){ var c=Math.round(t*sr),a=c-h,b=c+h; if(a<2||b>=n-2) return;
+    [oL,oR].forEach(function(x){ var p0=x[a],p1=x[b],m0=(x[a]-x[a-2])/2,m1=(x[b+2]-x[b])/2,len=b-a;
+      for(var j=1;j<len;j++){ var u=j/len,u2=u*u,u3=u2*u; x[a+j]=(2*u3-3*u2+1)*p0+(u3-2*u2+u)*m0*len+(-2*u3+3*u2)*p1+(u3-u2)*m1*len; } }); }); }
 function handle(d){
   var L=d.L,R=d.R,sr=d.sr,o=d.opts||{},res={},tr=[];
+  if(d.cmd==='artifacts') return {result:artifacts(L,R,sr),transfer:[]};
+  if(d.cmd==='smooth'){ var sres=smoothHF(L,R,sr,o); return {result:sres,transfer:[sres.L.buffer,sres.R.buffer]}; }
   if(d.lim){ res.grMin=applyLim(L,R,sr,d.lim); }
   var ld=loudness(L,R,sr); res.I=ld.I; res.Mmax=ld.Mmax; res.Smax=ld.Smax; res.LRA=ld.LRA; res.hist=ld.hist;
   var pk=0,i; for(i=0;i<L.length;i++){ var a=Math.abs(L[i]),b=Math.abs(R[i]); if(a>pk)pk=a; if(b>pk)pk=b; } res.peak=20*Math.log10(pk+1e-12);
@@ -1128,6 +1291,7 @@ function drawWave() {
     g.fillStyle = 'rgba(217,164,65,.13)'; g.fillRect(x0, RULER, x1 - x0, H);
     g.fillStyle = '#D9A441'; g.fillRect(Math.round(x0), RULER, 1, H); g.fillRect(Math.round(x1), RULER, 1, H);
     g.fillRect(x0, RULER - 3, x1 - x0, 3); }
+  drawArtMarks(g, w, t => t2x(t, w), RULER, 4);
   // Wellenform
   const spp = span * sr / w;
   if (spp < 2) {
@@ -1166,6 +1330,7 @@ function drawOverview() {
     for (let b = b0; b < b1 && b < nb; b++) { if (S.peaks.mn[b] < lo) lo = S.peaks.mn[b]; if (S.peaks.mx[b] > hi) hi = S.peaks.mx[b]; }
     g.fillRect(x, mid - hi * mid * 0.9, 1, Math.max(1, (hi - lo) * mid * 0.9)); }
   const d = n / S.track.sr, x0 = S.view.a / d * w, x1 = S.view.b / d * w;
+  drawArtMarks(g, w, t => t / d * w, 0, 3);
   g.fillStyle = 'rgba(154,223,255,.10)'; g.fillRect(x0, 0, Math.max(2, x1 - x0), h);
   g.strokeStyle = '#9ADFFF'; g.lineWidth = 1; g.strokeRect(Math.round(x0) + 0.5, 0.5, Math.max(2, x1 - x0) - 1, h - 1);
   if (S.sel) { g.fillStyle = 'rgba(154,223,255,.45)'; g.fillRect(S.sel.a / d * w, h - 3, Math.max(1, (S.sel.b - S.sel.a) / d * w), 3); }
@@ -1349,8 +1514,8 @@ function slider(parent, o) {
   const toI = v => o.log ? Math.log10(v) : v, fromI = v => o.log ? Math.pow(10, v) : v;
   inp.min = toI(o.min); inp.max = toI(o.max); inp.step = o.log ? 0.001 : o.step;
   const show = v => { out.textContent = o.fmt(v); inp.style.setProperty('--fill', ((toI(v) - toI(o.min)) / (toI(o.max) - toI(o.min)) * 100) + '%'); };
-  inp.addEventListener('input', () => { let v = fromI(+inp.value); if (o.log) v = Math.round(v); o.set(v); show(v); onParam(o.lim); });
-  inp.addEventListener('dblclick', () => { if (o.def != null) { inp.value = toI(o.def); o.set(o.def); show(o.def); onParam(o.lim); } });
+  inp.addEventListener('input', () => { let v = fromI(+inp.value); if (o.log) v = Math.round(v); o.set(v); show(v); if (!o.noParam) onParam(); });
+  inp.addEventListener('dblclick', () => { if (o.def != null) { inp.value = toI(o.def); o.set(o.def); show(o.def); if (!o.noParam) onParam(); } });
   w.refresh = () => { const v = o.get(); inp.value = toI(v); show(v); };
   w.refresh(); CTLS.push(w); parent.appendChild(w); return w;
 }
@@ -1498,7 +1663,7 @@ function drawEq() {
   const ic = document.createElement('div'); ic.className = 'row';
   checkbox(ic, 'True-Peak-Schutz (Zwischenwerte)', () => P.lim.isp, v => P.lim.isp = v); lc.appendChild(ic);
   const mc = $('#matchCtl');
-  slider(mc, { label: 'Stärke', min: 10, max: 100, step: 5, get: () => S.matchAmt, set: v => S.matchAmt = v, fmt: v => v + ' %', def: 60 });
+  slider(mc, { label: 'Stärke', min: 10, max: 100, step: 5, noParam: true, get: () => S.matchAmt, set: v => S.matchAmt = v, fmt: v => v + ' %', def: 60 });
 })();
 function compTitles() { const t = ['Bass < ' + fmtHz(P.comp.x1) + 'Hz', 'Mitten', 'Höhen > ' + fmtHz(P.comp.x2) + 'Hz']; $$('[data-ct]').forEach((e, i) => e.textContent = t[i]); }
 
@@ -1660,6 +1825,9 @@ function diagnose() {
     p => setBand(p, 0, { type: 'highpass', f: 20, q: 0.71 }), 'Low Cut 20 Hz');
   if (o.leadSil > 0.6 || o.tailSil > 2.5) add('info', 'Stille am Anfang/Ende (' + o.leadSil.toFixed(1) + ' s / ' + o.tailSil.toFixed(1) + ' s)', 'Für Streaming besser kürzen, damit der Song sofort beginnt.',
     () => opTrimSilence(), 'Stille kürzen');
+  if (S.arts && S.artsVer === S.ver) { const A = S.arts, n = A.regions.length + A.clicks.length;
+    if (n) F.push({ sev: n >= 6 ? 'warn' : 'info', title: 'Verdächtige KI-Artefakte: ' + n + ' Stelle' + (n > 1 ? 'n' : ''), text: 'Glitzern, Stereo-Flattern oder Knackser, wie sie bei KI-Musik häufig vorkommen. Die Stellen sind in der Wellenform markiert und lassen sich gezielt glätten.', nav: () => $('#artCard').scrollIntoView({ behavior: 'smooth', block: 'start' }), label: 'Zu den Stellen' });
+    if (A.cutoff && A.cutoff < 16800) add('info', 'Höhen enden bei ' + (A.cutoff / 1000).toFixed(1) + ' kHz', 'Darüber ist nichts mehr: typisch für komprimierte oder KI-erzeugte Quellen. Die Höhen nicht stark anheben, das klingt sonst künstlich.'); }
   const order = { bad: 0, warn: 1, info: 2, ok: 3 }; F.sort((a, b) => order[a.sev] - order[b.sev]);
   let score = 100; F.forEach(f => { score -= f.sev === 'bad' ? 18 : f.sev === 'warn' ? 9 : 3; });
   if (!F.length) add('ok', 'Keine Schwächen gefunden', 'Lautheit, Balance, Dynamik und Stereo liegen im gesunden Bereich. Jetzt entscheidet dein Geschmack.');
@@ -1681,7 +1849,8 @@ function renderCheck() {
     const li = document.createElement('li'); li.className = 'finding ' + f.sev;
     li.innerHTML = '<i></i><div class="ft"><b><span class="tag"></span><span class="tt"></span></b><span class="tx"></span></div>';
     li.querySelector('.tag').textContent = tags[f.sev]; li.querySelector('.tt').textContent = f.title; li.querySelector('.tx').textContent = f.text;
-    if (f.fix) { const b = document.createElement('button'); b.textContent = f.label; b.addEventListener('click', async () => { await applyFix(f); b.textContent = 'Angewendet'; b.classList.add('done'); b.disabled = true; }); li.appendChild(b); }
+    if (f.nav) { const b = document.createElement('button'); b.textContent = f.label; b.addEventListener('click', f.nav); li.appendChild(b); }
+    else if (f.fix) { const b = document.createElement('button'); b.textContent = f.label; b.addEventListener('click', async () => { await applyFix(f); b.textContent = 'Angewendet'; b.classList.add('done'); b.disabled = true; }); li.appendChild(b); }
     list.appendChild(li);
   });
   updateAIUI();
@@ -1701,7 +1870,7 @@ $('#btnFixAll').addEventListener('click', async () => {
   if (!CHECK) return; const fixes = CHECK.findings.filter(f => f.fix);
   let loud = null; for (const f of fixes) { if (/LUFS bringen/.test(f.label)) { loud = f; continue; } f.fix(P); }
   refreshAll(); onParam(); if (loud) await loud.fix(P);
-  $$('#ckList button').forEach(b => { b.textContent = 'Angewendet'; b.classList.add('done'); b.disabled = true; });
+  $$('#ckList li').forEach((li, i) => { const f = CHECK.findings[i], b = li.querySelector('button'); if (b && f && f.fix) { b.textContent = 'Angewendet'; b.classList.add('done'); b.disabled = true; } });
   status(fixes.length + ' Vorschläge angewendet. Jetzt mit Master / Original vergleichen.', 'ok', 5000);
 });
 
@@ -1720,6 +1889,7 @@ function updateAIUI() {
   else if (AI.mode === 'api') { b.textContent = 'API-Schlüssel aktiv'; b.classList.add('on'); }
   else { b.textContent = 'nicht verbunden'; b.classList.remove('on'); }
   $('#aiKeyBox').hidden = AI.mode === 'claude';
+  $('#aiMain').hidden = !AI.mode; $('#aiOff').hidden = !!AI.mode;
   $('#btnAI').disabled = !AI.mode || !S.track;
 }
 $('#btnAIKey').addEventListener('click', () => { const k = $('#aiKey').value.trim(); if (!/^sk-ant-/.test(k)) { status('Das sieht nicht wie ein Anthropic-Schlüssel aus (beginnt mit sk-ant-).', 'err'); return; }
@@ -1862,6 +2032,111 @@ $('#btnAIStop').addEventListener('click', () => AI.ctl && AI.ctl.abort());
 $('#btnAIUndo').addEventListener('click', () => { if (!AI.before) return; P = clone(AI.before); refreshAll(); onParam(); $('#btnAIUndo').hidden = true; status('Einstellungen von vor dem KI-Mastering wiederhergestellt.', 'ok'); });
 { const w = recall('aiwish'); if (w) $('#aiWish').value = w; }
 initAI();
+/* ============================ KI-Artefakte: Suche, Anzeige, Glätten ============================ */
+S.arts = null; S.artsVer = -1;
+const ART_TYPES = { shimmer: 'Glitzern', warble: 'Stereo-Flattern', click: 'Knackser' };
+const ART_COL = { shimmer: '#D9A441', warble: '#C29BFF', click: '#FF5C4D' };
+const ART = { strength: 55, freq: 6000 };
+(function artControls() {
+  const c = $('#artCtl');
+  slider(c, { label: 'Stärke', min: 10, max: 100, step: 5, noParam: true, get: () => ART.strength, set: v => ART.strength = v, fmt: v => v + ' %', def: 55, title: 'Wie stark Glitzern und Flattern geglättet werden' });
+  slider(c, { label: 'Ab Frequenz', min: 3000, max: 12000, log: true, noParam: true, get: () => ART.freq, set: v => ART.freq = v, fmt: v => fmtHz(v) + 'Hz', def: 6000, title: 'Unterhalb dieser Frequenz bleibt alles unverändert' });
+})();
+async function runArtifacts() {
+  if (!S.track) return; const ver = S.ver;
+  $('#artState').textContent = 'wird gesucht …'; $('#btnSmooth').disabled = true;
+  try {
+    const r = await DSP({ cmd: 'artifacts', sr: S.track.sr, L: S.track.L.slice(), R: S.track.R.slice() });
+    if (ver !== S.ver) return;
+    r.clicks = r.clicks || []; S.arts = r; S.artsVer = ver; renderArtifacts(); renderCheck(); drawAll();
+  } catch (e) { console.error(e); $('#artState').textContent = 'Suche fehlgeschlagen'; }
+}
+function artItems() {
+  if (!S.arts) return [];
+  const items = S.arts.regions.map(r => ({ ...r }));
+  S.arts.clicks.slice(0, 20).forEach(t => items.push({ a: t, b: t + 0.02, type: 'click', score: 8 }));
+  return items.sort((x, y) => x.a - y.a);
+}
+function renderArtifacts() {
+  const A = S.arts, list = $('#artList'); list.innerHTML = '';
+  if (!A) return;
+  const sh = A.regions.filter(r => r.type === 'shimmer').length, wb = A.regions.filter(r => r.type === 'warble').length, ck = A.clicks.length;
+  const total = sh + wb + ck;
+  $('#artState').textContent = total ? total + ' verdächtige Stellen' : 'nichts Auffälliges';
+  let txt = total ? [sh && sh + '× Glitzern/Zwitschern in den Höhen', wb && wb + '× flatterndes Stereobild', ck && ck + '× Knackser'].filter(Boolean).join(', ') + '. ' : 'Keine auffälligen Artefakt-Stellen gefunden. ';
+  if (A.cutoff && A.cutoff < 16800) txt += 'Die Höhen enden hart bei ' + (A.cutoff / 1000).toFixed(1) + ' kHz, typisch für komprimierte oder KI-erzeugte Quellen. Anheben bringt dort nichts, es klingt dann eher künstlich. ';
+  txt += 'Die Suche vergleicht jede Stelle mit dem Rest des Songs. Sie zeigt dir, wo du hinhören solltest, und ist kein Beweis.';
+  $('#artSummary').textContent = txt;
+  artItems().forEach(it => {
+    const li = document.createElement('li'), sc = Math.min(100, Math.round((it.score / 10) * 100));
+    li.innerHTML = '<span class="ty ' + it.type + '"></span><span class="mono"></span><span class="bar"><i style="width:' + sc + '%"></i></span><button>Anhören</button>';
+    li.querySelector('.ty').textContent = ART_TYPES[it.type];
+    li.querySelector('.mono').textContent = fmtTime(it.a, 1) + (it.type === 'click' ? '' : ' – ' + fmtTime(it.b, 1));
+    li.querySelector('button').addEventListener('click', () => listenAt(it));
+    list.appendChild(li);
+  });
+  $('#btnSmooth').disabled = false;
+}
+function listenAt(it) {
+  const pad = it.type === 'click' ? 0.6 : 0.5, d = duration();
+  S.sel = { a: Math.max(0, it.a - pad), b: Math.min(d, it.b + pad) };
+  S.view = { a: Math.max(0, S.sel.a - 2), b: Math.min(d, S.sel.b + 2) }; clampView();
+  S.loop = true; $('#btnLoop').setAttribute('aria-pressed', 'true'); drawAll(); play(S.sel.a);
+  status('Schleife über die Stelle. Mit „Original“ / „Master“ umschalten oder Strg+Z nach dem Glätten zum Vergleichen.', '', 4000);
+}
+$('#btnSmooth').addEventListener('click', async () => {
+  if (!S.track || !S.arts) return;
+  const scope = $('#artScope').value; let regions = null;
+  if (scope === 'regions') { regions = S.arts.regions.map(r => [r.a, r.b]); if (!regions.length && !($('#artClicks').checked && S.arts.clicks.length)) { status('Es gibt keine verdächtigen Stellen. Wähle „Ganzer Song“ oder eine Auswahl.'); return; } if (!regions.length) regions = [[0, 0]]; }
+  else if (scope === 'sel') { if (!S.sel) { status('Bitte zuerst in der Wellenform einen Bereich ziehen.'); return; } regions = [[S.sel.a, S.sel.b]]; }
+  stopPlayback(); $('#btnSmooth').disabled = true; status('Glätte KI-Artefakte … das dauert bei einem ganzen Song ein paar Sekunden.', 'busy');
+  try {
+    const r = await DSP({ cmd: 'smooth', sr: S.track.sr, L: S.track.L.slice(), R: S.track.R.slice(),
+      opts: { strength: ART.strength / 100, freq: ART.freq, regions, clicks: $('#artClicks').checked ? S.arts.clicks : null } });
+    commit(r.L, r.R, 'KI-Artefakte geglättet (' + ART.strength + ' %, ab ' + fmtHz(ART.freq) + 'Hz)', S.sel, S.cursor);
+    runArtifacts();
+  } catch (e) { console.error(e); status('Glätten fehlgeschlagen: ' + e.message, 'err'); }
+  finally { $('#btnSmooth').disabled = false; }
+});
+function drawArtMarks(g, w, map, y, h) {
+  if (!S.arts || S.artsVer !== S.ver) return;
+  S.arts.regions.forEach(r => { const x0 = map(r.a), x1 = map(r.b); if (x1 < 0 || x0 > w) return; g.fillStyle = ART_COL[r.type]; g.globalAlpha = 0.85; g.fillRect(x0, y, Math.max(2, x1 - x0), h); g.globalAlpha = 0.07; g.fillRect(x0, y + h, Math.max(2, x1 - x0), 999); g.globalAlpha = 1; });
+  g.fillStyle = ART_COL.click; S.arts.clicks.forEach(t => { const x = map(t); if (x >= 0 && x <= w) g.fillRect(Math.round(x), y, 2, h + 6); });
+}
+
+/* ============================ Feedback ============================ */
+const FB = { stars: 0, addr: 'deepstructure846@gmail.com' };
+(function stars() { const box = $('#fbStars'); for (let i = 1; i <= 5; i++) { const b = document.createElement('button'); b.type = 'button'; b.textContent = '★'; b.setAttribute('role', 'radio'); b.setAttribute('aria-label', i + ' von 5');
+  b.addEventListener('click', () => { FB.stars = i; $$('#fbStars button').forEach((x, j) => x.setAttribute('aria-checked', j < i ? 'true' : 'false')); updateMail(); }); box.appendChild(b); } })();
+function feedbackText() {
+  const lines = ['Feedback zum Deep Structure Mastering Studio', '', 'Bewertung: ' + (FB.stars ? '★'.repeat(FB.stars) + '☆'.repeat(5 - FB.stars) + ' (' + FB.stars + '/5)' : 'keine'),
+    'Name: ' + ($('#fbName').value.trim() || '–'), 'Musik: ' + ($('#fbGenre').value.trim() || '–'), '', 'Was gefällt:', $('#fbGood').value.trim() || '–', '', 'Was stört / fehlt / unklar:', $('#fbBad').value.trim() || '–'];
+  if ($('#fbTech').checked) {
+    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: ' + (window.claude ? 'Claude' : location.hostname || 'lokal'));
+    if (S.track && !S.track.demo) lines.push('Song: ' + S.track.name + ' · ' + (S.track.sr / 1000) + ' kHz · ' + fmtTime(duration(), 0));
+    if (CHECK) lines.push('Song-Check: ' + CHECK.score + '/100 · ' + CHECK.findings.map(f => f.title).join(' | '));
+    if (S.arts) lines.push('Artefakte: ' + S.arts.regions.length + ' Stellen, ' + S.arts.clicks.length + ' Knackser, Höhen bis ' + (S.arts.cutoff || '?') + ' Hz');
+    if (S.orig) lines.push('Original: ' + nf(S.orig.I, 1) + ' LUFS, TP ' + nf(S.orig.TP, 1) + ', LRA ' + nf(S.orig.LRA, 1));
+    if (S.master) lines.push('Master: ' + nf(S.master.I, 1) + ' LUFS, TP ' + nf(S.master.TP, 1) + ', LRA ' + nf(S.master.LRA, 1));
+    lines.push('Einstellungen: ' + JSON.stringify(P));
+  }
+  return lines.join('\n');
+}
+function updateMail() {
+  let body = feedbackText(); if (body.length > 1800) body = body.slice(0, 1800) + '\n…';
+  $('#fbMail').href = 'mailto:' + FB.addr + '?subject=' + encodeURIComponent('Feedback Mastering Studio' + (FB.stars ? ' (' + FB.stars + '/5)' : '')) + '&body=' + encodeURIComponent(body);
+}
+['#fbGood', '#fbBad', '#fbName', '#fbGenre', '#fbTech'].forEach(s => $(s).addEventListener('input', updateMail));
+$('#fbTech').addEventListener('change', updateMail);
+$('#btnFeedback').addEventListener('click', () => { updateMail(); $('#fbModal').hidden = false; $('#fbGood').focus(); });
+$('#fbCancel').addEventListener('click', () => { $('#fbModal').hidden = true; });
+$('#fbModal').addEventListener('click', e => { if (e.target.id === 'fbModal') $('#fbModal').hidden = true; });
+$('#fbMail').addEventListener('click', () => { updateMail(); setTimeout(() => status('Dein E-Mail-Programm sollte sich jetzt öffnen. Falls nicht: „Text kopieren“.', '', 6000), 300); });
+$('#fbCopy').addEventListener('click', async () => {
+  const t = 'An: ' + FB.addr + '\n\n' + feedbackText();
+  try { await navigator.clipboard.writeText(t); status('Feedback-Text kopiert. Jetzt z. B. in WhatsApp oder eine E-Mail einfügen.', 'ok', 5000); }
+  catch (e) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); status('Feedback-Text kopiert.', 'ok'); } catch (e2) { status('Kopieren nicht möglich.', 'err'); } ta.remove(); }
+});
 /* ============================ Offline-Rendern & Messung ============================ */
 const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 async function measureLatency(p, sr) {
@@ -1890,7 +2165,7 @@ async function analyzeOrig() {
   if (!S.track) return; const ver = S.ver;
   try {
     const r = await DSP({ cmd: 'analyze', sr: S.track.sr, L: S.track.L.slice(), R: S.track.R.slice(), opts: { tp: true, spectrum: true, diag: true } });
-    if (ver !== S.ver) return; S.orig = r; applyMonitor(); renderAnalysis(); drawSpec(); renderCheck(); scheduleMeasure(50);
+    if (ver !== S.ver) return; S.orig = r; applyMonitor(); renderAnalysis(); drawSpec(); renderCheck(); scheduleMeasure(50); runArtifacts();
     if (S.autoCheck) { S.autoCheck = false; showTab('check'); }
   } catch (e) { console.error(e); status('Messung fehlgeschlagen: ' + e.message, 'err'); }
 }
@@ -2133,7 +2408,7 @@ $('#btnCopyReport').addEventListener('click', async () => {
   catch (e) { const ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); status('Bericht kopiert.', 'ok'); } catch (e2) { status('Kopieren nicht möglich.', 'err'); } ta.remove(); }
 });
 document.addEventListener('keydown', e => {
-  const tg = e.target; if (tg.matches('input[type=text],input[type=number],textarea,select') || !$('#expModal').hidden) { if (e.key === 'Escape') $('#expModal').hidden = true; return; }
+  const tg = e.target; if (tg.matches('input[type=text],input[type=number],input[type=password],textarea,select') || !$('#expModal').hidden || !$('#fbModal').hidden) { if (e.key === 'Escape') { $('#expModal').hidden = true; $('#fbModal').hidden = true; } return; }
   const k = e.key.toLowerCase(), mod = e.ctrlKey || e.metaKey;
   if (k === ' ' && !tg.matches('button')) { e.preventDefault(); togglePlay(); }
   else if (mod && k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }

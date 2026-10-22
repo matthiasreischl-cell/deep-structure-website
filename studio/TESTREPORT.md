@@ -175,3 +175,20 @@ Beim fs/4-Testsignal liegt der theoretisch exakte True Peak bei 0,0 dBTP (Amplit
 | „3. DEIN ABER“ (207,6 s) | 173,94 BPM (halb: 86,97), Sicherheit 0,89, 13 Abschnitte, deren Pegelsprünge mit der Wellenform übereinstimmen. Analyse etwa 3,5 s. |
 
 Nicht automatisch prüfbar: Ob das erkannte Tempo dem entspricht, was der Musiker als Grundschlag empfindet (halb oder doppelt), und ob die Abschnittsnamen musikalisch passen. Dafür gibt es ÷ 2, × 2, das Tempo-Eingabefeld, die Taktverschiebung und den Metronom-Klick. Der GDScript-Code wurde nicht in Godot ausgeführt (keine Godot-Installation in der Testumgebung).
+
+## 9. Nachtrag 1.6.0: Drum-Reparatur
+
+| Prüfung | Ergebnis |
+|---|---|
+| Testmix 80/96/128 BPM (Kick mit Tonhöhenabfall, Snare mit metallischem Nachklingen bei 3,4 und 5,9 kHz, HiHats, Bass-Töne, Ton mit Vibrato wie Gesang) | Kicks 100 % gefunden und 100 % richtig. Bass-Töne werden nicht als Kick gezählt. Snares 100 % gefunden und 96–100 % richtig. |
+| Dasselbe bei 174 BPM (als 87 erkannt) | Kicks 100 %. Snares 75 % gefunden und 100 % richtig. |
+| Reiner Drum-Loop ohne andere Instrumente | 16 von 16 Kicks, 16 von 16 Snares |
+| Metall-Entferner (60 %) | Nachklingen −5,5 dB, Obertöne des Gesangstons ±0,11 dB |
+| Kick unterlegen, Original normal und mit gedrehter Polarität | +3,4 dB bzw. +3,1 dB im Kick-Bereich, keine Auslöschung |
+| Alle Regler aus | Bitgenau unverändert |
+| Nur Auswahl | Außerhalb bitgenau unverändert |
+| Ton ohne Schläge, Metall und Sand auf 100 % | Unverändert (STFT verlustfrei) |
+| Browser: Suchen, Anwenden, erneut Anwenden, Vorher/Nachher, Rückgängig | Funktioniert. Erneutes Anwenden ersetzt den Schritt. Rückgängig führt exakt zum Original. |
+| „3. DEIN ABER“ | 200 Kicks und 101 Snares, in festen Rasterpositionen, also ein plausibles Drum-Muster. Suche etwa 14 s, Reparatur etwa 20 s. Mit den Grundeinstellungen ändern sich die Höhen über 3 kHz deutlich (Differenz 12 dB unter den Höhen), ihr Pegel bleibt gleich (+0,2 dB). |
+
+Nicht automatisch prüfbar: ob die Reparatur besser *klingt*. Das entscheidet der Hörvergleich mit „Vorher/Nachher“. Die Snare-Erkennung bei sehr schnellen Songs (über 160 BPM) findet nicht jeden Schlag.

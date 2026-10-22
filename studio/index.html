@@ -304,6 +304,14 @@ a.btn{text-decoration:none}
 .gm-sections button{min-height:28px;padding:0 10px}
 .gm-inc{gap:8px 18px}
 .gm-out{width:100%;min-height:180px;max-height:340px;resize:vertical;font:12px/1.45 var(--f-mono);color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:10px;white-space:pre;overflow:auto}
+/* Drums */
+.dr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.dr-wide{grid-column:1/-1}
+.dr-layer{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 20px}
+.dr-layer>div{display:flex;flex-direction:column;gap:8px}
+.card h3 label.chk{font:inherit;letter-spacing:inherit;text-transform:inherit}
+.dr-apply{margin-top:12px;align-items:flex-end}
+#drAB[aria-pressed=true]{background:var(--gold);color:#1a1205;border-color:var(--gold)}
 </style>
 <div class="app" id="app">
   <div class="backdrop" aria-hidden="true"></div>
@@ -383,6 +391,7 @@ a.btn{text-decoration:none}
         <button role="tab" data-tab="sat" aria-selected="false"><span class="dot" data-dot="sat"></span>Sättigung</button>
         <button role="tab" data-tab="stereo" aria-selected="false"><span class="dot" data-dot="stereo"></span>Stereo</button>
         <button role="tab" data-tab="lim" aria-selected="false"><span class="dot" data-dot="lim"></span>Limiter</button>
+        <button role="tab" data-tab="drums" aria-selected="false">Drums</button>
         <button role="tab" data-tab="region" aria-selected="false">Bereich</button>
         <button role="tab" data-tab="ref" aria-selected="false">Referenz</button>
         <button role="tab" data-tab="ana" aria-selected="false">Analyse</button>
@@ -488,6 +497,39 @@ a.btn{text-decoration:none}
         </div>
       </div>
 
+
+      <div class="panel" data-panel="drums" hidden>
+        <div class="phead"><p>Repariert typische KI-Drums direkt im fertigen Song: metallische Resonanzen, sandige Höhen, abgehackte Ausklänge und dumpfe Schläge. Erst Schläge suchen, dann einstellen, anwenden und mit „Vorher/Nachher“ vergleichen. Gesang und Instrumente zwischen den Schlägen bleiben so weit wie möglich unberührt.</p>
+          <label class="field" style="flex:0 1 190px"><span>Erkennung</span><select id="drSens"><option value="0.3">Zurückhaltend</option><option value="0.5" selected>Normal</option><option value="0.75">Empfindlich</option></select></label>
+          <button id="drScan">Schläge suchen</button></div>
+        <p class="hint" id="drInfo">Noch keine Schläge gesucht.</p>
+        <div class="dr-grid">
+          <div class="card"><h3><label class="chk"><input type="checkbox" id="drMetalOn" checked>Metallklang entfernen</label></h3><div id="drMetalCtl"></div>
+            <label class="chk"><input type="checkbox" id="drMetalHits" checked>Nur bei Schlägen</label>
+            <p class="hint">Senkt schmale Frequenzen, die bei einem Schlag neu aufklingen und nachschwingen. Stehende Töne (Gesang, Akkorde) werden erkannt und geschont.</p></div>
+          <div class="card"><h3><label class="chk"><input type="checkbox" id="drSandOn" checked>Sand glätten</label></h3><div id="drSandCtl"></div>
+            <p class="hint">Glättet die körnige Feinstruktur in den Höhen von Snare, HiHats und Becken. Die Lautstärke der Höhen bleibt erhalten.</p></div>
+          <div class="card"><h3><label class="chk"><input type="checkbox" id="drFillOn" checked>Abgehackte Ausklänge füllen</label></h3><div id="drFillCtl"></div>
+            <p class="hint">Gibt nur den Schlägen einen kurzen, hellen Raum. Abrupt endende Snares und HiHats klingen dadurch natürlich aus.</p></div>
+          <div class="card"><h3><label class="chk"><input type="checkbox" id="drPunchOn">Punch</label></h3><div id="drPunchCtl"></div>
+            <p class="hint">Betont den Anschlag von Kick (Bass) und Snare/HiHat (Höhen). „Ausklang kürzen“ macht die Höhen nach dem Schlag trockener.</p></div>
+          <div class="card dr-wide"><h3>Saubere Schläge unterlegen</h3>
+            <div class="dr-layer">
+              <div><label class="chk"><input type="checkbox" id="drKickOn">Kick</label><div id="drKickCtl"></div>
+                <div class="row"><button id="drKickPlay">Kick anhören</button><button id="drKickLoad">Eigenes Sample …</button><span class="hint" id="drKickSmp"></span></div></div>
+              <div><label class="chk"><input type="checkbox" id="drSnareOn">Snare</label><div id="drSnareCtl"></div>
+                <div class="row"><button id="drSnarePlay">Snare anhören</button><button id="drSnareLoad">Eigenes Sample …</button><span class="hint" id="drSnareSmp"></span></div></div>
+            </div>
+            <p class="hint">Legt unter jeden erkannten Schlag einen sauberen Klang, leise dazugemischt, zeitlich und in der Phase ausgerichtet. Die Tonhöhe wird aus dem Song gemessen. Bei Songs mit 808-Bass prüfe die Kick-Marken in der Wellenform: Die Erkennung kann dort Bass-Töne erwischen.</p>
+            <input type="file" id="drSmpIn" accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a" hidden></div>
+        </div>
+        <div class="row dr-apply">
+          <label class="field" style="flex:0 1 180px"><span>Bereich</span><select id="drScope"><option value="all">Ganzer Song</option><option value="sel">Nur Auswahl</option></select></label>
+          <button class="primary" id="drApply">Anwenden</button>
+          <button id="drAB" aria-pressed="false" disabled title="Zwischen Original und reparierter Fassung umschalten, ohne die Wiedergabe zu unterbrechen">Vorher / Nachher</button>
+          <span class="hint" id="drReport"></span>
+        </div>
+      </div>
       <div class="panel" data-panel="region" hidden>
         <div class="phead"><p>Werkzeuge für die markierte Stelle in der Wellenform. Erst einen Bereich ziehen, dann anwenden. Alles lässt sich mit Rückgängig zurücknehmen.</p></div>
         <div class="grid2">
@@ -1039,10 +1081,197 @@ function gameData(L,R,sr,o){
     sections:sections,lowHits:lowHits,midHits:midHits,highHits:highHits,levelCurve:loud,levelStep:stepF/fr,dur:n/sr,fr:fr,ratio:ratio};
 }
 var GD_OFFSET=0.61;
+
+/* ---------- Drum-Reparatur: Erkennung im fertigen Mix, Unterlegen, Metall, Sand, Punch ---------- */
+function hpRBJ(fs,fc,Q){ var w=2*Math.PI*fc/fs,cs=Math.cos(w),al=Math.sin(w)/(2*Q),a0=1+al; return [(1+cs)/2/a0,-(1+cs)/a0,(1+cs)/2/a0,-2*cs/a0,(1-al)/a0]; }
+/* Nullphasen-Filter (vorwärts und rückwärts), dadurch exakt zeitgleich mit dem Original */
+function zpf(x,coefs){ var y=new Float64Array(x.length),i,n=x.length; y.set(x); coefs.forEach(function(c){ biq(y,c,y); for(i=0;i<n>>1;i++){ var t=y[i]; y[i]=y[n-1-i]; y[n-1-i]=t; } biq(y,c,y); for(i=0;i<n>>1;i++){ var t2=y[i]; y[i]=y[n-1-i]; y[n-1-i]=t2; } }); return y; }
+function bandLP(x,sr,f){ return zpf(x,[lpCoef(sr,f,0.7071)]); }
+function bandHP(x,sr,f){ return zpf(x,[hpRBJ(sr,f,0.7071)]); }
+function bandBP(x,sr,f1,f2){ return zpf(x,[hpRBJ(sr,f1,0.7071),lpCoef(sr,f2,0.7071)]); }
+function envDb(x,H,W){ W=Math.max(H,W||H); var m=Math.floor(x.length/H),e=new Float64Array(m),c=new Float64Array(x.length+1),i; for(i=0;i<x.length;i++) c[i+1]=c[i]+x[i]*x[i];
+  for(var j=0;j<m;j++){ var b=Math.min(x.length,j*H+H),a=Math.max(0,b-W); e[j]=10*Math.log10((c[b]-c[a])/(b-a)+1e-14); } return e; }
+/* Einsätze in einem Band: Pegelanstieg in ~12 ms gegenüber den 6–20 ms davor */
+function bandOnsets(e,H,sr,o){ var n=e.length,ms=function(v){ return Math.max(1,Math.round(v*sr/1000/H)); },rise=new Float64Array(n),out=[];
+  var a1=ms(6),a2=ms(24),gap=ms(o.gapMs||90),srt=Array.prototype.slice.call(e).sort(function(a,b){return a-b;}),p95=srt[Math.floor(srt.length*0.95)],floorDb=p95-(o.rangeDb||26);
+  var fl=p95-50; for(var j=a2;j<n;j++){ var mn=1e9; for(var q=j-a2;q<=j-a1;q++){ var v=e[q]<fl?fl:e[q]; if(v<mn) mn=v; } rise[j]=Math.max(e[j],fl)-mn; }
+  var last=-1e9,w=ms(10);
+  for(j=a2;j<n-w;j++){ if(rise[j]<o.thr) continue; var pk0=e[j]; for(q=j;q<Math.min(n,j+ms(15));q++) if(e[q]>pk0) pk0=e[q]; if(pk0<floorDb) continue; var isMax=true; for(q=Math.max(0,j-w);q<=j+w;q++) if(rise[q]>rise[j]||(rise[q]===rise[j]&&q<j)){ isMax=false; break; } if(!isMax) continue;
+    var pk=j; for(q=j;q<Math.min(n,j+ms(15));q++) if(e[q]>e[pk]) pk=q;
+    var on=j; for(q=j;q>=Math.max(0,j-a2);q--){ if(e[q]<e[pk]-12){ on=q+1; break; } on=q; }
+    if(on-last<gap){ if(out.length&&rise[j]>out[out.length-1].rise){ out[out.length-1]={f:on,rise:rise[j],lvl:e[pk]-p95}; last=on; } continue; }
+    out.push({f:on,rise:rise[j],lvl:e[pk]-p95}); last=on; }
+  return out; }
+function drumDetect(L,R,sr,o){
+  o=o||{}; var n=L.length,i,m=new Float64Array(n); for(i=0;i<n;i++) m[i]=(L[i]+R[i])*0.5;
+  var H=Math.max(16,Math.round(sr*0.001)), sens=o.sens!=null?o.sens:0.5;
+  var kb0=bandLP(m,sr,110),kb=new Float64Array(n),w0=2*Math.PI*70/sr; for(i=0;i<n;i++){ var dv=(kb0[Math.min(n-1,i+1)]-kb0[Math.max(0,i-1)])/(2*w0); kb[i]=Math.sqrt(kb0[i]*kb0[i]+dv*dv); }
+  var sb=bandBP(m,sr,1200,5000), hb=bandHP(m,sr,7000), bb=bandBP(m,sr,150,350);
+  var ms1=sr/1000,eK=envDb(kb,H,Math.round(10*ms1)),eS=envDb(sb,H,Math.round(4*ms1)),eH=envDb(hb,H,Math.round(3*ms1)),eB=envDb(bb,H,Math.round(8*ms1));
+  var kick=bandOnsets(eK,H,sr,{thr:10-6*sens,gapMs:110,rangeDb:10+8*sens}), snr=bandOnsets(eS,H,sr,{thr:9-6*sens,gapMs:110,rangeDb:20+8*sens});
+  // Snare von HiHat und Stimme trennen: Körper (150–350 Hz) steigt mit an, 1,2–5 kHz nicht deutlich schwächer als >7 kHz
+  var msF=function(v){ return Math.max(1,Math.round(v*sr/1000/H)); }, riseAt=function(e,f,win){ var mx=-1e9,mn=1e9; for(var q=Math.max(0,f-msF(24));q<=f-msF(6);q++) if(e[q]<mn) mn=e[q]; for(q=f;q<Math.min(e.length,f+msF(win||15));q++) if(e[q]>mx) mx=e[q]; return mx-mn; };
+  var eM1=envDb(bandBP(m,sr,350,1000),H,Math.round(5*ms1)),eM2=envDb(bandBP(m,sr,1000,3000),H,Math.round(4*ms1)),eM3=envDb(bandBP(m,sr,3000,6000),H,Math.round(3*ms1));
+  /* Snare/Clap: breitbandiger Einsatz, d. h. gleichzeitiger Anstieg in mindestens 4 von 5 Bändern inkl. Körper */
+  var bbCount=function(f,thr){ var c=0; [eB,eM1,eM2,eM3,eH].forEach(function(e,ix){ if(riseAt(e,f,ix===0?60:20)>=thr) c++; }); return c; };
+  snr.forEach(function(h){ h.rs=[riseAt(eB,h.f,60),riseAt(eM1,h.f,20),riseAt(eM2,h.f,20),riseAt(eM3,h.f,20),riseAt(eH,h.f,20)].map(function(v){return Math.round(v);}); });
+  var snrAll=snr.slice();
+  snr=snr.filter(function(h){ h.body=riseAt(eB,h.f,60); h.bb=bbCount(h.f,6-2*sens); return h.bb>=4&&h.body>=4-2*sens; });
+  var hats=bandOnsets(eH,H,sr,{thr:12-6*sens,gapMs:45,rangeDb:24});
+  var beats=null; if(o.grid&&o.beats&&o.beats.length>4){ beats=o.beats; }
+  var onGrid=function(t){ if(!beats) return true; var bs=(beats[beats.length-1]-beats[0])/(beats.length-1),st=bs/4,ph=(t-beats[0])/st,d=Math.abs(ph-Math.round(ph))*st; return d<=Math.min(0.035,st*0.3); };
+  var toT=function(h){ return {t:h.f*H/sr,s:Math.max(0,Math.min(1,(h.lvl+24)/24)),rise:Math.round(h.rise*10)/10}; };
+  /* Kick vs. Bass-Ton: eine Kick fällt in der Tonhöhe (Nulldurchgänge zu Beginn dichter als danach) */
+  var zc=function(a,b){ a=Math.max(1,a); b=Math.min(n,b); var c=0; for(var q=a;q<b;q++) if((kb0[q]>=0)!==(kb0[q-1]>=0)) c++; return c/Math.max(1,b-a); };
+  kick=kick.filter(function(h){ var s0=h.f*H, z1=zc(s0,s0+Math.round(0.035*sr)), z2=zc(s0+Math.round(0.06*sr),s0+Math.round(0.14*sr)); h.drop=z2>0?z1/z2:2; return h.drop>=1.18; });
+  /* Snares liegen im Takt fast immer an denselben Stellen: Kandidaten an Rasterplätzen behalten, die regelmäßig breitbandige Schläge haben */
+  var pkAt=function(e,f){ var mx=-1e9; for(var q=f;q<Math.min(e.length,f+msF(25));q++) if(e[q]>mx) mx=e[q]; return mx; };
+  var kF0=kick.map(function(h){return h.f;}), nearKick=function(f){ return kF0.some(function(q){ return Math.abs(q-f)<=msF(25); }); };
+  snr.forEach(function(h){ h.sc=(riseAt(eM1,h.f,20)+riseAt(eM2,h.f,20)+riseAt(eM3,h.f,20))/3+0.5*h.body; h.nk=nearKick(h.f); if(h.nk){ var bal=Math.max(pkAt(eM2,h.f),pkAt(eM3,h.f))-pkAt(eK,h.f); h.bal=bal; if(bal<-15) h.sc=0; else if(bal<-6) h.sc*=0.5; } });
+  snr=snr.filter(function(h){ return h.sc>0; });
+  if(o.beats&&o.beats.length>16&&snr.length>8){ var bts=o.beats,bsec=(bts[bts.length-1]-bts[0])/(bts.length-1),slots=[];
+    for(var z=0;z<16;z++) slots.push({n:0,s:0});
+    snr.forEach(function(h){ var q=(h.f*H/sr-bts[0])/(bsec/4),r=Math.round(q); h.slot=Math.abs(q-r)<0.3?((r%16)+16)%16:-1; if(h.slot>=0){ slots[h.slot].n++; slots[h.slot].s+=h.sc; } });
+    var barsN=(bts.length/4), mxS=0; slots.forEach(function(sl){ sl.m=sl.n?sl.s/sl.n:0; if(sl.n>=barsN*0.2&&sl.m>mxS) mxS=sl.m; });
+    snr=snr.filter(function(h){ if(h.slot<0) return h.sc>=1.3*mxS; var sl=slots[h.slot]; return (sl.n>=barsN*0.2&&sl.m>=0.7*mxS&&h.sc>=0.5*mxS)||h.sc>=1.3*mxS; }); }
+  else snr=snr.filter(function(h){ return !nearKick(h.f)||h.sc>=15; });
+  var snF=snr.map(function(h){return h.f;}); kick=kick.filter(function(h){ return !snF.some(function(f){ return Math.abs(f-h.f)<=Math.round(25*ms1/H); })||h.rise>=riseAt(eB,h.f)+6; });
+  var K=kick.map(toT).filter(function(h){ return onGrid(h.t); }), Sn=snr.map(toT).filter(function(h){ return onGrid(h.t); });
+  var Ht=hats.map(toT);
+  if(o.debug) return {kicks:K,snares:Sn,hats:Ht,H:H,dbgS:snrAll.map(function(h){ return [h.f*H/sr,h.rs.join(","),h.nk,h.bal,h.sc]; })};
+  return {kicks:K,snares:Sn,hats:Ht,H:H};
+}
+
+/* Klangerzeuger für saubere Ersatz-Schläge (deterministisch) */
+function synthKick(sr,f0,len){ var d=0.22+0.5*len,n=Math.round(d*sr),x=new Float32Array(n),ph=0,r=rng01(11),i,lp=0;
+  for(i=0;i<n;i++){ var t=i/sr,f=f0*(1+2.2*Math.exp(-t/0.018)); ph+=2*Math.PI*f/sr; var a=Math.exp(-t/(0.07+0.22*len))*(1-Math.exp(-t/0.0004));
+    var nz=r()*2-1; lp+=0.35*(nz-lp); x[i]=a*Math.sin(ph)+0.22*(nz-lp)*Math.exp(-t/0.0025); }
+  return normPk(x); }
+function synthSnare(sr,body,tone,len){ var d=0.16+0.35*len,n=Math.round(d*sr),x=new Float32Array(n),r=rng01(23),i;
+  var nz=new Float64Array(n); for(i=0;i<n;i++) nz[i]=r()*2-1;
+  var hpN=zpf(nz,[hpRBJ(sr,1200+800*tone,0.7071)]), lpN=zpf(hpN,[lpCoef(sr,Math.min(sr*0.45,5000+9000*tone),0.7071)]);
+  for(i=0;i<n;i++){ var t=i/sr, att=1-Math.exp(-t/0.0005), bd=(Math.sin(2*Math.PI*body*t)*Math.exp(-t/0.045)+0.5*Math.sin(2*Math.PI*body*1.47*t)*Math.exp(-t/0.03))*att;
+    x[i]=0.55*bd+1.6*lpN[i]*Math.exp(-t/(0.045+0.16*len))*att; }
+  return normPk(x); }
+function rng01(seed){ var s=seed>>>0||1; return function(){ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+function normPk(x){ var m=0,i; for(i=0;i<x.length;i++) m=Math.max(m,Math.abs(x[i])); if(m>0) for(i=0;i<x.length;i++) x[i]/=m; return x; }
+function resampleLin(x,from,to){ if(from===to) return x; var r=from/to,n=Math.floor(x.length/r),y=new Float32Array(n); for(var i=0;i<n;i++){ var p=i*r,a=Math.floor(p),f=p-a; y[i]=x[a]*(1-f)+(a+1<x.length?x[a+1]:0)*f; } return y; }
+function zcFreq(x,a,b,sr){ a=Math.max(1,a); b=Math.min(x.length,b); var c=0; for(var q=a;q<b;q++) if((x[q]>=0)!==(x[q-1]>=0)) c++; return c*sr/2/Math.max(1,b-a); }
+function median(a){ if(!a.length) return 0; var v=a.slice().sort(function(x,y){return x-y;}); return v[v.length>>1]; }
+
+/* Kleiner Raum (Freeverb-Prinzip) für abgehackte Ausklänge */
+function roomVerb(x,sr,size,damp){ var sc=sr/44100,combs=[1116,1188,1277,1356,1422,1491,1557,1617],aps=[556,441,341,225],n=x.length,outs=[];
+  [0,23].forEach(function(spread){ var y=new Float64Array(n),fb=0.7+0.27*size,d1=damp,d2=1-damp;
+    combs.forEach(function(L0){ var L=Math.round((L0+spread)*sc*(0.45+0.55*size)),buf=new Float64Array(L),p=0,st=0;
+      for(var i=0;i<n;i++){ var o=buf[p]; st=o*d2+st*d1; buf[p]=x[i]*0.015+st*fb; if(++p>=L) p=0; y[i]+=o; } });
+    aps.forEach(function(L0){ var L=Math.round((L0+spread)*sc),buf=new Float64Array(L),p=0;
+      for(var i=0;i<n;i++){ var b=buf[p],o=-y[i]+b; buf[p]=y[i]+b*0.5; if(++p>=L) p=0; y[i]=o; } });
+    outs.push(y); });
+  return outs; }
+
+function drumRepair(L,R,sr,o){
+  o=o||{}; var n=L.length,i,j,oL=new Float32Array(L),oR=new Float32Array(R),rep={};
+  var any=(o.kick&&o.kick.on)||(o.snare&&o.snare.on)||(o.metal&&o.metal.on)||(o.sand&&o.sand.on)||(o.fill&&o.fill.on)||(o.punch&&o.punch.on);
+  if(!any) return {L:oL,R:oR,report:{changed:false}};
+  var det=o.det||drumDetect(L,R,sr,o), on=function(h){ return Math.round(h.t*sr); };
+  var K=det.kicks||[],Sn=det.snares||[],Ht=det.hats||[],all=K.concat(Sn,Ht).map(on).sort(function(a,b){return a-b;});
+  var ms=sr/1000;
+  /* 1  Punch: Anschlag betonen (Bass- und Höhenband), Ausklang in den Höhen kürzen */
+  if(o.punch&&o.punch.on&&(o.punch.att||o.punch.sus)){
+    var att=db2gW(o.punch.att||0)-1,sus=db2gW(-(o.punch.sus||0))-1;
+    var gl=new Float32Array(n),gh=new Float32Array(n),shapeA=function(g,s0,amt){ for(var q=0;q<Math.round(22*ms);q++){ var t=q/ms,e=t<1?t:(t<7?1:Math.max(0,1-(t-7)/15)); var k=s0+q; if(k>=0&&k<n&&amt*e>g[k]) g[k]=amt*e; } };
+    K.forEach(function(h){ shapeA(gl,on(h),att); }); Sn.concat(Ht).forEach(function(h){ shapeA(gh,on(h),att); });
+    var hs=Sn.concat(Ht).map(on).sort(function(a,b){return a-b;});
+    if(sus<0) hs.forEach(function(s0,ix){ var nx=ix+1<hs.length?hs[ix+1]:n, a=s0+Math.round(45*ms),b=Math.min(nx-Math.round(2*ms),s0+Math.round(400*ms)),r=Math.round(25*ms);
+      for(var k=a;k<b;k++){ var e=Math.min(1,(k-a)/r,(b-k)/r); gh[k]=Math.min(gh[k],sus*e); } });
+    [oL,oR].forEach(function(x){ var lo=zpf(x,[lpCoef(sr,150,0.7071)]),hi0=zpf(x,[lpCoef(sr,1800,0.7071)]);
+      for(var k=0;k<n;k++){ x[k]+=gl[k]*lo[k]+gh[k]*(x[k]-hi0[k]); } });
+  }
+  /* 2+3  Metallklang (schmale nachklingende Spitzen) und Sand (körnige Feinstruktur) im STFT */
+  var doM=o.metal&&o.metal.on&&o.metal.amt>0, doS=o.sand&&o.sand.on&&o.sand.amt>0;
+  if(doM||doS){
+    var N=1024,hop=256,half=N/2,w=hannP(N,true),frames=Math.ceil((n+N)/hop)+1,pad=N;
+    var XL=new Float64Array(n+2*N+hop*2),XR=new Float64Array(XL.length); XL.set(oL,pad); XR.set(oR,pad);
+    var YL=new Float64Array(XL.length),YR=new Float64Array(XL.length);
+    var wM=new Float32Array(frames),wS=new Float32Array(frames),fms=hop/sr*1000;
+    var mark=function(arr,s0,a,b,ramp){ for(var f=Math.floor((s0+pad+a*ms-N/2)/hop);f<=Math.ceil((s0+pad+b*ms-N/2)/hop);f++){ if(f<0||f>=frames) continue; var tm=(f*hop+N/2-pad-s0)/ms, e=Math.min(1,(tm-a)/ramp+1,(b-tm)/ramp+1); if(e>arr[f]) arr[f]=Math.max(0,e); } };
+    all.forEach(function(s0){ mark(wM,s0,-4,180,20); mark(wS,s0,0,280,30); });
+    if(doM&&o.metal.hitsOnly===false) wM.fill(1); if(doS&&o.sand.everywhere) wS.fill(1);
+    var kLo=Math.max(2,Math.round((doM?o.metal.lo||1500:20000)*N/sr)),kHi=Math.min(half-1,Math.round((doM?o.metal.hi||12000:0)*N/sr)),kS=Math.max(2,Math.round((doS?o.sand.freq||3000:sr)*N/sr));
+    var amM=doM?o.metal.amt:0,amS=doS?o.sand.amt:0,thrM=7-3*amM,maxR=12;
+    var hist=new Float64Array(half+1),base=new Float64Array(half+1).fill(-1e10),ring=[],redPrev=new Float64Array(half+1),pref=new Float64Array(half+2);
+    var proc=function(fr){ var t=fr.t,P=fr.P,lp=fr.lp,g=new Float64Array(half+1),k;
+      for(k=0;k<=half;k++) g[k]=1;
+      if(doM&&wM[t]>0){ var prv=ring[0],nxt=ring[2];
+        for(k=kLo;k<=kHi;k++){ var ex=(fr.ex[k]+(prv?prv.ex[k]:fr.ex[k])+(nxt?nxt.ex[k]:fr.ex[k]))/3, red=Math.min(maxR,Math.max(0,ex-thrM)*(0.6+1.2*amM))*wM[t];
+          red=Math.max(red,redPrev[k]-1.2); redPrev[k]=red; hist[k]+=red; g[k]*=Math.pow(10,-red/20); } }
+      else if(doM){ for(k=kLo;k<=kHi;k++){ redPrev[k]=Math.max(0,redPrev[k]-1.2); g[k]*=Math.pow(10,-redPrev[k]/20); } }
+      if(doS&&wS[t]>0&&ring[0]&&ring[2]){ var E0=0,E1=0,a=1.5*amS*wS[t],gs=new Float64Array(half+1).fill(1);
+        for(k=kS;k<half-2;k++){ var sm=0; for(var dk=-2;dk<=2;dk++) sm+=ring[0].lp[k+dk]+lp[k+dk]+ring[2].lp[k+dk]; sm/=15; var d=lp[k]-sm;
+          gs[k]=d>0?Math.exp(-d*a):1; E0+=P[k]*g[k]*g[k]; E1+=P[k]*g[k]*g[k]*gs[k]*gs[k]; }
+        var mk=E1>0?Math.min(1.6,Math.sqrt(E0/E1)):1; for(k=kS;k<half-2;k++) g[k]*=gs[k]*mk; }
+      var gg=new Float64Array(half+1); for(k=0;k<=half;k++) gg[k]=(g[Math.max(0,k-1)]+2*g[k]+g[Math.min(half,k+1)])/4;
+      [[fr.L,YL],[fr.R,YR]].forEach(function(pr){ var re=pr[0].re,im=pr[0].im,Y=pr[1],o2=t*hop;
+        for(k=0;k<=half;k++){ re[k]*=gg[k]; im[k]*=gg[k]; if(k>0&&k<half){ re[N-k]=re[k]; im[N-k]=-im[k]; } }
+        for(k=0;k<N;k++) im[k]=-im[k]; fft(re,im); for(var q=0;q<N;q++) Y[o2+q]+=re[q]/N*w[q]*0.5; }); };
+    for(var t=0;t<frames;t++){ var o2=t*hop; if(o2+N>XL.length) break; var fr={t:t,L:{re:new Float64Array(N),im:new Float64Array(N)},R:{re:new Float64Array(N),im:new Float64Array(N)}};
+      for(i=0;i<N;i++){ fr.L.re[i]=XL[o2+i]*w[i]; fr.R.re[i]=XR[o2+i]*w[i]; } fft(fr.L.re,fr.L.im); fft(fr.R.re,fr.R.im);
+      var P=new Float64Array(half+1),lp=new Float64Array(half+1); for(k=0;k<=half;k++){ P[k]=(fr.L.re[k]*fr.L.re[k]+fr.L.im[k]*fr.L.im[k]+fr.R.re[k]*fr.R.re[k]+fr.R.im[k]*fr.R.im[k])*0.5; lp[k]=0.5*Math.log(P[k]+1e-20); }
+      fr.P=P; fr.lp=lp;
+      if(doM){ /* Anstieg gegenüber dem ruhigen Grundpegel (stehende Töne wie Gesang bleiben außen vor), dann schmale Spitzen darin */
+        var ld=new Float64Array(half+1),inc=new Float64Array(half+1); pref[0]=0;
+        for(k=0;k<=half;k++) ld[k]=10*Math.log10(P[k]+1e-20);
+        for(k=0;k<=half;k++){ var nb2=ld[k]; for(var q=Math.max(0,k-3);q<=Math.min(half,k+3);q++) if(ld[q]>nb2) nb2=ld[q]; if(!(base[k]>-1e9)) base[k]=nb2; inc[k]=ld[k]-base[k]; if(nb2<base[k]) base[k]+=0.5*(nb2-base[k]); else base[k]+=0.02*(nb2-base[k]); pref[k+1]=pref[k]+inc[k]; }
+        var ex=new Float64Array(half+1);
+        for(k=kLo;k<=kHi;k++){ var W=Math.max(3,Math.round(k*0.08)),a1=Math.max(0,k-W),b1=Math.min(half,k+W), loc=(pref[b1+1]-pref[a1]-inc[k])/(b1-a1); ex[k]=inc[k]>0?Math.min(inc[k],inc[k]-loc):0; } fr.ex=ex; }
+      ring.push(fr); if(ring.length===3){ proc(ring[1]); ring.shift(); } }
+    if(ring.length===2){ var last=ring[1]; ring=[ring[0],last,null]; proc(last); }
+    for(i=0;i<n;i++){ oL[i]=YL[i+pad]; oR[i]=YR[i+pad]; }
+    if(doM){ var pk=[]; for(k=kLo+1;k<kHi;k++) if(hist[k]>hist[k-1]&&hist[k]>=hist[k+1]) pk.push([k*sr/N,hist[k]]); pk.sort(function(a,b){return b[1]-a[1];}); var mx=pk.length?pk[0][1]:0;
+      rep.metalFreqs=pk.filter(function(p){ return p[1]>=mx*0.35; }).slice(0,5).map(function(p){ return Math.round(p[0]/10)*10; }); rep.metalAmount=mx; }
+  }
+  /* 4  Abgehackte Ausklänge: Schlag-Höhen kurz verhallen */
+  if(o.fill&&o.fill.on&&o.fill.amt>0){ var feed=new Float64Array(n),gate=new Float32Array(n),lenF=o.fill.len!=null?o.fill.len:0.4;
+    all.forEach(function(s0){ for(var q=-Math.round(2*ms);q<Math.round(60*ms);q++){ var k2=s0+q; if(k2<0||k2>=n) continue; var e=q<0?1+q/(2*ms):Math.min(1,(60*ms-q)/(20*ms)); if(e>gate[k2]) gate[k2]=e; } });
+    var mono=new Float64Array(n); for(i=0;i<n;i++) mono[i]=(oL[i]+oR[i])*0.5; var hf=zpf(mono,[hpRBJ(sr,2500,0.7071)]); for(i=0;i<n;i++) feed[i]=hf[i]*gate[i];
+    var rv=roomVerb(feed,sr,0.15+0.6*lenF,0.35),gF=o.fill.amt*3.5; for(i=0;i<n;i++){ oL[i]+=gF*rv[0][i]; oR[i]+=gF*rv[1][i]; } }
+  /* 5  Saubere Schläge unterlegen */
+  var mono2=null,getMono=function(){ if(!mono2){ mono2=new Float64Array(n); for(var q=0;q<n;q++) mono2[q]=(L[q]+R[q])*0.5; } return mono2; };
+  var layer=function(hits,smp,band,amt,useXcorr){ if(!hits.length||!(amt>0)) return 0; var src=getMono(),bo=band(src),bs=band(Float64Array.from(smp)),cnt=0,win=Math.round(0.06*sr);
+    var rmsS=0; for(var q=0;q<Math.min(win,bs.length);q++) rmsS+=bs[q]*bs[q]; rmsS=Math.sqrt(rmsS/Math.min(win,bs.length))||1;
+    var pos=hits.map(on);
+    pos.forEach(function(s0,ix){ var best=0,bl=0,sg=1;
+      if(useXcorr){ for(var lag=-Math.round(4*ms);lag<=Math.round(3*ms);lag+=2){ var c=0; for(var q=0;q<win;q+=2){ var a=s0+lag+q; if(a>=0&&a<n&&q<bs.length) c+=bo[a]*bs[q]; } if(Math.abs(c)>Math.abs(best)){ best=c; bl=lag; } } sg=best<0?-1:1; }
+      var st=s0+bl,ro=0,c2=0; for(var q2=0;q2<win;q2++){ var a2=st+q2; if(a2>=0&&a2<n){ ro+=bo[a2]*bo[a2]; c2++; } } ro=Math.sqrt(ro/Math.max(1,c2));
+      var g=amt*ro/rmsS*sg, end=Math.min(smp.length,(ix+1<pos.length?pos[ix+1]-st-Math.round(1*ms):smp.length)),fade=Math.round(5*ms);
+      for(var q3=0;q3<end;q3++){ var a3=st+q3; if(a3<0) continue; if(a3>=n) break; var e=q3>end-fade?(end-q3)/fade:1, v=g*smp[q3]*e; oL[a3]+=v; oR[a3]+=v; } cnt++; });
+    return cnt; };
+  var src0=getMono();
+  if(o.kick&&o.kick.on&&K.length){ var kb=zpf(src0,[lpCoef(sr,150,0.7071)]),fs=K.map(function(h){ var s0=on(h); return zcFreq(kb,s0+Math.round(0.05*sr),s0+Math.round(0.15*sr),sr); }).filter(function(f){ return f>25&&f<150; });
+    var f0=Math.max(35,Math.min(95,median(fs)||50)); rep.kickHz=Math.round(f0);
+    var ks=o.kick.sample?resampleLin(o.kick.sample,o.kick.sampleSr||sr,sr):synthKick(sr,f0,o.kick.len!=null?o.kick.len:0.4);
+    rep.kickLayered=layer(K,ks,function(x){ return zpf(x,[lpCoef(sr,180,0.7071)]); },o.kick.amt,true); }
+  if(o.snare&&o.snare.on&&Sn.length){ var bb=zpf(src0,[hpRBJ(sr,130,0.7071),lpCoef(sr,380,0.7071)]),fb=Sn.map(function(h){ var s0=on(h); return zcFreq(bb,s0+Math.round(0.012*sr),s0+Math.round(0.06*sr),sr); }).filter(function(f){ return f>120&&f<400; });
+    var body=Math.max(150,Math.min(330,median(fb)||200)); rep.snareHz=Math.round(body);
+    var ss=o.snare.sample?resampleLin(o.snare.sample,o.snare.sampleSr||sr,sr):synthSnare(sr,body,o.snare.tone!=null?o.snare.tone:0.5,o.snare.len!=null?o.snare.len:0.4);
+    rep.snareLayered=layer(Sn,ss,function(x){ return zpf(x,[hpRBJ(sr,150,0.7071),lpCoef(sr,9000,0.7071)]); },o.snare.amt,false); }
+  /* nur in Bereichen anwenden */
+  if(o.regions&&o.regions.length){ var mask=new Float32Array(n),xf=Math.round(sr*0.05);
+    o.regions.forEach(function(r){ var a=Math.max(0,Math.round(r[0]*sr)),b=Math.min(n,Math.round(r[1]*sr)); for(var k=Math.max(0,a-xf);k<Math.min(n,b+xf);k++){ var e=k<a?1-(a-k)/xf:(k>=b?1-(k-b+1)/xf:1); if(e>mask[k]) mask[k]=e; } });
+    for(i=0;i<n;i++){ var m2=mask[i]; oL[i]=L[i]+(oL[i]-L[i])*m2; oR[i]=R[i]+(oR[i]-R[i])*m2; } }
+  var pkO=0; for(i=0;i<n;i++){ var v=Math.max(Math.abs(oL[i]),Math.abs(oR[i])); if(v>pkO) pkO=v; } rep.peak=pkO; rep.changed=true;
+  rep.kicks=K.length; rep.snares=Sn.length; rep.hats=Ht.length;
+  return {L:oL,R:oR,report:rep};
+}
+function db2gW(d){ return Math.pow(10,d/20); }
+function drumPreview(sr,o){ var k=o.kick||{},s2=o.snare||{}; return {kick:k.sample?resampleLin(k.sample,k.sampleSr||sr,sr):synthKick(sr,o.kickHz||50,k.len!=null?k.len:0.4), snare:s2.sample?resampleLin(s2.sample,s2.sampleSr||sr,sr):synthSnare(sr,o.snareHz||200,s2.tone!=null?s2.tone:0.5,s2.len!=null?s2.len:0.4)}; }
 function handle(d){
   var L=d.L,R=d.R,sr=d.sr,o=d.opts||{},res={},tr=[];
   if(d.cmd==='artifacts') return {result:artifacts(L,R,sr),transfer:[]};
   if(d.cmd==='gamedata') return {result:gameData(L,R,sr,o),transfer:[]};
+  if(d.cmd==='drumscan'){ if(!o.beats){ var gd0=gameData(L,R,sr,{}); if(!gd0.error) o.beats=gd0.beats; } var dr=drumDetect(L,R,sr,o); return {result:dr,transfer:[]}; }
+  if(d.cmd==='drumrepair'){ var rr=drumRepair(L,R,sr,o); return {result:rr,transfer:[rr.L.buffer,rr.R.buffer]}; }
+  if(d.cmd==='drumpreview'){ var pv=drumPreview(sr,o); return {result:pv,transfer:[pv.kick.buffer,pv.snare.buffer]}; }
   if(d.cmd==='smooth'){ var sres=smoothHF(L,R,sr,o); return {result:sres,transfer:[sres.L.buffer,sres.R.buffer]}; }
   if(d.lim){ res.grMin=applyLim(L,R,sr,d.lim); }
   var ld=loudness(L,R,sr); res.I=ld.I; res.Mmax=ld.Mmax; res.Smax=ld.Smax; res.LRA=ld.LRA; res.hist=ld.hist;
@@ -1490,7 +1719,7 @@ function drawWave() {
     g.fillStyle = 'rgba(217,164,65,.13)'; g.fillRect(x0, RULER, x1 - x0, H);
     g.fillStyle = '#D9A441'; g.fillRect(Math.round(x0), RULER, 1, H); g.fillRect(Math.round(x1), RULER, 1, H);
     g.fillRect(x0, RULER - 3, x1 - x0, 3); }
-  drawArtMarks(g, w, t => t2x(t, w), RULER, 4); drawGameMarks(g, w, t => t2x(t, w), RULER, 4);
+  drawArtMarks(g, w, t => t2x(t, w), RULER, 4); drawGameMarks(g, w, t => t2x(t, w), RULER, 4); drawDrumMarks(g, w, t => t2x(t, w), RULER, 4);
   // Wellenform
   const spp = span * sr / w;
   if (spp < 2) {
@@ -1529,7 +1758,7 @@ function drawOverview() {
     for (let b = b0; b < b1 && b < nb; b++) { if (S.peaks.mn[b] < lo) lo = S.peaks.mn[b]; if (S.peaks.mx[b] > hi) hi = S.peaks.mx[b]; }
     g.fillRect(x, mid - hi * mid * 0.9, 1, Math.max(1, (hi - lo) * mid * 0.9)); }
   const d = n / S.track.sr, x0 = S.view.a / d * w, x1 = S.view.b / d * w;
-  drawArtMarks(g, w, t => t / d * w, 0, 3); drawGameMarks(g, w, t => t / d * w, 0, 3);
+  drawArtMarks(g, w, t => t / d * w, 0, 3); drawGameMarks(g, w, t => t / d * w, 0, 3); drawDrumMarks(g, w, t => t / d * w, 0, 3);
   g.fillStyle = 'rgba(154,223,255,.10)'; g.fillRect(x0, 0, Math.max(2, x1 - x0), h);
   g.strokeStyle = '#9ADFFF'; g.lineWidth = 1; g.strokeRect(Math.round(x0) + 0.5, 0.5, Math.max(2, x1 - x0) - 1, h - 1);
   if (S.sel) { g.fillStyle = 'rgba(154,223,255,.45)'; g.fillRect(S.sel.a / d * w, h - 3, Math.max(1, (S.sel.b - S.sel.a) / d * w), 3); }
@@ -2697,6 +2926,150 @@ $('#gmSave').addEventListener('click', async () => { if (!GAME.raw) return; cons
   try { const how = await deliver(new Blob([$('#gmOut').value], { type: 'application/json' }), name); if (how !== 'declined') status('„' + name + '“ gespeichert.', 'ok'); }
   catch (e) { status('Speichern nicht möglich: ' + e.message, 'err'); } });
 $$('.tabs [role=tab]').forEach(b => b.addEventListener('click', () => { if (b.dataset.tab === 'game') { if (!GAME.raw || GAME.ver !== S.ver) runGame(); else { drawGame(); drawGameHead(); } } drawAll(); }));
+/* ============================ Drum-Reparatur ============================ */
+const DR_DEF = { metal: 50, sandAmt: 50, sandFreq: 3000, fillAmt: 30, fillLen: 40, att: 2, sus: 0, kickAmt: 35, kickLen: 40, snareAmt: 30, snareTone: 50, snareLen: 40 };
+const DR = Object.assign({}, DR_DEF, recall('drum') || {});
+const DRS = { det: null, detVer: -1, busy: false, base: null, baseVer: -1, afterVer: -1, ab: false, beforeBuf: null, kickSmp: null, snareSmp: null, pick: null, rep: null };
+const drSave = () => { const o = {}; Object.keys(DR_DEF).forEach(k => o[k] = DR[k]); ['drMetalOn', 'drMetalHits', 'drSandOn', 'drFillOn', 'drPunchOn', 'drKickOn', 'drSnareOn'].forEach(id => o[id] = $('#' + id).checked); store('drum', o); };
+(function drControls() {
+  const sl = (c, o) => slider($(c), Object.assign({ noParam: true }, o, { set: v => { o.set(v); drSave(); } }));
+  sl('#drMetalCtl', { label: 'Stärke', min: 0, max: 100, step: 5, get: () => DR.metal, set: v => DR.metal = v, fmt: v => v + ' %', def: DR_DEF.metal });
+  sl('#drSandCtl', { label: 'Stärke', min: 0, max: 100, step: 5, get: () => DR.sandAmt, set: v => DR.sandAmt = v, fmt: v => v + ' %', def: DR_DEF.sandAmt });
+  sl('#drSandCtl', { label: 'Ab Frequenz', min: 1500, max: 8000, log: true, get: () => DR.sandFreq, set: v => DR.sandFreq = v, fmt: v => fmtHz(v) + 'Hz', def: DR_DEF.sandFreq });
+  sl('#drFillCtl', { label: 'Menge', min: 0, max: 100, step: 5, get: () => DR.fillAmt, set: v => DR.fillAmt = v, fmt: v => v + ' %', def: DR_DEF.fillAmt });
+  sl('#drFillCtl', { label: 'Länge', min: 0, max: 100, step: 5, get: () => DR.fillLen, set: v => DR.fillLen = v, fmt: v => (Math.round((0.15 + 0.6 * v / 100) * 900 / 10) * 10) + ' ms', def: DR_DEF.fillLen });
+  sl('#drPunchCtl', { label: 'Anschlag', min: 0, max: 6, step: 0.5, get: () => DR.att, set: v => DR.att = v, fmt: v => '+' + nf(v, 1) + ' dB', def: DR_DEF.att });
+  sl('#drPunchCtl', { label: 'Ausklang kürzen', min: 0, max: 8, step: 0.5, get: () => DR.sus, set: v => DR.sus = v, fmt: v => (v ? '−' : '') + nf(v, 1) + ' dB', def: DR_DEF.sus });
+  sl('#drKickCtl', { label: 'Anteil', min: 0, max: 100, step: 5, get: () => DR.kickAmt, set: v => DR.kickAmt = v, fmt: v => v + ' %', def: DR_DEF.kickAmt });
+  sl('#drKickCtl', { label: 'Länge', min: 0, max: 100, step: 5, get: () => DR.kickLen, set: v => DR.kickLen = v, fmt: v => v + ' %', def: DR_DEF.kickLen });
+  sl('#drSnareCtl', { label: 'Anteil', min: 0, max: 100, step: 5, get: () => DR.snareAmt, set: v => DR.snareAmt = v, fmt: v => v + ' %', def: DR_DEF.snareAmt });
+  sl('#drSnareCtl', { label: 'Klang', min: 0, max: 100, step: 5, get: () => DR.snareTone, set: v => DR.snareTone = v, fmt: v => v < 35 ? 'dunkel' : v > 65 ? 'hell' : 'mittel', def: DR_DEF.snareTone });
+  sl('#drSnareCtl', { label: 'Länge', min: 0, max: 100, step: 5, get: () => DR.snareLen, set: v => DR.snareLen = v, fmt: v => v + ' %', def: DR_DEF.snareLen });
+  ['drMetalOn', 'drMetalHits', 'drSandOn', 'drFillOn', 'drPunchOn', 'drKickOn', 'drSnareOn'].forEach(id => { if (DR[id] != null) $('#' + id).checked = !!DR[id]; $('#' + id).addEventListener('change', drSave); });
+})();
+
+function drDetValid() { return DRS.det && DRS.detVer === drSourceVer(); }
+/* Erkennung bezieht sich auf das unreparierte Material: nach „Anwenden“ bleibt sie gültig */
+function drSourceVer() { return DRS.afterVer === S.ver && DRS.baseVer >= 0 ? DRS.baseVer : S.ver; }
+function drSource() { return DRS.afterVer === S.ver && DRS.base ? DRS.base : { L: S.track.L, R: S.track.R }; }
+
+async function drScan() {
+  if (!S.track || DRS.busy) return;
+  DRS.busy = true; $('#drScan').disabled = true; $('#drApply').disabled = true;
+  $('#drInfo').innerHTML = '<span class="busy"></span>Suche Kick, Snare und HiHats … (etwa 10 Sekunden pro 3 Minuten Song)';
+  const ver = drSourceVer(), src = drSource();
+  try {
+    const opts = { sens: +$('#drSens').value };
+    if (typeof GAME !== 'undefined' && GAME.raw && GAME.ver === ver) opts.beats = GAME.raw.beats;
+    const r = await DSP({ cmd: 'drumscan', sr: S.track.sr, L: src.L.slice(), R: src.R.slice(), opts });
+    if (ver !== drSourceVer()) return;
+    DRS.det = r; DRS.detVer = ver; drRenderInfo(); drawAll();
+  } catch (e) { console.error(e); $('#drInfo').textContent = 'Suche fehlgeschlagen: ' + e.message; }
+  finally { DRS.busy = false; $('#drScan').disabled = false; $('#drApply').disabled = false; }
+}
+function drRenderInfo() {
+  const d = DRS.det; if (!d) return;
+  $('#drInfo').textContent = d.kicks.length + ' Kicks, ' + d.snares.length + ' Snares/Claps und ' + d.hats.length + ' HiHat-Schläge gefunden. Die Marken siehst du in der Wellenform (gold = Kick, hellblau = Snare, grau = HiHat). Bei falschen Treffern die Erkennung umstellen und neu suchen.';
+}
+
+function drOpts() {
+  const sr = S.track.sr, o = { sens: +$('#drSens').value, det: DRS.det };
+  if ($('#drMetalOn').checked && DR.metal > 0) o.metal = { on: true, amt: DR.metal / 100, lo: 1500, hi: Math.min(14000, sr * 0.45), hitsOnly: $('#drMetalHits').checked };
+  if ($('#drSandOn').checked && DR.sandAmt > 0) o.sand = { on: true, amt: DR.sandAmt / 100, freq: DR.sandFreq };
+  if ($('#drFillOn').checked && DR.fillAmt > 0) o.fill = { on: true, amt: DR.fillAmt / 100, len: DR.fillLen / 100 };
+  if ($('#drPunchOn').checked && (DR.att > 0 || DR.sus > 0)) o.punch = { on: true, att: DR.att, sus: DR.sus };
+  if ($('#drKickOn').checked && DR.kickAmt > 0) o.kick = { on: true, amt: DR.kickAmt / 100, len: DR.kickLen / 100, sample: DRS.kickSmp && DRS.kickSmp.x, sampleSr: DRS.kickSmp && DRS.kickSmp.sr };
+  if ($('#drSnareOn').checked && DR.snareAmt > 0) o.snare = { on: true, amt: DR.snareAmt / 100, tone: DR.snareTone / 100, len: DR.snareLen / 100, sample: DRS.snareSmp && DRS.snareSmp.x, sampleSr: DRS.snareSmp && DRS.snareSmp.sr };
+  return o;
+}
+
+async function drApply() {
+  if (!S.track || DRS.busy) return;
+  if (!drDetValid()) { await drScan(); if (!drDetValid()) return; }
+  const o = drOpts(); if (!o.metal && !o.sand && !o.fill && !o.punch && !o.kick && !o.snare) { status('Bitte mindestens eine Reparatur einschalten.'); return; }
+  if ($('#drScope').value === 'sel') { if (!S.sel) { status('Bitte zuerst in der Wellenform einen Bereich ziehen.'); return; } o.regions = [[S.sel.a, S.sel.b]]; }
+  drSetAB(false);
+  const replacing = DRS.afterVer === S.ver && DRS.base && S.undo.length && S.undo[S.undo.length - 1].drum;
+  const src = drSource(), baseVer = drSourceVer();
+  DRS.busy = true; $('#drApply').disabled = true; $('#drScan').disabled = true; stopPlayback();
+  status('Repariere die Drums … das dauert bei einem ganzen Song etwa 10–20 Sekunden.', 'busy', 60000);
+  try {
+    const r = await DSP({ cmd: 'drumrepair', sr: S.track.sr, L: src.L.slice(), R: src.R.slice(), opts: o });
+    if (replacing) { S.undo.pop(); S.track.L = src.L; S.track.R = src.R; }
+    DRS.base = { L: src.L, R: src.R }; DRS.baseVer = baseVer; DRS.beforeBuf = null;
+    const parts = [o.metal && 'Metall', o.sand && 'Sand', o.fill && 'Ausklang', o.punch && 'Punch', o.kick && 'Kick', o.snare && 'Snare'].filter(Boolean).join(', ');
+    commit(r.L, r.R, 'Drums repariert (' + parts + ')', S.sel, S.cursor);
+    S.undo[S.undo.length - 1].drum = true;
+    DRS.afterVer = S.ver; DRS.rep = r.report; drReport(r.report); $('#drAB').disabled = false;
+  } catch (e) { console.error(e); status('Reparatur fehlgeschlagen: ' + e.message, 'err'); }
+  finally { DRS.busy = false; $('#drApply').disabled = false; $('#drScan').disabled = false; }
+}
+function drReport(r) {
+  const t = [];
+  if (r.metalFreqs && r.metalFreqs.length) t.push('Metallische Resonanzen vor allem bei ' + r.metalFreqs.slice(0, 4).map(f => fmtHz(f) + 'Hz').join(', '));
+  if (r.kickLayered) t.push(r.kickLayered + ' Kicks unterlegt (Grundton ' + r.kickHz + ' Hz)');
+  if (r.snareLayered) t.push(r.snareLayered + ' Snares unterlegt (Körper ' + r.snareHz + ' Hz)');
+  if (r.peak > 1) t.push('Spitzenpegel jetzt ' + sf(g2db(r.peak), 1) + ' dBFS, der Limiter fängt das beim Export ab');
+  $('#drReport').textContent = t.length ? t.join('. ') + '. Erneutes „Anwenden“ ersetzt diese Reparatur.' : 'Angewendet. Erneutes „Anwenden“ ersetzt diese Reparatur.';
+}
+
+/* Vorher/Nachher: tauscht nur den Abspiel-Puffer, die Wiedergabe läuft an derselben Stelle weiter */
+function drSetAB(on) {
+  if (on && !(DRS.afterVer === S.ver && DRS.base)) on = false;
+  DRS.ab = on; $('#drAB').setAttribute('aria-pressed', on ? 'true' : 'false');
+  const playing = S.playing, pos = curPos();
+  if (on) { if (!DRS.beforeBuf) DRS.beforeBuf = trackToBuffer({ L: DRS.base.L, R: DRS.base.R, sr: S.track.sr }); S.abuf = DRS.beforeBuf; }
+  else S.abuf = null;
+  if (playing) play(pos);
+  applyMonitor(); if (on) $('#monLabel').textContent += ' · vorher';
+}
+setInterval(() => { if (DRS.afterVer !== S.ver) { if (DRS.ab) drSetAB(false); $('#drAB').disabled = true; } }, 400);
+
+/* Ersatz-Klänge anhören und eigene Samples laden */
+async function drPreview(which) {
+  if (!S.ctx) return; const sr = S.ctx.sampleRate, d = DRS.det;
+  const o = { kickHz: DRS.rep && DRS.rep.kickHz || 52, snareHz: DRS.rep && DRS.rep.snareHz || 200, kick: { len: DR.kickLen / 100, sample: DRS.kickSmp && DRS.kickSmp.x, sampleSr: DRS.kickSmp && DRS.kickSmp.sr }, snare: { tone: DR.snareTone / 100, len: DR.snareLen / 100, sample: DRS.snareSmp && DRS.snareSmp.x, sampleSr: DRS.snareSmp && DRS.snareSmp.sr } };
+  const r = await DSP({ cmd: 'drumpreview', sr, L: new Float32Array(1), R: new Float32Array(1), opts: o });
+  const x = which === 'kick' ? r.kick : r.snare, b = S.ctx.createBuffer(1, x.length, sr); b.copyToChannel(x, 0);
+  if (S.ctx.state !== 'running') { try { await S.ctx.resume(); } catch (e) {} }
+  const src = S.ctx.createBufferSource(), g = S.ctx.createGain(); g.gain.value = 0.5; src.buffer = b; src.connect(g); g.connect(S.ctx.destination); src.start();
+}
+$('#drKickPlay').addEventListener('click', () => drPreview('kick'));
+$('#drSnarePlay').addEventListener('click', () => drPreview('snare'));
+function drSmpLabel() {
+  [['kick', '#drKickSmp', '#drKickLoad'], ['snare', '#drSnareSmp', '#drSnareLoad']].forEach(([k, lab, btn]) => { const s = DRS[k + 'Smp'];
+    $(lab).textContent = s ? s.name : 'eingebauter Klang'; $(btn).textContent = s ? 'Eingebauten nehmen' : 'Eigenes Sample …'; });
+}
+['kick', 'snare'].forEach(k => $('#dr' + (k === 'kick' ? 'Kick' : 'Snare') + 'Load').addEventListener('click', () => {
+  if (DRS[k + 'Smp']) { DRS[k + 'Smp'] = null; drSmpLabel(); return; }
+  DRS.pick = k; $('#drSmpIn').value = ''; $('#drSmpIn').click(); }));
+$('#drSmpIn').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0], k = DRS.pick; if (!f || !k) return;
+  try {
+    const t = await decodeFile(f), n = t.L.length; let x = new Float32Array(n), pk = 0;
+    for (let i = 0; i < n; i++) { x[i] = (t.L[i] + t.R[i]) * 0.5; pk = Math.max(pk, Math.abs(x[i])); }
+    if (!(pk > 0)) throw new Error('Die Datei ist stumm.');
+    let a = 0; while (a < n && Math.abs(x[a]) < pk * 0.02) a++;
+    x = x.slice(Math.max(0, a - 8), Math.min(n, a + Math.round(t.sr * 2)));
+    for (let i = 0; i < x.length; i++) x[i] /= pk;
+    for (let i = 0; i < Math.min(8, x.length); i++) x[i] *= i / 8;
+    DRS[k + 'Smp'] = { x, sr: t.sr, name: f.name }; drSmpLabel(); status('Sample „' + f.name + '“ geladen.', 'ok');
+  } catch (err) { status('Sample konnte nicht geladen werden: ' + err.message, 'err'); }
+});
+drSmpLabel();
+
+/* Marken in der Wellenform, solange der Reiter offen ist */
+function drawDrumMarks(g, w, map, y, h) {
+  if (!drDetValid() || curTab() !== 'drums') return; const d = DRS.det;
+  const mk = (arr, col, hh) => { g.fillStyle = col; arr.forEach(q => { const x = map(q.t); if (x >= 0 && x <= w) g.fillRect(Math.round(x), y, 1.5, hh); }); };
+  mk(d.hats, 'rgba(127,148,164,.55)', h * 0.5); mk(d.snares, '#9ADFFF', h + 10); mk(d.kicks, '#D9A441', h + 16);
+}
+
+$('#drScan').addEventListener('click', drScan);
+$('#drApply').addEventListener('click', drApply);
+$('#drAB').addEventListener('click', () => drSetAB(!DRS.ab));
+$('#drSens').addEventListener('change', () => { if (DRS.det) drScan(); });
+$$('.tabs [role=tab]').forEach(b => b.addEventListener('click', () => { if (b.dataset.tab === 'drums' && S.track && !drDetValid() && !DRS.busy) drScan(); }));
 /* ============================ Offline-Rendern & Messung ============================ */
 const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 async function measureLatency(p, sr) {

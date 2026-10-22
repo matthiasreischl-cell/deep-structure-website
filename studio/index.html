@@ -283,6 +283,27 @@ a.btn{text-decoration:none}
   #eqCanvas{height:200px}
 }
 @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+/* Spiel-Daten */
+.gm-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.pill{font:600 11px var(--f-mono);letter-spacing:.04em;padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);text-transform:none}
+.pill.good{color:#7EE2B8;border-color:#2a5a48}.pill.mid{color:var(--gold);border-color:#5a4a26}.pill.low{color:#FF8A7A;border-color:#5e2c26}
+.gm-bpm{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.gm-bpm b{font:400 40px/1 var(--f-display);color:var(--accent);font-variant-numeric:tabular-nums}
+.gm-bpm small{font:600 12px var(--f-display);letter-spacing:.12em;color:var(--muted)}
+.gm-btns button{min-width:52px}
+.gm-num{flex:0 1 120px}
+#gmClick[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.gm-graph{height:150px}
+.gm-graph canvas{width:100%;height:100%;display:block;cursor:pointer}
+.gm-sections td:first-child{color:var(--text)}
+.gm-sections td .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:-1px}
+.gm-sections select,.gm-sections input[type=text]{min-height:28px;font-size:12.5px}
+.gm-sections input[type=text]{width:130px}
+.gm-sections .ebar{display:inline-block;width:60px;height:6px;border-radius:3px;background:#1b2833;vertical-align:middle;margin-left:6px;overflow:hidden}
+.gm-sections .ebar i{display:block;height:100%;background:var(--accent)}
+.gm-sections button{min-height:28px;padding:0 10px}
+.gm-inc{gap:8px 18px}
+.gm-out{width:100%;min-height:180px;max-height:340px;resize:vertical;font:12px/1.45 var(--f-mono);color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:10px;white-space:pre;overflow:auto}
 </style>
 <div class="app" id="app">
   <div class="backdrop" aria-hidden="true"></div>
@@ -365,6 +386,7 @@ a.btn{text-decoration:none}
         <button role="tab" data-tab="region" aria-selected="false">Bereich</button>
         <button role="tab" data-tab="ref" aria-selected="false">Referenz</button>
         <button role="tab" data-tab="ana" aria-selected="false">Analyse</button>
+        <button role="tab" data-tab="game" aria-selected="false">Spiel-Daten</button>
         <button class="assist" id="btnAssist" title="Analysiert den Song und stellt einen Startpunkt ein">Assistent</button>
       </nav>
 
@@ -512,6 +534,61 @@ a.btn{text-decoration:none}
         <div class="graph"><canvas id="histCanvas"></canvas></div>
         <div class="legend"><span><i style="background:var(--orig)"></i>Original</span><span><i style="background:var(--amber)"></i>Master</span><span class="muted">Kurzzeit-Lautheit (LUFS, 3 s) über die Songdauer</span></div>
         <ul class="notes" id="notes"></ul>
+      </div>
+
+      <div class="panel" data-panel="game" hidden>
+        <div class="phead"><p>Tempo, Takte, Song-Abschnitte, Energie und Schläge als Daten für dein Spiel. Alle Zeiten in Sekunden ab Dateianfang. Prüfe das Raster mit dem Klick beim Abspielen, bevor du kopierst.</p><button id="gmRun">Neu analysieren</button></div>
+        <div class="gm-top">
+          <div class="card gm-tempo">
+            <h3>Tempo und Takt <span class="pill" id="gmConf">–</span></h3>
+            <div class="gm-bpm"><b id="gmBpm">–</b><small>BPM</small><span class="muted" id="gmBpmAlt"></span></div>
+            <div class="row gm-btns">
+              <button id="gmHalf" title="Tempo halbieren: jeder zweite Beat entfällt">÷ 2</button>
+              <button id="gmDouble" title="Tempo verdoppeln: Zwischenschläge werden Beats">× 2</button>
+              <button id="gmShiftL" title="Taktanfang einen Beat früher">‹ 1</button>
+              <button id="gmShiftR" title="Taktanfang einen Beat später">1 ›</button>
+              <button id="gmClick" aria-pressed="false" title="Beim Abspielen ein Klick auf jedem Beat, hoher Ton auf der 1">Klick</button>
+            </div>
+            <div class="row">
+              <label class="field gm-num"><span>BPM bekannt?</span><input type="number" id="gmBpmIn" min="40" max="260" step="0.01" placeholder="z. B. 128"></label>
+              <button id="gmBpmGo">Raster neu ausrichten</button>
+            </div>
+            <p class="hint" id="gmTempoInfo"></p>
+          </div>
+          <div class="card gm-meta">
+            <h3>Song</h3>
+            <div class="row">
+              <label class="field" style="flex:2 1 160px"><span>Titel</span><input type="text" id="gmTitle" maxlength="80"></label>
+              <label class="field gm-num"><span>Level / Track</span><input type="number" id="gmLevel" min="0" max="999" step="1" placeholder="1"></label>
+            </div>
+            <label class="field"><span>Abschnitte</span><select id="gmSens"><option value="0.8">Wenige, grobe Abschnitte</option><option value="0.3" selected>Normal</option><option value="-0.1">Viele, feine Abschnitte</option></select></label>
+            <p class="hint" id="gmSongInfo"></p>
+          </div>
+        </div>
+        <div class="graph gm-graph"><canvas id="gmCanvas"></canvas></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>Energie pro Beat</span><span><i style="background:var(--gold)"></i>Bass</span><span class="muted">Farbige Blöcke: Abschnitte. Tippen spielt ab dieser Stelle.</span></div>
+        <div class="tablewrap"><table class="metrics gm-sections" id="gmSections"></table></div>
+        <div class="card">
+          <h3>Export für das Spiel</h3>
+          <div class="row gm-inc" id="gmInc">
+            <label class="chk"><input type="checkbox" data-inc="beats" checked>Beats und Takte</label>
+            <label class="chk"><input type="checkbox" data-inc="energy" checked>Energie pro Beat</label>
+            <label class="chk"><input type="checkbox" data-inc="bands" checked>Bass/Mitten/Höhen pro Beat</label>
+            <label class="chk"><input type="checkbox" data-inc="hits" checked>Schläge (Bass, Mitte, Höhen)</label>
+            <label class="chk"><input type="checkbox" data-inc="loudness">Lautheitsverlauf</label>
+            <label class="chk"><input type="checkbox" data-inc="snap" checked>Schläge aufs 1/16-Raster</label>
+            <label class="chk"><input type="checkbox" data-inc="pretty">Lesbar formatiert</label>
+          </div>
+          <div class="row"><label class="field" style="flex:1 1 220px"><span>Schläge: nur ab Stärke <b id="gmThrV">40 %</b></span><input type="range" id="gmThr" min="0" max="90" step="5" value="40"></label><span class="hint" id="gmHitInfo"></span></div>
+          <textarea id="gmOut" class="gm-out" readonly spellcheck="false" aria-label="Spiel-Daten als JSON"></textarea>
+          <div class="row">
+            <button class="primary" id="gmCopy">JSON kopieren</button>
+            <button id="gmSave">Als Datei speichern</button>
+            <button id="gmGodot" title="GDScript zum Laden und Abfragen der Daten">Godot-Code kopieren</button>
+            <button id="gmCodex" title="Erklärung aller Felder plus Umsetzungsideen, zum Einfügen in Codex">Codex-Anleitung kopieren</button>
+            <span class="hint" id="gmSize"></span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -861,9 +938,111 @@ function fixClicks(oL,oR,sr,clicks){ var h=12,n=oL.length;
   clicks.forEach(function(t){ var c=Math.round(t*sr),a=c-h,b=c+h; if(a<2||b>=n-2) return;
     [oL,oR].forEach(function(x){ var p0=x[a],p1=x[b],m0=(x[a]-x[a-2])/2,m1=(x[b+2]-x[b])/2,len=b-a;
       for(var j=1;j<len;j++){ var u=j/len,u2=u*u,u3=u2*u; x[a+j]=(2*u3-3*u2+1)*p0+(u3-2*u2+u)*m0*len+(-2*u3+3*u2)*p1+(u3-u2)*m1*len; } }); }); }
+
+/* ---------- Spiel-Daten: Tempo, Beats, Takte, Abschnitte, Ereignisse ---------- */
+function movAvg(a,w){ var o=new Float64Array(a.length),s=0,h=w>>1,i; for(i=0;i<a.length+h;i++){ if(i<a.length) s+=a[i]; if(i-w>=0) s-=a[i-w]; var c=i-h; if(c>=0&&c<a.length) o[c]=s/Math.min(w,i+1,a.length-c+h); } return o; }
+function pctl(a,q){ var v=Array.prototype.slice.call(a).filter(function(x){return isFinite(x);}).sort(function(x,y){return x-y;}); return v.length?v[Math.min(v.length-1,Math.max(0,Math.floor(q*(v.length-1))))]:0; }
+function norm01(a){ var lo=pctl(a,0.05),hi=pctl(a,0.95),d=Math.max(1e-9,hi-lo); return Array.prototype.map.call(a,function(x){ return Math.max(0,Math.min(1,(x-lo)/d)); }); }
+function peaks(x,fr,minGap,k,withVal){ var m=movAvg(x,Math.round(fr*1.0)),out=[],last=-1e9,g=Math.round(minGap*fr),base=pctl(x,0.6);
+  for(var t=3;t<x.length-3;t++){ var v=x[t]; if(v<=m[t]*k||v<=base) continue; if(v<x[t-1]||v<x[t-2]||v<x[t-3]||v<x[t+1]||v<x[t+2]||v<x[t+3]) continue; if(t-last<g) continue; out.push(withVal?[t,v-m[t]]:t); last=t; } return out; }
+function gameData(L,R,sr,o){
+  o=o||{}; var N=2048,hop=512,n=L.length,half=N/2,frames=Math.floor((n-N)/hop)+1,t,k,i,j;
+  if(frames<300) return {error:'Der Song ist zu kurz für eine Tempo-Analyse (mindestens ca. 4 Sekunden).'};
+  var fr=sr/hop,w=hannP(N,false),bin=function(f){return Math.max(1,Math.min(half-1,Math.round(f*N/sr)));};
+  var bl=[bin(30),bin(150)],bm=[bin(150),bin(2500)],bh=[bin(5000),bin(Math.min(16000,sr/2-200))];
+  var prev=new Float64Array(half),prevM=new Float64Array(half),fAll=new Float64Array(frames),fLow=new Float64Array(frames),fMid=new Float64Array(frames),fHigh=new Float64Array(frames),fLowLin=new Float64Array(frames);
+  var eAll=new Float64Array(frames),eLow=new Float64Array(frames),eMid=new Float64Array(frames),eHigh=new Float64Array(frames);
+  var lr=new Float64Array(N),li=new Float64Array(N),rr=new Float64Array(N),ri=new Float64Array(N),sc=4/N;
+  for(t=0;t<frames;t++){ var o0=t*hop; for(i=0;i<N;i++){ lr[i]=L[o0+i]*w[i]; rr[i]=R[o0+i]*w[i]; li[i]=0; ri[i]=0; } fft(lr,li); fft(rr,ri);
+    var fa=0,fl=0,fm=0,fh=0,pa=0,pl=0,pm=0,ph=0,fll=0;
+    for(k=1;k<half;k++){ var p=(lr[k]*lr[k]+li[k]*li[k]+rr[k]*rr[k]+ri[k]*ri[k])*0.5, mg0=Math.sqrt(p)*sc, lm=Math.log(1+1000*mg0), d=lm-prev[k]; prev[k]=lm; if(d<0)d=0;
+      fa+=d; pa+=p; if(k>=bl[0]&&k<bl[1]){ fl+=d; pl+=p; if(mg0>prevM[k]) fll+=mg0-prevM[k]; } else if(k>=bm[0]&&k<bm[1]){ fm+=d; pm+=p; } else if(k>=bh[0]&&k<=bh[1]){ fh+=d; ph+=p; } }
+    for(k=bl[0];k<bl[1];k++) prevM[k]=Math.sqrt((lr[k]*lr[k]+li[k]*li[k]+rr[k]*rr[k]+ri[k]*ri[k])*0.5)*sc; fLowLin[t]=fll;
+    fAll[t]=fa; fLow[t]=fl; fMid[t]=fm; fHigh[t]=fh; eAll[t]=pa; eLow[t]=pl; eMid[t]=pm; eHigh[t]=ph; }
+  fAll[0]=fLow[0]=fMid[0]=fHigh[0]=0;
+  /* Onset-Hüllkurve */
+  var mA=movAvg(fAll,Math.round(fr*0.4)),env=new Float64Array(frames),s1=0,s2=0;
+  for(t=0;t<frames;t++){ var v=fAll[t]-mA[t]; env[t]=v>0?v:0; s1+=env[t]; s2+=env[t]*env[t]; }
+  var sd=Math.sqrt(Math.max(1e-12,s2/frames-(s1/frames)*(s1/frames))); for(t=0;t<frames;t++) env[t]/=sd;
+  var envS=new Float64Array(frames); for(t=1;t<frames-1;t++) envS[t]=0.25*env[t-1]+0.5*env[t]+0.25*env[t+1];
+  /* Tempo: Autokorrelation, Vorliebe für 85–175 BPM */
+  var bmin=o.bpmMin||60,bmax=o.bpmMax||200,lagMin=Math.floor(60*fr/bmax),lagMax=Math.ceil(60*fr/bmin),acN=Math.min(frames-2,4*lagMax+4),ac=new Float64Array(acN+2),l;
+  for(l=1;l<=acN;l++){ var a=0; for(t=0;t+l<frames;t++) a+=env[t]*env[t+l]; ac[l]=a/(frames-l); }
+  var acM=0; for(l=lagMin;l<=acN;l++) acM+=ac[l]; acM/=Math.max(1,acN-lagMin+1);
+  var acS=function(x){ var i0=Math.floor(x),f=x-i0; return i0+1<=acN?Math.max(ac[i0],ac[i0+1])*0.0+ac[i0]*(1-f)+ac[i0+1]*f-acM:0; };
+  var acP=function(x){ return Math.max(acS(x-0.5),acS(x),acS(x+0.5)); };
+  /* Metrische Bewertung: ein Beat-Kandidat ist gut, wenn auch 2 und 4 Beats (halber/ganzer Takt) periodisch sind */
+  var prior=function(bpm){ if(o.bpmMin) return 1; var c=Math.log2(bpm/120); return Math.exp(-0.5*c*c/(0.9*0.9)); };
+  var best=-1e9,P=lagMin,cands=[];
+  var lowE=new Float64Array(frames),mL=movAvg(fLow,Math.round(fr*0.4)),ls1=0,ls2=0; for(t=0;t<frames;t++){ var vl=fLow[t]-mL[t]; lowE[t]=vl>0?vl:0; ls1+=lowE[t]; ls2+=lowE[t]*lowE[t]; }
+  var lsd=Math.sqrt(Math.max(1e-12,ls2/frames-(ls1/frames)*(ls1/frames))),acL=new Float64Array(lagMax+2),aLM=0; for(l=Math.max(2,Math.floor(lagMin/2)-1);l<=lagMax+1;l++){ var a3=0; for(t=0;t+l<frames;t++) a3+=lowE[t]*lowE[t+l]; acL[l]=a3/(frames-l)/(lsd*lsd); if(l>=lagMin) aLM+=acL[l]; } aLM/=(lagMax-lagMin+2);
+  var acLP=function(x){ var i0=Math.round(x); return Math.max(acL[i0-1]||0,acL[i0]||0,acL[i0+1]||0)-aLM; };
+  for(var x0=lagMin;x0<=lagMax;x0+=0.25){ var bpm=60*fr/x0, m=acP(x0)+acP(2*x0)+acP(4*x0)+acLP(x0)-0.7*Math.max(0,acLP(x0/2)); if(m<=0) continue; var v2=m*prior(bpm); if(v2>best){ best=v2; P=x0; } }
+  if(o.bpm) P=60*fr/o.bpm;
+  /* Konstantes Raster: Periode und Phase so wählen, dass möglichst viele Einsätze getroffen werden */
+  var envAt=function(x){ var i0=Math.floor(x),f=x-i0; return i0>=0&&i0+1<frames?envS[i0]*(1-f)+envS[i0+1]*f:0; };
+  var comb=function(per,phs){ var s3=0,c3=0; for(var x=phs;x<frames-1;x+=per){ s3+=envAt(x); c3++; } return s3/Math.max(1,c3); };
+  var bestG=-1,gP=P,gPh=0,span=o.bpm?0.002:0.015,steps=60;
+  for(var si=-steps;si<=steps;si++){ var per=P*(1+span*si/steps); for(var phs=0;phs<per;phs+=0.25){ var cs=comb(per,phs); if(cs>bestG){ bestG=cs; gP=per; gPh=phs; } } }
+  for(var it=0;it<2;it++){ var p0=gP,q0=gPh; for(si=-20;si<=20;si++){ var per2=p0*(1+span*si/(steps*20)); for(var d2=-0.3;d2<=0.3;d2+=0.05){ var cs2=comb(per2,q0+d2); if(cs2>bestG){ bestG=cs2; gP=per2; gPh=q0+d2; } } } }
+  var bpmRaw=60*fr/gP, bpmOut=o.bpm?Math.round(o.bpm*100)/100:(Math.abs(bpmRaw-Math.round(bpmRaw))<0.04?Math.round(bpmRaw):Math.round(bpmRaw*100)/100);
+  if(bpmOut!==bpmRaw){ var per3=60*fr/bpmOut,bb=-1; for(phs=0;phs<per3;phs+=0.05){ cs=comb(per3,phs); if(cs>bb){ bb=cs; gPh=phs; } } gP=per3; }
+  var lag=o.offset!=null?o.offset:0, beatSec=gP*hop/sr, phSec=gPh*hop/sr+lag+N/2/sr*0;
+  // Zeitbezug: Fenster-Mitte der Flux-Spitze -> Einsatzzeit (empirisch kalibriert, siehe Tests)
+  var off=GD_OFFSET*N/sr;
+  var bf=[]; for(var x2=gPh;x2<frames-1;x2+=gP) bf.push(x2);
+  var nb=bf.length,beats=bf.map(function(f){ return f*hop/sr+off; });
+  /* Wie gut passt das feste Raster? Anteil Einsätze nah am Raster */
+  var onHits=peaks(env,fr,0.08,1.4),inGrid=0; onHits.forEach(function(f){ var r=((f-gPh)%gP+gP)%gP; if(Math.min(r,gP-r)<=Math.max(1.5,0.06*gP)) inGrid++; });
+  var gridFit=onHits.length?inGrid/onHits.length:0, meanAll=0; for(t=0;t<frames;t++) meanAll+=envS[t]; meanAll/=frames;
+  var ratio=bestG/Math.max(1e-9,meanAll),conf=Math.max(0,Math.min(1,(ratio-1.8)/3));
+  /* Werte pro Beat */
+  var perBeat=function(arr){ var out=[]; for(var b=0;b<nb;b++){ var a2=Math.max(0,Math.round(bf[b])),z=Math.min(frames,Math.round(bf[b]+gP)),s3=0,c3=0; for(j=a2;j<z;j++){ s3+=arr[j]; c3++; } out.push(10*Math.log10(s3/Math.max(1,c3)+1e-20)); } return out; };
+  var near=function(arr,f){ var m=0,c=Math.round(f); for(var d=-2;d<=2;d++){ var q=c+d; if(q>=0&&q<frames&&arr[q]>m) m=arr[q]; } return m; };
+  var EdB=perBeat(eAll),LdB=perBeat(eLow),MdB=perBeat(eMid),HdB=perBeat(eHigh),energy=norm01(EdB),bass=norm01(LdB),mid=norm01(MdB),high=norm01(HdB);
+  var strength=norm01(bf.map(function(f){ return near(env,f); }));
+  /* Neuheit auf Beat-Ebene (2 Takte davor/danach) */
+  var featB=[]; for(var b2=0;b2<nb;b2++) featB.push([EdB[b2],LdB[b2],MdB[b2],HdB[b2],strength[b2]*10]);
+  var novelty=function(feat,K,wts){ var m=feat.length,dim=feat[0].length,mu=[],sg=[],d1,q; for(d1=0;d1<dim;d1++){ var s4=0,s5=0; for(q=0;q<m;q++){ s4+=feat[q][d1]; s5+=feat[q][d1]*feat[q][d1]; } mu[d1]=s4/m; sg[d1]=Math.sqrt(Math.max(1e-9,s5/m-mu[d1]*mu[d1])); }
+    var nv=new Float64Array(m); for(var c=1;c<m;c++){ var kk=Math.min(K,c,m-c),A=new Float64Array(dim),B=new Float64Array(dim); for(var u=0;u<kk;u++) for(d1=0;d1<dim;d1++){ A[d1]+=(feat[c-1-u][d1]-mu[d1])/sg[d1]/kk; B[d1]+=(feat[c+u][d1]-mu[d1])/sg[d1]/kk; }
+      var dd=0; for(d1=0;d1<dim;d1++) dd+=wts[d1]*(A[d1]-B[d1])*(A[d1]-B[d1]); nv[c]=Math.sqrt(dd)*Math.sqrt(kk/K); } return nv; };
+  var novB=nb>16?novelty(featB,8,[2,1.5,1,1,1]):new Float64Array(nb);
+  /* Taktanfang (4/4): Bass-Einsätze und Abschnittswechsel liegen meist auf der "1" */
+  var phS=[0,0,0,0],lowB=bf.map(function(f){ return near(fLowLin,f); }),lm2=0,nm2=0; for(i=0;i<nb;i++){ lm2+=lowB[i]; nm2+=novB[i]; } lm2=lm2/nb||1; nm2=nm2/nb||1;
+  var phL=[0,0,0,0],phN=[0,0,0,0]; for(i=0;i<nb;i++){ phL[i%4]+=lowB[i]/lm2; phN[i%4]+=3*novB[i]/nm2; phS[i%4]+=lowB[i]/lm2+3*novB[i]/nm2; }
+  var srtL=phL.slice().sort(function(a,b){return b-a;}), dPh=srtL[0]>=1.15*srtL[1]?phL.indexOf(srtL[0]):phS.indexOf(Math.max.apply(null,phS)); if(o.downbeatPhase!=null) dPh=((o.downbeatPhase%4)+4)%4;
+  /* Abschnitte: Neuheit zwischen Takten (4 Takte Kontext) */
+  /* Einheit für die Abschnittssuche: etwa 1,2–2,8 s (ein Takt bei normalem Tempo, ein halber bei langsamem) */
+  var bsec=gP/fr, U=bsec>=0.5?2:(bsec<0.25?8:4);
+  var bars=[]; for(i=dPh%U;i<nb;i+=U) bars.push(i);
+  var featT=bars.map(function(b){ var f=[0,0,0,0,0],c=0; for(var q=b;q<Math.min(nb,b+U);q++){ for(var d1=0;d1<5;d1++) f[d1]+=featB[q][d1]; c++; } return f.map(function(x){return x/c;}); });
+  var emax=Math.max.apply(null,EdB),lastAct=nb-1; while(lastAct>0&&EdB[lastAct]<emax-40) lastAct--;
+  var nbarAll=featT.length; while(featT.length>1&&bars[featT.length-1]>lastAct-2) featT.pop();
+  var unitSec=U*bsec, Kb=Math.max(2,Math.min(8,Math.round(5.5/unitSec)));
+  var nbar=featT.length, novT=nbar>2*Kb?novelty(featT,Kb,[2,1.5,1,1,1]):new Float64Array(nbar);
+  var nm=0,ns=0,cnt=0; for(j=1;j<nbar;j++){ nm+=novT[j]; ns+=novT[j]*novT[j]; cnt++; } nm/=Math.max(1,cnt); ns=Math.sqrt(Math.max(0,ns/Math.max(1,cnt)-nm*nm));
+  var thrN=nm+(o.sensitivity!=null?o.sensitivity:0.3)*ns, cand=[];
+  for(j=1;j<nbar;j++){ var isMax=true; for(var u=-2;u<=2;u++){ var q2=j+u; if(u&&q2>0&&q2<nbar&&novT[q2]>novT[j]) isMax=false; } if(isMax&&novT[j]>thrN) cand.push([j,novT[j]]); }
+  cand.sort(function(a,b){ return b[1]-a[1]; });
+  var minBars=o.minBars||Kb, bounds=[0,nbar];
+  cand.forEach(function(c){ var ok=bounds.every(function(b){ return Math.abs(b-c[0])>=minBars||(b===nbar&&nbar-c[0]>=2); }); if(ok) bounds.push(c[0]); });
+  bounds.sort(function(a,b){return a-b;});
+  var sections=[]; for(i=0;i+1<bounds.length;i++){ var sb=i===0?0:bars[bounds[i]],eb=bounds[i+1]<nbar?bars[bounds[i+1]]:nb,se=0,sb2=0,sm=0,sh=0,sl=0;
+    for(j=sb;j<eb;j++){ se+=energy[j]; sb2+=bass[j]; sm+=mid[j]; sh+=high[j]; sl+=EdB[j]; } var cn=Math.max(1,eb-sb);
+    sections.push({startBeat:sb,endBeat:eb,startBar:i===0?0:Math.floor((sb-dPh)/4),bars:Math.round((eb-sb)/2)/2,energy:se/cn,bass:sb2/cn,mid:sm/cn,high:sh/cn,levelDb:sl/cn,novelty:i===0?0:novT[bounds[i]]}); }
+  /* Ereignisse */
+  var tsec=function(f){ return f*hop/sr+off; };
+  var hitList=function(arr,gap,kf){ var pk=peaks(arr,fr,gap,kf,true),ref=pctl(pk.map(function(q){return q[1];}),0.95)||1; return pk.map(function(q){ return [Math.round(tsec(q[0])*1000)/1000,Math.round(Math.min(1,q[1]/ref)*100)/100]; }); };
+  var lowHits=hitList(fLow,0.09,1.6),midHits=hitList(fMid,0.09,1.6),highHits=hitList(fHigh,0.05,1.5);
+  var loud=[],stepF=Math.round(fr*0.5); for(t=0;t<frames;t+=stepF){ var s6=0,c6=0; for(j=t;j<Math.min(frames,t+stepF);j++){ s6+=eAll[j]; c6++; } loud.push(10*Math.log10(s6/c6+1e-20)); }
+  return {bpm:bpmOut,bpmRaw:bpmRaw,bpmConfidence:conf,gridFit:gridFit,beatSec:beatSec,beats:beats,downbeatPhase:dPh,energy:energy,bass:bass,mid:mid,high:high,strength:strength,novelty:Array.prototype.slice.call(novB),
+    sections:sections,lowHits:lowHits,midHits:midHits,highHits:highHits,levelCurve:loud,levelStep:stepF/fr,dur:n/sr,fr:fr,ratio:ratio};
+}
+var GD_OFFSET=0.61;
 function handle(d){
   var L=d.L,R=d.R,sr=d.sr,o=d.opts||{},res={},tr=[];
   if(d.cmd==='artifacts') return {result:artifacts(L,R,sr),transfer:[]};
+  if(d.cmd==='gamedata') return {result:gameData(L,R,sr,o),transfer:[]};
   if(d.cmd==='smooth'){ var sres=smoothHF(L,R,sr,o); return {result:sres,transfer:[sres.L.buffer,sres.R.buffer]}; }
   if(d.lim){ res.grMin=applyLim(L,R,sr,d.lim); }
   var ld=loudness(L,R,sr); res.I=ld.I; res.Mmax=ld.Mmax; res.Smax=ld.Smax; res.LRA=ld.LRA; res.hist=ld.hist;
@@ -1311,7 +1490,7 @@ function drawWave() {
     g.fillStyle = 'rgba(217,164,65,.13)'; g.fillRect(x0, RULER, x1 - x0, H);
     g.fillStyle = '#D9A441'; g.fillRect(Math.round(x0), RULER, 1, H); g.fillRect(Math.round(x1), RULER, 1, H);
     g.fillRect(x0, RULER - 3, x1 - x0, 3); }
-  drawArtMarks(g, w, t => t2x(t, w), RULER, 4);
+  drawArtMarks(g, w, t => t2x(t, w), RULER, 4); drawGameMarks(g, w, t => t2x(t, w), RULER, 4);
   // Wellenform
   const spp = span * sr / w;
   if (spp < 2) {
@@ -1350,7 +1529,7 @@ function drawOverview() {
     for (let b = b0; b < b1 && b < nb; b++) { if (S.peaks.mn[b] < lo) lo = S.peaks.mn[b]; if (S.peaks.mx[b] > hi) hi = S.peaks.mx[b]; }
     g.fillRect(x, mid - hi * mid * 0.9, 1, Math.max(1, (hi - lo) * mid * 0.9)); }
   const d = n / S.track.sr, x0 = S.view.a / d * w, x1 = S.view.b / d * w;
-  drawArtMarks(g, w, t => t / d * w, 0, 3);
+  drawArtMarks(g, w, t => t / d * w, 0, 3); drawGameMarks(g, w, t => t / d * w, 0, 3);
   g.fillStyle = 'rgba(154,223,255,.10)'; g.fillRect(x0, 0, Math.max(2, x1 - x0), h);
   g.strokeStyle = '#9ADFFF'; g.lineWidth = 1; g.strokeRect(Math.round(x0) + 0.5, 0.5, Math.max(2, x1 - x0) - 1, h - 1);
   if (S.sel) { g.fillStyle = 'rgba(154,223,255,.45)'; g.fillRect(S.sel.a / d * w, h - 3, Math.max(1, (S.sel.b - S.sel.a) / d * w), 3); }
@@ -2180,6 +2359,344 @@ $('#fbCopy').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(t); status('Feedback-Text kopiert. Jetzt z. B. in WhatsApp oder eine E-Mail einfügen.', 'ok', 5000); }
   catch (e) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); status('Feedback-Text kopiert.', 'ok'); } catch (e2) { status('Kopieren nicht möglich.', 'err'); } ta.remove(); }
 });
+/* ============================ Spiel-Daten (Tempo, Takte, Abschnitte, Energie, Schläge) ============================ */
+const GM_TYPES = { intro: 'Intro', build: 'Aufbau', main: 'Hauptteil', peak: 'Höhepunkt', drop: 'Drop', breakdown: 'Ruhephase', outro: 'Outro', part: 'Teil' };
+const GM_COL = { intro: '#7FA6BF', build: '#C29BFF', main: '#3F8DB3', peak: '#9ADFFF', drop: '#D9A441', breakdown: '#35546B', outro: '#7E8792', part: '#5B7385' };
+const GAME = { raw: null, ver: -1, busy: false, opts: {}, optsKey: '', sections: [], click: false, thr: 40 };
+const curTab = () => { const b = document.querySelector('.tabs [role=tab][aria-selected="true"]'); return b ? b.dataset.tab : 'check'; };
+const r3 = v => Math.round(v * 1000) / 1000, r2 = v => Math.round(v * 100) / 100;
+
+async function runGame(force) {
+  if (!S.track || GAME.busy) return;
+  const key = S.track.name + '|' + S.track.sr; if (GAME.optsKey !== key) { GAME.opts = {}; GAME.optsKey = key; $('#gmTitle').value = S.track.name || 'Song'; }
+  if (!force && GAME.raw && GAME.ver === S.ver) return;
+  const ver = S.ver; GAME.busy = true; $('#gmRun').disabled = true;
+  $('#gmTempoInfo').innerHTML = '<span class="busy"></span>Analysiere Tempo, Takte und Abschnitte …';
+  try {
+    const r = await DSP({ cmd: 'gamedata', sr: S.track.sr, L: S.track.L.slice(), R: S.track.R.slice(), opts: { ...GAME.opts } });
+    if (ver !== S.ver) { GAME.busy = false; $('#gmRun').disabled = false; return runGame(true); }
+    if (r.error) { GAME.raw = null; $('#gmTempoInfo').textContent = r.error; return; }
+    GAME.raw = r; GAME.ver = ver; GAME.sections = autoTypes(r);
+    renderGame();
+  } catch (e) { console.error(e); $('#gmTempoInfo').textContent = 'Analyse fehlgeschlagen: ' + e.message; }
+  finally { GAME.busy = false; $('#gmRun').disabled = false; }
+}
+
+/* Abschnittstypen aus Energieverlauf ableiten (heuristisch, frei umbenennbar) */
+function autoTypes(r) {
+  const S2 = r.sections.map((s, i) => ({ ...s, index: i, type: 'main', label: '' })), n = S2.length;
+  if (!n) return S2;
+  const es = S2.map(s => s.energy), hi = Math.max(...es), lo = Math.min(...es), rng = Math.max(0.15, hi - lo);
+  S2.forEach(s => s.rel = (s.energy - lo) / rng);
+  S2.forEach((s, i) => {
+    const prev = S2[i - 1], next = S2[i + 1];
+    if (s.rel >= 0.72) s.type = prev && s.energy - prev.energy >= 0.3 && prev.rel < 0.45 ? 'drop' : 'peak';
+    else if (s.rel < 0.4) s.type = i === 0 ? 'intro' : (i === n - 1 ? 'outro' : 'breakdown');
+    else s.type = i === 0 ? 'intro' : (i === n - 1 ? 'outro' : 'main');
+    if (next && s.type !== 'intro' && (s.type === 'main' || s.type === 'breakdown') && next.rel >= 0.72 && next.energy - s.energy >= 0.12 && s.bars <= 8 && s.high >= s.bass * 0.8) s.type = 'build';
+  });
+  const cnt = {}; S2.forEach(s => { cnt[s.type] = (cnt[s.type] || 0) + 1; s.label = GM_TYPES[s.type] + (['intro', 'outro'].includes(s.type) ? '' : ' ' + cnt[s.type]); });
+  return S2;
+}
+
+function gmBeats() { return GAME.raw ? GAME.raw.beats : []; }
+function secStart(s, i) { return i === 0 ? 0 : GAME.raw.beats[s.startBeat]; }
+function secEnd(i) { const n = GAME.sections[i + 1]; return n ? GAME.raw.beats[n.startBeat] : GAME.raw.dur; }
+
+function renderGame() {
+  const r = GAME.raw; if (!r) return;
+  $('#gmBpm').textContent = (Math.round(r.bpm * 100) / 100).toString().replace('.', ',');
+  $('#gmBpmAlt').textContent = 'halb ' + nf(r.bpm / 2, 2) + ' · doppelt ' + nf(r.bpm * 2, 2);
+  const c = r.bpmConfidence, pill = $('#gmConf');
+  pill.textContent = c >= 0.7 ? 'Raster sicher' : c >= 0.4 ? 'Raster wahrscheinlich' : 'Raster unsicher';
+  pill.className = 'pill ' + (c >= 0.7 ? 'good' : c >= 0.4 ? 'mid' : 'low');
+  const fd = r.beats[r.downbeatPhase];
+  $('#gmTempoInfo').textContent = 'Beat alle ' + nf(r.beatSec * 1000, 1) + ' ms, Takt (4/4) alle ' + nf(r.beatSec * 4, 3) + ' s. Erste „1“ bei ' + nf(fd, 3) + ' s. ' +
+    (c < 0.4 ? 'Der Song hat wenig klare Schläge. Trag das Tempo selbst ein, wenn du es kennst. ' : '') +
+    'Halb oder doppelt so schnell klingt oft ähnlich: Wähle, was im Spiel als Grundschlag dienen soll.';
+  $('#gmSongInfo').textContent = GAME.sections.length + ' Abschnitte, ' + r.beats.length + ' Beats, ' + Math.floor((r.beats.length - r.downbeatPhase) / 4) + ' Takte' + (S.orig ? ', ' + nf(S.orig.I, 1) + ' LUFS' : '') + '. Abschnitte und Typen sind automatisch erkannt, du kannst sie unten umbenennen.';
+  renderSections(); drawGame(); updateGameOut(); drawAll();
+}
+
+function renderSections() {
+  const t = $('#gmSections'); t.innerHTML = '<thead><tr><th>Abschnitt</th><th>Start</th><th>Takte</th><th>Intensität</th><th>Name im Spiel</th><th></th></tr></thead>';
+  const tb = document.createElement('tbody');
+  GAME.sections.forEach((s, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><span class="sw"></span><select></select></td><td></td><td></td><td></td><td><input type="text" maxlength="40"></td><td><button title="Ab hier abspielen">▶</button></td>';
+    const sel = tr.querySelector('select'); Object.entries(GM_TYPES).forEach(([k, v]) => { const o = document.createElement('option'); o.value = k; o.textContent = v; sel.appendChild(o); });
+    sel.value = s.type; sel.setAttribute('aria-label', 'Typ von Abschnitt ' + (i + 1));
+    tr.querySelector('.sw').style.background = GM_COL[s.type];
+    sel.addEventListener('change', () => { s.type = sel.value; tr.querySelector('.sw').style.background = GM_COL[s.type]; drawGame(); updateGameOut(); drawAll(); });
+    const tds = tr.querySelectorAll('td');
+    tds[1].textContent = fmtTime(secStart(s, i), 2); tds[2].textContent = s.bars;
+    tds[3].innerHTML = nf(s.energy, 2) + '<span class="ebar"><i style="width:' + Math.round(s.energy * 100) + '%"></i></span>';
+    const inp = tr.querySelector('input'); inp.value = s.label; inp.setAttribute('aria-label', 'Name von Abschnitt ' + (i + 1));
+    inp.addEventListener('input', () => { s.label = inp.value; updateGameOut(); });
+    tr.querySelector('button').addEventListener('click', () => { seek(secStart(s, i)); if (!S.playing) play(secStart(s, i)); });
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+}
+
+/* Zeitleiste: Abschnitte, Energie und Bass pro Beat, Taktstriche, Abspielposition */
+const gmCv = $('#gmCanvas'); let gmStatic = null;
+function drawGame() {
+  const r = GAME.raw, dpr = window.devicePixelRatio || 1, w = gmCv.clientWidth, h = gmCv.clientHeight; if (!w || !h) return;
+  gmCv.width = Math.round(w * dpr); gmCv.height = Math.round(h * dpr);
+  const g = gmCv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+  if (!r) { gmStatic = null; return; }
+  const d = r.dur, X = t => t / d * w, top = 8, bh = 22, H = h - bh - top - 6;
+  GAME.sections.forEach((s, i) => { const x0 = X(secStart(s, i)), x1 = X(secEnd(i)); g.fillStyle = GM_COL[s.type]; g.globalAlpha = 0.16; g.fillRect(x0, top, x1 - x0, H); g.globalAlpha = 0.9; g.fillRect(x0 + 1, h - bh - 2, x1 - x0 - 2, bh);
+    g.globalAlpha = 1; g.fillStyle = '#02131B'; g.font = '600 11px "Barlow Condensed",sans-serif'; g.textBaseline = 'middle'; g.save(); g.beginPath(); g.rect(x0 + 1, h - bh - 2, x1 - x0 - 2, bh); g.clip(); g.fillText(s.label || GM_TYPES[s.type], x0 + 5, h - bh / 2 - 2); g.restore(); });
+  g.strokeStyle = 'rgba(230,242,248,.08)'; g.lineWidth = 1; for (let i = r.downbeatPhase; i < r.beats.length; i += 4) { const x = Math.round(X(r.beats[i])) + 0.5; g.beginPath(); g.moveTo(x, top); g.lineTo(x, top + H); g.stroke(); }
+  const line = (arr, col, lw) => { g.strokeStyle = col; g.lineWidth = lw; g.beginPath(); arr.forEach((v, i) => { const x = X(r.beats[i] + r.beatSec / 2), y = top + H - v * H; i ? g.lineTo(x, y) : g.moveTo(x, y); }); g.stroke(); };
+  const sm = a => a.map((v, i) => { let s2 = 0, c = 0; for (let k = Math.max(0, i - 2); k <= Math.min(a.length - 1, i + 2); k++) { s2 += a[k]; c++; } return s2 / c; });
+  line(sm(r.bass), 'rgba(217,164,65,.8)', 1.2); line(sm(r.energy), '#9ADFFF', 1.8);
+  gmStatic = document.createElement('canvas'); gmStatic.width = gmCv.width; gmStatic.height = gmCv.height; gmStatic.getContext('2d').drawImage(gmCv, 0, 0);
+}
+function drawGameHead() {
+  if (!gmStatic || !GAME.raw) return; const g = gmCv.getContext('2d'), dpr = window.devicePixelRatio || 1, w = gmCv.clientWidth, h = gmCv.clientHeight;
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, gmCv.width, gmCv.height); g.drawImage(gmStatic, 0, 0); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const x = Math.round(curPos() / GAME.raw.dur * w) + 0.5; g.strokeStyle = '#E6F2F8'; g.lineWidth = 1; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
+}
+gmCv.addEventListener('click', e => { if (!GAME.raw) return; const rc = gmCv.getBoundingClientRect(), t = (e.clientX - rc.left) / rc.width * GAME.raw.dur; seek(t); if (!S.playing) play(t); });
+window.addEventListener('resize', () => { if (curTab() === 'game') drawGame(); });
+
+/* Abschnittsmarken in der Wellenform, solange der Reiter offen ist */
+function drawGameMarks(g, w, map, y, h) {
+  if (!GAME.raw || GAME.ver !== S.ver || curTab() !== 'game') return;
+  GAME.sections.forEach((s, i) => { const x0 = map(secStart(s, i)), x1 = map(secEnd(i)); if (x1 < 0 || x0 > w) return; g.fillStyle = GM_COL[s.type]; g.globalAlpha = 0.9; g.fillRect(x0, y, Math.max(2, x1 - x0 - 1), h); g.globalAlpha = 1; });
+}
+
+/* Klick-Spur zum Prüfen des Rasters (läuft am Mastering vorbei direkt zum Ausgang) */
+const gmClk = { t0: -1, next: 0 };
+function gmClickTick() {
+  if (!GAME.click || !GAME.raw || !S.playing || S.loopOn || !S.ctx) { gmClk.t0 = -1; return; }
+  const ctx = S.ctx, r = GAME.raw;
+  if (gmClk.t0 !== S.t0) { gmClk.t0 = S.t0; const p = curPos(); gmClk.next = r.beats.findIndex(b => b >= p - 0.005); if (gmClk.next < 0) gmClk.next = r.beats.length; }
+  const horizon = curPos() + 0.25;
+  while (gmClk.next < r.beats.length && r.beats[gmClk.next] < horizon) {
+    const i = gmClk.next++, when = S.t0 + (r.beats[i] - S.off); if (when < ctx.currentTime) continue;
+    const down = ((i - r.downbeatPhase) % 4 + 4) % 4 === 0, o = ctx.createOscillator(), gn = ctx.createGain();
+    o.frequency.value = down ? 1760 : 1175; gn.gain.setValueAtTime(0, when); gn.gain.linearRampToValueAtTime(down ? 0.35 : 0.2, when + 0.002); gn.gain.exponentialRampToValueAtTime(0.0005, when + 0.05);
+    o.connect(gn); gn.connect(ctx.destination); o.start(when); o.stop(when + 0.06);
+  }
+}
+setInterval(gmClickTick, 40);
+(function gmLoop() { if (curTab() === 'game' && S.playing) drawGameHead(); else if (curTab() === 'game' && gmStatic && !S.playing && gmLoop.was) drawGameHead(); gmLoop.was = S.playing; requestAnimationFrame(gmLoop); })();
+
+/* ---------- JSON für das Spiel ---------- */
+const gmInc = k => { const el = $('#gmInc [data-inc="' + k + '"]'); return !!(el && el.checked); };
+function snapHits(list, thr) {
+  const r = GAME.raw, step = r.beatSec / 4, f0 = r.beats[0], out = new Map();
+  list.forEach(([t, s]) => { if (s < thr) return; let tt = t;
+    if (gmInc('snap')) { const q = f0 + Math.round((t - f0) / step) * step; if (Math.abs(q - t) <= step * 0.35) tt = q; }
+    tt = r3(Math.max(0, tt)); if (!out.has(tt) || out.get(tt) < s) out.set(tt, s); });
+  return [...out.entries()].sort((a, b) => a[0] - b[0]).map(([t, s]) => [t, r2(s)]);
+}
+function gameJSON() {
+  const r = GAME.raw; if (!r) return null;
+  const ph = r.downbeatPhase, lvl = $('#gmLevel').value, thr = GAME.thr / 100;
+  const track = { title: $('#gmTitle').value.trim() || S.track.name, level: lvl === '' ? null : +lvl, sourceName: S.track.name, durationSec: r3(r.dur), sampleRate: S.track.sr,
+    bpm: r.bpm, bpmConfidence: r2(r.bpmConfidence), timeSignature: [4, 4], beatSec: +r.beatSec.toFixed(6), barSec: +(r.beatSec * 4).toFixed(6),
+    firstBeatSec: r3(r.beats[0]), firstDownbeatSec: r3(r.beats[ph]), firstDownbeatIndex: ph, beatCount: r.beats.length,
+    integratedLufs: S.orig && isFinite(S.orig.I) ? r2(S.orig.I) : null, truePeakDb: S.orig && isFinite(S.orig.TP) ? r2(S.orig.TP) : null };
+  const sections = GAME.sections.map((s, i) => ({ index: i, type: s.type, label: s.label || GM_TYPES[s.type], startSec: r3(secStart(s, i)), endSec: r3(secEnd(i)),
+    startBeat: i === 0 ? 0 : s.startBeat, startBar: s.startBar, bars: s.bars, intensity: r2(s.energy), bass: r2(s.bass), mid: r2(s.mid), high: r2(s.high) }));
+  const o = { format: 'deepstructure.trackdata.v1', generator: 'Deep Structure Mastering Studio', createdAt: new Date().toISOString().slice(0, 19) + 'Z', track, sections,
+    drops: sections.filter(s => s.type === 'drop').map(s => s.startSec), peaks: sections.filter(s => s.type === 'peak' || s.type === 'drop').map(s => s.startSec) };
+  if (gmInc('beats')) { o.beats = r.beats.map(r3); o.downbeats = r.beats.filter((b, i) => i >= ph && (i - ph) % 4 === 0).map(r3); }
+  if (gmInc('energy')) { o.energyPerBeat = r.energy.map(r2); const bars = []; for (let i = ph; i < r.energy.length; i += 4) { const seg = r.energy.slice(i, i + 4); bars.push(r2(seg.reduce((a, b) => a + b, 0) / seg.length)); } o.intensityPerBar = bars; }
+  if (gmInc('bands')) o.bandsPerBeat = { bass: r.bass.map(r2), mid: r.mid.map(r2), high: r.high.map(r2) };
+  if (gmInc('hits')) o.hits = { minStrength: thr, low: snapHits(r.lowHits, thr), mid: snapHits(r.midHits, thr), high: snapHits(r.highHits, thr) };
+  if (gmInc('loudness')) { const mx = Math.max(...r.levelCurve); o.loudness = { stepSec: r3(r.levelStep), relDb: r.levelCurve.map(v => Math.round(Math.max(-60, v - mx) * 10) / 10) }; }
+  return o;
+}
+/* Kompakt: eine Zeile pro Eintrag, Zahlenlisten am Stück. Lesbar: klassisch eingerückt. */
+function gameText() {
+  const o = gameJSON(); if (!o) return '';
+  if (gmInc('pretty')) return JSON.stringify(o, null, 2);
+  const lines = ['{']; const keys = Object.keys(o);
+  keys.forEach((k, i) => { const v = o[k], end = i < keys.length - 1 ? ',' : '';
+    if (Array.isArray(v) && v.length && typeof v[0] === 'object' && !Array.isArray(v[0])) { lines.push('  "' + k + '": ['); v.forEach((x, j) => lines.push('    ' + JSON.stringify(x) + (j < v.length - 1 ? ',' : ''))); lines.push('  ]' + end); }
+    else if (v && typeof v === 'object' && !Array.isArray(v)) { lines.push('  "' + k + '": {'); const ks = Object.keys(v); ks.forEach((kk, j) => lines.push('    "' + kk + '": ' + JSON.stringify(v[kk]) + (j < ks.length - 1 ? ',' : ''))); lines.push('  }' + end); }
+    else lines.push('  "' + k + '": ' + JSON.stringify(v) + end); });
+  lines.push('}'); return lines.join('\n');
+}
+function updateGameOut() {
+  const t = gameText(); $('#gmOut').value = t;
+  $('#gmSize').textContent = t ? (t.length / 1024).toFixed(1).replace('.', ',') + ' KB' : '';
+  const r = GAME.raw; if (r && gmInc('hits')) { const th = GAME.thr / 100, c = a => a.filter(h => h[1] >= th).length; $('#gmHitInfo').textContent = 'Bass ' + c(r.lowHits) + ' · Mitte ' + c(r.midHits) + ' · Höhen ' + c(r.highHits) + ' Schläge'; } else $('#gmHitInfo').textContent = '';
+}
+function gameFileName() { const lvl = $('#gmLevel').value; let title = $('#gmTitle').value.trim() || (S.track && S.track.name) || 'song'; if (lvl !== '') title = title.replace(/^\s*\d+\s*[.\-_)]*\s*/, '') || title;
+  const base = title.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'song';
+  return (lvl !== '' ? String(+lvl).padStart(2, '0') + '_' : '') + base + '.trackdata.json'; }
+
+async function copyText(txt, ok) {
+  try { await navigator.clipboard.writeText(txt); status(ok, 'ok', 4000); return; } catch (e) {}
+  const ta = document.createElement('textarea'); ta.value = txt; ta.setAttribute('readonly', ''); ta.style.cssText = 'position:fixed;left:-9999px;top:0'; document.body.appendChild(ta); ta.select();
+  let done = false; try { done = document.execCommand('copy'); } catch (e) {} ta.remove();
+  status(done ? ok : 'Kopieren wurde vom Browser blockiert. Markiere den Text im Feld und kopiere ihn von Hand.', done ? 'ok' : 'err', 6000);
+}
+
+function godotCode() {
+  const f = gameFileName();
+  return `# track_data.gd – Spiel-Daten eines Songs (erzeugt mit dem Deep Structure Mastering Studio)
+# Laden:   var td := TrackData.new()
+#          td.load_file("res://music/${f}")
+# Zeit:    var t := td.song_time($Music)   # genaue Songzeit in Sekunden
+class_name TrackData
+extends RefCounted
+
+var data: Dictionary = {}
+var track: Dictionary = {}
+var sections: Array = []
+
+func load_file(path: String) -> bool:
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if typeof(parsed) != TYPE_DICTIONARY:
+		push_error("TrackData: %s konnte nicht gelesen werden" % path)
+		return false
+	data = parsed
+	track = data["track"]
+	sections = data["sections"]
+	return true
+
+## Genaue Wiedergabezeit, so wie Godot es für Musik-Synchronisation empfiehlt.
+func song_time(player: AudioStreamPlayer) -> float:
+	return player.get_playback_position() + AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()
+
+## Nummer des Beats zur Zeit t (0 = erster Beat). Das Raster ist gleichmäßig.
+func beat_index(t: float) -> int:
+	return int(floor((t - float(track["firstBeatSec"])) / float(track["beatSec"])))
+
+## Nummer des Takts (0 = erster voller Takt ab der ersten "1").
+func bar_index(t: float) -> int:
+	return int(floor((t - float(track["firstDownbeatSec"])) / float(track["barSec"])))
+
+## true, wenn Beat b auf der "1" eines Takts liegt.
+func is_downbeat(b: int) -> bool:
+	return posmod(b - int(track["firstDownbeatIndex"]), 4) == 0
+
+## 0.0 genau auf dem Beat, gegen 1.0 kurz vor dem nächsten (für Pulsieren, Timing-Fenster).
+func beat_phase(t: float) -> float:
+	var x := (t - float(track["firstBeatSec"])) / float(track["beatSec"])
+	return x - floor(x)
+
+func section_at(t: float) -> Dictionary:
+	for s in sections:
+		if t < float(s["endSec"]):
+			return s
+	return sections.back()
+
+## Intensität 0…1 zur Zeit t: pro Beat, falls exportiert, sonst die des Abschnitts.
+func intensity_at(t: float) -> float:
+	if data.has("energyPerBeat"):
+		var e: Array = data["energyPerBeat"]
+		return float(e[clampi(beat_index(t), 0, e.size() - 1)])
+	return float(section_at(t)["intensity"])
+
+
+# ---------------------------------------------------------------
+# Beispiel: music_clock.gd – sendet Signale auf Beats, Takten und Abschnitten
+# extends Node
+# signal beat(index: int, downbeat: bool)
+# signal section_changed(section: Dictionary)
+# @export var music: AudioStreamPlayer
+# var td := TrackData.new()
+# var _last_beat := -1
+# var _last_section := -1
+#
+# func _ready() -> void:
+# 	td.load_file("res://music/${f}")
+# 	music.play()
+#
+# func _process(_delta: float) -> void:
+# 	if not music.playing:
+# 		return
+# 	var t := td.song_time(music)
+# 	var b := td.beat_index(t)
+# 	if b != _last_beat and b >= 0:
+# 		_last_beat = b
+# 		beat.emit(b, td.is_downbeat(b))
+# 	var s := td.section_at(t)
+# 	if int(s["index"]) != _last_section:
+# 		_last_section = int(s["index"])
+# 		section_changed.emit(s)
+`;
+}
+
+function codexGuide() {
+  const o = gameJSON(), t = o.track, f = gameFileName();
+  const secs = o.sections.map(s => '  ' + (s.index + 1) + '. ' + s.label + ' (' + s.type + '): ' + s.startSec.toFixed(2) + '–' + s.endSec.toFixed(2) + ' s, ' + s.bars + ' Takte, Intensität ' + s.intensity.toFixed(2)).join('\n');
+  return `Aufgabe: Binde die Spiel-Daten eines Songs in mein Godot-4-Tower-Defense-Spiel ein. Jedes Level gehört zu einem Song des Albums. Der Spielablauf soll der Musik folgen.
+
+DATEI
+res://music/${f}  (JSON, erzeugt mit dem Deep Structure Mastering Studio, Format "${o.format}")
+Sie gehört zum Song "${t.sourceName}" (genau diese Audiodatei). Alle Zeiten sind Sekunden ab dem ersten Sample dieser Datei.
+Wird der Song geschnitten, mit Stille am Anfang versehen oder neu exportiert, müssen die Daten neu erzeugt werden.
+Im Spiel möglichst OGG Vorbis oder WAV verwenden. MP3 kann am Anfang eine kleine Verzögerung haben.
+
+DIESER SONG
+Titel: ${t.title}${t.level != null ? ' · Level ' + t.level : ''}
+Dauer: ${t.durationSec} s · Tempo: ${t.bpm} BPM (4/4) · Beat: ${t.beatSec} s · Takt: ${t.barSec} s
+Erster Beat: ${t.firstBeatSec} s · Erste "1" eines Takts: ${t.firstDownbeatSec} s (Beat-Index ${t.firstDownbeatIndex})
+Abschnitte:
+${secs}
+
+FELDER
+- track.bpm, beatSec, barSec, firstBeatSec, firstDownbeatSec, firstDownbeatIndex: Das Beat-Raster ist gleichmäßig. Beat n liegt bei firstBeatSec + n * beatSec.
+- sections[]: index, type, label, startSec, endSec, startBeat, startBar, bars, intensity (0–1), bass/mid/high (0–1, relativ zum Song).
+  type ist einer von: intro, build (Aufbau), main (Hauptteil), peak (Höhepunkt), drop, breakdown (Ruhephase), outro, part.
+  label ist der Name, den ich im Spiel verwenden will (z. B. für Story-Texte).
+- drops[], peaks[]: Startzeiten der Drop- bzw. Höhepunkt-Abschnitte.${o.beats ? '\n- beats[], downbeats[]: alle Beat-Zeiten bzw. die Zeiten jeder "1".' : ''}${o.energyPerBeat ? '\n- energyPerBeat[i]: Energie 0–1 des Beats i (0 = leiseste, 1 = lauteste Stellen des Songs).\n- intensityPerBar[k]: mittlere Energie 0–1 des Takts k (Takt 0 beginnt bei firstDownbeatSec). Gut für Wellengrößen pro Takt.' : ''}${o.bandsPerBeat ? '\n- bandsPerBeat.bass/mid/high[i]: Anteil Bass (30–150 Hz), Mitten (150–2500 Hz) und Höhen (5–16 kHz) pro Beat, 0–1.' : ''}${o.hits ? '\n- hits.low/mid/high: Listen von [zeitSec, stärke 0–1]. low ≈ Kick und Bass-Einsätze, mid ≈ Snare, Clap, Stimme, Akkorde, high ≈ HiHats und Becken. Nur Schläge ab Stärke ' + o.hits.minStrength + '.' : ''}${o.loudness ? '\n- loudness.relDb: Pegelverlauf in dB relativ zur lautesten Stelle, alle loudness.stepSec Sekunden.' : ''}
+
+TECHNISCHE REGELN
+1. Songzeit immer so berechnen (nicht delta aufsummieren):
+   t = player.get_playback_position() + AudioServer.get_time_since_last_mix() - AudioServer.get_output_latency()
+2. Ereignisse über einen fortlaufenden Index abarbeiten (nächster Beat, nächster Schlag), damit bei Ruckeln nichts doppelt oder gar nicht ausgelöst wird.
+3. Die JSON-Datei einmal beim Laden des Levels lesen (JSON.parse_string). Zahlen kommen als float an, Indizes mit int() umwandeln.
+4. Eine Klasse TrackData (track_data.gd) bereitstellen mit: load_file, song_time, beat_index, bar_index, is_downbeat, beat_phase, section_at, intensity_at. Dazu einen MusicClock-Node, der Signale beat(index, downbeat), bar(index), section_changed(section), hit(kind, strength) sendet.
+
+UMSETZUNGSIDEEN FÜR DAS TOWER DEFENSE (bitte als Vorschlag umsetzen und konfigurierbar machen)
+- Gegnerwellen starten auf einer "1" (downbeat). Größe und Spawn-Rate der Welle folgen section.intensity.
+- intro: ruhiger Einstieg, wenige schwache Gegner, Zeit zum Bauen.
+- build: Spannung steigt, Spawn-Rate erhöht sich Takt für Takt bis zum nächsten drop/peak.
+- drop / peak: große Welle oder Boss genau auf startSec. Kurze Kamera- oder Licht-Reaktion.
+- main: normale Wellen im Takt.
+- breakdown: Verschnaufpause, keine oder kaum Gegner. Platz für Story-Dialog und Turm-Upgrades.
+- outro: letzte Welle, danach Level-Abschluss.
+- hits.low: Türme feuern oder pulsieren auf Kick-Schlägen, leichte Bildschirm-Erschütterung bei stärke > 0.8.
+- hits.high: Partikel, Funken, Lichter. energyPerBeat steuert Hintergrund-Helligkeit oder Nebel.
+- Optional: Aktionen des Spielers im Beat (beat_phase < 0.12 oder > 0.88) geben einen kleinen Bonus.
+
+Bitte zuerst TrackData und MusicClock bauen, dann die Wellensteuerung an section.type und intensity anschließen. Keine festen Zeiten in den Code schreiben, alles aus der JSON-Datei lesen, damit jedes Level des Albums mit seiner eigenen Datei funktioniert.`;
+}
+
+/* ---------- Bedienung ---------- */
+$('#gmRun').addEventListener('click', () => runGame(true));
+$('#gmHalf').addEventListener('click', () => { if (!GAME.raw) return; GAME.opts = { ...GAME.opts, bpm: GAME.raw.bpm / 2, downbeatPhase: undefined }; delete GAME.opts.downbeatPhase; runGame(true); });
+$('#gmDouble').addEventListener('click', () => { if (!GAME.raw) return; GAME.opts = { ...GAME.opts, bpm: GAME.raw.bpm * 2 }; delete GAME.opts.downbeatPhase; runGame(true); });
+const gmShift = d => { if (!GAME.raw) return; GAME.opts = { ...GAME.opts, bpm: GAME.raw.bpm, downbeatPhase: (GAME.raw.downbeatPhase + d + 4) % 4 }; runGame(true); };
+$('#gmShiftL').addEventListener('click', () => gmShift(-1)); $('#gmShiftR').addEventListener('click', () => gmShift(1));
+$('#gmBpmGo').addEventListener('click', () => { const v = parseFloat(String($('#gmBpmIn').value).replace(',', '.'));
+  if (!(v >= 40 && v <= 260)) { status('Bitte ein Tempo zwischen 40 und 260 BPM eintragen.', 'err'); return; }
+  GAME.opts = { ...GAME.opts, bpm: v }; delete GAME.opts.downbeatPhase; runGame(true); });
+$('#gmBpmIn').addEventListener('keydown', e => { if (e.key === 'Enter') $('#gmBpmGo').click(); });
+$('#gmSens').addEventListener('change', () => { GAME.opts = { ...GAME.opts, sensitivity: +$('#gmSens').value }; if (GAME.raw) { GAME.opts.bpm = GAME.raw.bpm; GAME.opts.downbeatPhase = GAME.raw.downbeatPhase; } runGame(true); });
+$('#gmClick').addEventListener('click', () => { GAME.click = !GAME.click; $('#gmClick').setAttribute('aria-pressed', GAME.click ? 'true' : 'false'); gmClk.t0 = -1; });
+$('#gmThr').addEventListener('input', () => { GAME.thr = +$('#gmThr').value; $('#gmThrV').textContent = GAME.thr + ' %'; $('#gmThr').style.setProperty('--fill', (GAME.thr / 90 * 100) + '%'); updateGameOut(); });
+$('#gmThr').style.setProperty('--fill', (40 / 90 * 100) + '%');
+$$('#gmInc input').forEach(c => c.addEventListener('change', updateGameOut));
+['#gmTitle', '#gmLevel'].forEach(s => $(s).addEventListener('input', updateGameOut));
+$('#gmCopy').addEventListener('click', () => { if (!GAME.raw) return; copyText($('#gmOut').value, 'Spiel-Daten kopiert (' + $('#gmSize').textContent + ').'); });
+$('#gmGodot').addEventListener('click', () => copyText(godotCode(), 'Godot-Code kopiert. In Godot als track_data.gd speichern.'));
+$('#gmCodex').addEventListener('click', () => { if (!GAME.raw) return; copyText(codexGuide(), 'Anleitung für Codex kopiert. Zusammen mit der JSON-Datei verwenden.'); });
+$('#gmSave').addEventListener('click', async () => { if (!GAME.raw) return; const name = gameFileName();
+  try { const how = await deliver(new Blob([$('#gmOut').value], { type: 'application/json' }), name); if (how !== 'declined') status('„' + name + '“ gespeichert.', 'ok'); }
+  catch (e) { status('Speichern nicht möglich: ' + e.message, 'err'); } });
+$$('.tabs [role=tab]').forEach(b => b.addEventListener('click', () => { if (b.dataset.tab === 'game') { if (!GAME.raw || GAME.ver !== S.ver) runGame(); else { drawGame(); drawGameHead(); } } drawAll(); }));
 /* ============================ Offline-Rendern & Messung ============================ */
 const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 async function measureLatency(p, sr) {
@@ -2209,7 +2726,8 @@ async function analyzeOrig() {
   try {
     const r = await DSP({ cmd: 'analyze', sr: S.track.sr, L: S.track.L.slice(), R: S.track.R.slice(), opts: { tp: true, spectrum: true, diag: true } });
     if (ver !== S.ver) return; S.orig = r; applyMonitor(); renderAnalysis(); drawSpec(); renderCheck(); scheduleMeasure(50); runArtifacts();
-    if (S.autoCheck) { S.autoCheck = false; showTab('check'); }
+    if (S.autoCheck) { S.autoCheck = false; if (curTab() !== 'game') showTab('check'); }
+    if (curTab() === 'game') runGame();
   } catch (e) { console.error(e); status('Messung fehlgeschlagen: ' + e.message, 'err'); }
 }
 let measT = 0;

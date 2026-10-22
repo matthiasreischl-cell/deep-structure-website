@@ -160,3 +160,18 @@ Beim fs/4-Testsignal liegt der theoretisch exakte True Peak bei 0,0 dBTP (Amplit
 - **Masters, bei denen „Drive auf Ziel einstellen“ geklickt wurde:** Der Drive blieb unverändert, das Lautheitsziel wurde nicht eingestellt. Der Assistent und das KI-Mastering waren nicht betroffen, weil sie den Zielwert als Zahl übergeben haben.
 - **Masters mit Preset „Neutral“:** Spitzen über −1 dBTP wurden leicht begrenzt. Für ein unverändertes Original neu exportieren.
 - **Song-Check, EQ-Angleich und KI-Vorschläge bei sehr breiten oder gegenphasigen Mischungen:** Die Klangbalance konnte falsch bewertet worden sein. Bei typischen Mischungen ist der Unterschied gering.
+
+## 8. Nachtrag 1.5.0: Spiel-Daten
+
+| Prüfung | Ergebnis |
+|---|---|
+| Synthetische Songs 75, 90, 128, 140, 174 BPM (Intro, Hauptteil, Break, Drop, Outro) | Tempo exakt. Beat-Abweichung im Median 0,0–0,3 ms. Erste „1“ richtig. Alle 4 Abschnittswechsel auf den Beat genau gefunden. |
+| Krummes Tempo 123,4 BPM, 48 kHz, 3,2 s Stille am Anfang | 123,4 BPM, 0,1 ms |
+| Eingetragenes Tempo (127,5 BPM) | Exakt übernommen |
+| Taktanfang verschieben | Funktioniert |
+| Rauschen ohne Rhythmus | Raster als „unsicher“ markiert (Sicherheit 0,00) |
+| Zu kurzer Song | Verständliche Meldung statt Fehler |
+| Browser: 120-BPM-Klickspur mit Akzent auf der 1 | 120 BPM, erste „1“ bei 0,501 s, JSON gültig, Typ-Änderung landet im JSON, Dateiname mit Level |
+| „3. DEIN ABER“ (207,6 s) | 173,94 BPM (halb: 86,97), Sicherheit 0,89, 13 Abschnitte, deren Pegelsprünge mit der Wellenform übereinstimmen. Analyse etwa 3,5 s. |
+
+Nicht automatisch prüfbar: Ob das erkannte Tempo dem entspricht, was der Musiker als Grundschlag empfindet (halb oder doppelt), und ob die Abschnittsnamen musikalisch passen. Dafür gibt es ÷ 2, × 2, das Tempo-Eingabefeld, die Taktverschiebung und den Metronom-Klick. Der GDScript-Code wurde nicht in Godot ausgeführt (keine Godot-Installation in der Testumgebung).

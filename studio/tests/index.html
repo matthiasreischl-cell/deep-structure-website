@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Studio-Tests</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { color-scheme: dark; --bg: #03060A; --fg: #E6F2F8; --mut: #7F94A4; --ok: #5FD08A; --bad: #FF5C4D; --line: #1C2A36; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 system-ui, sans-serif; padding: 20px max(16px, env(safe-area-inset-left, 0px)); }
+  h1 { font-size: 20px; margin: 0 0 6px; } p { color: var(--mut); margin: 0 0 14px; max-width: 75ch; }
+  table { border-collapse: collapse; width: 100%; max-width: 1100px; } td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { width: 60px; font-weight: 700; } .PASS { color: var(--ok); } .FAIL { color: var(--bad); } td.d { color: var(--mut); font-family: ui-monospace, monospace; font-size: 12px; }
+  #sum { font-weight: 700; margin: 12px 0; } iframe { width: 1px; height: 1px; border: 0; position: absolute; left: -10px; }
+  button { font: inherit; padding: 6px 14px; background: #0F171F; color: var(--fg); border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Deep Structure Mastering Studio – Integrationstests</h1>
+<p>Lädt die App unsichtbar und prüft Signalkette, Presets, Sättigung, Lautheitsziel, Stereo, Limiter und WAV-Export mit Testsignalen. Dauert je nach Rechner 1–3 Minuten. Es werden keine Dateien heruntergeladen.</p>
+<button id="run">Tests starten</button>
+<div id="sum"></div>
+<table id="out"></table>
+<iframe id="app" title="App unter Test"></iframe>
+<script>
+const out = document.getElementById('out'), sum = document.getElementById('sum');
+window.__results = null;
+function row(status, name, detail) { const tr = document.createElement('tr'); tr.innerHTML = '<td class="' + status + '">' + status + '</td><td></td><td class="d"></td>'; tr.children[1].textContent = name; tr.children[2].textContent = detail; out.appendChild(tr); }
+
+// Jeder Test läuft IN der App (iframe) und gibt [[name, ok, detail], ...] zurück.
+const TESTS = [
+async function neutralNull() {
+  const sr = 48000, n = sr * 4, L = new Float32Array(n), R = new Float32Array(n); let s = 5;
+  for (let i = 0; i < n; i++) { s = (s * 16807) % 2147483647; const v = s / 2147483647 - 0.5; L[i] = 0.9 * Math.sin(2 * Math.PI * 220 * i / sr) * 0.6 + v * 0.35; R[i] = L[i] * 0.8 - v * 0.2; }
+  const keepTrack = S.track; S.track = { sr, L, R, name: 'null', demo: true };
+  const p = clone(PRESETS.neutral.p), pre = await renderPre(p, sr);
+  let m = 0; for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(pre.L[i] - L[i]), Math.abs(pre.R[i] - R[i]));
+  const lp = { on: p.lim.on, drive: p.lim.drive, ceiling: p.lim.ceiling, release: p.lim.release, isp: p.lim.isp };
+  const r32 = await DSP({ cmd: 'analyze', sr, L: pre.L.slice(), R: pre.R.slice(), lim: lp, opts: { encode: 32 } }), w32 = parseWav(r32.wav);
+  let m32 = 0; for (let i = 0; i < n; i++) m32 = Math.max(m32, Math.abs(w32.L[i] - L[i]));
+  const r24 = await DSP({ cmd: 'analyze', sr, L: pre.L.slice(), R: pre.R.slice(), lim: lp, opts: { encode: 24 } }), w24 = parseWav(r24.wav);
+  let m24 = 0; for (let i = 0; i < n; i++) m24 = Math.max(m24, Math.abs(w24.L[i] - L[i]));
+  S.track = keepTrack;
+  return [['Preset „Neutral“: Signalkette ist ein Nulltest (Peaks bis −0,1 dBFS)', m < 1e-6, 'max. Abweichung ' + m.toExponential(2)],
+    ['Preset „Neutral“: Export 32 Bit Float identisch zum Original', m32 < 1e-6, 'max. Abweichung ' + m32.toExponential(2)],
+    ['Preset „Neutral“: Export 24 Bit innerhalb von 2 LSB (Dither)', m24 <= 2 / 8388608 + 1e-9, 'max. Abweichung ' + (m24 * 8388608).toFixed(2) + ' LSB']];
+},
+async function saturation() {
+  const sr = 48000, n = sr, res = [];
+  const run = async (drive, mix, amp, on = true) => { const oc = new OfflineAudioContext(2, n, sr), b = oc.createBuffer(2, n, sr);
+    for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = amp * Math.sin(2 * Math.PI * 1000 * i / sr); }
+    const p = clone(DEFAULT); p.eq.on = false; p.stereo.on = false; p.lim.on = false; p.sat.on = on; p.sat.drive = drive; p.sat.mix = mix;
+    const src = oc.createBufferSource(); src.buffer = b; const ch = buildChain(oc, p, {}); src.connect(ch.input); ch.output.connect(oc.destination); src.start(0);
+    const o = await oc.startRendering(), x = o.getChannelData(0); let e = 0, e0 = 0; for (let i = 4800; i < n - 4800; i++) { e += x[i] * x[i]; e0 += b.getChannelData(0)[i] ** 2; } return 20 * Math.log10(Math.sqrt(e / e0)); };
+  for (const drive of [0, 50, 100]) for (const amp of [0.05, 0.5, 1.5]) { const g = await run(drive, 0, amp); res.push(['Sättigung Mix 0 %: unverändert (Drive ' + drive + ', Pegel ' + amp + ')', Math.abs(g) < 0.01, (g >= 0 ? '+' : '') + g.toFixed(3) + ' dB']); }
+  for (const [drive, mix] of [[25, 60], [60, 100], [100, 100]]) { const gs = await run(drive, mix, 0.02), gl = await run(drive, mix, 0.9);
+    res.push(['Sättigung Drive ' + drive + ' / Mix ' + mix + ' %: leise unverändert, laut nie lauter', Math.abs(gs) < 0.1 && gl <= 0.05, 'leise ' + gs.toFixed(2) + ' dB, laut ' + gl.toFixed(2) + ' dB']); }
+  const off = await run(50, 60, 0.3, false), on = await run(50, 60, 0.05);
+  res.push(['Sättigung ein/aus: kein Pegelsprung bei normalem Pegel', Math.abs(off) < 0.01 && Math.abs(on) < 0.15, 'aus ' + off.toFixed(3) + ' dB, ein (−26 dBFS) ' + on.toFixed(2) + ' dB']);
+  return res;
+},
+async function eqResponse() {
+  const sr = 48000, n = sr, res = [];
+  const tone = async (f, p) => { const oc = new OfflineAudioContext(1, n, sr), b = oc.createBuffer(1, n, sr), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = 0.1 * Math.sin(2 * Math.PI * f * i / sr);
+    const src = oc.createBufferSource(); src.buffer = b; const ch = buildChain(oc, p, {}); src.connect(ch.input); ch.output.connect(oc.destination); src.start(0);
+    const o = (await oc.startRendering()).getChannelData(0); let e = 0, e0 = 0; for (let i = 9600; i < n - 960; i++) { e += o[i] * o[i]; e0 += d[i] * d[i]; } return 20 * Math.log10(Math.sqrt(e / e0)); };
+  const p = clone(PRESETS.neutral.p); p.eq.on = true; p.eq.bands.forEach(b => { b.on = false; }); Object.assign(p.eq.bands[3], { on: true, type: 'peaking', f: 1000, g: 6, q: 1 });
+  const g1 = await tone(1000, p), g2 = await tone(100, p), g3 = await tone(10000, p);
+  res.push(['EQ: Glocke +6 dB bei 1 kHz trifft +6 dB', Math.abs(g1 - 6) < 0.1, g1.toFixed(2) + ' dB'], ['EQ: weit entfernte Frequenzen unbeeinflusst (100 Hz, 10 kHz)', Math.abs(g2) < 0.3 && Math.abs(g3) < 0.3, g2.toFixed(2) + ' / ' + g3.toFixed(2) + ' dB']);
+  const q = clone(PRESETS.neutral.p); q.eq.on = true; q.eq.bands.forEach(b => { b.on = false; }); Object.assign(q.eq.bands[0], { on: true, type: 'highpass', f: 100, q: 0.71 });
+  const h1 = await tone(100, q), h2 = await tone(1000, q); res.push(['EQ: Low Cut 100 Hz Butterworth (−3 dB an der Grenze, Durchlass unverändert)', Math.abs(h1 + 3) < 0.2 && Math.abs(h2) < 0.1, h1.toFixed(2) + ' / ' + h2.toFixed(2) + ' dB']);
+  return res;
+},
+async function stereo() {
+  const sr = 48000, n = sr * 3, L = new Float32Array(n), R = new Float32Array(n), res = [];
+  for (let i = 0; i < n; i++) { const b = 0.3 * Math.sin(2 * Math.PI * 60 * i / sr), h = 0.1 * Math.sin(2 * Math.PI * 2000 * i / sr); L[i] = b + h; R[i] = -b + h; }
+  const keep = S.track; S.track = { sr, L, R, name: 'st', demo: true };
+  const p = clone(PRESETS.neutral.p); p.stereo.on = true; p.stereo.bassMono = true; p.stereo.monoFreq = 120; p.stereo.width = 100;
+  const o = await renderPre(p, sr); S.track = keep;
+  let sb = 0, sb0 = 0; for (let i = sr; i < n - sr / 2; i++) { const s0 = (L[i] - R[i]) / 2, s1 = (o.L[i] - o.R[i]) / 2; sb0 += s0 * s0; sb += s1 * s1; }
+  const red = 10 * Math.log10(sb0 / sb);
+  res.push(['Bass-Mono 120 Hz: gegenphasiger 60-Hz-Bass wird mono (Seite −20 dB oder mehr)', red > 20, 'Seitenanteil −' + red.toFixed(1) + ' dB']);
+  const a = await DSP({ cmd: 'analyze', sr, L: L.slice(), R: R.slice(), opts: { spectrum: true } });
+  res.push(['Analyse: gegenphasiger Bass bleibt im Spektrum sichtbar', a.spec[5] > -20, '63-Hz-Band ' + a.spec[5].toFixed(1) + ' dB']);
+  return res;
+},
+async function lufsTarget() {
+  const res = [], sr = 48000, n = sr * 12, L = new Float32Array(n), R = new Float32Array(n); let s = 9, b0 = 0;
+  for (let i = 0; i < n; i++) { s = (s * 16807) % 2147483647; const w = s / 2147483647 - 0.5; b0 = 0.97 * b0 + w * 0.1; L[i] = (b0 + w * 0.05) * (0.6 + 0.4 * Math.sin(i / 9000)); R[i] = L[i] * 0.9; }
+  const keepT = S.track, keepP = clone(P); await loadTrack({ sr, L, R, name: 'LUFS-Test', demo: true });
+  P = clone(PRESETS.neutral.p); P.lim.on = true; refreshAll(); onParam();
+  document.querySelector('#targetSel').value = '-14';
+  const r1 = await setDriveToTarget({ type: 'click' }); // Ereignis-Objekt darf den Zielwert nicht verfälschen
+  res.push(['Lautheitsziel: Klick-Ereignis wird ignoriert, Ziel aus dem Auswahlfeld (−14)', r1 && r1.reached && Math.abs(r1.I + 14) <= 0.5, r1 ? 'I = ' + r1.I.toFixed(2) + ' LUFS bei Drive ' + r1.driveUsed : 'kein Ergebnis']);
+  document.querySelector('#btnToTarget').click(); await sleep(300); while (document.querySelector('#status .busy')) await sleep(200);
+  res.push(['Lautheitsziel: Knopf „Drive auf Ziel einstellen“ funktioniert', /Lautheit eingestellt/.test(document.querySelector('#status').textContent), document.querySelector('#status').textContent.slice(0, 80)]);
+  const m = await (async () => { await freshMaster(); return S.master; })();
+  res.push(['Lautheitsziel: neu gemessener Master stimmt (±0,5 LU)', Math.abs(m.I + 14) <= 0.5 && m.TP <= P.lim.ceiling + 0.1, 'Master ' + m.I.toFixed(2) + ' LUFS, TP ' + m.TP.toFixed(2)]);
+  P.lim.ceiling = -6; refreshAll(); onParam();
+  const r2 = await setDriveToTarget(-5);
+  res.push(['Lautheitsziel: unerreichbares Ziel (−5 LUFS bei Decke −6) wird als nicht erreicht gemeldet', r2 && r2.reached === false && /NICHT erreicht/.test(document.querySelector('#targetInfo').textContent), document.querySelector('#targetInfo').textContent.slice(0, 120)]);
+  const r3 = await setDriveToTarget('abc'); res.push(['Lautheitsziel: ungültige Eingabe wird abgelehnt', r3 === null && /Ungültiges/.test(document.querySelector('#status').textContent), document.querySelector('#status').textContent.slice(0, 60)]);
+  P = keepP; refreshAll(); onParam(); if (keepT) await loadTrack(keepT);
+  return res;
+},
+async function exportMatrix() {
+  const res = [], keep = S.track, keepP = clone(P);
+  for (const srIn of [44100, 48000, 96000]) {
+    const n = Math.round(srIn * 6), L = new Float32Array(n), R = new Float32Array(n); let s = 3;
+    for (let i = 0; i < n; i++) { s = (s * 16807) % 2147483647; const w = s / 2147483647 - 0.5; L[i] = 0.5 * Math.sin(2 * Math.PI * 330 * i / srIn) * (0.5 + 0.5 * Math.sin(i / 5000)) + w * 0.2; R[i] = L[i] * 0.85; }
+    S.track = { sr: srIn, L, R, name: 'exp', demo: true }; S.ver++; S.preCache = null;
+    P = clone(DEFAULT); P.lim.drive = 8; P.lim.ceiling = -1;
+    const pre = await getPre(srIn), lp = limParams();
+    const shown = await DSP({ cmd: 'analyze', sr: srIn, L: pre.L.slice(), R: pre.R.slice(), lim: lp, opts: { tp: true } });
+    for (const bits of [16, 24, 32]) {
+      const r = await DSP({ cmd: 'analyze', sr: srIn, L: pre.L.slice(), R: pre.R.slice(), lim: lp, opts: { tp: true, encode: bits } }), w = parseWav(r.wav);
+      const wLen = w.L.length, back = await DSP({ cmd: 'analyze', sr: w.sr, L: w.L.slice(), R: w.R.slice(), opts: { tp: true } }); // Kopien: DSP() überträgt die Puffer an den Worker
+      res.push(['Export ' + (srIn / 1000) + ' kHz / ' + bits + ' Bit: Format, Länge, Lautheit = Anzeige, TP ≤ Decke',
+        w.sr === srIn && wLen === n && Math.abs(back.I - shown.I) < 0.05 && back.TP <= -1 + 0.15, 'angezeigt ' + shown.I.toFixed(2) + ' / Datei ' + back.I.toFixed(2) + ' LUFS, TP Datei ' + back.TP.toFixed(2) + ', ' + w.sr + ' Hz, ' + wLen + ' Samples']);
+    }
+    const a = await DSP({ cmd: 'analyze', sr: srIn, L: pre.L.slice(), R: pre.R.slice(), lim: lp, opts: { encode: 24 } }), b = await DSP({ cmd: 'analyze', sr: srIn, L: pre.L.slice(), R: pre.R.slice(), lim: lp, opts: { encode: 24 } });
+    const ua = new Uint8Array(a.wav), ub = new Uint8Array(b.wav); let same = ua.length === ub.length; for (let i = 0; same && i < ua.length; i++) if (ua[i] !== ub[i]) same = false;
+    let unchanged = true; for (let i = 0; i < n; i += 97) if (S.track.L[i] !== L[i]) { unchanged = false; break; }
+    res.push(['Export ' + (srIn / 1000) + ' kHz: wiederholter Export identisch, Original unverändert', same && unchanged, ua.length + ' Bytes']);
+  }
+  { const n = 44100 * 6, L = new Float32Array(n); for (let i = 0; i < n; i++) L[i] = 0.3 * Math.sin(2 * Math.PI * 440 * i / 44100);
+    S.track = { sr: 44100, L, R: L.slice(), name: 'rs', demo: true }; S.ver++; S.preCache = null; P = clone(PRESETS.neutral.p);
+    const pre = await renderPre(clone(P), 48000), m = await DSP({ cmd: 'analyze', sr: 48000, L: pre.L.slice(), R: pre.R.slice(), opts: { tp: true } }), m0 = await DSP({ cmd: 'analyze', sr: 44100, L: L.slice(), R: L.slice(), opts: { tp: true } });
+    res.push(['Export mit Abtastratenwandlung 44,1 → 48 kHz: Länge und Lautheit erhalten', pre.L.length === 48000 * 6 && Math.abs(m.I - m0.I) < 0.1, pre.L.length + ' Samples, ' + m0.I.toFixed(2) + ' → ' + m.I.toFixed(2) + ' LUFS']); }
+  S.track = keep; S.ver++; S.preCache = null; P = keepP; refreshAll(); onParam(); return res;
+},
+async function edgeFiles() {
+  const res = [], keep = S.track;
+  for (const [name, sec, amp] of [['Stille (3 s)', 3, 0], ['sehr kurz (0,2 s)', 0.2, 0.3], ['sehr kurz (20 ms)', 0.02, 0.3]]) {
+    let ok = true, info = '';
+    try { const n = Math.max(1, Math.round(48000 * sec)), L = new Float32Array(n); for (let i = 0; i < n; i++) L[i] = amp * Math.sin(i / 7);
+      await loadTrack({ sr: 48000, L, R: L.slice(), name, demo: true });
+      for (let i = 0; i < 60 && !(S.orig && S.arts && S.artsVer === S.ver); i++) await sleep(100);
+      const pre = await getPre(); const r = await DSP({ cmd: 'analyze', sr: 48000, L: pre.L.slice(), R: pre.R.slice(), lim: limParams(), opts: { tp: true, encode: 24 } });
+      info = 'Song-Check ' + (CHECK ? CHECK.score : '–') + ', Export ' + r.wav.byteLength + ' Bytes, I=' + (isFinite(r.I) ? r.I.toFixed(1) : '–');
+    } catch (e) { ok = false; info = e.message; }
+    res.push(['Datei: ' + name + ' – Laden, Analyse, Export ohne Fehler', ok, info]);
+  }
+  if (keep) await loadTrack(keep); return res;
+},
+async function aiKeyStorage() {
+  const res = []; try { localStorage.removeItem('dsms.aikey'); } catch (e) {}
+  document.querySelector('#aiRemember').checked = false; document.querySelector('#aiKey').value = 'sk-ant-test-0000';
+  document.querySelector('#btnAIKey').click(); let stored = null; try { stored = localStorage.getItem('dsms.aikey'); } catch (e) {}
+  res.push(['API-Schlüssel: ohne Häkchen nur im Arbeitsspeicher', stored === null && AI.key === 'sk-ant-test-0000', 'localStorage: ' + stored]);
+  document.querySelector('#btnAIKeyDel').click(); res.push(['API-Schlüssel: Entfernen löscht ihn', AI.key === null, String(AI.key)]);
+  return res;
+}
+];
+
+async function runAll() {
+  document.getElementById('run').disabled = true; out.innerHTML = ''; sum.textContent = 'Lade App …';
+  const frame = document.getElementById('app'); frame.src = '../index.html?test=' + Date.now();
+  await new Promise(r => frame.onload = r); const W = frame.contentWindow;
+  for (let i = 0; i < 300; i++) { try { if (W.eval('typeof S !== "undefined" && S.orig && S.master && !S.measuring')) break; } catch (e) {} await new Promise(r => setTimeout(r, 200)); }
+  let pass = 0, fail = 0; const all = [];
+  for (const t of TESTS) {
+    sum.textContent = 'Läuft: ' + t.name + ' …';
+    try { const rows = await W.eval('(' + t.toString() + ')()'); for (const [n, ok, d] of rows) { row(ok ? 'PASS' : 'FAIL', n, d); all.push([ok ? 'PASS' : 'FAIL', n, d]); ok ? pass++ : fail++; } }
+    catch (e) { row('FAIL', t.name, String(e && e.stack || e)); all.push(['FAIL', t.name, String(e)]); fail++; }
+  }
+  sum.textContent = pass + ' bestanden, ' + fail + ' fehlgeschlagen'; sum.className = fail ? 'FAIL' : 'PASS';
+  window.__results = { pass, fail, rows: all }; document.getElementById('run').disabled = false;
+}
+document.getElementById('run').addEventListener('click', runAll);
+if (location.hash === '#auto') runAll();
+</script>
+</body>
+</html>

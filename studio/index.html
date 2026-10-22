@@ -226,6 +226,7 @@ table.metrics td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .score b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:600 26px var(--f-mono);font-variant-numeric:tabular-nums}
 .cktext{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:4px}
 .cktext h2{font-size:20px;color:var(--text)}
+.eyebrow{font:600 10px var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 .findings{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .finding{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px 10px 0;overflow:hidden}
 .finding i{align-self:stretch;border-radius:0 3px 3px 0}
@@ -370,8 +371,8 @@ a.btn{text-decoration:none}
       <div class="panel" data-panel="check" hidden>
         <div class="checkhead">
           <div class="score" aria-hidden="true"><canvas id="ckRing" width="92" height="92"></canvas><b id="ckNum">–</b></div>
-          <div class="cktext"><h2 id="ckVerdict">Song wird analysiert …</h2><p class="hint" id="ckSub">Beim Laden prüft das Studio Lautheit, Klangbalance, Dynamik, Stereobild und Übersteuerung und zeigt dir, wo dein Track schwächelt.</p></div>
-          <button class="primary" id="btnFixAll" disabled>Alle Vorschläge anwenden</button>
+          <div class="cktext"><span class="eyebrow">Orientierungswert aus Messungen</span><h2 id="ckVerdict">Song wird analysiert …</h2><p class="hint" id="ckSub">Beim Laden prüft das Studio Lautheit, Klangbalance, Dynamik, Stereobild und Übersteuerung und zeigt dir, wo dein Track schwächelt.</p></div>
+          <button class="primary" id="btnFixAll" disabled>Alle Vorschläge übernehmen</button>
         </div>
         <ul class="findings" id="ckList"></ul>
         <div class="card artcard" id="artCard">
@@ -394,12 +395,17 @@ a.btn{text-decoration:none}
           <div class="row" style="margin-top:8px"><button class="primary" id="btnAI" disabled>Mit KI mastern</button><button id="btnAIStop" hidden>Stopp</button><button id="btnAIUndo" hidden>Vorherige Einstellungen</button></div>
           </div>
           <p class="hint" id="aiOff" hidden>Hier ist keine KI verbunden. Song-Check, Artefakt-Suche und alle Werkzeuge funktionieren trotzdem. Das KI-Mastering gibt es in der Claude-Version des Studios oder hier mit einem eigenen API-Schlüssel.</p>
+          <details class="aisend"><summary>Was wird an die KI gesendet?</summary>
+            <p class="hint">Nur Zahlen und Text, nie Audio: Lautheit, True Peak, Dynamik, Stereo-Werte, das Terzband-Spektrum, ein grober Lautheitsverlauf, Dauer und Abtastrate, die Befunde des Song-Checks, deine aktuellen Einstellungen und dein Wunschtext. Bei geladener Referenz zusätzlich deren Messwerte. Kein Dateiname, keine Audiodaten. Empfänger ist Anthropic (Claude), in der Claude-Version über dein Claude-Konto, sonst über deinen API-Schlüssel.</p>
+          </details>
           <ol class="ailog" id="aiLog" hidden></ol>
           <div class="aiexp" id="aiExp" hidden></div>
           <details id="aiKeyBox" hidden>
             <summary>KI hier freischalten (eigener Anthropic-API-Schlüssel)</summary>
-            <p class="hint">In Claude läuft die KI über dein Claude-Konto. Auf deiner Website und am PC braucht das Studio einen eigenen API-Schlüssel von console.anthropic.com. Ein Mastering-Durchgang kostet dort wenige Cent. Der Schlüssel bleibt nur in diesem Browser gespeichert.</p>
-            <div class="row"><input type="password" id="aiKey" placeholder="sk-ant-…" autocomplete="off" style="flex:1;min-width:0"><button id="btnAIKey">Speichern</button><button id="btnAIKeyDel" class="ghost">Löschen</button></div>
+            <p class="hint">In Claude läuft die KI über dein Claude-Konto. Hier braucht das Studio einen eigenen API-Schlüssel von console.anthropic.com (wenige Cent pro Durchgang).</p>
+            <p class="hint"><b>Sicherheit:</b> Diese Seite hat keinen eigenen Server. Der Schlüssel geht direkt aus deinem Browser an Anthropic. Standardmäßig liegt er nur im Arbeitsspeicher und ist nach dem Schließen weg. Jedes Skript auf dieser Seite und jede Browser-Erweiterung könnte ihn grundsätzlich lesen. Nutze deshalb einen eigenen Schlüssel nur für dieses Studio, setze in der Anthropic-Konsole ein niedriges Ausgabenlimit und gib ihn nicht auf fremden Geräten ein.</p>
+            <div class="row"><input type="password" id="aiKey" placeholder="sk-ant-…" autocomplete="off" style="flex:1;min-width:0"><button id="btnAIKey">Verwenden</button><button id="btnAIKeyDel" class="ghost">Entfernen</button></div>
+            <label class="chk"><input type="checkbox" id="aiRemember"> Auf diesem Gerät merken (bleibt im Browser-Speicher, bis du ihn entfernst)</label>
           </details>
         </div>
       </div>
@@ -699,8 +705,11 @@ function spectrum(L,R,fs){ var N=8192,n=L.length; if(n<N) return null;
   var frames=Math.min(400,Math.floor((n-N)/(N/2))+1), step=(n-N)/Math.max(1,frames-1), pw=new Float64Array(N/2), win=new Float64Array(N),i,f,k;
   for(i=0;i<N;i++) win[i]=0.5-0.5*Math.cos(2*Math.PI*i/(N-1));
   var re=new Float64Array(N),im=new Float64Array(N);
-  for(f=0;f<frames;f++){ var o=Math.floor(f*step); for(i=0;i<N;i++){ re[i]=(L[o+i]+R[o+i])*0.5*win[i]; im[i]=0; } fft(re,im);
-    for(k=0;k<N/2;k++) pw[k]+=re[k]*re[k]+im[k]*im[k]; }
+  // Linker und rechter Kanal werden getrennt transformiert und ihre Leistung gemittelt.
+  // So löschen sich gegenphasige Stereoanteile nicht aus (anders als bei (L+R)/2 vor der FFT).
+  var re2=new Float64Array(N),im2=new Float64Array(N);
+  for(f=0;f<frames;f++){ var o=Math.floor(f*step); for(i=0;i<N;i++){ re[i]=L[o+i]*win[i]; im[i]=0; re2[i]=R[o+i]*win[i]; im2[i]=0; } fft(re,im); fft(re2,im2);
+    for(k=0;k<N/2;k++) pw[k]+=(re[k]*re[k]+im[k]*im[k]+re2[k]*re2[k]+im2[k]*im2[k])*0.5; }
   var out=[]; for(var b=0;b<THIRDS.length;b++){ var lo=THIRDS[b]*Math.pow(2,-1/6),hi=THIRDS[b]*Math.pow(2,1/6),s=0,c=0;
     for(k=Math.max(1,Math.floor(lo*N/fs));k<=Math.min(N/2-1,Math.ceil(hi*N/fs));k++){ var fk=k*fs/N; if(fk>=lo&&fk<hi){ s+=pw[k]; c++; } }
     if(c===0){ var kk=Math.round(THIRDS[b]*N/fs); s=kk<N/2?pw[kk]:0; }
@@ -712,7 +721,8 @@ function stereoStats(L,R,fs){ var n=L.length,i,sll=0,srr=0,slr=0,sm=0,ss=0;
   for(i=0;i<n;i++){ M[i]=(L[i]+R[i])*0.5; S[i]=(L[i]-R[i])*0.5; }
   biq(biq(M,lp,M),lp,M); biq(biq(S,lp,S),lp,S);
   var bm=0,bs=0; for(i=0;i<n;i++){ bm+=M[i]*M[i]; bs+=S[i]*S[i]; }
-  return { corr: (sll>0&&srr>0)?slr/Math.sqrt(sll*srr):1, sideMid: 10*Math.log10((ss+1e-20)/(sm+1e-20)), bassSide: 10*Math.log10((bs+1e-20)/(bm+1e-20)), rms: 10*Math.log10((sll+srr)/(2*n)+1e-20) };
+  // Bei (fast) stummem Material sind Verhältnisse nicht definiert -> null statt 0/0
+  return { corr: (sll>1e-12&&srr>1e-12)?slr/Math.sqrt(sll*srr):null, sideMid: (sm+ss)>1e-12?10*Math.log10((ss+1e-20)/(sm+1e-20)):null, bassSide: (bm+bs)>1e-12?10*Math.log10((bs+1e-20)/(bm+1e-20)):null, rms: 10*Math.log10((sll+srr)/(2*n)+1e-20) };
 }
 function applyLim(L,R,sr,lim){
   var g=Math.pow(10,(lim.drive||0)/20),n=L.length,i;
@@ -761,7 +771,7 @@ function artifacts(L,R,sr){
     var o=f*hop; for(i=0;i<N;i++){ lr[i]=L[o+i]*w[i]; rr[i]=R[o+i]*w[i]; li[i]=0; ri[i]=0; }
     fft(lr,li); fft(rr,ri);
     var bf=0,tot=0,wsum=0,wv=0,mf=0,all=0;
-    for(k=1;k<half;k++){ var mr=(lr[k]+rr[k])*0.5,mi=(li[k]+ri[k])*0.5,m2=mr*mr+mi*mi; avg[k]+=m2; all+=m2;
+    for(k=1;k<half;k++){ var m2=(lr[k]*lr[k]+li[k]*li[k]+rr[k]*rr[k]+ri[k]*ri[k])*0.5; avg[k]+=m2; all+=m2;
       if(k>=k1&&k<=k4){ var dm=10*Math.log10(m2+1e-14); mf+=Math.abs(dm-prevMid[k]); prevMid[k]=dm; }
       if(k>=k6&&k<=k16){ var db=10*Math.log10(m2+1e-14); bf+=Math.abs(db-prevDb[k]); prevDb[k]=db; tot+=m2;
         var cr=lr[k]*rr[k]+li[k]*ri[k], ci=li[k]*rr[k]-lr[k]*ri[k], ipd=Math.atan2(ci,cr), d=ipd-prevIpd[k];
@@ -800,6 +810,7 @@ function artifacts(L,R,sr){
 }
 /* ---------- KI-Artefakte: Glätter (spektrales Entglitzern in Mitte/Seite) ---------- */
 function smoothHF(L,R,sr,o){
+  if(!(o.strength>0)&&!(o.clicks&&o.clicks.length)) return {L:new Float32Array(L),R:new Float32Array(R)};
   if(o.regions&&o.regions.length&&!o._seg){ var n0=L.length,pad=Math.round(sr*0.6),segs=[],tot=0;
     o.regions.forEach(function(r){ var a=Math.max(0,Math.round(r[0]*sr)-pad),b=Math.min(n0,Math.round(r[1]*sr)+pad); if(b-a<64) return;
       if(segs.length&&a<=segs[segs.length-1][1]) segs[segs.length-1][1]=Math.max(segs[segs.length-1][1],b); else segs.push([a,b]); });
@@ -915,7 +926,7 @@ const BAND_COLORS = ['#7FB8FF', '#6FD3C1', '#A6D58A', '#E2CB6A', '#D9A441', '#E8
 const TYPE_NAMES = { highpass: 'Low Cut', lowshelf: 'Bass-Shelf', peaking: 'Glocke', highshelf: 'Höhen-Shelf', lowpass: 'High Cut' };
 function presetFrom(mod) { const p = clone(DEFAULT); mod(p); return p; }
 const PRESETS = {
-  neutral: { name: 'Neutral (nichts verändert)', p: presetFrom(() => {}) },
+  neutral: { name: 'Neutral (nichts verändert)', p: presetFrom(p => { p.eq.on = false; p.comp.on = false; p.sat.on = false; p.stereo.on = false; p.lim.on = false; p.lim.drive = 0; p.inputGain = 0; }) },
   stream: { name: 'Streaming klar (−14 LUFS)', target: -14, p: presetFrom(p => {
     p.eq.bands[0].on = true; p.eq.bands[0].f = 25; p.eq.bands[1].g = 0.8; p.eq.bands[2].g = -1; p.eq.bands[6].g = 1.2;
     p.comp.on = true; p.stereo.width = 105; p.stereo.bassMono = true; p.stereo.monoFreq = 110; }) },
@@ -967,13 +978,20 @@ const DSP = (() => {
 
 /* ============================ Mastering-Kette ============================ */
 function setQ(f, q) { f.Q.value = (f.type === 'lowpass' || f.type === 'highpass') ? 20 * Math.log10(q) : q; }
+const satActive = p => !!(p.sat.on && p.sat.mix > 0);
 function structKey(p) {
-  return JSON.stringify([p.eq.on, p.eq.bands.map(b => b.on), p.comp.on, p.sat.on, p.stereo.on, p.stereo.bassMono, p.lim.on]);
+  return JSON.stringify([p.eq.on, p.eq.bands.map(b => b.on), p.comp.on, satActive(p), p.stereo.on, p.stereo.bassMono, p.lim.on]);
 }
+/* Sättigungskennlinie. Der WaveShaper bildet Eingänge im Bereich −1…+1 ab; damit auch Pegel über 0 dBFS
+   (nach EQ-Anhebungen) nicht hart abgeschnitten werden, wird vorher mit SAT_PRE (−12 dB) abgesenkt und die
+   Kennlinie für den tatsächlichen Pegel a = x / SAT_PRE (−4…+4) berechnet. Die Ausgangsverstärkung
+   (trim) gleicht SAT_PRE und die Kleinsignal-Verstärkung der Kennlinie aus: leise Signale bleiben exakt
+   gleich laut, laute werden weich begrenzt. Bei Mischung 0 % wird das Modul ganz umgangen. */
+const SAT_PRE = 0.25;
 function satCurve(drive, mix) {
-  const N = 4096, c = new Float32Array(N), k = 0.5 + drive / 100 * 4.5, m = mix / 100, tk = Math.tanh(k);
-  for (let i = 0; i < N; i++) { const a = (i / (N - 1) * 2 - 1) * 4; c[i] = ((1 - m) * a + m * Math.tanh(k * a) / tk) / 4; }
-  const small = (1 - m) + m * k / tk; return { curve: c, trim: 4 / small };
+  const N = 8192, c = new Float32Array(N), k = 0.5 + drive / 100 * 4.5, m = mix / 100, tk = Math.tanh(k);
+  for (let i = 0; i < N; i++) { const a = (i / (N - 1) * 2 - 1) / SAT_PRE; c[i] = ((1 - m) * a + m * Math.tanh(k * a) / tk) * SAT_PRE; }
+  const small = (1 - m) + m * k / tk; return { curve: c, trim: 1 / (SAT_PRE * small) };
 }
 function buildChain(ctx, P0, opt = {}) {
   const rt = !!opt.realtime;
@@ -982,7 +1000,8 @@ function buildChain(ctx, P0, opt = {}) {
   const eq = { in: G(), out: G(), f: Array.from({ length: 8 }, () => BQ('peaking')) };
   const cp = { in: G(), out: G(), lp1a: BQ('lowpass'), lp1b: BQ('lowpass'), ap2: BQ('allpass'), hp1a: BQ('highpass'), hp1b: BQ('highpass'),
     lp2a: BQ('lowpass'), lp2b: BQ('lowpass'), hp2a: BQ('highpass'), hp2b: BQ('highpass'), c: [0, 1, 2].map(() => ctx.createDynamicsCompressor()), mk: [G(), G(), G()] };
-  const st = { in: G(), out: G(), sh: ctx.createWaveShaper(), trim: G(), key: '' };
+  const st = { in: G(), out: G(), pre: G(), sh: ctx.createWaveShaper(), trim: G(), key: '' };
+  st.pre.gain.value = SAT_PRE;
   st.sh.oversample = '4x';
   const sw = { in: G(), out: G(), sp: ctx.createChannelSplitter(2), mg: ctx.createChannelMerger(2), mL: G(), mR: G(), sL: G(), sR: G(), M: G(), Sd: G(),
     h1: BQ('highpass'), h2: BQ('highpass'), Sw: G(), oL: G(), oR: G(), neg: G() };
@@ -1023,8 +1042,8 @@ function buildChain(ctx, P0, opt = {}) {
       cp.c.forEach((c, i) => { c.connect(cp.mk[i]); cp.mk[i].connect(cp.out); });
     } else cp.in.connect(cp.out);
     // Sättigung
-    st.in.disconnect(); st.sh.disconnect(); st.trim.disconnect();
-    if (p.sat.on) { st.in.connect(st.sh); st.sh.connect(st.trim); st.trim.connect(st.out); } else st.in.connect(st.out);
+    st.in.disconnect(); st.pre.disconnect(); st.sh.disconnect(); st.trim.disconnect();
+    if (satActive(p)) { st.in.connect(st.pre); st.pre.connect(st.sh); st.sh.connect(st.trim); st.trim.connect(st.out); } else st.in.connect(st.out);
     // Stereo
     sw.in.disconnect(); sw.Sd.disconnect(); sw.h1.disconnect(); sw.h2.disconnect();
     if (p.stereo.on) {
@@ -1105,8 +1124,9 @@ async function setupGraph() {
   const k2 = ctx.createBiquadFilter(); k2.type = 'highpass'; k2.frequency.value = 38; setQ(k2, 0.5);
   mbus.connect(k1); k1.connect(k2); const sp2 = ctx.createChannelSplitter(2); k2.connect(sp2);
   S.kL = mk(8192); S.kR = mk(8192); sp2.connect(S.kL, 0); sp2.connect(S.kR, 1);
-  S.anaPre = ctx.createAnalyser(); S.anaPre.fftSize = 8192; S.anaPre.smoothingTimeConstant = 0.82; S.anaPre.connect(sink); S.chain.preTap.connect(S.anaPre);
-  S.anaPost = ctx.createAnalyser(); S.anaPost.fftSize = 8192; S.anaPost.smoothingTimeConstant = 0.82; S.anaPost.connect(sink); S.chain.output.connect(S.anaPost);
+  // Spektrum vor/nach der Kette: L und R getrennt (Leistung wird beim Zeichnen gemittelt, keine Auslöschung gegenphasiger Anteile)
+  const specPair = node => { const sp3 = ctx.createChannelSplitter(2); node.connect(sp3); return [0, 1].map(c => { const a = ctx.createAnalyser(); a.fftSize = 8192; a.smoothingTimeConstant = 0.82; a.connect(sink); sp3.connect(a, c); return a; }); };
+  S.anaPre = specPair(S.chain.preTap); S.anaPost = specPair(S.chain.output);
   applyMonitor(true);
 }
 function levelFor(which) {
@@ -1569,7 +1589,7 @@ const fx = (f, w) => Math.log(f / 20) / Math.log(1000) * w, xf = (x, w) => 20 * 
 const EQR = 15;
 function bandY(b, h) { const g = (b.type === 'highpass' || b.type === 'lowpass') ? 0 : b.g; return h / 2 - g / EQR * (h / 2 - 12); }
 let eqDirty = true; function drawEqSoon() { eqDirty = true; }
-const specPre = new Float32Array(4096), specPost = new Float32Array(4096);
+const specPre = new Float32Array(4096), specPost = new Float32Array(4096), specTmp = new Float32Array(4096);
 function drawEq() {
   const cv = $('#eqCanvas'); if (!cv.offsetParent) return; const { g, w, h } = fitCanvas(cv);
   g.fillStyle = '#060B0F'; g.fillRect(0, 0, w, h);
@@ -1578,8 +1598,10 @@ function drawEq() {
   [-12, -6, 0, 6, 12].forEach(d => { const y = Math.round(h / 2 - d / EQR * (h / 2 - 12)) + 0.5; g.fillStyle = d ? '#112029' : '#1E3442'; g.fillRect(0, y, w, 1); g.fillStyle = '#6b727c'; g.fillText((d > 0 ? '+' : '') + d, 4, y + 2); });
   // Spektrum
   if (S.ctx && S.anaPre && S.track) {
-    const sr = S.ctx.sampleRate, N = S.anaPre.frequencyBinCount;
-    S.anaPre.getFloatFrequencyData(specPre); S.anaPost.getFloatFrequencyData(specPost);
+    const sr = S.ctx.sampleRate, N = S.anaPre[0].frequencyBinCount;
+    const pair = (an, out) => { an[0].getFloatFrequencyData(out); an[1].getFloatFrequencyData(specTmp);
+      for (let k = 0; k < out.length; k++) out[k] = 10 * Math.log10((Math.pow(10, out[k] / 10) + Math.pow(10, specTmp[k] / 10)) / 2 + 1e-30); };
+    pair(S.anaPre, specPre); pair(S.anaPost, specPost);
     const drawSpec = (arr, fill, stroke) => { g.beginPath(); g.moveTo(0, h); let started = false;
       for (let x = 0; x <= w; x += 2) { const f = xf(x, w), k = Math.min(N - 1, Math.max(1, Math.round(f / (sr / 2) * N)));
         let v = -200; const span = Math.max(1, Math.round(k * 0.03)); for (let j = k - span; j <= k + span; j++) if (j > 0 && j < N && arr[j] > v) v = arr[j];
@@ -1775,80 +1797,99 @@ function bandDev(spec) {
   return out;
 }
 function setBand(p, idx, o) { Object.assign(p.eq.bands[idx], o, { on: true }); p.eq.on = true; }
+/* Diagnose. Zwei Arten von Befunden:
+   - technisch (cat 'tech'): messbare Fehler wie Clipping, Gleichspannung, Phasenauslöschung, Knackser
+   - klanglich (alle anderen): Abweichungen von einer Vergleichskurve oder üblichen Werten. Diese sind
+     Geschmack und Genre und werden nur als Hinweis formuliert, nie als Fehler.
+   Behebungen werden nur auf Knopfdruck des Nutzers angewendet. */
+const CATS = { tech: 'Technik', loud: 'Lautheit', dyn: 'Dynamik', bal: 'Klangbalance', st: 'Stereo', ai: 'KI-Artefakte' };
 function diagnose() {
   const o = S.orig; if (!o) return null;
   const tgt = +$('#targetSel').value, dv = bandDev(o.spec) || {}, F = [];
-  const add = (sev, title, text, fix, label) => F.push({ sev, title, text, fix, label });
-  const refTxt = S.ref ? 'als deine Referenz' : 'als bei ausgewogenen Produktionen';
-  // Übersteuerung
-  if (o.clips > 0) add('bad', 'Übersteuerung im Original: ' + o.clips + ' Clipping-Stelle' + (o.clips > 1 ? 'n' : ''),
-    'Der Mix stößt an 0 dBFS an und ist dort hart abgeschnitten. Mastering kann das nicht mehr reparieren. Am besten den Mix 2 bis 3 dB leiser exportieren und neu laden.');
-  else if (o.TP > -0.3) add('warn', 'Kaum Luft nach oben (True Peak ' + nf(o.TP, 1) + ' dBTP)', 'Der Mix ist schon bis an die Grenze ausgesteuert. Kein Clipping gefunden, aber für Mastering ist etwas Reserve (−3 bis −6 dB) besser.');
-  // Lautheit
-  if (isFinite(o.I) && o.I < tgt - 2) add('info', 'Leiser als dein Ziel (' + nf(o.I, 1) + ' statt ' + tgt + ' LUFS)', 'Normal für einen Mix vor dem Mastering. Der Limiter bringt ihn auf Ziel-Lautheit.',
-    async () => { P.lim.on = true; refreshAll(); onParam(); await setDriveToTarget(tgt); }, 'Auf ' + tgt + ' LUFS bringen');
-  if (isFinite(o.I) && o.I > -9) add('warn', 'Schon sehr laut (' + nf(o.I, 1) + ' LUFS)', 'Wenig Spielraum für Mastering. Streaming-Dienste drehen so laute Songs ohnehin leiser. Lieber den Limiter-Drive klein halten.');
-  // Dynamik
-  if (isFinite(o.TP - o.I) && o.TP - o.I < 8) add('warn', 'Bereits stark verdichtet (PLR ' + nf(o.TP - o.I, 1) + ' dB)', 'Schläge und Transienten haben wenig Platz. Zusätzliche Kompression würde den Song platt machen.',
-    p => { p.comp.on = false; }, 'Kompressor aus');
-  if (o.LRA > 13) add('info', 'Große Lautstärkesprünge (LRA ' + nf(o.LRA, 1) + ' LU)', 'Leise und laute Teile liegen weit auseinander. Eine sanfte Kompression hält den Song zusammen.',
-    p => { p.comp.on = true; p.comp.bands.forEach(b => { b.ratio = 1.8; }); }, 'Sanft komprimieren');
-  // Klangbalance
-  const d = (id, v) => (dv[id] || 0) > v, u = (id, v) => (dv[id] || 0) < -v, amt = (id, k, max) => Math.round(Math.min(max, Math.abs(dv[id]) * k) * 10) / 10;
-  if (d('sub', 4)) add(dv.sub > 7 ? 'bad' : 'warn', 'Viel Tiefbass / Rumpeln unter 50 Hz (' + sf(dv.sub, 1) + ' dB)', 'Frisst Lautheit, ohne dass man es hört, und kann Boxen und Vinyl überfordern.',
-    p => setBand(p, 0, { type: 'highpass', f: 30, q: 0.71 }), 'Low Cut 30 Hz');
-  if (u('bass', 3)) add('warn', 'Zu wenig Bass / Druck (' + sf(dv.bass, 1) + ' dB)', 'Der Song hat im Bassbereich weniger Energie ' + refTxt + '.',
-    p => setBand(p, 1, { type: 'lowshelf', f: 90, g: amt('bass', 0.6, 4), q: 0.71 }), 'Bass anheben');
-  if (d('bass', 3)) add('warn', 'Bass dröhnt (' + sf(dv.bass, 1) + ' dB)', 'Zu viel Energie zwischen 60 und 160 Hz. Klingt auf großen Anlagen wummerig und macht den Mix schwer.',
-    p => setBand(p, 1, { type: 'lowshelf', f: 100, g: -amt('bass', 0.6, 4), q: 0.71 }), 'Bass absenken');
-  if (d('lowmid', 2.5)) add('warn', 'Mulmig in den unteren Mitten (' + sf(dv.lowmid, 1) + ' dB)', 'Zu viel 200–500 Hz macht den Mix matschig und verdeckt Stimme und Instrumente.',
-    p => setBand(p, 2, { type: 'peaking', f: 300, g: -amt('lowmid', 0.6, 4), q: 1 }), '300 Hz absenken');
-  if (u('mid', 3)) add('info', 'Hohle Mitten (' + sf(dv.mid, 1) + ' dB)', 'Wenig Energie um 1 kHz. Stimme und Snare können dünn wirken.',
-    p => setBand(p, 4, { type: 'peaking', f: 1000, g: amt('mid', 0.5, 3), q: 0.9 }), 'Mitten anheben');
-  if (d('upmid', 2.5)) add('warn', 'Harsch / spitz in den oberen Mitten (' + sf(dv.upmid, 1) + ' dB)', 'Zu viel 2–5 kHz ermüdet die Ohren und klingt bei hoher Lautstärke aggressiv.',
-    p => setBand(p, 5, { type: 'peaking', f: 3200, g: -amt('upmid', 0.6, 4), q: 1.1 }), '3 kHz absenken');
-  if (u('air', 3)) add('warn', 'Dumpf, wenig Brillanz (' + sf(dv.air, 1) + ' dB)', 'Die Höhen über 6 kHz fehlen. Der Song wirkt wie unter einer Decke.',
-    p => setBand(p, 6, { type: 'highshelf', f: 9000, g: amt('air', 0.6, 4), q: 0.71 }), 'Höhen anheben');
-  if (d('air', 3)) add('warn', 'Scharf / zischelig in den Höhen (' + sf(dv.air, 1) + ' dB)', 'Zu viel über 6 kHz. S-Laute und Becken stechen heraus. Bei KI-Musik oft auch ein metallisches Glitzern.',
-    p => setBand(p, 6, { type: 'highshelf', f: 9000, g: -amt('air', 0.6, 4), q: 0.71 }), 'Höhen absenken');
-  // Stereo
-  if (o.corr != null && o.corr < 0) add('bad', 'Phasenprobleme (Korrelation ' + o.corr.toFixed(2) + ')', 'Links und rechts arbeiten gegeneinander. In Mono (Handy, Club) verschwinden Teile des Songs.',
-    p => { p.stereo.on = true; p.stereo.width = 70; p.stereo.bassMono = true; }, 'Breite reduzieren');
-  else if (o.corr != null && o.corr < 0.25) add('warn', 'Sehr breites Stereobild (Korrelation ' + o.corr.toFixed(2) + ')', 'Kann auf Handy-Lautsprechern und in Mono dünn klingen.',
-    p => { p.stereo.on = true; p.stereo.width = 85; }, 'Etwas schmaler');
-  if (o.bassSide != null && o.bassSide > -18) add('warn', 'Bass ist stereo (' + nf(o.bassSide, 1) + ' dB Seitenanteil)', 'Tiefe Töne gehören in die Mitte: mehr Druck, sauberer im Club, und für Vinyl fast Pflicht.',
-    p => { p.stereo.on = true; p.stereo.bassMono = true; p.stereo.monoFreq = 120; }, 'Bass-Mono an');
-  if (o.sideMid != null && o.sideMid < -24 && (o.corr == null || o.corr > 0.97)) add('info', 'Fast mono', 'Kaum Stereo-Information. Etwas mehr Breite kann den Song größer wirken lassen.',
-    p => { p.stereo.on = true; p.stereo.width = 120; }, 'Breiter machen');
-  // Technik
-  if (o.dc > 0.002) add('warn', 'Gleichspannungsversatz (DC ' + (o.dc * 100).toFixed(2) + ' %)', 'Die Welle ist nach oben oder unten verschoben. Das kostet Headroom.',
+  const add = (cat, sev, title, text, fix, label) => F.push({ cat, sev, title, text, fix, label });
+  // Stumm oder zu kurz: keine Klang-, Dynamik- oder Stereobewertung (sonst Fehlalarme aus 0/0 oder leeren Spektren)
+  if (!(o.TP > -90)) { add('tech', 'warn', 'Die Datei ist stumm', 'Es wurde kein hörbares Signal gefunden. Bitte prüfen, ob die richtige Datei geladen ist.');
+    return { score: 50, findings: F, dev: {}, techIssues: 1 }; }
+  const measurable = isFinite(o.I) && o.I > -70;
+  if (!measurable) add('tech', 'info', 'Zu kurz oder zu leise für eine Lautheitsmessung', 'Die Messung nach BS.1770 braucht mindestens 0,4 s hörbares Signal. Klangbalance, Dynamik und Stereo werden deshalb nicht bewertet.');
+  const cmp = S.ref ? 'deiner Referenz' : 'einer gemittelten Vergleichskurve';
+  const genre = 'Kann je nach Genre und Absicht genau so gewollt sein.';
+  // --- Technik
+  if (o.clips > 0) add('tech', 'bad', 'Übersteuerung im Original: ' + o.clips + ' Clipping-Stelle' + (o.clips > 1 ? 'n' : ''),
+    'Mehrere aufeinanderfolgende Samples liegen auf 0 dBFS, die Wellenform ist dort abgeschnitten. Das lässt sich im Mastering nicht mehr rückgängig machen. Besser den Mix 2–3 dB leiser exportieren.');
+  else if (o.TP > -0.3) add('tech', 'info', 'Wenig Reserve (True Peak ' + nf(o.TP, 1) + ' dBTP)', 'Kein Clipping gefunden. Für Mastering ist etwas Reserve (z. B. −3 bis −6 dBTP) bequemer, aber kein Muss.');
+  if (o.dc > 0.002) add('tech', 'warn', 'Gleichspannungsversatz (' + (o.dc * 100).toFixed(2) + ' % DC)', 'Die Wellenform ist dauerhaft nach oben oder unten verschoben. Das kostet Headroom und ist nicht hörbar gewollt.',
     p => setBand(p, 0, { type: 'highpass', f: 20, q: 0.71 }), 'Low Cut 20 Hz');
-  if (o.leadSil > 0.6 || o.tailSil > 2.5) add('info', 'Stille am Anfang/Ende (' + o.leadSil.toFixed(1) + ' s / ' + o.tailSil.toFixed(1) + ' s)', 'Für Streaming besser kürzen, damit der Song sofort beginnt.',
+  if (o.corr != null && o.corr < 0) add('tech', 'warn', 'Überwiegend gegenphasig (Korrelation ' + o.corr.toFixed(2) + ')', 'Links und rechts heben sich teilweise auf. In Mono (Handy, Club, Radio) wird der Song leiser und dünner.',
+    p => { p.stereo.on = true; p.stereo.width = 70; p.stereo.bassMono = true; }, 'Breite reduzieren');
+  else if (o.monoLoss != null && o.monoLoss < -3.5) add('tech', 'info', 'Verliert in Mono ' + nf(-o.monoLoss, 1) + ' dB', 'Beim Zusammenmischen auf Mono geht mehr Pegel verloren als bei üblichen Mischungen. Bei sehr breiten Sounds normal, für Club/Handy prüfen.');
+  if (o.leadSil > 0.6 || o.tailSil > 2.5) add('tech', 'info', 'Stille am Anfang/Ende (' + o.leadSil.toFixed(1) + ' s / ' + o.tailSil.toFixed(1) + ' s)', 'Für Streaming beginnt ein Song meist sofort. Wenn die Stille nicht gewollt ist, kürzen.',
     () => opTrimSilence(), 'Stille kürzen');
-  if (S.arts && S.artsVer === S.ver) { const A = S.arts, n = A.regions.length + A.clicks.length;
-    if (n) F.push({ sev: n >= 6 ? 'warn' : 'info', title: 'Verdächtige KI-Artefakte: ' + n + ' Stelle' + (n > 1 ? 'n' : ''), text: 'Glitzern, Stereo-Flattern oder Knackser, wie sie bei KI-Musik häufig vorkommen. Die Stellen sind in der Wellenform markiert und lassen sich gezielt glätten.', nav: () => $('#artCard').scrollIntoView({ behavior: 'smooth', block: 'start' }), label: 'Zu den Stellen' });
-    if (A.cutoff && A.cutoff < 16800) add('info', 'Höhen enden bei ' + (A.cutoff / 1000).toFixed(1) + ' kHz', 'Darüber ist nichts mehr: typisch für komprimierte oder KI-erzeugte Quellen. Die Höhen nicht stark anheben, das klingt sonst künstlich.'); }
-  const order = { bad: 0, warn: 1, info: 2, ok: 3 }; F.sort((a, b) => order[a.sev] - order[b.sev]);
-  let score = 100; F.forEach(f => { score -= f.sev === 'bad' ? 18 : f.sev === 'warn' ? 9 : 3; });
-  if (!F.length) add('ok', 'Keine Schwächen gefunden', 'Lautheit, Balance, Dynamik und Stereo liegen im gesunden Bereich. Jetzt entscheidet dein Geschmack.');
-  return { score: Math.max(5, score), findings: F, dev: dv };
+  // --- Lautheit
+  if (isFinite(o.I) && o.I < tgt - 2) add('loud', 'info', 'Leiser als dein Ziel (' + nf(o.I, 1) + ' statt ' + tgt + ' LUFS)', 'Für einen Mix vor dem Mastering normal. Der Limiter kann ihn auf die Ziel-Lautheit bringen.',
+    async () => { P.lim.on = true; refreshAll(); onParam(); await setDriveToTarget(tgt); }, 'Auf ' + tgt + ' LUFS bringen');
+  if (isFinite(o.I) && o.I > -9) add('loud', 'info', 'Schon sehr laut (' + nf(o.I, 1) + ' LUFS)', 'Wenig Spielraum für weitere Lautheit. Streaming-Dienste spielen so laute Songs leiser ab.');
+  if (measurable) {
+  // --- Dynamik
+  if (isFinite(o.TP - o.I) && o.TP - o.I < 8) add('dyn', 'info', 'Bereits stark verdichtet (PLR ' + nf(o.TP - o.I, 1) + ' dB)', 'Zusätzliche Kompression würde die Dynamik weiter verringern. ' + genre,
+    p => { p.comp.on = false; }, 'Kompressor aus');
+  if (o.LRA > 13) add('dyn', 'info', 'Große Lautstärkeunterschiede (LRA ' + nf(o.LRA, 1) + ' LU)', 'Leise und laute Teile liegen weit auseinander. ' + genre + ' Eine sanfte Kompression kann es zusammenhalten.',
+    p => { p.comp.on = true; p.comp.bands.forEach(b => { b.ratio = 1.5; }); }, 'Sanft komprimieren');
+  // --- Klangbalance: neutral formuliert, nur Hinweise. Ab 6 dB Abweichung als "deutlich" markiert.
+  const v = id => dv[id] || 0, sevOf = x => Math.abs(x) >= 6 ? 'warn' : 'info', amt = (x, k, max) => Math.round(Math.min(max, Math.abs(x) * k) * 10) / 10;
+  const bal = (id, thr, more, less, fixMore, fixLess, lblMore, lblLess) => { const x = v(id); if (Math.abs(x) < thr) return;
+    const up = x > 0, b = BANDS.find(q => q.id === id);
+    add('bal', sevOf(x), (up ? 'Mehr ' : 'Weniger ') + b.name + ' als ' + cmp + ' (' + sf(x, 1) + ' dB, ' + b.lo + '–' + (b.hi >= 1000 ? b.hi / 1000 + ' k' : b.hi) + 'Hz)',
+      (up ? more : less) + ' ' + genre, up ? fixMore : fixLess, up ? lblMore : lblLess); };
+  bal('sub', 4, 'Viel Energie unter 50 Hz frisst Lautheit und kann kleine Boxen und Vinyl überfordern.', 'Wenig Tiefbass.',
+    p => setBand(p, 0, { type: 'highpass', f: 30, q: 0.71 }), null, 'Low Cut 30 Hz', null);
+  bal('bass', 3, 'Falls es auf deinen Lautsprechern dröhnt: Bass leicht absenken.', 'Falls Druck fehlt: Bass leicht anheben.',
+    p => setBand(p, 1, { type: 'lowshelf', f: 100, g: -amt(v('bass'), 0.5, 3), q: 0.71 }), p => setBand(p, 1, { type: 'lowshelf', f: 90, g: amt(v('bass'), 0.5, 3), q: 0.71 }), 'Bass absenken', 'Bass anheben');
+  bal('lowmid', 3, 'Viel 200–500 Hz klingt schnell mulmig oder matschig.', 'Wenig Wärme und Körper.',
+    p => setBand(p, 2, { type: 'peaking', f: 300, g: -amt(v('lowmid'), 0.5, 3), q: 1 }), null, '300 Hz absenken', null);
+  bal('mid', 3, 'Präsente Mitten, kann nasal wirken.', 'Stimme und Snare können dünn wirken.',
+    null, p => setBand(p, 4, { type: 'peaking', f: 1000, g: amt(v('mid'), 0.5, 3), q: 0.9 }), null, 'Mitten anheben');
+  bal('upmid', 3, 'Viel 2–5 kHz kann bei hoher Lautstärke hart klingen.', 'Weniger Präsenz, wirkt eher weich.',
+    p => setBand(p, 5, { type: 'peaking', f: 3200, g: -amt(v('upmid'), 0.5, 3), q: 1.1 }), null, '3 kHz absenken', null);
+  bal('air', 3, 'Viele Höhen: S-Laute und Becken können stechen, bei KI-Musik manchmal metallisch.', 'Wirkt eher dunkel/gedeckt.',
+    p => setBand(p, 6, { type: 'highshelf', f: 9000, g: -amt(v('air'), 0.5, 3), q: 0.71 }), p => setBand(p, 6, { type: 'highshelf', f: 9000, g: amt(v('air'), 0.5, 3), q: 0.71 }), 'Höhen absenken', 'Höhen anheben');
+  // --- Stereo
+  if (o.bassSide != null && o.bassSide > -18) add('st', o.bassSide > -10 ? 'warn' : 'info', 'Stereo-Anteil im Bass (' + nf(o.bassSide, 1) + ' dB unter 150 Hz)',
+    'Im Club, in Mono und auf Vinyl ist ein mittiger Bass stabiler. Für Kopfhörer-Musik kann ein breiter Bass gewollt sein.',
+    p => { p.stereo.on = true; p.stereo.bassMono = true; p.stereo.monoFreq = 120; }, 'Bass-Mono an');
+  if (o.corr != null && o.corr >= 0 && o.corr < 0.2) add('st', 'info', 'Sehr breites Stereobild (Korrelation ' + o.corr.toFixed(2) + ')', 'Auf Handy-Lautsprechern und in Mono kann es dünner klingen. ' + genre,
+    p => { p.stereo.on = true; p.stereo.width = 85; }, 'Etwas schmaler');
+  if (o.sideMid != null && o.sideMid < -24 && (o.corr == null || o.corr > 0.97)) add('st', 'info', 'Fast mono', 'Kaum Stereo-Information. ' + genre, p => { p.stereo.on = true; p.stereo.width = 115; }, 'Etwas breiter');
+  }
+  // --- KI-Artefakte (nur Hinweis)
+  if (S.arts && S.artsVer === S.ver) { const A = S.arts, n = A.regions.length;
+    if (A.clicks.length) add('tech', 'warn', A.clicks.length + ' mögliche Knackser', 'Einzelne sprunghafte Stellen in der Wellenform. Bitte anhören. Reparatur im Bereich „KI-Artefakte“.');
+    if (n) F.push({ cat: 'ai', sev: 'info', title: n + ' auffällige Stelle' + (n > 1 ? 'n' : '') + ' in den Höhen/im Stereobild', text: 'Stellen, die sich deutlich vom Rest des Songs abheben, wie es bei KI-Artefakten (Glitzern, Flattern) vorkommt. Hinweis zum Hinhören, kein Beweis.', nav: () => $('#artCard').scrollIntoView({ behavior: 'smooth', block: 'start' }), label: 'Zu den Stellen' });
+    if (A.cutoff && A.cutoff < 16800) add('tech', 'info', 'Höhen enden bei ' + (A.cutoff / 1000).toFixed(1) + ' kHz', 'Darüber ist kaum Signal, typisch für komprimierte oder KI-erzeugte Quellen. Starkes Anheben der Höhen klingt dann eher künstlich.'); }
+  const order = { bad: 0, warn: 1, info: 2, ok: 3 }; F.sort((a, b) => order[a.sev] - order[b.sev] || (a.cat === 'tech' ? -1 : 0) - (b.cat === 'tech' ? -1 : 0));
+  // Orientierungswert: technische Befunde wiegen schwer, klangliche Abweichungen nur leicht.
+  let score = 100; F.forEach(f => { score -= f.cat === 'tech' ? (f.sev === 'bad' ? 25 : f.sev === 'warn' ? 10 : 3) : (f.sev === 'warn' ? 5 : 2); });
+  const techIssues = F.filter(f => f.cat === 'tech' && f.sev !== 'info').length;
+  if (!F.length) add('tech', 'ok', 'Keine Auffälligkeiten', 'Technisch sauber, Balance und Dynamik im üblichen Bereich. Ein Mastering darf hier fast nichts verändern.');
+  return { score: Math.max(5, score), findings: F, dev: dv, techIssues };
 }
 let CHECK = null;
 function renderCheck() {
   CHECK = diagnose();
   const list = $('#ckList'); list.innerHTML = '';
   if (!CHECK) { $('#ckNum').textContent = '–'; drawRing(0); return; }
-  const { score, findings } = CHECK, tags = { bad: 'Problem', warn: 'Schwäche', info: 'Hinweis', ok: 'Gut' };
+  const { score, findings, techIssues } = CHECK;
   $('#ckNum').textContent = score; drawRing(score);
-  $('#ckVerdict').textContent = score >= 85 ? 'Gute Basis fürs Mastering' : score >= 65 ? 'Ordentlich, mit ein paar Schwächen' : score >= 45 ? 'Deutliche Schwächen' : 'Der Mix braucht Arbeit';
-  const nFix = findings.filter(f => f.fix).length;
-  $('#ckSub').textContent = (S.track ? '„' + S.track.name + '“: ' : '') + findings.filter(f => f.sev !== 'ok').length + ' Auffälligkeiten' + (nFix ? ', ' + nFix + ' davon mit einem Klick behebbar.' : '.') + (S.ref ? ' Klangbalance verglichen mit deiner Referenz.' : '');
+  $('#ckVerdict').textContent = techIssues ? (techIssues === 1 ? 'Ein technischer Befund' : techIssues + ' technische Befunde') : 'Technisch sauber';
+  const nFix = findings.filter(f => f.fix).length, nHint = findings.filter(f => f.cat !== 'tech' && f.sev !== 'ok').length;
+  $('#ckSub').textContent = (S.track ? '„' + S.track.name + '“: ' : '') + (nHint ? nHint + ' klangliche Hinweise (Geschmackssache, keine Fehler). ' : 'Keine klanglichen Auffälligkeiten. ') + (nFix ? nFix + ' Vorschläge lassen sich per Klick übernehmen. ' : '') +
+    'Die Zahl ist ein Orientierungswert aus Messungen, kein Urteil über die Musik.' + (S.ref ? ' Klangbalance verglichen mit deiner Referenz.' : '');
   $('#btnFixAll').disabled = !nFix;
-  $('#ckDot').style.background = score >= 85 ? 'var(--ok)' : score >= 65 ? 'var(--warn)' : 'var(--hot)';
+  $('#ckDot').style.background = techIssues ? 'var(--warn)' : 'var(--ok)';
   findings.forEach(f => {
     const li = document.createElement('li'); li.className = 'finding ' + f.sev;
     li.innerHTML = '<i></i><div class="ft"><b><span class="tag"></span><span class="tt"></span></b><span class="tx"></span></div>';
-    li.querySelector('.tag').textContent = tags[f.sev]; li.querySelector('.tt').textContent = f.title; li.querySelector('.tx').textContent = f.text;
+    li.querySelector('.tag').textContent = f.sev === 'ok' ? 'Gut' : CATS[f.cat] || 'Hinweis'; li.querySelector('.tt').textContent = f.title; li.querySelector('.tx').textContent = f.text;
     if (f.nav) { const b = document.createElement('button'); b.textContent = f.label; b.addEventListener('click', f.nav); li.appendChild(b); }
     else if (f.fix) { const b = document.createElement('button'); b.textContent = f.label; b.addEventListener('click', async () => { await applyFix(f); b.textContent = 'Angewendet'; b.classList.add('done'); b.disabled = true; }); li.appendChild(b); }
     list.appendChild(li);
@@ -1880,22 +1921,24 @@ async function initAI() {
   if (window.claude && typeof window.claude.use === 'function') {
     try { const s = await window.claude.use('sample'); if (s) { AI.mode = 'claude'; AI.sample = s; } } catch (e) {}
   }
-  if (!AI.mode) { const k = recall('aikey'); if (k) { AI.mode = 'api'; AI.key = k; } }
+  if (!AI.mode) { const k = recall('aikey'); if (k) { AI.mode = 'api'; AI.key = k; AI.remembered = true; } }
   updateAIUI();
 }
 function updateAIUI() {
   const b = $('#aiBadge');
   if (AI.mode === 'claude') { b.textContent = 'über dein Claude-Konto'; b.classList.add('on'); }
-  else if (AI.mode === 'api') { b.textContent = 'API-Schlüssel aktiv'; b.classList.add('on'); }
+  else if (AI.mode === 'api') { b.textContent = AI.remembered ? 'API-Schlüssel (gemerkt)' : 'API-Schlüssel (Sitzung)'; b.classList.add('on'); }
+  if ($('#aiRemember')) $('#aiRemember').checked = !!AI.remembered;
   else { b.textContent = 'nicht verbunden'; b.classList.remove('on'); }
   $('#aiKeyBox').hidden = AI.mode === 'claude';
   $('#aiMain').hidden = !AI.mode; $('#aiOff').hidden = !!AI.mode;
   $('#btnAI').disabled = !AI.mode || !S.track;
 }
 $('#btnAIKey').addEventListener('click', () => { const k = $('#aiKey').value.trim(); if (!/^sk-ant-/.test(k)) { status('Das sieht nicht wie ein Anthropic-Schlüssel aus (beginnt mit sk-ant-).', 'err'); return; }
-  store('aikey', k); AI.key = k; AI.mode = 'api'; $('#aiKey').value = ''; updateAIUI(); status('Schlüssel gespeichert. KI-Mastering ist bereit.', 'ok'); });
-$('#btnAIKeyDel').addEventListener('click', () => { try { localStorage.removeItem('dsms.aikey'); } catch (e) {} AI.key = null; if (AI.mode === 'api') AI.mode = null; updateAIUI(); status('Schlüssel gelöscht.'); });
-
+  AI.key = k; AI.mode = 'api'; AI.remembered = $('#aiRemember').checked; $('#aiKey').value = '';
+  if (AI.remembered) store('aikey', k); else { try { localStorage.removeItem('dsms.aikey'); } catch (e) {} }
+  updateAIUI(); status(AI.remembered ? 'Schlüssel aktiv und auf diesem Gerät gemerkt.' : 'Schlüssel aktiv, nur für diese Sitzung (nach dem Schließen weg).', 'ok', 5000); });
+$('#btnAIKeyDel').addEventListener('click', () => { try { localStorage.removeItem('dsms.aikey'); } catch (e) {} AI.key = null; AI.remembered = false; if (AI.mode === 'api') AI.mode = null; $('#aiRemember').checked = false; updateAIUI(); status('Schlüssel entfernt (Arbeitsspeicher und Browser-Speicher).'); });
 function parseJSONLoose(t) {
   try { return JSON.parse(t); } catch (e) {}
   const f = t.match(/```(?:json)?\s*([\s\S]*?)```/); if (f) { try { return JSON.parse(f[1]); } catch (e) {} }
@@ -1942,7 +1985,7 @@ function buildPrompt(round, wish, tgt, prev) {
   const o = S.orig, diag = CHECK ? CHECK.findings.map(f => f.sev + ': ' + f.title) : [];
   let t = `Du bist ein erfahrener Mastering-Engineer. Du masterst einen Song im "Deep Structure Mastering Studio". Du kannst den Song nicht hören, aber du bekommst präzise Messwerte (ITU-R BS.1770, Terzband-Spektrum) und stellst die Mastering-Kette ein. Die Kette läuft in dieser Reihenfolge: 8-Band-EQ → 3-Band-Kompressor (Linkwitz-Riley-Weichen, Web-Audio-Kompressor mit Soft-Knee 6 dB und automatischer Aufholverstärkung) → Bandsättigung (tanh, pegelkompensiert) → Stereo (M/S-Breite, Bass-Mono per Hochpass auf dem Seitensignal) → True-Peak-Limiter mit 5 ms Vorschau. Den Limiter-Drive für die Ziel-Lautheit rechnet das Studio danach selbst exakt aus, den musst du nicht angeben.
 
-Arbeitsweise: Mastering ist dezent. EQ-Eingriffe meist ±0,5 bis ±3 dB, breite Güte (Q 0,5–1,2), nur bei klaren Problemen mehr. Kompression sanft (Ratio 1,3–2,5, 1–3 dB Gain-Reduktion); Schwelle relativ zum Pegel: die integrierte Lautheit liegt bei ${r1(o.I)} LUFS, Spitzen ca. 8–12 dB darüber. Ist der Mix schon stark verdichtet (PLR unter 9), Kompressor aus oder sehr sanft. Bass-Mono 100–150 Hz ist fast immer sinnvoll. Sättigung nur, wenn der Wunsch nach Wärme/Dichte verlangt (Drive 10–35). Höhen bei KI-generierter Musik (z. B. Suno) eher nicht anheben, dort klingen sie oft metallisch. "balanceVsTargetDb" ist die Abweichung der Klangbalance von ${S.ref ? 'der Referenz des Nutzers' : 'einer ausgewogenen Durchschnittskurve'} (positiv = zu viel).
+Grundsatz: Den musikalischen Charakter bewahren. Abweichungen von der Vergleichskurve sind KEINE Fehler, Genre und Wunsch haben Vorrang. Ist der Song technisch sauber, ändere wenig oder nichts – neutrale Einstellungen (alle EQ-Gains 0, Kompressor aus, Sättigung aus) sind ausdrücklich erlaubt und oft richtig. Arbeitsweise: Mastering ist dezent. EQ-Eingriffe meist ±0,5 bis ±3 dB, breite Güte (Q 0,5–1,2), nur bei klaren Problemen mehr. Kompression sanft (Ratio 1,3–2,5, 1–3 dB Gain-Reduktion); Schwelle relativ zum Pegel: die integrierte Lautheit liegt bei ${r1(o.I)} LUFS, Spitzen ca. 8–12 dB darüber. Ist der Mix schon stark verdichtet (PLR unter 9), Kompressor aus oder sehr sanft. Bass-Mono 100–150 Hz ist fast immer sinnvoll. Sättigung nur, wenn der Wunsch nach Wärme/Dichte verlangt (Drive 10–35). Höhen bei KI-generierter Musik (z. B. Suno) eher nicht anheben, dort klingen sie oft metallisch. "balanceVsTargetDb" ist die Abweichung der Klangbalance von ${S.ref ? 'der Referenz des Nutzers' : 'einer ausgewogenen Durchschnittskurve'} (positiv = zu viel).
 
 Wunsch des Künstlers: ${wish || '(keine Angabe – ausgewogen, modern, für Streaming)'}
 Ziel-Lautheit (vom Nutzer gewählt): ${tgt} LUFS
@@ -2188,22 +2231,37 @@ function updateSongKv() {
 }
 async function setDriveToTarget(tgtIn) {
   if (!S.track) return null;
-  const tgt = tgtIn != null ? tgtIn : +$('#targetSel').value; status('Berechne Drive für ' + tgt + ' LUFS über den ganzen Song …', 'busy');
+  // Zielwert: ausdrücklich übergebene Zahl, sonst das Auswahlfeld. Alles andere (z. B. ein Klick-Ereignis) wird ignoriert.
+  const raw = (typeof tgtIn === 'number' || typeof tgtIn === 'string') ? tgtIn : $('#targetSel').value;
+  const tgt = Number(raw);
+  if (!isFinite(tgt) || tgt < -30 || tgt > -5) { status('Ungültiges Lautheitsziel: ' + raw + '. Erlaubt sind −30 bis −5 LUFS.', 'err'); return null; }
+  status('Berechne Drive für ' + tgt + ' LUFS über den ganzen Song …', 'busy');
   try {
-    const pre = await getPre(); let d = P.lim.drive, r = null, prev = null;
-    for (let it = 0; it < 6; it++) {
-      r = await DSP({ cmd: 'analyze', sr: pre.sr, L: pre.L.slice(), R: pre.R.slice(), lim: limParams({ on: true, drive: d }), opts: {} });
-      const diff = tgt - r.I; if (!isFinite(diff) || Math.abs(diff) < 0.2) break;
-      let step = diff; if (prev) { const slope = (r.I - prev.I) / (d - prev.d); if (isFinite(slope) && slope > 0.15) step = diff / slope; }
-      prev = { d, I: r.I }; d = clamp(d + clamp(step, -12, 12), -12, 24); if (d >= 24 && diff > 0) break;
-      status('Berechne Drive … Schritt ' + (it + 2) + ': ' + nf(r.I, 1) + ' LUFS', 'busy');
+    const pre = await getPre(), DMIN = -12, DMAX = 24;
+    const measure = d => DSP({ cmd: 'analyze', sr: pre.sr, L: pre.L.slice(), R: pre.R.slice(), lim: limParams({ on: true, drive: d }), opts: { tp: true } });
+    let d = clamp(Number(P.lim.drive) || 0, DMIN, DMAX), r = null, prev = null;
+    for (let it = 0; it < 8; it++) {
+      r = await measure(d); if (!isFinite(r.I)) break;
+      const diff = tgt - r.I; if (Math.abs(diff) < 0.15) break;
+      let step = diff; if (prev && d !== prev.d) { const slope = (r.I - prev.I) / (d - prev.d); if (isFinite(slope) && slope > 0.1) step = diff / slope; }
+      prev = { d, I: r.I }; const nd = clamp(d + clamp(step, -12, 12), DMIN, DMAX);
+      if (Math.abs(nd - d) < 0.02) break; // an der Grenze: weiter geht es nicht
+      d = nd; status('Berechne Drive … Schritt ' + (it + 2) + ': ' + nf(r.I, 1) + ' LUFS', 'busy');
     }
-    P.lim.on = true; P.lim.drive = Math.round(d * 10) / 10; refreshAll(); onParam();
-    const gr = -g2db(r.grMin);
-    $('#targetInfo').textContent = 'Drive ' + sf(P.lim.drive, 1) + ' dB ergibt ' + nf(r.I, 1) + ' LUFS. Der Limiter greift dabei mit bis zu ' + nf(gr, 1) + ' dB ein.' +
-      (gr > 6 ? ' Das ist viel. Wenn es gequetscht klingt, nimm ein leiseres Ziel oder lass den Kompressor mehr Arbeit machen.' : '');
-    status('Lautheit eingestellt: ' + nf(r.I, 1) + ' LUFS (Ziel ' + tgt + ')', 'ok');
-    return r;
+    // Den tatsächlich verwendeten (gerundeten) Drive noch einmal exakt messen.
+    const dUsed = Math.round(d * 10) / 10; r = await measure(dUsed);
+    P.lim.on = true; P.lim.drive = dUsed; refreshAll(); onParam();
+    const gr = r.grMin != null ? -g2db(r.grMin) : 0, miss = isFinite(r.I) ? r.I - tgt : NaN;
+    const reached = isFinite(miss) && Math.abs(miss) <= 0.5;
+    let info = 'Drive ' + sf(dUsed, 1) + ' dB ergibt ' + nf(r.I, 1) + ' LUFS (Ziel ' + tgt + '), True Peak ' + nf(r.TP, 1) + ' dBTP. Der Limiter regelt dabei bis zu ' + nf(gr, 1) + ' dB herunter.';
+    if (!isFinite(r.I)) info = 'Der Song ist zu kurz oder zu leise für eine Lautheitsmessung. Drive bleibt bei ' + sf(dUsed, 1) + ' dB.';
+    else if (!reached && miss < 0) info += ' Ziel NICHT erreicht: lauter geht mit dieser Decke (' + nf(P.lim.ceiling, 1) + ' dB) und maximalem Drive nicht' + (dUsed >= DMAX ? '' : ' ohne extreme Begrenzung') + '.';
+    else if (!reached) info += ' Ziel NICHT erreicht: der Song ist schon lauter als das Ziel, auch mit minimalem Drive.';
+    if (reached && gr > 6) info += ' Das ist viel Begrenzung. Wenn es gequetscht klingt, nimm ein leiseres Ziel.';
+    $('#targetInfo').textContent = info;
+    if (reached) status('Lautheit eingestellt: ' + nf(r.I, 1) + ' LUFS (Ziel ' + tgt + ')', 'ok');
+    else status(isFinite(r.I) ? 'Ziel ' + tgt + ' LUFS nicht erreichbar, erreicht: ' + nf(r.I, 1) + ' LUFS. Details im Reiter Limiter.' : 'Lautheit nicht messbar.', 'err', 8000);
+    r.reached = reached; r.driveUsed = dUsed; return r;
   } catch (e) { console.error(e); status('Berechnung fehlgeschlagen: ' + e.message, 'err'); return null; }
 }
 
@@ -2296,18 +2354,26 @@ async function assistant() {
   if (!S.track) return; status('Assistent analysiert den Song …', 'busy');
   for (let i = 0; i < 80 && !(S.orig && S.orig.spec); i++) await sleep(250);
   if (!(S.orig && S.orig.spec)) { status('Die Analyse dauert zu lange. Bitte später noch einmal versuchen.', 'err'); return; }
-  const tgt = +$('#targetSel').value, o = S.orig, p = clone(DEFAULT);
-  Object.assign(p.eq.bands[0], { on: true, f: 25 });
-  matchEq(p, 55, true);
-  p.comp.on = true; const base = clamp(Math.round(o.I), -36, -8);
-  p.comp.bands[0] = { th: base + 1, ratio: 1.8, att: 30, rel: 220, gain: 0 };
-  p.comp.bands[1] = { th: base - 1, ratio: 1.6, att: 20, rel: 160, gain: 0 };
-  p.comp.bands[2] = { th: base - 5, ratio: 1.6, att: 10, rel: 120, gain: 0 };
-  p.stereo.on = true; p.stereo.width = o.corr != null && o.corr > 0.85 ? 110 : 100; p.stereo.bassMono = true; p.stereo.monoFreq = 120;
+  // Zurückhaltend: nur korrigieren, was deutlich auffällt. Ein technisch sauberer Song bleibt fast unverändert.
+  const tgt = +$('#targetSel').value, o = S.orig, p = clone(DEFAULT), done = [];
+  p.eq.bands.forEach(b => { if (b.type !== 'highpass' && b.type !== 'lowpass') b.g = 0; });
+  const dv = bandDev(o.spec) || {};
+  if ((dv.sub || 0) > 4 || o.dc > 0.002) { Object.assign(p.eq.bands[0], { on: true, type: 'highpass', f: 25, q: 0.71 }); done.push('Low Cut 25 Hz'); }
+  const corr = (id, idx, o2, label) => { const v = dv[id] || 0, ex = Math.abs(v) - 2; if (ex <= 0) return; const g = -Math.sign(v) * Math.min(3, Math.round(ex * 0.5 * 10) / 10);
+    if (Math.abs(g) < 0.3) return; Object.assign(p.eq.bands[idx], o2, { on: true, g }); done.push(label + ' ' + sf(g, 1) + ' dB'); };
+  corr('bass', 1, { type: 'lowshelf', f: 90, q: 0.71 }, 'Bass'); corr('lowmid', 2, { type: 'peaking', f: 300, q: 1 }, '300 Hz');
+  corr('mid', 4, { type: 'peaking', f: 1000, q: 0.9 }, '1 kHz'); corr('upmid', 5, { type: 'peaking', f: 3200, q: 1.1 }, '3 kHz'); corr('air', 6, { type: 'highshelf', f: 9000, q: 0.71 }, 'Höhen');
+  p.comp.on = false;
+  if (o.LRA > 10 && o.TP - o.I > 10) { p.comp.on = true; const base = clamp(Math.round(o.I), -36, -8);
+    p.comp.bands = [{ th: base + 2, ratio: 1.5, att: 30, rel: 220, gain: 0 }, { th: base, ratio: 1.4, att: 20, rel: 160, gain: 0 }, { th: base - 4, ratio: 1.4, att: 10, rel: 120, gain: 0 }]; done.push('sanfte Kompression (LRA ' + nf(o.LRA, 1) + ' LU)'); }
+  p.sat.on = false; p.stereo.on = true; p.stereo.width = 100;
+  if (o.bassSide != null && o.bassSide > -18) { p.stereo.bassMono = true; p.stereo.monoFreq = 120; done.push('Bass-Mono 120 Hz'); } else p.stereo.bassMono = false;
   p.lim = { on: true, drive: 0, ceiling: tgt <= -18 ? -3 : -1, release: 80, isp: true };
   P = p; refreshAll(); onParam();
-  await setDriveToTarget();
-  status('Startpunkt gesetzt: Klangbalance ' + (S.ref ? 'an Referenz' : 'an Durchschnittskurve') + ' angeglichen (55 %), sanfte Kompression, Bass-Mono 120 Hz, Lautheit ' + tgt + ' LUFS. Jetzt mit den Ohren nachregeln.', 'ok', 9000);
+  let lt = '';
+  if (isFinite(o.I) && Math.abs(o.I - tgt) > 1) { const r = await setDriveToTarget(tgt); lt = r && r.reached ? 'Lautheit ' + tgt + ' LUFS' : 'Lautheitsziel nicht ganz erreichbar'; }
+  else lt = 'Lautheit bleibt (liegt schon nahe am Ziel)';
+  status('Startpunkt: ' + (done.length ? done.join(', ') : 'keine Klangkorrektur nötig') + '; ' + lt + '. Alles ist Vorschlag – mit Master/Original vergleichen.', 'ok', 10000);
 }
 
 /* ============================ Export ============================ */
@@ -2395,7 +2461,7 @@ $('#edFadeIn').addEventListener('click', () => opFade(true)); $('#edFadeOut').ad
 $('#edSilence').addEventListener('click', opSilence); $('#edReverse').addEventListener('click', opReverse); $('#edTrim').addEventListener('click', opTrimSilence);
 $('#btnRgGain').addEventListener('click', () => { const v = parseFloat(String($('#rgGain').value).replace(',', '.')); if (!isFinite(v) || Math.abs(v) > 24) { status('Bitte einen Wert zwischen −24 und +24 dB eingeben.', 'err'); return; } opGain(v); });
 $('#btnRgNorm').addEventListener('click', opNormalize); $('#btnRgEq').addEventListener('click', opRegionEq); $('#btnRgSolo').addEventListener('click', opBandSolo);
-$('#btnAssist').addEventListener('click', assistant); $('#btnToTarget').addEventListener('click', setDriveToTarget);
+$('#btnAssist').addEventListener('click', assistant); $('#btnToTarget').addEventListener('click', () => setDriveToTarget());
 $('#btnMatch').addEventListener('click', () => { if (matchEq(P, S.matchAmt)) { refreshAll(); onParam(); showTab('eq'); status('EQ-Vorschlag übernommen (' + S.matchAmt + ' %). Hör mit Master/Original pegelgleich gegen.', 'ok'); } });
 $('#targetSel').addEventListener('change', () => { renderAnalysis(); store('target', $('#targetSel').value); });
 $('#btnResetMeter').addEventListener('click', resetLive);

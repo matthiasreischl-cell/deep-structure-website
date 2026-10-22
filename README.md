@@ -58,6 +58,8 @@ The prototype imports Three.js as an ES module from unpkg. No framework or build
 
 ## Main files
 
+- `landing-3d.js` / `landing-3d.css` — 3D-Startseite: Logo schwimmt auf Wasser mit echter Spiegelung und Wellen (Three.js, WebGL2). Ohne WebGL2 wird automatisch `symbol-v2.js` + Wasser-Shader aus `app.js` genutzt.
+
 - `index.html` — entrance shell, transition and World V1 host markup
 - `styles.css` — entrance composition, symbol stage and compass
 - `app.js` — WebGL water shader and entrance interaction

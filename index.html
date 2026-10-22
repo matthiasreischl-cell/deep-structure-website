@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="perception-game.css?v=2" />
   <link rel="stylesheet" href="story-world.css?v=6" />
   <link rel="stylesheet" href="cursor.css?v=1" />
+  <link rel="stylesheet" href="landing-3d.css?v=1" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
@@ -63,10 +64,26 @@
   </div>
 
   <script type="module">
-    await import('./app.js?v=10');
+    // 3D-Startseite (Logo schwimmt auf Wasser), wenn das Gerät WebGL2 kann; sonst die bisherige Variante.
+    window.__DS_LANDING3D = location.hash !== '#inside' && (() => {
+      try { const c = document.createElement('canvas'); const g = c.getContext('webgl2'); if (g) { const x = g.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); return true; } } catch (e) {}
+      return false;
+    })();
+    await import('./app.js?v=11');
     if (location.hash === '#inside') {
       document.body.classList.add('entered');
       document.getElementById('inside').setAttribute('aria-hidden', 'false');
+    } else if (window.__DS_LANDING3D) {
+      try {
+        await import('./landing-3d.js?v=1');
+      } catch (error) {
+        console.warn('3D-Startseite nicht verfügbar, nutze Ersatz:', error);
+        window.__DS_LANDING3D = false;
+        document.body.classList.remove('scene3d');
+        document.getElementById('scene3d')?.remove();
+        window.__dsInitWater?.();
+        await import('./symbol-v2.js?v=6');
+      }
     } else {
       await import('./symbol-v2.js?v=6');
     }

@@ -143,7 +143,15 @@ function applyCssMotion() {
 // Stylised slow water inspired by broad hand-drawn ripple bands.
 // The surface is procedural and continuous across the viewport; interaction
 // only perturbs it locally, so it reads as water rather than an effect cloud.
-const gl = location.hash === '#inside' ? null : canvas.getContext('webgl', {
+// Wenn die 3D-Szene (landing-3d.js) aktiv ist, bleibt dieser Shader als Ersatz in Reserve.
+const WATER_OPTIONS = {
+  antialias: false,
+  alpha: false,
+  depth: false,
+  stencil: false,
+  powerPreference: 'high-performance'
+};
+let gl = (location.hash === '#inside' || window.__DS_LANDING3D) ? null : canvas.getContext('webgl', {
   antialias: false,
   alpha: false,
   depth: false,
@@ -188,6 +196,7 @@ function createProgram(vertexSource, fragmentSource) {
   return result;
 }
 
+function setupWater() {
 if (gl) {
   const vertexSource = `
     attribute vec2 aPosition;
@@ -377,6 +386,14 @@ if (gl) {
     waterReady = true;
   }
 }
+}
+setupWater();
+window.__dsInitWater = () => {
+  if (gl || location.hash === '#inside') return;
+  gl = canvas.getContext('webgl', WATER_OPTIONS);
+  setupWater();
+  resizeWater();
+};
 
 function resizeWater() {
   if (!gl) return;

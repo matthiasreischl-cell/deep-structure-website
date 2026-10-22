@@ -1,6 +1,6 @@
 # Deep Structure Mastering Studio
 
-Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, Song-Check, KI-Artefakt-Suche und Mastering-Kette. Die gesamte Audioverarbeitung läuft lokal im Browser. Audiodateien verlassen das Gerät nie.
+Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, Song-Check, KI-Artefakt-Suche, Mastering-Kette und Spiel-Daten-Export. Die gesamte Audioverarbeitung läuft lokal im Browser. Audiodateien verlassen das Gerät nie.
 
 ## Dateien
 
@@ -63,6 +63,16 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - STFT mit Wurzel-Hann-Fenster, verlustfrei rekonstruierend (getestet).
 - Wahlweise nur auf markierte Stellen angewendet.
 
+**Spiel-Daten** (Reiter „Spiel-Daten“, für Rhythmus- und Musikspiele, z. B. in Godot):
+- Onset-Hüllkurve aus logarithmischem Spektral-Fluss (STFT 2048, Hop 512, L und R getrennt).
+- Tempo: Autokorrelation mit metrischer Bewertung (Beat, halber und ganzer Takt) plus Bass-Periodizität. Eine sanfte Vorliebe für 60–200 BPM um 120 entscheidet Grenzfälle. Halbes oder doppeltes Tempo ist musikalisch oft gleichwertig, deshalb gibt es ÷ 2 und × 2 und ein Eingabefeld für ein bekanntes Tempo.
+- Beat-Raster: gleichmäßig (konstantes Tempo). Periode und Phase werden fein gesucht, sodass möglichst viele Einsätze getroffen werden. Ganzzahlige Tempi werden eingerastet, wenn sie innerhalb von 0,04 BPM liegen. Genauigkeit an Testsignalen: unter 1 ms.
+- Taktanfang (4/4): deutliche Bass-Akzente entscheiden. Fehlen sie, zählen Abschnittswechsel, die meist auf der „1“ liegen. Mit ‹ 1 und 1 › verschiebbar.
+- Abschnitte: Neuheitskurve über Takt-Merkmale (Pegel, Bass, Mitten, Höhen, Einsatzstärke) mit etwa 5,5 s Kontext, unabhängig davon, ob halbes oder doppeltes Tempo gewählt ist. Die Typen (Intro, Aufbau, Hauptteil, Höhepunkt, Drop, Ruhephase, Outro) leitet eine Heuristik aus dem Energieverlauf ab. Sie sind frei umbenennbar.
+- Schläge: adaptive Spitzensuche im Fluss je Band (Bass 30–150 Hz, Mitten 150–2500 Hz, Höhen 5–16 kHz) mit Stärke 0–1. Wahlweise auf 1/16 eingerastet.
+- Export: JSON im Format `deepstructure.trackdata.v1`. Dazu gibt es GDScript (`TrackData`-Klasse mit `song_time()` nach Godot-Empfehlung) und eine Anleitung zum Einfügen in Codex. Mit „Klick“ läuft beim Abspielen ein Metronom am Mastering vorbei, um das Raster zu prüfen.
+- Grenzen: Tempowechsel innerhalb eines Songs werden nicht verfolgt (das Raster ist gleichmäßig). Die Abschnittstypen sind Vorschläge, kein Songtext-Verständnis.
+
 **Assistent:** Er korrigiert nur deutliche Abweichungen (Totzone ±2 dB, höchstens ±3 dB). Kompression setzt er nur bei großer Dynamik ein, Sättigung nie. Ein technisch sauberer Song bleibt nahezu unverändert.
 
 ## KI-Mastering und Datenschutz
@@ -81,6 +91,13 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.5.0 (Spiel-Daten)
+
+- Neuer Reiter **Spiel-Daten**: Tempo, Beat-Raster, Taktanfang, Abschnitte, Energie pro Beat und Takt, Bass/Mitten/Höhen pro Beat, Schläge mit Stärke, Lautheitsverlauf.
+- Kopieren als JSON, Speichern als `.trackdata.json` (mit Level-Nummer im Dateinamen), GDScript für Godot 4, Anleitung für Codex.
+- Metronom-Klick zum Prüfen des Rasters, Abschnittsmarken in der Wellenform.
+- Bestehende Funktionen und Messwerte sind unverändert. Neue Tests: 15 DSP-Tests, 6 Browser-Tests.
 
 ## Änderungen 1.4.0 (Fehlerbehebung und Validierung)
 

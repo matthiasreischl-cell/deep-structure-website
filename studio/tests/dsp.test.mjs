@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const htmlPath = process.argv[2] || path.join(here, '..', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const grab = name => { const m = html.match(new RegExp('const ' + name + ' = String\\.raw`([\\s\\S]*?)`;')); if (!m) throw new Error(name + ' nicht gefunden'); return m[1]; };
-const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter};')();
+const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData};')();
 
 let pass = 0, fail = 0; const rows = [];
 function check(name, ok, detail) { rows.push([ok ? 'PASS' : 'FAIL', name, detail]); ok ? pass++ : fail++; }
@@ -102,6 +102,36 @@ for (const bits of [16, 24, 32]) { const x = sine(48000, 1, 440, 0.5), buf = D.e
 { const x = sine(48000, 8, 440, 0.3), a = D.artifacts(x.L, x.R, 48000); check('Artefakt-Suche: sauberer Sinus ohne Fehlalarm', a.regions.length === 0 && a.clicks.length === 0, a.regions.length + ' Regionen, ' + a.clicks.length + ' Knackser'); }
 { const x = sine(48000, 8, 440, 0.2), L = x.L, R = x.R; for (const t of [2, 4.5, 6]) { const i = Math.round(t * 48000); L[i] += 0.5; R[i] += 0.5; }
   const a = D.artifacts(L, R, 48000); check('Artefakt-Suche: 3 eingefügte Knackser werden gefunden', a.clicks.length === 3, a.clicks.map(c => c.toFixed(2)).join(', ')); }
+
+/* 9  Spiel-Daten: Tempo, Beat-Raster, Taktanfang, Abschnitte (synthetischer Song mit bekannten Werten) */
+function song(bpm, sr = 44100, pre = 0.5) {
+  const plan = [['intro', 8, { hat: 1 }], ['main', 16, { kick: 1, snare: 1, hat: 1, bass: 1 }], ['break', 8, { pad: 1 }], ['drop', 16, { kick: 1, snare: 1, hat: 1, bass: 1, loud: 1 }], ['outro', 4, { hat: 1 }]];
+  const beat = 60 / bpm, total = plan.reduce((a, p) => a + p[1], 0) * 4 * beat + pre + 1, n = Math.round(total * sr), L = new Float32Array(n), r = rng(7), secs = [];
+  const add = (t, len, f) => { const i0 = Math.round(t * sr); for (let i = 0; i < len && i0 + i < n; i++) L[i0 + i] += f(i); };
+  let t0 = pre;
+  for (const [name, bars, o] of plan) { secs.push(t0);
+    for (let b = 0; b < bars * 4; b++) { const t = t0 + b * beat, g = o.loud ? 1.4 : 1;
+      if (o.kick) add(t, sr * 0.3, i => g * 0.8 * Math.sin(2 * Math.PI * (50 + 80 * Math.exp(-i / sr * 30)) * i / sr) * Math.exp(-i / sr * 8));
+      if (o.snare && b % 2 === 1) add(t, sr * 0.2, i => g * (0.35 * r() * 2 * Math.exp(-i / sr * 20) + 0.2 * Math.sin(2 * Math.PI * 200 * i / sr) * Math.exp(-i / sr * 25)));
+      if (o.hat) { add(t + beat / 2, sr * 0.05, i => 0.12 * r() * 2 * Math.exp(-i / sr * 60)); if (!o.kick) add(t, sr * 0.05, i => 0.12 * r() * 2 * Math.exp(-i / sr * 60)); }
+      if (o.bass) { const f = 55 * (b % 8 < 4 ? 1 : 1.335); add(t, beat * sr, i => g * 0.25 * Math.sin(2 * Math.PI * f * i / sr) * Math.min(1, i / 200) * Math.max(0, 1 - i / (beat * sr * 0.95))); }
+      if (o.pad && b % 4 === 0) add(t, 4 * beat * sr, i => 0.15 * (Math.sin(2 * Math.PI * 220 * i / sr) + Math.sin(2 * Math.PI * 277 * i / sr)) * Math.min(1, i / 2000)); }
+    t0 += bars * 4 * beat; }
+  return { L, R: L.slice(), sr, secs, beat, pre };
+}
+const gd = (x, opts = {}) => D.handle({ cmd: 'gamedata', L: x.L.slice(), R: x.R.slice(), sr: x.sr, opts }).result;
+for (const bpm of [75, 90, 128, 140, 174]) {
+  const x = song(bpm), g = gd(x), err = g.beats.map(b => { const k = Math.round((b - x.pre) / x.beat); return Math.abs(b - x.pre - k * x.beat) * 1000; }).sort((a, b) => a - b);
+  const med = err[err.length >> 1], down = g.beats[g.downbeatPhase], downOk = Math.abs(((down - x.pre) / (4 * x.beat)) - Math.round((down - x.pre) / (4 * x.beat))) < 0.02;
+  check('Spiel-Daten ' + bpm + ' BPM: Tempo, Beat-Raster (Median < 6 ms) und Taktanfang', g.bpm === bpm && med < 6 && downOk, g.bpm + ' BPM, Abweichung ' + med.toFixed(1) + ' ms, erste „1“ ' + down.toFixed(3) + ' s');
+  const st = g.sections.slice(1).map(s => g.beats[s.startBeat]), hit = x.secs.slice(1).filter(t => st.some(s => Math.abs(s - t) < x.beat * 0.5)).length;
+  check('Spiel-Daten ' + bpm + ' BPM: Abschnittswechsel gefunden (4 von 4)', hit === 4 && st.length <= 5, st.map(t => t.toFixed(2)).join(', ') + ' s'); }
+{ const x = song(123.4, 48000, 3.2), g = gd(x), err = g.beats.filter(b => b > x.pre).map(b => { const k = Math.round((b - x.pre) / x.beat); return Math.abs(b - x.pre - k * x.beat) * 1000; }).sort((a, b) => a - b);
+  check('Spiel-Daten: krummes Tempo (123,4 BPM), 48 kHz, 3,2 s Stille am Anfang', Math.abs(g.bpm - 123.4) < 0.02 && err[err.length >> 1] < 6, g.bpm + ' BPM, Abweichung ' + err[err.length >> 1].toFixed(1) + ' ms'); }
+{ const x = song(128), g = gd(x, { bpm: 127.5 }); check('Spiel-Daten: eingetragenes Tempo wird exakt übernommen', g.bpm === 127.5 && Math.abs(g.beatSec - 60 / 127.5) < 1e-9, g.bpm + ' BPM, Beat ' + g.beatSec.toFixed(6) + ' s'); }
+{ const x = song(128), g = gd(x, { bpm: 128, downbeatPhase: 2 }); check('Spiel-Daten: Taktanfang lässt sich verschieben', g.downbeatPhase === 2, 'Phase ' + g.downbeatPhase); }
+{ const x = noise(44100, 30, 0.2, 11), g = gd(x); check('Spiel-Daten: Rauschen ohne Rhythmus → Raster als unsicher markiert', g.bpmConfidence < 0.3, 'Sicherheit ' + g.bpmConfidence.toFixed(2)); }
+{ const g = gd(sine(44100, 2, 440, 0.1)); check('Spiel-Daten: zu kurzer Song → verständliche Meldung statt Fehler', typeof g.error === 'string', g.error || '–'); }
 
 const w = Math.max(...rows.map(r => r[1].length));
 console.log('\nDeep Structure Mastering Studio – DSP-Tests (' + path.basename(htmlPath) + ')\n');

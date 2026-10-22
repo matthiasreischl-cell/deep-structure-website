@@ -138,7 +138,7 @@ button.toggle[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
 .rack{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:12px;align-items:start}
 .modules{background:var(--panel);border:1px solid var(--line);border-radius:10px;min-width:0}
 .tabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);padding:6px 6px 0;scrollbar-width:thin}
-.tabs button{border:0;border-radius:6px 6px 0 0;background:transparent;color:var(--muted);min-height:38px;padding:0 14px;position:relative}
+.tabs button{border:0;border-radius:6px 6px 0 0;background:transparent;color:var(--muted);min-height:38px;padding:0 11px;position:relative;flex:none}
 .tabs button[aria-selected=true]{color:var(--text);background:var(--panel2)}
 .tabs button[aria-selected=true]::after{content:"";position:absolute;left:10px;right:10px;bottom:0;height:2px;background:var(--accent)}
 .tabs button .dot{width:6px;height:6px;border-radius:50%;background:#3a414c}
@@ -217,6 +217,39 @@ table.metrics td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .modal .box h2{font-size:20px}
 .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .result{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px}
+
+
+/* Song-Check */
+.checkhead{display:flex;flex-wrap:wrap;align-items:center;gap:14px 18px}
+.score{position:relative;width:92px;height:92px;flex:none}
+.score canvas{width:92px;height:92px;display:block}
+.score b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:600 26px var(--f-mono);font-variant-numeric:tabular-nums}
+.cktext{flex:1 1 260px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.cktext h2{font-size:20px;color:var(--text)}
+.findings{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.finding{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px 10px 0;overflow:hidden}
+.finding i{align-self:stretch;border-radius:0 3px 3px 0}
+.finding .ft{display:flex;flex-direction:column;gap:3px;min-width:0}
+.finding .ft b{font-weight:600}
+.finding .ft span{font-size:13px;color:var(--muted)}
+.finding .tag{font:600 10px var(--f-display);letter-spacing:.14em;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-right:8px;vertical-align:1px}
+.finding.bad i,.finding.bad .tag{background:var(--hot);color:#1a0503}
+.finding.warn i,.finding.warn .tag{background:var(--warn);color:#1a1403}
+.finding.info i,.finding.info .tag{background:var(--accent);color:var(--accent-ink)}
+.finding.ok i,.finding.ok .tag{background:var(--ok);color:#03140a}
+.finding button.done{border-color:var(--ok);color:var(--ok)}
+.aicard{gap:10px;border-color:#24414f;background:linear-gradient(180deg,rgba(154,223,255,.05),transparent 60%),var(--panel2)}
+.aicard h3{color:var(--text)}
+.aibadge{font:600 10px var(--f-display);letter-spacing:.14em;padding:3px 7px;border-radius:3px;background:#1c2a36;color:var(--muted)}
+.aibadge.on{background:var(--accent);color:var(--accent-ink)}
+textarea{font:400 14px var(--f-body);color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:5px;padding:8px 10px;resize:vertical;width:100%;min-width:0}
+.ailog{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.ailog li.cur{color:var(--text)}
+.ailog li.cur::marker{color:var(--accent)}
+.aiexp{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:13.5px;display:flex;flex-direction:column;gap:8px;max-width:80ch}
+.aiexp ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+details summary{cursor:pointer;font-size:13px;color:var(--muted)}
+@media (max-width:640px){ .finding{grid-template-columns:4px minmax(0,1fr)} .finding button{grid-column:2;justify-self:start} }
 
 @media (max-width:1100px){ .bands{grid-template-columns:repeat(4,minmax(0,1fr))} }
 @media (max-width:920px){
@@ -307,7 +340,8 @@ table.metrics td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
   <main class="rack">
     <section class="modules" aria-label="Mastering-Module">
       <nav class="tabs" role="tablist">
-        <button role="tab" data-tab="eq" aria-selected="true"><span class="dot" data-dot="eq"></span>Equalizer</button>
+        <button role="tab" data-tab="check" aria-selected="false"><span class="dot on" id="ckDot"></span>Song-Check</button>
+        <button role="tab" data-tab="eq" aria-selected="false"><span class="dot" data-dot="eq"></span>Equalizer</button>
         <button role="tab" data-tab="comp" aria-selected="false"><span class="dot" data-dot="comp"></span>Dynamik</button>
         <button role="tab" data-tab="sat" aria-selected="false"><span class="dot" data-dot="sat"></span>Sättigung</button>
         <button role="tab" data-tab="stereo" aria-selected="false"><span class="dot" data-dot="stereo"></span>Stereo</button>
@@ -318,7 +352,29 @@ table.metrics td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
         <button class="assist" id="btnAssist" title="Analysiert den Song und stellt einen Startpunkt ein">Assistent</button>
       </nav>
 
-      <div class="panel" data-panel="eq">
+      <div class="panel" data-panel="check" hidden>
+        <div class="checkhead">
+          <div class="score" aria-hidden="true"><canvas id="ckRing" width="92" height="92"></canvas><b id="ckNum">–</b></div>
+          <div class="cktext"><h2 id="ckVerdict">Song wird analysiert …</h2><p class="hint" id="ckSub">Beim Laden prüft das Studio Lautheit, Klangbalance, Dynamik, Stereobild und Übersteuerung und zeigt dir, wo dein Track schwächelt.</p></div>
+          <button class="primary" id="btnFixAll" disabled>Alle Vorschläge anwenden</button>
+        </div>
+        <ul class="findings" id="ckList"></ul>
+        <div class="card aicard" id="aiCard">
+          <h3><span>KI-Mastering</span><span class="aibadge" id="aiBadge">wird geprüft …</span></h3>
+          <p class="hint">Die KI bekommt alle Messwerte deines Songs und deinen Wunsch, stellt die ganze Mastering-Kette ein, lässt das Ergebnis nachmessen und bessert in einer zweiten Runde nach. Danach hörst du mit Master / Original selbst, ob es besser ist.</p>
+          <label class="field" for="aiWish"><span>Wie soll dein Song klingen?</span><textarea id="aiWish" rows="2" placeholder="z. B. Drum &amp; Bass, dunkel und druckvoll, Bass vorne, Stimme klar, für Spotify"></textarea></label>
+          <div class="row"><button class="primary" id="btnAI" disabled>Mit KI mastern</button><button id="btnAIStop" hidden>Stopp</button><button id="btnAIUndo" hidden>Vorherige Einstellungen</button></div>
+          <ol class="ailog" id="aiLog" hidden></ol>
+          <div class="aiexp" id="aiExp" hidden></div>
+          <details id="aiKeyBox" hidden>
+            <summary>KI hier freischalten (eigener Anthropic-API-Schlüssel)</summary>
+            <p class="hint">In Claude läuft die KI über dein Claude-Konto. Auf deiner Website und am PC braucht das Studio einen eigenen API-Schlüssel von console.anthropic.com. Ein Mastering-Durchgang kostet dort wenige Cent. Der Schlüssel bleibt nur in diesem Browser gespeichert.</p>
+            <div class="row"><input type="password" id="aiKey" placeholder="sk-ant-…" autocomplete="off" style="flex:1;min-width:0"><button id="btnAIKey">Speichern</button><button id="btnAIKeyDel" class="ghost">Löschen</button></div>
+          </details>
+        </div>
+      </div>
+
+      <div class="panel" data-panel="eq" hidden>
         <div class="phead">
           <label class="switch"><input type="checkbox" id="eqOn"><i></i><span>Equalizer</span></label>
           <p>Punkte in der Kurve ziehen: links/rechts = Frequenz, hoch/runter = Pegel. Mausrad oder zwei Finger auf einem Punkt = Bandbreite (Q). Grau: Spektrum vorher, Eisblau: nachher.</p>
@@ -640,6 +696,12 @@ function handle(d){
   var pk=0,i; for(i=0;i<L.length;i++){ var a=Math.abs(L[i]),b=Math.abs(R[i]); if(a>pk)pk=a; if(b>pk)pk=b; } res.peak=20*Math.log10(pk+1e-12);
   if(o.tp){ var t=Math.max(truePeak(L),truePeak(R)); res.TP=20*Math.log10(t+1e-12); }
   if(o.spectrum){ res.spec=spectrum(L,R,sr); var st=stereoStats(L,R,sr); res.corr=st.corr; res.sideMid=st.sideMid; res.bassSide=st.bassSide; res.rms=st.rms; }
+  if(o.diag){ var n=L.length,run=0,clips=0,sl=0,sr2=0,mm=0,ee=0,thr=0.001,lead=0,tail=0;
+    for(i=0;i<n;i++){ var l=L[i],r=R[i]; if(l>=0.9995||l<=-0.9995||r>=0.9995||r<=-0.9995){ run++; if(run===3) clips++; } else run=0;
+      sl+=l; sr2+=r; var m=(l+r)*0.5; mm+=m*m; ee+=(l*l+r*r)*0.5; }
+    while(lead<n&&Math.abs(L[lead])<thr&&Math.abs(R[lead])<thr) lead++;
+    while(tail<n-lead&&Math.abs(L[n-1-tail])<thr&&Math.abs(R[n-1-tail])<thr) tail++;
+    res.clips=clips; res.dc=Math.max(Math.abs(sl/n),Math.abs(sr2/n)); res.monoLoss=10*Math.log10((mm+1e-20)/(ee+1e-20)); res.leadSil=lead/sr; res.tailSil=tail/sr; }
   res.dur=L.length/sr; res.sr=sr;
   if(o.encode){ res.wav=encodeWav(L,R,sr,o.encode); tr.push(res.wav); }
   if(o.returnAudio){ res.L=L; res.R=R; tr.push(L.buffer,R.buffer); }
@@ -1001,7 +1063,7 @@ async function openFile(file) {
   status('Lade „' + file.name + '“ …', 'busy');
   try {
     const t = await decodeFile(file); t.name = file.name.replace(/\.[^.]+$/, '');
-    await loadTrack(t);
+    S.autoCheck = true; await loadTrack(t);
     status('„' + file.name + '“ geladen: ' + fmtTime(duration(), 1) + ', ' + (t.sr / 1000) + ' kHz. Messung läuft …', 'ok');
   } catch (e) { console.error(e); status('Die Datei konnte nicht gelesen werden. Unterstützt: WAV, MP3, FLAC, M4A. (' + e.message + ')', 'err', 8000); }
 }
@@ -1532,6 +1594,274 @@ function frame(t) {
   if ((S.playing || eqDirty) && !$('[data-panel=eq]').hidden) drawEq();
   requestAnimationFrame(frame);
 }
+/* ============================ Song-Check: Schwächen erkennen ============================ */
+const BANDS = [
+  { id: 'sub', name: 'Tiefbass', lo: 20, hi: 50 },
+  { id: 'bass', name: 'Bass', lo: 63, hi: 160 },
+  { id: 'lowmid', name: 'untere Mitten', lo: 200, hi: 500 },
+  { id: 'mid', name: 'Mitten', lo: 630, hi: 1600 },
+  { id: 'upmid', name: 'obere Mitten', lo: 2000, hi: 5000 },
+  { id: 'air', name: 'Höhen', lo: 6300, hi: 16000 }
+];
+function bandDev(spec) {
+  if (!spec) return null;
+  const cur = norm(spec), tgt = norm(S.ref && S.refM ? S.refM.spec : targetCurve()), out = {};
+  BANDS.forEach(b => { let s = 0, c = 0; THIRDS.forEach((f, i) => { if (f >= b.lo && f <= b.hi) { s += cur[i] - tgt[i]; c++; } }); out[b.id] = c ? s / c : 0; });
+  return out;
+}
+function setBand(p, idx, o) { Object.assign(p.eq.bands[idx], o, { on: true }); p.eq.on = true; }
+function diagnose() {
+  const o = S.orig; if (!o) return null;
+  const tgt = +$('#targetSel').value, dv = bandDev(o.spec) || {}, F = [];
+  const add = (sev, title, text, fix, label) => F.push({ sev, title, text, fix, label });
+  const refTxt = S.ref ? 'als deine Referenz' : 'als bei ausgewogenen Produktionen';
+  // Übersteuerung
+  if (o.clips > 0) add('bad', 'Übersteuerung im Original: ' + o.clips + ' Clipping-Stelle' + (o.clips > 1 ? 'n' : ''),
+    'Der Mix stößt an 0 dBFS an und ist dort hart abgeschnitten. Mastering kann das nicht mehr reparieren. Am besten den Mix 2 bis 3 dB leiser exportieren und neu laden.');
+  else if (o.TP > -0.3) add('warn', 'Kaum Luft nach oben (True Peak ' + nf(o.TP, 1) + ' dBTP)', 'Der Mix ist schon bis an die Grenze ausgesteuert. Kein Clipping gefunden, aber für Mastering ist etwas Reserve (−3 bis −6 dB) besser.');
+  // Lautheit
+  if (isFinite(o.I) && o.I < tgt - 2) add('info', 'Leiser als dein Ziel (' + nf(o.I, 1) + ' statt ' + tgt + ' LUFS)', 'Normal für einen Mix vor dem Mastering. Der Limiter bringt ihn auf Ziel-Lautheit.',
+    async () => { P.lim.on = true; refreshAll(); onParam(); await setDriveToTarget(tgt); }, 'Auf ' + tgt + ' LUFS bringen');
+  if (isFinite(o.I) && o.I > -9) add('warn', 'Schon sehr laut (' + nf(o.I, 1) + ' LUFS)', 'Wenig Spielraum für Mastering. Streaming-Dienste drehen so laute Songs ohnehin leiser. Lieber den Limiter-Drive klein halten.');
+  // Dynamik
+  if (isFinite(o.TP - o.I) && o.TP - o.I < 8) add('warn', 'Bereits stark verdichtet (PLR ' + nf(o.TP - o.I, 1) + ' dB)', 'Schläge und Transienten haben wenig Platz. Zusätzliche Kompression würde den Song platt machen.',
+    p => { p.comp.on = false; }, 'Kompressor aus');
+  if (o.LRA > 13) add('info', 'Große Lautstärkesprünge (LRA ' + nf(o.LRA, 1) + ' LU)', 'Leise und laute Teile liegen weit auseinander. Eine sanfte Kompression hält den Song zusammen.',
+    p => { p.comp.on = true; p.comp.bands.forEach(b => { b.ratio = 1.8; }); }, 'Sanft komprimieren');
+  // Klangbalance
+  const d = (id, v) => (dv[id] || 0) > v, u = (id, v) => (dv[id] || 0) < -v, amt = (id, k, max) => Math.round(Math.min(max, Math.abs(dv[id]) * k) * 10) / 10;
+  if (d('sub', 4)) add(dv.sub > 7 ? 'bad' : 'warn', 'Viel Tiefbass / Rumpeln unter 50 Hz (' + sf(dv.sub, 1) + ' dB)', 'Frisst Lautheit, ohne dass man es hört, und kann Boxen und Vinyl überfordern.',
+    p => setBand(p, 0, { type: 'highpass', f: 30, q: 0.71 }), 'Low Cut 30 Hz');
+  if (u('bass', 3)) add('warn', 'Zu wenig Bass / Druck (' + sf(dv.bass, 1) + ' dB)', 'Der Song hat im Bassbereich weniger Energie ' + refTxt + '.',
+    p => setBand(p, 1, { type: 'lowshelf', f: 90, g: amt('bass', 0.6, 4), q: 0.71 }), 'Bass anheben');
+  if (d('bass', 3)) add('warn', 'Bass dröhnt (' + sf(dv.bass, 1) + ' dB)', 'Zu viel Energie zwischen 60 und 160 Hz. Klingt auf großen Anlagen wummerig und macht den Mix schwer.',
+    p => setBand(p, 1, { type: 'lowshelf', f: 100, g: -amt('bass', 0.6, 4), q: 0.71 }), 'Bass absenken');
+  if (d('lowmid', 2.5)) add('warn', 'Mulmig in den unteren Mitten (' + sf(dv.lowmid, 1) + ' dB)', 'Zu viel 200–500 Hz macht den Mix matschig und verdeckt Stimme und Instrumente.',
+    p => setBand(p, 2, { type: 'peaking', f: 300, g: -amt('lowmid', 0.6, 4), q: 1 }), '300 Hz absenken');
+  if (u('mid', 3)) add('info', 'Hohle Mitten (' + sf(dv.mid, 1) + ' dB)', 'Wenig Energie um 1 kHz. Stimme und Snare können dünn wirken.',
+    p => setBand(p, 4, { type: 'peaking', f: 1000, g: amt('mid', 0.5, 3), q: 0.9 }), 'Mitten anheben');
+  if (d('upmid', 2.5)) add('warn', 'Harsch / spitz in den oberen Mitten (' + sf(dv.upmid, 1) + ' dB)', 'Zu viel 2–5 kHz ermüdet die Ohren und klingt bei hoher Lautstärke aggressiv.',
+    p => setBand(p, 5, { type: 'peaking', f: 3200, g: -amt('upmid', 0.6, 4), q: 1.1 }), '3 kHz absenken');
+  if (u('air', 3)) add('warn', 'Dumpf, wenig Brillanz (' + sf(dv.air, 1) + ' dB)', 'Die Höhen über 6 kHz fehlen. Der Song wirkt wie unter einer Decke.',
+    p => setBand(p, 6, { type: 'highshelf', f: 9000, g: amt('air', 0.6, 4), q: 0.71 }), 'Höhen anheben');
+  if (d('air', 3)) add('warn', 'Scharf / zischelig in den Höhen (' + sf(dv.air, 1) + ' dB)', 'Zu viel über 6 kHz. S-Laute und Becken stechen heraus. Bei KI-Musik oft auch ein metallisches Glitzern.',
+    p => setBand(p, 6, { type: 'highshelf', f: 9000, g: -amt('air', 0.6, 4), q: 0.71 }), 'Höhen absenken');
+  // Stereo
+  if (o.corr != null && o.corr < 0) add('bad', 'Phasenprobleme (Korrelation ' + o.corr.toFixed(2) + ')', 'Links und rechts arbeiten gegeneinander. In Mono (Handy, Club) verschwinden Teile des Songs.',
+    p => { p.stereo.on = true; p.stereo.width = 70; p.stereo.bassMono = true; }, 'Breite reduzieren');
+  else if (o.corr != null && o.corr < 0.25) add('warn', 'Sehr breites Stereobild (Korrelation ' + o.corr.toFixed(2) + ')', 'Kann auf Handy-Lautsprechern und in Mono dünn klingen.',
+    p => { p.stereo.on = true; p.stereo.width = 85; }, 'Etwas schmaler');
+  if (o.bassSide != null && o.bassSide > -18) add('warn', 'Bass ist stereo (' + nf(o.bassSide, 1) + ' dB Seitenanteil)', 'Tiefe Töne gehören in die Mitte: mehr Druck, sauberer im Club, und für Vinyl fast Pflicht.',
+    p => { p.stereo.on = true; p.stereo.bassMono = true; p.stereo.monoFreq = 120; }, 'Bass-Mono an');
+  if (o.sideMid != null && o.sideMid < -24 && (o.corr == null || o.corr > 0.97)) add('info', 'Fast mono', 'Kaum Stereo-Information. Etwas mehr Breite kann den Song größer wirken lassen.',
+    p => { p.stereo.on = true; p.stereo.width = 120; }, 'Breiter machen');
+  // Technik
+  if (o.dc > 0.002) add('warn', 'Gleichspannungsversatz (DC ' + (o.dc * 100).toFixed(2) + ' %)', 'Die Welle ist nach oben oder unten verschoben. Das kostet Headroom.',
+    p => setBand(p, 0, { type: 'highpass', f: 20, q: 0.71 }), 'Low Cut 20 Hz');
+  if (o.leadSil > 0.6 || o.tailSil > 2.5) add('info', 'Stille am Anfang/Ende (' + o.leadSil.toFixed(1) + ' s / ' + o.tailSil.toFixed(1) + ' s)', 'Für Streaming besser kürzen, damit der Song sofort beginnt.',
+    () => opTrimSilence(), 'Stille kürzen');
+  const order = { bad: 0, warn: 1, info: 2, ok: 3 }; F.sort((a, b) => order[a.sev] - order[b.sev]);
+  let score = 100; F.forEach(f => { score -= f.sev === 'bad' ? 18 : f.sev === 'warn' ? 9 : 3; });
+  if (!F.length) add('ok', 'Keine Schwächen gefunden', 'Lautheit, Balance, Dynamik und Stereo liegen im gesunden Bereich. Jetzt entscheidet dein Geschmack.');
+  return { score: Math.max(5, score), findings: F, dev: dv };
+}
+let CHECK = null;
+function renderCheck() {
+  CHECK = diagnose();
+  const list = $('#ckList'); list.innerHTML = '';
+  if (!CHECK) { $('#ckNum').textContent = '–'; drawRing(0); return; }
+  const { score, findings } = CHECK, tags = { bad: 'Problem', warn: 'Schwäche', info: 'Hinweis', ok: 'Gut' };
+  $('#ckNum').textContent = score; drawRing(score);
+  $('#ckVerdict').textContent = score >= 85 ? 'Gute Basis fürs Mastering' : score >= 65 ? 'Ordentlich, mit ein paar Schwächen' : score >= 45 ? 'Deutliche Schwächen' : 'Der Mix braucht Arbeit';
+  const nFix = findings.filter(f => f.fix).length;
+  $('#ckSub').textContent = (S.track ? '„' + S.track.name + '“: ' : '') + findings.filter(f => f.sev !== 'ok').length + ' Auffälligkeiten' + (nFix ? ', ' + nFix + ' davon mit einem Klick behebbar.' : '.') + (S.ref ? ' Klangbalance verglichen mit deiner Referenz.' : '');
+  $('#btnFixAll').disabled = !nFix;
+  $('#ckDot').style.background = score >= 85 ? 'var(--ok)' : score >= 65 ? 'var(--warn)' : 'var(--hot)';
+  findings.forEach(f => {
+    const li = document.createElement('li'); li.className = 'finding ' + f.sev;
+    li.innerHTML = '<i></i><div class="ft"><b><span class="tag"></span><span class="tt"></span></b><span class="tx"></span></div>';
+    li.querySelector('.tag').textContent = tags[f.sev]; li.querySelector('.tt').textContent = f.title; li.querySelector('.tx').textContent = f.text;
+    if (f.fix) { const b = document.createElement('button'); b.textContent = f.label; b.addEventListener('click', async () => { await applyFix(f); b.textContent = 'Angewendet'; b.classList.add('done'); b.disabled = true; }); li.appendChild(b); }
+    list.appendChild(li);
+  });
+  updateAIUI();
+}
+async function applyFix(f) {
+  const r = f.fix(P);
+  if (r && r.then) await r; else { refreshAll(); onParam(); }
+  status('Angewendet: ' + f.label + '. Mit Master / Original vergleichen.', 'ok', 3500);
+}
+function drawRing(score) {
+  const cv = $('#ckRing'), d = window.devicePixelRatio || 1; cv.width = 92 * d; cv.height = 92 * d; const g = cv.getContext('2d'); g.scale(d, d);
+  g.lineWidth = 7; g.lineCap = 'round'; g.strokeStyle = '#1c2a36'; g.beginPath(); g.arc(46, 46, 38, 0, Math.PI * 2); g.stroke();
+  if (!score) return; g.strokeStyle = score >= 85 ? '#5FD08A' : score >= 65 ? '#F2C94C' : '#FF5C4D';
+  g.beginPath(); g.arc(46, 46, 38, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * score / 100); g.stroke();
+}
+$('#btnFixAll').addEventListener('click', async () => {
+  if (!CHECK) return; const fixes = CHECK.findings.filter(f => f.fix);
+  let loud = null; for (const f of fixes) { if (/LUFS bringen/.test(f.label)) { loud = f; continue; } f.fix(P); }
+  refreshAll(); onParam(); if (loud) await loud.fix(P);
+  $$('#ckList button').forEach(b => { b.textContent = 'Angewendet'; b.classList.add('done'); b.disabled = true; });
+  status(fixes.length + ' Vorschläge angewendet. Jetzt mit Master / Original vergleichen.', 'ok', 5000);
+});
+
+/* ============================ KI-Mastering ============================ */
+const AI = { mode: null, sample: null, key: null, ctl: null, before: null };
+async function initAI() {
+  if (window.claude && typeof window.claude.use === 'function') {
+    try { const s = await window.claude.use('sample'); if (s) { AI.mode = 'claude'; AI.sample = s; } } catch (e) {}
+  }
+  if (!AI.mode) { const k = recall('aikey'); if (k) { AI.mode = 'api'; AI.key = k; } }
+  updateAIUI();
+}
+function updateAIUI() {
+  const b = $('#aiBadge');
+  if (AI.mode === 'claude') { b.textContent = 'über dein Claude-Konto'; b.classList.add('on'); }
+  else if (AI.mode === 'api') { b.textContent = 'API-Schlüssel aktiv'; b.classList.add('on'); }
+  else { b.textContent = 'nicht verbunden'; b.classList.remove('on'); }
+  $('#aiKeyBox').hidden = AI.mode === 'claude';
+  $('#btnAI').disabled = !AI.mode || !S.track;
+}
+$('#btnAIKey').addEventListener('click', () => { const k = $('#aiKey').value.trim(); if (!/^sk-ant-/.test(k)) { status('Das sieht nicht wie ein Anthropic-Schlüssel aus (beginnt mit sk-ant-).', 'err'); return; }
+  store('aikey', k); AI.key = k; AI.mode = 'api'; $('#aiKey').value = ''; updateAIUI(); status('Schlüssel gespeichert. KI-Mastering ist bereit.', 'ok'); });
+$('#btnAIKeyDel').addEventListener('click', () => { try { localStorage.removeItem('dsms.aikey'); } catch (e) {} AI.key = null; if (AI.mode === 'api') AI.mode = null; updateAIUI(); status('Schlüssel gelöscht.'); });
+
+function parseJSONLoose(t) {
+  try { return JSON.parse(t); } catch (e) {}
+  const f = t.match(/```(?:json)?\s*([\s\S]*?)```/); if (f) { try { return JSON.parse(f[1]); } catch (e) {} }
+  const a = t.indexOf('{'), b = t.lastIndexOf('}'); if (a >= 0 && b > a) return JSON.parse(t.slice(a, b + 1));
+  throw new Error('Antwort der KI war kein gültiges JSON');
+}
+async function askAI(prompt, signal) {
+  if (AI.mode === 'claude') return AI.sample.json(prompt, { modelTier: 'default', effort: 'medium', signal, cache: false });
+  const res = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal,
+    headers: { 'content-type': 'application/json', 'x-api-key': AI.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({ model: 'claude-sonnet-5-5', max_tokens: 4000, messages: [{ role: 'user', content: prompt }] }) });
+  if (!res.ok) { let m = res.status + ''; try { const j = await res.json(); m += ' ' + (j.error && j.error.message || ''); } catch (e) {} throw { code: res.status === 401 ? 'bad_key' : 'upstream_error', message: m }; }
+  const j = await res.json(); return parseJSONLoose((j.content || []).map(c => c.text || '').join(''));
+}
+const r1 = v => Math.round(v * 10) / 10;
+function metricsFor(m, withSpec) {
+  if (!m) return null;
+  const o = { lufs: r1(m.I), truePeak: r1(m.TP), lra: r1(m.LRA), plr: r1(m.TP - m.I), shortTermMax: r1(m.Smax),
+    correlation: m.corr != null ? Math.round(m.corr * 100) / 100 : null, sideToMidDb: m.sideMid != null ? r1(m.sideMid) : null, bassStereoDb: m.bassSide != null ? r1(m.bassSide) : null };
+  if (m.grMin != null) o.limiterMaxReductionDb = r1(-g2db(m.grMin));
+  if (m.clips != null) { o.clippingEvents = m.clips; o.dcOffsetPct = Math.round(m.dc * 10000) / 100; }
+  const dv = bandDev(m.spec); if (dv) o.balanceVsTargetDb = Object.fromEntries(Object.entries(dv).map(([k, v]) => [k, r1(v)]));
+  if (withSpec && m.spec) { const n = norm(m.spec); o.thirdOctaveHz_dB = THIRDS.map((f, i) => [f, r1(n[i])]); }
+  if (m.hist && m.hist.length) { const h = m.hist.filter(v => v > -70), step = Math.max(1, Math.floor(h.length / 24)); o.loudnessCurveLufs = h.filter((v, i) => i % step === 0).map(v => Math.round(v)); }
+  return o;
+}
+function settingsSummary(p) {
+  return { eq: p.eq.bands.map((b, i) => ({ band: i + 1, on: b.on, type: b.type, f: b.f, g: b.g, q: b.q })),
+    comp: { on: p.comp.on, x1: p.comp.x1, x2: p.comp.x2, bands: p.comp.bands }, sat: p.sat, stereo: p.stereo,
+    lim: { on: p.lim.on, ceiling: p.lim.ceiling, release: p.lim.release } };
+}
+const SCHEMA = `{
+  "eq": [ {"band": 1-8, "on": bool, "type": "highpass|lowshelf|peaking|highshelf|lowpass", "f": Hz, "g": dB (-6..+6), "q": 0.3..4} ],
+  "comp": {"on": bool, "x1": Hz 60..600, "x2": Hz 1200..8000, "bands": [ {"th": dBFS -40..0, "ratio": 1..4, "att": ms 1..100, "rel": ms 30..800, "gain": dB -4..4} x3 (Bass, Mitten, Höhen) ]},
+  "sat": {"on": bool, "drive": 0..60, "mix": 0..100},
+  "stereo": {"on": bool, "width": 70..140, "bassMono": bool, "monoFreq": Hz 60..200},
+  "lim": {"ceiling": dBTP -3..-0.3, "release": ms 20..400},
+  "targetLufs": -18..-8,
+  "done": bool,
+  "summary": "1-2 Sätze auf Deutsch: was du am Klang änderst und warum",
+  "steps": ["kurze deutsche Stichpunkte, je Modul einer"]
+}`;
+function buildPrompt(round, wish, tgt, prev) {
+  const o = S.orig, diag = CHECK ? CHECK.findings.map(f => f.sev + ': ' + f.title) : [];
+  let t = `Du bist ein erfahrener Mastering-Engineer. Du masterst einen Song im "Deep Structure Mastering Studio". Du kannst den Song nicht hören, aber du bekommst präzise Messwerte (ITU-R BS.1770, Terzband-Spektrum) und stellst die Mastering-Kette ein. Die Kette läuft in dieser Reihenfolge: 8-Band-EQ → 3-Band-Kompressor (Linkwitz-Riley-Weichen, Web-Audio-Kompressor mit Soft-Knee 6 dB und automatischer Aufholverstärkung) → Bandsättigung (tanh, pegelkompensiert) → Stereo (M/S-Breite, Bass-Mono per Hochpass auf dem Seitensignal) → True-Peak-Limiter mit 5 ms Vorschau. Den Limiter-Drive für die Ziel-Lautheit rechnet das Studio danach selbst exakt aus, den musst du nicht angeben.
+
+Arbeitsweise: Mastering ist dezent. EQ-Eingriffe meist ±0,5 bis ±3 dB, breite Güte (Q 0,5–1,2), nur bei klaren Problemen mehr. Kompression sanft (Ratio 1,3–2,5, 1–3 dB Gain-Reduktion); Schwelle relativ zum Pegel: die integrierte Lautheit liegt bei ${r1(o.I)} LUFS, Spitzen ca. 8–12 dB darüber. Ist der Mix schon stark verdichtet (PLR unter 9), Kompressor aus oder sehr sanft. Bass-Mono 100–150 Hz ist fast immer sinnvoll. Sättigung nur, wenn der Wunsch nach Wärme/Dichte verlangt (Drive 10–35). Höhen bei KI-generierter Musik (z. B. Suno) eher nicht anheben, dort klingen sie oft metallisch. "balanceVsTargetDb" ist die Abweichung der Klangbalance von ${S.ref ? 'der Referenz des Nutzers' : 'einer ausgewogenen Durchschnittskurve'} (positiv = zu viel).
+
+Wunsch des Künstlers: ${wish || '(keine Angabe – ausgewogen, modern, für Streaming)'}
+Ziel-Lautheit (vom Nutzer gewählt): ${tgt} LUFS
+
+Messwerte des unbearbeiteten Songs (${fmtTime(o.dur, 0)} min, ${o.sr} Hz):
+${JSON.stringify(metricsFor(o, true))}
+Automatische Diagnose: ${JSON.stringify(diag)}
+${S.ref && S.refM ? 'Referenz-Track des Nutzers: ' + JSON.stringify(metricsFor(S.refM, true)) + '\n' : ''}`;
+  if (round === 1) t += `
+Aktuelle Einstellungen (Ausgangspunkt): ${JSON.stringify(settingsSummary(P))}
+
+Gib die vollständigen neuen Einstellungen zurück. Setze "done" auf false.`;
+  else t += `
+Runde ${round}: Deine letzten Einstellungen: ${JSON.stringify(settingsSummary(P))}
+Messung des gemasterten Ergebnisses danach: ${JSON.stringify(metricsFor(prev, true))}
+
+Prüfe kritisch: Stimmt die Klangbalance mit dem Wunsch überein? Greift der Limiter zu stark (über 4–5 dB)? Ist der PLR noch gesund (über 7–8)? Ist der Bass mono genug? Korrigiere, was nicht passt, und gib die vollständigen Einstellungen zurück. Wenn alles passt, gib sie unverändert zurück und setze "done" auf true.`;
+  t += `
+
+Antworte NUR mit einem JSON-Objekt in genau dieser Form:
+${SCHEMA}`;
+  return t;
+}
+const TARGETS = [-18, -16, -14, -11, -9];
+function applyAI(s) {
+  const p = clone(P), num = (v, a, b, d) => { const n = Number(v); return isFinite(n) ? clamp(n, a, b) : d; }, TYPES = ['highpass', 'lowshelf', 'peaking', 'highshelf', 'lowpass'];
+  if (Array.isArray(s.eq)) { p.eq.on = true; s.eq.forEach(e => { const i = Math.round(Number(e.band)) - 1; if (!(i >= 0 && i < 8)) return; const b = p.eq.bands[i];
+    if (TYPES.includes(e.type)) b.type = e.type; b.on = e.on !== false; b.f = Math.round(num(e.f, 20, 20000, b.f)); b.g = r1(num(e.g, -6, 6, 0)); b.q = Math.round(num(e.q, 0.3, 4, b.q) * 100) / 100; }); }
+  if (s.comp) { p.comp.on = !!s.comp.on; p.comp.x1 = Math.round(num(s.comp.x1, 60, 600, p.comp.x1)); p.comp.x2 = Math.round(num(s.comp.x2, 1200, 8000, p.comp.x2));
+    if (Array.isArray(s.comp.bands)) s.comp.bands.slice(0, 3).forEach((c, i) => { const b = p.comp.bands[i]; b.th = r1(num(c.th, -40, 0, b.th)); b.ratio = r1(num(c.ratio, 1, 4, b.ratio)); b.att = Math.round(num(c.att, 1, 100, b.att)); b.rel = Math.round(num(c.rel, 30, 800, b.rel)); b.gain = r1(num(c.gain, -4, 4, 0)); }); }
+  if (s.sat) { p.sat.on = !!s.sat.on; p.sat.drive = Math.round(num(s.sat.drive, 0, 60, p.sat.drive)); p.sat.mix = Math.round(num(s.sat.mix, 0, 100, p.sat.mix)); }
+  if (s.stereo) { p.stereo.on = s.stereo.on !== false; p.stereo.width = Math.round(num(s.stereo.width, 70, 140, 100)); p.stereo.bassMono = !!s.stereo.bassMono; p.stereo.monoFreq = Math.round(num(s.stereo.monoFreq, 60, 200, 120)); }
+  if (s.lim) { p.lim.ceiling = r1(num(s.lim.ceiling, -3, -0.3, -1)); p.lim.release = Math.round(num(s.lim.release, 20, 400, 80)); }
+  p.lim.on = true; p.lim.isp = true;
+  P = p; refreshAll(); onParam();
+  const t = num(s.targetLufs, -18, -8, +$('#targetSel').value);
+  return TARGETS.reduce((a, b) => Math.abs(b - t) < Math.abs(a - t) ? b : a);
+}
+function aiLog(text, cur = true) { const ol = $('#aiLog'); ol.hidden = false; $$('#aiLog li').forEach(li => li.classList.remove('cur')); const li = document.createElement('li'); li.textContent = text; if (cur) li.classList.add('cur'); ol.appendChild(li); return li; }
+function showExplanation(s, m) {
+  const box = $('#aiExp'); box.hidden = false; box.innerHTML = '<b></b><ul></ul><span class="mono small muted"></span>';
+  box.querySelector('b').textContent = String(s.summary || 'Mastering eingestellt.');
+  (Array.isArray(s.steps) ? s.steps : []).slice(0, 8).forEach(x => { const li = document.createElement('li'); li.textContent = String(x); box.querySelector('ul').appendChild(li); });
+  if (m) box.querySelector('span').textContent = 'Ergebnis: ' + nf(m.I, 1) + ' LUFS · True Peak ' + nf(m.TP, 1) + ' dBTP · PLR ' + nf(m.TP - m.I, 1) + ' dB · Limiter max ' + nf(m.grMin != null ? g2db(m.grMin) : 0, 1) + ' dB';
+}
+async function freshMaster() {
+  clearTimeout(measT); while (S.measuring) await sleep(150); S.measurePending = false; await measureMaster(); return S.master;
+}
+async function runAI() {
+  if (!AI.mode || !S.track) return;
+  for (let i = 0; i < 80 && !(S.orig && S.orig.spec); i++) await sleep(200);
+  if (!S.orig) { status('Die Analyse läuft noch. Bitte gleich noch einmal versuchen.', 'err'); return; }
+  const wish = $('#aiWish').value.trim(); store('aiwish', wish);
+  AI.before = clone(P); AI.ctl = new AbortController(); const signal = AI.ctl.signal;
+  $('#aiLog').innerHTML = ''; $('#aiExp').hidden = true; $('#btnAI').disabled = true; $('#btnAIStop').hidden = false; $('#btnAIUndo').hidden = true;
+  let tgt = +$('#targetSel').value, last = null, lastS = null;
+  try {
+    for (let round = 1; round <= 3; round++) {
+      const li = aiLog(round === 1 ? 'KI liest die Messwerte und plant das Mastering …' : 'Runde ' + round + ': KI prüft das Ergebnis und bessert nach …');
+      li.insertAdjacentHTML('afterbegin', '<span class="busy"></span>');
+      const s = await askAI(buildPrompt(round, wish, tgt, last), signal);
+      if (!s || typeof s !== 'object') throw { code: 'invalid_json', message: 'leere Antwort' };
+      li.querySelector('.busy')?.remove(); lastS = s;
+      tgt = applyAI(s); $('#targetSel').value = String(tgt);
+      const li2 = aiLog('Einstellungen übernommen, Lautheit auf ' + tgt + ' LUFS, Ergebnis wird gemessen …'); li2.insertAdjacentHTML('afterbegin', '<span class="busy"></span>');
+      const r = await setDriveToTarget(tgt); if (signal.aborted) throw { code: 'cancelled' };
+      last = await freshMaster(); li2.querySelector('.busy')?.remove();
+      li2.textContent = 'Gemessen: ' + nf(last.I, 1) + ' LUFS, True Peak ' + nf(last.TP, 1) + ' dBTP, Limiter ' + nf(last.grMin != null ? g2db(last.grMin) : 0, 1) + ' dB';
+      showExplanation(s, last);
+      if (s.done === true || round === 3) break;
+      if (r && r.grMin != null && -g2db(r.grMin) < 4.5 && last.TP - last.I > 7.5 && round >= 2) break;
+    }
+    aiLog('Fertig. Vergleiche jetzt mit Master / Original (Pegelgleich an).', true);
+    $('#btnAIUndo').hidden = false;
+    status('KI-Mastering fertig: ' + nf(last.I, 1) + ' LUFS. Hör es dir im Vergleich an.', 'ok', 7000);
+  } catch (e) {
+    $$('#aiLog .busy').forEach(b => b.remove());
+    const code = e && (e.code || (e.name === 'AbortError' ? 'cancelled' : null)), msg = { cancelled: 'Abgebrochen.', not_granted: 'Die KI wurde nicht erlaubt. In Claude beim nächsten Versuch „Erlauben“ wählen.', rate_limited: 'Zu viele Anfragen oder Nutzungslimit erreicht. Bitte später erneut versuchen.',
+      bad_key: 'Der API-Schlüssel wurde abgelehnt. Bitte prüfen.', sampling_disabled: 'KI ist für dieses Konto nicht verfügbar.', invalid_json: 'Die KI-Antwort war unvollständig. Bitte noch einmal versuchen.' }[code]
+      || ('KI-Mastering fehlgeschlagen: ' + ((e && e.message) || e) + (e instanceof TypeError ? ' (keine Verbindung zur KI)' : ''));
+    aiLog(msg, true); status(msg, code === 'cancelled' ? '' : 'err', 7000);
+    if (lastS) $('#btnAIUndo').hidden = false;
+  } finally { $('#btnAI').disabled = !AI.mode; $('#btnAIStop').hidden = true; AI.ctl = null; }
+}
+$('#btnAI').addEventListener('click', runAI);
+$('#btnAIStop').addEventListener('click', () => AI.ctl && AI.ctl.abort());
+$('#btnAIUndo').addEventListener('click', () => { if (!AI.before) return; P = clone(AI.before); refreshAll(); onParam(); $('#btnAIUndo').hidden = true; status('Einstellungen von vor dem KI-Mastering wiederhergestellt.', 'ok'); });
+{ const w = recall('aiwish'); if (w) $('#aiWish').value = w; }
+initAI();
 /* ============================ Offline-Rendern & Messung ============================ */
 const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 async function measureLatency(p, sr) {
@@ -1559,8 +1889,9 @@ const limParams = (o = {}) => Object.assign({ on: P.lim.on, drive: P.lim.drive, 
 async function analyzeOrig() {
   if (!S.track) return; const ver = S.ver;
   try {
-    const r = await DSP({ cmd: 'analyze', sr: S.track.sr, L: S.track.L.slice(), R: S.track.R.slice(), opts: { tp: true, spectrum: true } });
-    if (ver !== S.ver) return; S.orig = r; applyMonitor(); renderAnalysis(); drawSpec(); scheduleMeasure(50);
+    const r = await DSP({ cmd: 'analyze', sr: S.track.sr, L: S.track.L.slice(), R: S.track.R.slice(), opts: { tp: true, spectrum: true, diag: true } });
+    if (ver !== S.ver) return; S.orig = r; applyMonitor(); renderAnalysis(); drawSpec(); renderCheck(); scheduleMeasure(50);
+    if (S.autoCheck) { S.autoCheck = false; showTab('check'); }
   } catch (e) { console.error(e); status('Messung fehlgeschlagen: ' + e.message, 'err'); }
 }
 let measT = 0;
@@ -1580,9 +1911,9 @@ function updateSongKv() {
   if (S.measuring || (m && m.stale)) { e.innerHTML = '<span class="busy"></span>'; return; }
   e.textContent = m ? nf(m.I, 1) + ' LUFS · ' + nf(m.TP, 1) + ' TP' : '–';
 }
-async function setDriveToTarget() {
-  if (!S.track) return;
-  const tgt = +$('#targetSel').value; status('Berechne Drive für ' + tgt + ' LUFS über den ganzen Song …', 'busy');
+async function setDriveToTarget(tgtIn) {
+  if (!S.track) return null;
+  const tgt = tgtIn != null ? tgtIn : +$('#targetSel').value; status('Berechne Drive für ' + tgt + ' LUFS über den ganzen Song …', 'busy');
   try {
     const pre = await getPre(); let d = P.lim.drive, r = null, prev = null;
     for (let it = 0; it < 6; it++) {
@@ -1597,7 +1928,8 @@ async function setDriveToTarget() {
     $('#targetInfo').textContent = 'Drive ' + sf(P.lim.drive, 1) + ' dB ergibt ' + nf(r.I, 1) + ' LUFS. Der Limiter greift dabei mit bis zu ' + nf(gr, 1) + ' dB ein.' +
       (gr > 6 ? ' Das ist viel. Wenn es gequetscht klingt, nimm ein leiseres Ziel oder lass den Kompressor mehr Arbeit machen.' : '');
     status('Lautheit eingestellt: ' + nf(r.I, 1) + ' LUFS (Ziel ' + tgt + ')', 'ok');
-  } catch (e) { console.error(e); status('Berechnung fehlgeschlagen: ' + e.message, 'err'); }
+    return r;
+  } catch (e) { console.error(e); status('Berechnung fehlgeschlagen: ' + e.message, 'err'); return null; }
 }
 
 /* ============================ Analyse-Anzeige ============================ */
@@ -1849,7 +2181,7 @@ async function makeDemo() {
 /* ============================ Start ============================ */
 (async function init() {
   const t = recall('target'); if (t) $('#targetSel').value = t;
-  compTitles(); refreshAll(); showTab(recall('tab') || 'eq'); updateEditButtons(); renderAnalysis();
+  compTitles(); refreshAll(); showTab(recall('tab') || 'check'); updateEditButtons(); renderAnalysis();
   requestAnimationFrame(frame);
   try { await loadTrack(await makeDemo()); $('#trackName').innerHTML = '<b>Demo-Loop</b> · synthetisch erzeugt · öffne deinen Song oder zieh ihn hierher'; }
   catch (e) { console.error(e); $('#trackName').textContent = 'Song öffnen oder Datei hierher ziehen'; }

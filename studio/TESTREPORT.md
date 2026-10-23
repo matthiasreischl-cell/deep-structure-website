@@ -192,3 +192,13 @@ Nicht automatisch prüfbar: Ob das erkannte Tempo dem entspricht, was der Musike
 | „3. DEIN ABER“ | 200 Kicks und 101 Snares, in festen Rasterpositionen, also ein plausibles Drum-Muster. Suche etwa 14 s, Reparatur etwa 20 s. Mit den Grundeinstellungen ändern sich die Höhen über 3 kHz deutlich (Differenz 12 dB unter den Höhen), ihr Pegel bleibt gleich (+0,2 dB). |
 
 Nicht automatisch prüfbar: ob die Reparatur besser *klingt*. Das entscheidet der Hörvergleich mit „Vorher/Nachher“. Die Snare-Erkennung bei sehr schnellen Songs (über 160 BPM) findet nicht jeden Schlag.
+
+## 10. Nachtrag 1.6.1: OGG-Vorbis-Export
+
+| Prüfung | Ergebnis |
+|---|---|
+| Export „3. DEIN ABER“ als OGG (Standard) im Browser | 9,5 s Kodierzeit, 3,5 MB, 140 kbit/s. Fortschrittsanzeige läuft, die Oberfläche bleibt bedienbar. |
+| FFmpeg-Gegenprüfung | Codec Vorbis, 48 kHz, Stereo, Dauer 207,600 s (sample-genau gleich wie das Original). −16,0 LUFS und 8,0 LU wie in der App angezeigt. |
+| Zeitversatz zum Original (Kreuzkorrelation bei 1:00) | 0 Samples. Die Spiel-Daten passen also auch zur OGG-Datei. |
+| Testton 1 kHz, Klick bei 5 s | Klick-Versatz 0 Samples, Länge exakt |
+| Browser-Test: Encoder nachladen und gültige Ogg-Datei erzeugen | Bestanden („OggS“-Kopf) |

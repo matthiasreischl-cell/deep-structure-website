@@ -683,7 +683,7 @@ a.btn{text-decoration:none}
         <label class="field"><span>Inhalt</span>
           <select id="expMode"><option value="master">Gemastert (mit allen Modulen)</option><option value="edit">Nur Schnitt (ohne Mastering)</option></select></label>
         <label class="field"><span>Format</span>
-          <select id="expFmt"><option value="24">WAV 24 Bit (für Vertrieb, Archiv)</option><option value="16">WAV 16 Bit (CD, mit Dither)</option><option value="32">WAV 32 Bit Float (Weiterbearbeitung)</option></select></label>
+          <select id="expFmt"><option value="24">WAV 24 Bit (für Vertrieb, Archiv)</option><option value="16">WAV 16 Bit (CD, mit Dither)</option><option value="32">WAV 32 Bit Float (Weiterbearbeitung)</option><option value="ogg5">OGG Vorbis, ca. 140 kbit/s (Spiele, Web)</option><option value="ogg8">OGG Vorbis, ca. 240 kbit/s (hohe Qualität)</option></select></label>
         <label class="field"><span>Abtastrate</span>
           <select id="expRate"><option value="orig">Wie Original</option><option value="44100">44,1 kHz</option><option value="48000">48 kHz (Video)</option></select></label>
         <label class="field"><span>Dateiname</span><input type="text" id="expName" value="Master"></label>
@@ -3282,8 +3282,8 @@ async function deliver(blob, name) {
   if (window.claude && typeof window.claude.use === 'function') {
     const dl = await window.claude.use('downloads');
     if (dl) {
-      const isAudio = /\.wav$/i.test(name); const data = isAudio ? makeZip(name, new Uint8Array(await blob.arrayBuffer())) : blob;
-      const fn = isAudio ? name.replace(/\.wav$/i, '.zip') : name;
+      const isAudio = /\.(wav|ogg)$/i.test(name); const data = isAudio ? makeZip(name, new Uint8Array(await blob.arrayBuffer())) : blob;
+      const fn = isAudio ? name.replace(/\.(wav|ogg)$/i, '.zip') : name;
       try { await dl.save({ filename: fn, data }); return isAudio ? 'zip' : 'saved'; }
       catch (e) { if (e && e.code === 'declined') return 'declined'; throw new Error(e && e.message || 'Speichern nicht möglich'); }
     }
@@ -3298,24 +3298,44 @@ async function deliver(blob, name) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 8000); return 'file';
 }
 function openExport() { if (!S.track) return; $('#expResult').hidden = true; $('#expHint').textContent = ''; $('#expGo').disabled = false; $('#expModal').hidden = false; $('#expGo').focus(); }
+/* OGG Vorbis: libvorbis (OggVorbisEncoder.js) wird erst beim ersten OGG-Export nachgeladen und dann in Stücken kodiert,
+   damit die Oberfläche bedienbar bleibt. Ogg-Granulpositionen sorgen für exakt gleiche Länge und Startzeit wie das WAV. */
+let vorbisP = null;
+function loadVorbis() {
+  if (window.OggVorbisEncoder) return Promise.resolve();
+  if (!vorbisP) vorbisP = new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'vorbis-encoder.js'; s.async = true;
+    s.onload = () => window.OggVorbisEncoder ? res() : rej(new Error('OGG-Encoder nicht verfügbar'));
+    s.onerror = () => { vorbisP = null; s.remove(); rej(new Error('Der OGG-Encoder (vorbis-encoder.js) konnte nicht geladen werden. Er muss neben der App liegen, beim ersten Mal ist auf der Website Internet nötig')); };
+    document.head.appendChild(s); });
+  return vorbisP;
+}
+async function encodeOgg(L, R, sr, q, onProg) {
+  await loadVorbis();
+  const enc = new OggVorbisEncoder(sr, 2, q), C = 16384, n = L.length; let t0 = performance.now();
+  try {
+    for (let o = 0; o < n; o += C) { enc.encode([L.subarray(o, Math.min(n, o + C)), R.subarray(o, Math.min(n, o + C))]);
+      if (performance.now() - t0 > 40) { onProg && onProg(o / n); await new Promise(r => setTimeout(r, 0)); t0 = performance.now(); } }
+    onProg && onProg(1); return enc.finish('audio/ogg');
+  } catch (e) { try { enc.cancel(); } catch (e2) {} throw e; }
+}
 async function runExport() {
-  const mode = $('#expMode').value, bits = +$('#expFmt').value, rs = $('#expRate').value, sr = rs === 'orig' ? S.track.sr : +rs;
-  let name = ($('#expName').value || 'Master').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'Master'; name += '.wav';
+  const mode = $('#expMode').value, fmt = $('#expFmt').value, ogg = /^ogg/.test(fmt), oggQ = fmt === 'ogg8' ? 0.8 : 0.5, bits = ogg ? 0 : +fmt, rs = $('#expRate').value, sr = rs === 'orig' ? S.track.sr : +rs;
+  let name = ($('#expName').value || 'Master').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'Master'; name += ogg ? '.ogg' : '.wav';
   $('#expGo').disabled = true; const hint = $('#expHint'); hint.innerHTML = '<span class="busy"></span>Berechne den ganzen Song …';
   try {
     let src;
     if (mode === 'master') src = await getPre(sr);
     else if (sr === S.track.sr) src = { L: S.track.L, R: S.track.R };
     else { const p0 = clone(DEFAULT); p0.eq.on = false; p0.stereo.on = false; p0.lim.on = false; src = await renderPre(p0, sr); }
-    hint.innerHTML = '<span class="busy"></span>Limiter, Messung und WAV-Datei …';
-    const r = await DSP({ cmd: 'analyze', sr, L: src.L.slice(), R: src.R.slice(), lim: mode === 'master' ? limParams() : null, opts: { tp: true, encode: bits } });
-    const blob = new Blob([r.wav], { type: 'audio/wav' });
+    hint.innerHTML = '<span class="busy"></span>Limiter, Messung und ' + (ogg ? 'Vorbereitung …' : 'WAV-Datei …');
+    const r = await DSP({ cmd: 'analyze', sr, L: src.L.slice(), R: src.R.slice(), lim: mode === 'master' ? limParams() : null, opts: ogg ? { tp: true, returnAudio: true } : { tp: true, encode: bits } });
+    const blob = ogg ? await encodeOgg(r.L, r.R, sr, oggQ, p => { hint.innerHTML = '<span class="busy"></span>OGG Vorbis wird kodiert … ' + Math.round(p * 100) + ' %'; }) : new Blob([r.wav], { type: 'audio/wav' });
     hint.innerHTML = '<span class="busy"></span>Datei wird übergeben …';
     const how = await deliver(blob, name);
     const res = $('#expResult'); res.hidden = false;
-    res.innerHTML = '<b></b><br><span class="mono">' + nf(r.I, 1) + ' LUFS · True Peak ' + nf(r.TP, 1) + ' dBTP · LRA ' + nf(r.LRA, 1) + ' LU · ' + (sr / 1000) + ' kHz / ' + (bits === 32 ? '32 Bit Float' : bits + ' Bit') + ' · ' + (blob.size / 1048576).toFixed(1) + ' MB</span>';
+    res.innerHTML = '<b></b><br><span class="mono">' + nf(r.I, 1) + ' LUFS · True Peak ' + nf(r.TP, 1) + ' dBTP · LRA ' + nf(r.LRA, 1) + ' LU · ' + (sr / 1000) + ' kHz / ' + (ogg ? 'OGG Vorbis ' + Math.round(blob.size * 8 / (r.L.length / sr) / 1000) + ' kbit/s' : bits === 32 ? '32 Bit Float' : bits + ' Bit') + ' · ' + (blob.size / 1048576).toFixed(1) + ' MB</span>';
     res.querySelector('b').textContent = how === 'declined' ? 'Speichern abgebrochen.' : name;
-    hint.textContent = how === 'shared' ? 'Zum Ablegen im Teilen-Menü „In Dateien sichern“ wählen.' : how === 'zip' ? 'Im Browser-Fenster von Claude werden Audiodateien als ZIP übergeben. Einfach entpacken, darin liegt die WAV.' : how === 'declined' ? '' : 'Die Datei liegt in deinem Download-Ordner. Das Original bleibt unverändert.';
+    hint.textContent = how === 'shared' ? 'Zum Ablegen im Teilen-Menü „In Dateien sichern“ wählen.' : how === 'zip' ? 'Im Browser-Fenster von Claude werden Audiodateien als ZIP übergeben. Einfach entpacken, darin liegt die ' + (ogg ? 'OGG-Datei.' : 'WAV.') : how === 'declined' ? '' : 'Die Datei liegt in deinem Download-Ordner. Das Original bleibt unverändert.' + (ogg && mode === 'master' && P.lim.on && P.lim.ceiling > -1 ? ' Tipp: Für OGG die Limiter-Decke auf −1 dBTP stellen, sonst können beim Abspielen kleine Übersteuerungen entstehen.' : '');
   } catch (e) { console.error(e); hint.textContent = 'Export fehlgeschlagen: ' + e.message + '. Bei sehr langen Dateien hilft es, den Browser neu zu starten.'; }
   $('#expGo').disabled = false;
 }

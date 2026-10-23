@@ -9,6 +9,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 | `index.html` | Die komplette App (HTML, CSS, JavaScript in einer Datei, ohne Build-Schritt) |
 | `sw.js` | Service Worker: Offline-Start und Updates |
 | `vorbis-encoder.js` | OGG-Vorbis-Encoder, wird nur beim OGG-Export nachgeladen (Lizenzen im Dateikopf) |
+| `lame.min.js` | MP3-Encoder [LAME](https://lame.sourceforge.io) als JavaScript ([lamejs](https://github.com/zhuker/lamejs), LGPL), unverändert, wird nur beim MP3-Export nachgeladen |
 | `manifest.webmanifest`, `icon-*.png`, `favicon.png`, `apple-touch-icon.png` | Installation als App |
 | `tests/` | Automatisierte Tests (siehe `tests/README.md`) |
 | `TESTREPORT.md` | Ergebnisse der letzten Prüfung inklusive FFmpeg-Gegenmessung |
@@ -29,7 +30,9 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 **Export:**
 - Der Export rendert die Kette mit `OfflineAudioContext`. Die Latenz wird per Klick-Test kompensiert.
 - Limiter, Messung und WAV-Kodierung laufen im Web Worker, mit demselben Limiter-Code wie in der Echtzeit-Wiedergabe (AudioWorklet).
-- Formate: WAV 16 und 24 Bit (TPDF-Dither, deterministisch), 32 Bit Float sowie OGG Vorbis (ca. 140 oder 240 kbit/s, VBR).
+- Formate: WAV 16 und 24 Bit (TPDF-Dither, deterministisch), 32 Bit Float, OGG Vorbis (ca. 140 oder 240 kbit/s, VBR) sowie MP3 (320 oder 192 kbit/s, CBR).
+- MP3: LAME über `lame.min.js` (lamejs, LGPL, als eigene Datei eingebunden). Vor die Audio-Frames setzt die App einen LAME-„Info“-Frame mit Encoder-Verzögerung (576) und Auffüllung. Browser, FFmpeg, VLC und minimp3 spielen dadurch lückenlos und sample-genau. MP3 erlaubt nur 32, 44,1 und 48 kHz, andere Raten werden für MP3 auf 48 kHz umgerechnet.
+- Import von MP3, OGG und FLAC: Die Abtastrate wird aus dem Dateikopf gelesen, dekodiert wird in der Originalrate (vorher wurden MP3s auf 44,1 kHz umgerechnet).
 - OGG Vorbis: libvorbis über `vorbis-encoder.js` (OggVorbisEncoder.js, MIT; libogg/libvorbis, BSD, Xiph.org). Die Datei wird erst beim ersten OGG-Export geladen und danach vom Service Worker zwischengespeichert. Die Kodierung läuft in Stücken, damit die Oberfläche bedienbar bleibt. Länge und Startzeit sind sample-genau wie beim WAV, die Spiel-Daten passen also auch zur OGG-Datei.
 
 **Messung:**
@@ -103,6 +106,11 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.6.3 (MP3-Export)
+
+- Export als **MP3** mit 320 oder 192 kbit/s. Die Datei ist lückenlos markiert (LAME-Info-Frame): Länge und Startzeit sind sample-genau wie beim WAV, geprüft mit FFmpeg und Chrome.
+- MP3-, OGG- und FLAC-Dateien werden in ihrer Originalrate geladen. Eine 48-kHz-MP3 wurde vorher auf 44,1 kHz umgerechnet.
 
 ## Änderungen 1.6.2 (Korrekturen nach Codex-Prüfung, OGG wieder enthalten)
 

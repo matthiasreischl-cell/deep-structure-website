@@ -216,7 +216,7 @@ async function robustImport() {
     r = t(mkx(4, 0x33, (c, i) => c === 3 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske Quadro (0x33): hinten rechts landet rechts', r.ok && pk(r.r.L) === 0 && pk(r.r.R) > 0.1, r.ok ? 'L ' + pk(r.r.L).toFixed(3) + ', R ' + pk(r.r.R).toFixed(3) : r.err]);
     r = t(mkx(6, 0x60F, (c, i) => c === 3 && i === 100 ? 0.9 : 0)); res.push(['WAV-Kanalmaske 5.1 Seite (0x60F): LFE wird weggelassen und gemeldet', r.ok && pk(r.r.L) === 0 && pk(r.r.R) === 0 && /LFE/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]);
     r = t(mkx(3, 0x3, (c, i) => c === 2 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske mit fehlender Position: Kanal wird mittig eingemischt und gemeldet', r.ok && Math.abs(pk(r.r.L) - pk(r.r.R)) < 1e-4 && /keine Lautsprecherposition/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]); }
-  res.push(['Version 1.7.1 wird angezeigt', /1\.7\.1/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
+  res.push(['Version 1.8.0 wird angezeigt', /1\.8\.0/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
   return res;
 },
 async function mp3Export() {
@@ -260,6 +260,29 @@ async function originalMonitor() {
   res.push(['Monitor: nach einem Schnitt „Ohne Mastering“ statt versetzter Datei', Math.abs(o2 - m2) < 1 && /Ohne Mastering/i.test(lab2), 'Original ' + o2.toFixed(1) + ' dB, Master ' + m2.toFixed(1) + ' dB, Anzeige „' + lab2 + '“']);
   undo(); undo(); await sleep(200); setMode('orig'); res.push(['Monitor: nach Rückgängig wieder „Original“', S.track.L === S.file.L && document.querySelector('#monLabel').textContent === 'Original', document.querySelector('#monLabel').textContent]);
   setMode('master'); S.match = keepMatch; P = keepP; refreshAll(); onParam(); if (keep) await loadTrack(keep); return res;
+},
+async function cleanSongTest() {
+  const res = [], sr = 48000, n = sr * 20, L = new Float32Array(n), R = new Float32Array(n); let sd = 5; const rnd = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 - 0.5; };
+  // Musik-Ersatz: wechselnde Akkorde und Rauschen, dazu zwei stehende Störtöne (3455 Hz Mitte, 2883 Hz nur Seite)
+  for (let i = 0; i < n; i++) { const t = i / sr, ch = [220, 247, 196, 262][Math.floor(t / 2.5) % 4], m = 0.15 * Math.sin(2 * Math.PI * ch * t) + 0.08 * Math.sin(2 * Math.PI * ch * 1.5 * t) + 0.05 * rnd();
+    const lm = 0.01 * Math.sin(2 * Math.PI * 3455 * t), ls = 0.006 * Math.sin(2 * Math.PI * 2883 * t); L[i] = m + lm + ls; R[i] = m + lm - ls; }
+  const keep = S.track; await loadTrack({ sr, L, R, name: 'Clean-Test', demo: true });
+  for (let i = 0; i < 300 && !(S.clean && S.cleanVer === S.ver); i++) await sleep(100);
+  const fs = S.clean ? S.clean.lines.map(l => Math.round(l.f)) : [];
+  res.push(['Clean Song: stehende Störtöne in Mitte und Seite gefunden', fs.some(f => Math.abs(f - 3455) <= 6) && fs.some(f => Math.abs(f - 2883) <= 6), fs.join(', ') + ' Hz']);
+  res.push(['Clean Song: Liste mit Häkchen und Knopf wird angezeigt', $$('#cleanList li input[type=checkbox]').length >= 2 && !$('#btnClean').disabled, $$('#cleanList li').length + ' Einträge']);
+  const amp = (X, Y, f, side) => { let re = 0, im = 0; for (let i = sr * 2; i < n - sr * 2; i++) { const v = side ? (X[i] - Y[i]) / 2 : (X[i] + Y[i]) / 2; re += v * Math.cos(2 * Math.PI * f * i / sr); im += v * Math.sin(2 * Math.PI * f * i / sr); } return 2 * Math.hypot(re, im) / (n - 4 * sr); };
+  const a1 = amp(S.track.L, S.track.R, 3455, false), a2 = amp(S.track.L, S.track.R, 2883, true), u0 = S.undo.length, v0 = S.ver;
+  $('#btnClean').click(); for (let i = 0; i < 600 && S.ver === v0; i++) await sleep(100);
+  const b1 = amp(S.track.L, S.track.R, 3455, false), b2 = amp(S.track.L, S.track.R, 2883, true), lab = S.undo.length ? S.undo[S.undo.length - 1].label : '';
+  res.push(['Clean Song: Störtöne um mehr als 15 dB abgesenkt, ein Rückgängig-Schritt', 20 * Math.log10(a1 / b1) > 15 && 20 * Math.log10(a2 / b2) > 15 && S.undo.length === u0 + 1 && /^Clean Song/.test(lab), '3455 Hz −' + (20 * Math.log10(a1 / b1)).toFixed(1) + ' dB, 2883 Hz (Seite) −' + (20 * Math.log10(a2 / b2)).toFixed(1) + ' dB · ' + lab]);
+  const c1 = amp(S.track.L, S.track.R, 220, false), c0 = amp(L, R, 220, false);
+  res.push(['Clean Song: Musik bleibt erhalten (220-Hz-Akkordton unverändert)', Math.abs(20 * Math.log10(c1 / c0)) < 0.3, (20 * Math.log10(c1 / c0)).toFixed(2) + ' dB']);
+  res.push(['Clean Song: „Entferntes anhören“ wird freigeschaltet', !$('#btnCleanDiff').disabled, $('#btnCleanDiff').disabled ? 'gesperrt' : 'bereit']);
+  // Ladereihenfolge: Neuzeichnen direkt nach Laden-Start darf nicht abstürzen (vorher S.peaks null)
+  S.peaks = null; let err = ''; const pr = loadTrack({ sr: 44100, L: new Float32Array(44100), R: new Float32Array(44100), name: 'Kurz', demo: true }); try { drawAll(); } catch (e) { err = e.message; } await pr;
+  res.push(['Laden: Wellenform zeichnet schon während der Audio-Start läuft', !err, err || 'ok']);
+  if (keep) await loadTrack(keep); return res;
 },
 async function aiKeyStorage() {
   const res = []; try { localStorage.removeItem('dsms.aikey'); } catch (e) {}

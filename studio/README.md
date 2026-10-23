@@ -20,7 +20,14 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 
 1. **Eingang**
 2. **8-Band-EQ:** Web-Audio-Biquads (RBJ). Low/High Cut sind Butterworth 2. Ordnung, die Q-Umrechnung in dB ist berücksichtigt.
-3. **3-Band-Kompressor:** Linkwitz-Riley-Weichen 4. Ordnung mit Allpass-Ausgleich im Bassband. Web-Audio-`DynamicsCompressor` je Band, Soft-Knee 6 dB.
+3. **3-Band-Kompressor:** Linkwitz-Riley-Weichen 4. Ordnung mit Allpass-Ausgleich im Bassband. Je Band ein eigener Kompressor (`DSComp`, AudioWorklet in Echtzeit und in den Offline-Kontexten für Export und Messung):
+   - Spitzenpegel, stereo gekoppelt
+   - weiches Knie 6 dB
+   - Regelung im dB-Bereich („smooth decoupled“ nach Giannoulis/Massberg/Reiss 2012)
+   - kein automatisches Anheben: unterhalb der Schwelle bitgenau, Ausgleich nur über „Pegel“
+   - keine Vorschau-Latenz
+
+   Nur in Browsern ohne AudioWorklet wird auf den Browser-Kompressor zurückgegriffen.
 4. **Sättigung:** tanh-Kennlinie, 4-fach überabgetastet, auf Kleinsignal-Verstärkung 1,0 normiert. Bei 0 % Mischung wird das Modul umgangen.
 5. **Stereo:** M/S-Breite. Bass-Mono über einen Hochpass 4. Ordnung auf dem Seitensignal.
 6. **Limiter:** True-Peak-Limiter mit 5 ms Vorschau (Details unten).
@@ -84,7 +91,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - Sand: Die körnige Feinstruktur der Höhen wird in Zeit und Frequenz geglättet (3 × 5 Nachbarn, nur Absenkung von Spitzen). Danach wird die Energie je Frame wiederhergestellt.
 - Ausklänge: Ein kurzer Raum (Freeverb-Prinzip) erhält nur die Höhen der ersten 60 ms jedes Schlags.
 - Punch: Anschlag-Hüllkurve im Bass- und Höhenband (Nullphasen-Filter, komplementär). Optional wird der Ausklang in den Höhen gekürzt.
-- Unterlegen: Eingebaute Kick und Snare oder eigenes Sample, Tonhöhe aus dem Song gemessen. Die Kick wird per Kreuzkorrelation zeitlich und in der Polarität ausgerichtet. Der Pegel folgt jedem einzelnen Schlag.
+- Unterlegen: 6 Kick- und 7 Snare-Klänge (Punchy, Tief und weich, 808, Lo-Fi, akustisch, EDM bzw. akustisch, fett, hell, Clap, Snare + Clap, Trap, Rimshot) oder eigenes Sample, Tonhöhe aus dem Song gemessen. „An Original angleichen“ passt die Klangfarbe per Terzband-Korrektur (±12 dB) an das mittlere Spektrum der Original-Schläge an. „Im Song probehören“ rechnet 8 s ab dem Cursor oder die Auswahl und spielt sie in Schleife. Beim Klangwechsel wird nur neu unterlegt, das dauert unter 1 s. Die Kick wird per Kreuzkorrelation zeitlich und in der Polarität ausgerichtet. Der Pegel folgt jedem einzelnen Schlag.
 - Anwenden erzeugt einen Bearbeitungsschritt mit Rückgängig. Erneutes Anwenden ersetzt ihn. „Vorher/Nachher“ tauscht nur den Abspiel-Puffer, die Wiedergabe läuft an derselben Stelle weiter. Mit allen Reglern aus bleibt der Song bitgenau unverändert.
 - Grenzen: Was der Generator nicht erzeugt hat, lässt sich nicht zurückholen. Die Erkennung ist heuristisch, deshalb gibt es Marken zum Prüfen und drei Empfindlichkeitsstufen.
 
@@ -106,6 +113,13 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.7.0 (eigener Kompressor, Drum-Klänge)
+
+- **Eigener Kompressor** statt Browser-Kompressor: Er klingt in jedem Browser und im Export gleich und hebt nichts automatisch an.
+  - Die Grundeinstellungen und Presets sind so kalibriert, dass die Wirkung der bisherigen entspricht (Schwellen 5 dB höher, LRA bei „Streaming klar“ auf −14 LUFS: vorher 6,4, jetzt 6,2 LU).
+  - Eigene gespeicherte Kompressor-Einstellungen wirken jetzt stärker und ohne automatisches Anheben. Für die gleiche Wirkung die Schwelle etwa 4 bis 5 dB höher stellen.
+- **Drum-Reparatur:** 6 Kick- und 7 Snare-Klänge zur Auswahl, „An Original angleichen“, „Im Song probehören“ mit Umschalten auf das Original.
 
 ## Änderungen 1.6.3 (MP3-Export)
 
@@ -165,7 +179,7 @@ Eine Codex-Überarbeitung vom 23.10.2026 basierte auf 1.6.0. Ihr fehlte deshalb 
 
 ## Bekannte Einschränkungen
 
-- Der Kompressor nutzt den Web-Audio-`DynamicsCompressor`. Dessen Kennlinie (automatische Aufholverstärkung, feste Vorschau von 6 ms) ist durch den Browser vorgegeben und kann sich zwischen Browsern minimal unterscheiden.
+- Der Kompressor hat keine Vorschau (Lookahead). Sehr kurze Transienten können deshalb minimal durchrutschen, das fängt der Limiter ab.
 - Die Sättigung ist bei kleinen Pegeln exakt pegelneutral. Laute Passagen werden bewusst weich begrenzt, sie werden also etwas leiser und nie lauter.
 - Die Vergleichskurve des Song-Checks ist ein grober Durchschnitt. Für Genre-gerechte Aussagen eine Referenz laden.
 - Die Artefakt-Suche bewertet relativ zum Song. Ein durchgehend artefaktbehafteter Song zeigt deshalb nicht jede Stelle.

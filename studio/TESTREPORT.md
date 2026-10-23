@@ -234,3 +234,20 @@ Gesamt: 56 von 56 DSP-Tests, 65 von 65 Browser-Tests. Die Codex-Prüfung vom 23.
 | Import einer 48-kHz-MP3 | jetzt 48 kHz, 9.964.800 Samples (vorher auf 44,1 kHz umgerechnet) |
 
 Gesamt: 56 von 56 DSP-Tests, 67 von 67 Browser-Tests.
+
+## 13. Nachtrag 1.7.0: eigener Kompressor, Drum-Klänge
+
+| Prüfung | Ergebnis |
+|---|---|
+| Kompressor: Signal unter der Schwelle | bitgenau unverändert |
+| Kennlinie −10 dBFS, Schwelle −20, Ratio 2:1 / 4:1 | −15,00 / −17,49 dBFS (Soll −15 / −17,5) |
+| Attack 20 ms, nach 60 ms | 7,1 von 7,5 dB eingeregelt |
+| Stereo-Kopplung (Signal links laut, rechts leise) | beide Kanäle −9,32 dB |
+| Offline-Render (Export) mit eigenem Kompressor | −15,00 dBFS, gleiche Kennlinie wie in Echtzeit |
+| Latenz | 2 Samples (nur Frequenzweichen, wird ausgeglichen). Der Browser-Kompressor hatte 6 ms Vorschau. |
+| „Dein Aber“, Preset „Streaming klar“, auf −14 LUFS | 1.6.3: LRA 6,4 LU. 1.7.0: −14,1 LUFS, −1,0 dBTP, LRA 6,2 LU. FFmpeg bestätigt −14,1 LUFS, LRA 6,2, Peak −1,0. |
+| Drum-Klangbibliothek | 6 Kicks und 7 Snares erzeugen gültige Klänge |
+| „An Original angleichen“ (Testsnare dunkel, Ersatz hell) | Klangabstand 17,3 → 12,0 dB |
+| „Im Song probehören“, „Dein Aber“ ab 2:01 | erste Probe 2,3 s, Klangwechsel 0,7–1,0 s, Original-Taste wechselt ohne Unterbrechung, Song bleibt unverändert bis „Anwenden“ |
+
+Gesamt: 63 von 63 DSP-Tests, 70 von 70 Browser-Tests.

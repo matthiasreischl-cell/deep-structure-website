@@ -306,3 +306,10 @@ Verglichen wurden das ungemasterte Original, eine Fassung, die mit Gemini in vie
 Einordnung: Der Stem-Mix entfernt den Störton ebenfalls weitgehend, ist aber zusätzlich gemastert, deutlich dunkler in den oberen Mitten und schmaler im Stereobild. Clean Song verändert außer dem Störton praktisch nichts. Der von Gemini gemeldete „Schleifteppich“ ist messbar, aber schwach. Der zweite gemeldete Ton bei 2883 Hz ließ sich nicht nachweisen. Mit 1.8.0 wurde der 3453-Hz-Ton noch nicht gemeldet (Mittel 10,4 dB bei 4096 Punkten, Schwelle 12 dB), deshalb die feinere Suche in 1.8.1. Auf den fünf übrigen Test-Songs meldet 1.8.1 im hörbaren Bereich nur eine unsichere Linie bei 850 Hz (zwei Songs, nicht angehakt; sie taucht in mehreren Suno-Titeln mit unterschiedlicher Tonart auf).
 
 Gesamt: 72 von 72 DSP-Tests, 84 von 84 Browser-Tests.
+
+## 17. Nachtrag 1.8.2: Anleitung
+
+| Prüfung | Ergebnis |
+|---|---|
+| Knopf „Anleitung“ in der Kopfzeile, Desktop und Handy | sichtbar neben Feedback |
+| PDF liegt neben der App und ist gültig | Browser-Test bestanden |

@@ -10,6 +10,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 | `sw.js` | Service Worker: Offline-Start und Updates |
 | `vorbis-encoder.js` | OGG-Vorbis-Encoder, wird nur beim OGG-Export nachgeladen (Lizenzen im Dateikopf) |
 | `lame.min.js` | MP3-Encoder [LAME](https://lame.sourceforge.io) als JavaScript ([lamejs](https://github.com/zhuker/lamejs), LGPL), unverändert, wird nur beim MP3-Export nachgeladen |
+| `Anleitung.pdf` | Bebilderte Anleitung für Tester und Nutzer, über den Knopf „Anleitung“ erreichbar |
 | `manifest.webmanifest`, `icon-*.png`, `favicon.png`, `apple-touch-icon.png` | Installation als App |
 | `tests/` | Automatisierte Tests (siehe `tests/README.md`) |
 | `TESTREPORT.md` | Ergebnisse der letzten Prüfung inklusive FFmpeg-Gegenmessung |
@@ -120,6 +121,10 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.8.2 (Anleitung zum Herunterladen)
+
+- **Knopf „Anleitung“** oben in der Kopfzeile: lädt die bebilderte Anleitung als PDF herunter (`Anleitung.pdf` liegt neben der App). In der PC-Fassung öffnet sie sich im PDF-Betrachter, weil Browser dort kein Nachladen aus Dateien erlauben.
 
 ## Änderungen 1.8.1 (Clean Song an Blueprint geschärft)
 

@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const htmlPath = process.argv[2] || path.join(here, '..', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const grab = name => { const m = html.match(new RegExp('const ' + name + ' = String\\.raw`([\\s\\S]*?)`;')); if (!m) throw new Error(name + ' nicht gefunden'); return m[1]; };
-const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft};')();
+const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES};')();
 
 let pass = 0, fail = 0; const rows = [];
 function check(name, ok, detail) { rows.push([ok ? 'PASS' : 'FAIL', name, detail]); ok ? pass++ : fail++; }
@@ -176,9 +176,31 @@ const hitRate = (det, tru) => [tru.filter(t => det.some(d => Math.abs(d.t - t) <
   const rr = D.drumRepair(x.L, x.R, x.sr, { det: d, metal: { on: true, amt: 1 }, sand: { on: true, amt: 1 }, fill: { on: true, amt: 0.5 }, snare: { on: true, amt: 0.5 }, regions: [[3, 5]] });
   let outside = 0; for (let i = 0; i < x.L.length; i++) { const t = i / x.sr; if (t < 2.9 || t > 5.1) outside = Math.max(outside, Math.abs(rr.L[i] - x.L[i])); }
   check('Drums: „Nur Auswahl“ lässt den Rest unverändert', outside === 0, 'max. Abweichung außerhalb ' + outside); }
+{ const bandsOf = (x, a, sr) => { const N = 4096, re = new Float64Array(N), im = new Float64Array(N); for (let i = 0; i < N; i++) re[i] = a + i < x.length ? x[a + i] : 0; D.fft(re, im); const out = []; for (let f = 200; f <= 10000; f *= Math.pow(2, 1 / 3)) { let e = 0; for (let k = Math.floor(f / 1.12 * N / sr); k <= Math.ceil(f * 1.12 * N / sr); k++) e += re[k] * re[k] + im[k] * im[k]; out.push(10 * Math.log10(e + 1e-20)); } return out; };
+  const dist = (A, B) => { const d = A.map((v, i) => v - B[i]), m = d.reduce((a, b) => a + b, 0) / d.length; return Math.sqrt(d.reduce((a, b) => a + (b - m) * (b - m), 0) / d.length); };
+  const sr = 48000, n = sr * 6, src = new Float64Array(n), r = rng(31), pos = [];
+  for (let k = 0; k < 10; k++) { const p0 = Math.round((0.3 + k * 0.5) * sr); pos.push(p0); let lp = 0; for (let i = 0; i < sr * 0.2; i++) { const t = i / sr; lp += 0.08 * ((r() * 2) - lp); src[p0 + i] += (0.3 * Math.sin(2 * Math.PI * 230 * t) * Math.exp(-t / 0.05) + 1.2 * lp * Math.exp(-t / 0.08)); } }
+  const orig = pos.map(p => bandsOf(src, p, sr)).reduce((a, b) => a.map((v, i) => v + b[i] / pos.length)), sn = D.synthSnare(sr, 230, 0.5, 0.4, 'bright');
+  const d0 = dist(bandsOf(sn, 0, sr), orig), d1 = dist(bandsOf(D.toneMatch(sn, src, pos, sr, 150, 12000, 1), 0, sr), orig);
+  check('Drums: „An Original angleichen“ bringt den Ersatz-Klang deutlich näher an die Original-Snare (≥ 25 %)', d1 < d0 * 0.75, 'Klangabstand ' + d0.toFixed(1) + ' → ' + d1.toFixed(1) + ' dB'); }
+{ const sr = 48000, ok = Object.keys(D.KICKS).every(id => { const x = D.synthKick(sr, 52, 0.4, id); return x.length > 1000 && x.every(Number.isFinite) && Math.max(...x.map(Math.abs)) > 0.99; }) && Object.keys(D.SNARES).every(id => { const x = D.synthSnare(sr, 200, 0.5, 0.4, id); return x.length > 1000 && x.every(Number.isFinite); });
+  check('Drums: Klangbibliothek (' + Object.keys(D.KICKS).length + ' Kicks, ' + Object.keys(D.SNARES).length + ' Snares) erzeugt gültige Klänge', ok, Object.keys(D.KICKS).join(', ') + ' / ' + Object.keys(D.SNARES).join(', ')); }
 { const n = 48000 * 4, L = new Float32Array(n); for (let i = 0; i < n; i++) L[i] = 0.3 * Math.sin(2 * Math.PI * 1000 * i / 48000);
   const r = D.drumRepair(L, L.slice(), 48000, { det: { kicks: [], snares: [], hats: [] }, metal: { on: true, amt: 1 }, sand: { on: true, amt: 1 } }); let m = 0; for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(r.L[i] - L[i]));
   check('Drums: Ohne Schläge bleibt ein Ton unverändert (STFT verlustfrei)', m < 1e-5, 'max. Abweichung ' + (20 * Math.log10(m + 1e-12)).toFixed(0) + ' dBFS'); }
+
+/* 11  Eigener Kompressor (DSComp, läuft im AudioWorklet in Echtzeit und Export) */
+const compRun = (L, R, o, sr = 48000) => { const c = new D.DSComp(sr); c.set(o); const l = Float32Array.from(L), r = Float32Array.from(R); for (let i = 0; i < l.length; i += 128) c.process(l.subarray(i, i + 128), r.subarray(i, i + 128), Math.min(128, l.length - i)); return { L: l, R: r }; };
+const pkDb = (x, a, b) => { let m = 0; for (let i = a; i < b; i++) m = Math.max(m, Math.abs(x[i])); return 20 * Math.log10(m); };
+{ const x = sine(48000, 2, 1000, Math.pow(10, -30 / 20)), y = compRun(x.L, x.R, { th: -20, ratio: 4, att: 10, rel: 100, knee: 6 });
+  check('Kompressor: Signal unter der Schwelle bleibt bitgenau (kein automatisches Anheben)', y.L.every((v, i) => v === x.L[i]), 'unverändert'); }
+for (const [ratio, want] of [[2, -15], [4, -17.5]]) { const x = sine(48000, 3, 1000, Math.pow(10, -10 / 20)), y = compRun(x.L, x.R, { th: -20, ratio, att: 10, rel: 150, knee: 6 }), got = pkDb(y.L, 96000, 144000);
+  check('Kompressor: Kennlinie −10 dBFS, Schwelle −20, Ratio ' + ratio + ':1 → ' + String(want).replace('.', ',') + ' dBFS', near(got, want, 0.3), got.toFixed(2) + ' dBFS'); }
+{ const n = 48000, L = new Float32Array(n); for (let i = 0; i < n; i++) L[i] = (i < 24000 ? 0.0316 : 0.316) * Math.sin(2 * Math.PI * 1000 * i / 48000);
+  const y = compRun(L, L, { th: -20, ratio: 4, att: 20, rel: 150, knee: 0 }), gr = t => pkDb(L, t, t + 480) - pkDb(y.L, t, t + 480), fin = gr(40000), at3 = gr(24000 + 2880);
+  check('Kompressor: Attack 20 ms regelt nach 3 Zeitkonstanten zu > 85 % ein', at3 / fin > 0.85 && fin > 7, 'nach 60 ms ' + at3.toFixed(1) + ' von ' + fin.toFixed(1) + ' dB'); }
+{ const x = sine(48000, 2, 500, Math.pow(10, -6 / 20)), R = x.L.map(v => v * 0.1), y = compRun(x.L, R, { th: -20, ratio: 3, att: 10, rel: 150, knee: 6 }), gl = pkDb(y.L, 60000, 90000) - pkDb(x.L, 60000, 90000), gr2 = pkDb(y.R, 60000, 90000) - pkDb(R, 60000, 90000);
+  check('Kompressor: Stereo gekoppelt (beide Kanäle gleich abgesenkt, Stereobild bleibt)', near(gl, gr2, 0.01) && gl < -5, 'L ' + gl.toFixed(2) + ' dB, R ' + gr2.toFixed(2) + ' dB'); }
 
 const w = Math.max(...rows.map(r => r[1].length));
 console.log('\nDeep Structure Mastering Studio – DSP-Tests (' + path.basename(htmlPath) + ')\n');

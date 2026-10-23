@@ -206,7 +206,7 @@ async function robustImport() {
   let okAll = true; for (const k in PRESETS) { try { validateSettings(PRESETS[k].p); } catch (e) { okAll = false; } }
   res.push(['Einstellungen: alle Presets und Grundeinstellungen sind gültig', okAll && !!validateSettings(DEFAULT), okAll ? Object.keys(PRESETS).length + ' Presets' : 'Fehler']);
   setTargetValue(-12); res.push(['Lautheitsziel: eigener Wert (−12 LUFS) bleibt wählbar', $('#targetSel').value === '-12', $('#targetSel').value]); setTargetValue(-14);
-  res.push(['Version 1.6.3 wird angezeigt', /1\.6\.3/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
+  res.push(['Version 1.7.0 wird angezeigt', /1\.7\.0/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
   return res;
 },
 async function mp3Export() {
@@ -218,6 +218,19 @@ async function mp3Export() {
   res.push(['MP3: Encoder lädt nach, Datei mit Lückenlos-Angabe (LAME-Info)', !!u8 && u8[0] === 0xFF && info === 'Info', u8 ? info + ', ' + u8.length + ' Bytes' : err]);
   if (u8) { const oc = new OfflineAudioContext(2, 1, sr); const buf = await oc.decodeAudioData(u8.buffer.slice(0)); const d = buf.getChannelData(0); let mi = 0; for (let i = 0; i < d.length; i++) if (Math.abs(d[i]) > Math.abs(d[mi])) mi = i;
     res.push(['MP3: Browser dekodiert sample-genau (Länge und Klick-Position)', buf.length === n && Math.abs(mi - sr) <= 1, 'Länge ' + buf.length + ' (Soll ' + n + '), Klick bei ' + mi + ' (Soll ' + sr + ')']); }
+  return res;
+},
+async function ownCompressor() {
+  const res = [], sr = 48000;
+  res.push(['Kompressor: Echtzeit nutzt den eigenen Kompressor (AudioWorklet)', !!S.chain && S.chain.cp.c.every(c => c.own === !!S.workletOK) && S.workletOK, S.workletOK ? 'eigener Kompressor in allen 3 Bändern' : 'kein AudioWorklet']);
+  const p = clone(DEFAULT); p.eq.on = false; p.stereo.on = false; p.lim.on = false; p.sat.on = false; p.comp.on = true; p.comp.x1 = 40; p.comp.x2 = 12000;
+  p.comp.bands = [0, 1, 2].map(() => ({ th: -20, ratio: 2, att: 10, rel: 150, gain: 0 }));
+  const n = sr * 2, oc = new OfflineAudioContext(2, n, sr), w = await addWorklet(oc), b = oc.createBuffer(2, n, sr);
+  for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = Math.pow(10, -10 / 20) * Math.sin(2 * Math.PI * 1000 * i / sr); }
+  const ch = buildChain(oc, p, { worklet: w }), s = oc.createBufferSource(); s.buffer = b; s.connect(ch.input); ch.output.connect(oc.destination); s.start(0);
+  const out = await oc.startRendering(), d = out.getChannelData(0); let m = 0; for (let i = sr; i < n; i++) m = Math.max(m, Math.abs(d[i])); const db = 20 * Math.log10(m);
+  res.push(['Kompressor: Export/Offline gleiche Kennlinie (−10 dBFS → −15 dBFS bei 2:1)', w && Math.abs(db + 15) < 0.5, db.toFixed(2) + ' dBFS']);
+  const lat = await measureLatency(p, sr); res.push(['Kompressor: praktisch keine Latenz (nur Frequenzweichen, wird ausgeglichen)', lat <= 5, lat + ' Samples (Browser-Kompressor: 6 ms Vorschau)']);
   return res;
 },
 async function aiKeyStorage() {

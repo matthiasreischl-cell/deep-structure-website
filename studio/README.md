@@ -76,10 +76,10 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - Wahlweise nur auf markierte Stellen angewendet.
 
 **Clean Song (Störtöne und Rauschteppich):**
-- Suche: STFT mit 4096 Punkten (8192 ab 88,2 kHz), Hann, in Mitte und Seite getrennt. Für jede Frequenz wird gemessen, wie weit sie über ihren Nachbarn liegt (Ring 58–150 Hz daneben, Mittel in dB).
-- Störton: steht in mindestens 60 % der hörbaren Abschnitte mehr als 8 dB über den Nachbarn und im Mittel mindestens 12 dB, ab 500 Hz. Musik wechselt Tonhöhe und Pegel, KI-Störlinien bleiben stehen. Angehakt werden Töne ab 14 dB und ab 800 Hz sowie Linien über 18 kHz; alles andere entscheidet der Nutzer nach dem Anhören.
-- Rauschteppich: im Bereich 5–16 kHz der zusammenhängende Abschnitt (mind. 1,5 kHz breit), dessen Grundpegel (15-%-Wert) höchstens 9 dB unter dem Mittelwert (50 %) liegt.
-- Entfernen: STFT 4096, Hop 1024, Hann/Hann. Störtöne werden in ±5 Bins je Fenster auf die Hälfte des Nachbarpegels begrenzt (nur der Überschuss). Der Rauschteppich wird per spektraler Subtraktion mit zeitlich (≈ 45 ms) und spektral geglätteter Leistung abgesenkt; plötzliche Anstiege (Anschläge) werden sofort durchgelassen. Untergrenze −6 bis −18 dB je nach Regler, die Seite bekommt etwas mehr. Anschließend laufen Glätter und Knackser-Reparatur über die markierten Stellen. Ohne Auswahl bleibt das Signal bitgenau.
+- Suche: STFT mit 8192 Punkten (5,9 Hz Auflösung bei 48 kHz, 16384 ab 88,2 kHz), Hann, in Mitte und Seite getrennt. Für jede Frequenz wird gemessen, wie weit sie über ihren Nachbarn liegt (Ring 47–135 Hz daneben, Mittel in dB).
+- Störton: ab 500 Hz, entweder in mindestens 65 % der hörbaren Abschnitte mehr als 8 dB über den Nachbarn und im Mittel mindestens 10 dB, oder in 60 % und im Mittel 12 dB. Musik wechselt Tonhöhe und Pegel (Töne der Tonart erreichen in den getesteten Songs höchstens 64 %), KI-Störlinien bleiben stehen (Blueprint: 83 %). Angehakt werden Töne ab 75 % und 9 dB, ab 14 dB und 800 Hz sowie Linien über 18 kHz; alles andere entscheidet der Nutzer nach dem Anhören.
+- Rauschteppich: im Bereich 5–16 kHz der zusammenhängende Abschnitt (mind. 1,5 kHz breit), dessen Grundpegel (15-%-Wert) höchstens 9 dB unter dem Mittelwert (50 %) liegt. Abgesenkt wird nur in diesem Bereich (ohne Fund: 5–16 kHz, wenn der Regler von Hand aufgedreht wird).
+- Entfernen: STFT 4096, Hop 1024, Hann/Hann (das Rauschprofil der Suche wird in Frequenz und Pegel auf diese Länge umgerechnet). Störtöne werden in ±5 Bins je Fenster auf die Hälfte des Nachbarpegels begrenzt (nur der Überschuss). Der Rauschteppich wird per spektraler Subtraktion mit zeitlich (≈ 45 ms) und spektral geglätteter Leistung abgesenkt; plötzliche Anstiege (Anschläge) werden sofort durchgelassen. Untergrenze −6 bis −18 dB je nach Regler, die Seite bekommt etwas mehr. Anschließend laufen Glätter und Knackser-Reparatur über die markierten Stellen. Ohne Auswahl bleibt das Signal bitgenau.
 - Messung (synthetische Störung in „Dein Aber“): Störtöne −21 bis −32 dB, Rauschteppich in leisen Passagen −22 dB, laute Passagen und der restliche Frequenzgang praktisch unverändert.
 
 **Spiel-Daten** (Reiter „Spiel-Daten“, für Rhythmus- und Musikspiele, z. B. in Godot):
@@ -120,6 +120,11 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.8.1 (Clean Song an Blueprint geschärft)
+
+- **Feinere Störton-Suche:** doppelte Frequenzauflösung (5,9 Hz) und eine zusätzliche Regel für Töne, die sehr beständig, aber nicht ganz so laut sind. Dadurch wird der Störton bei 3453 Hz in Blueprint gefunden (in 83 % des Songs, im Intro bis +33 dB). Mit 1.8.0 rutschte er knapp unter der Schwelle durch.
+- **Rauschteppich:** wird nur noch im gefundenen Frequenzbereich abgesenkt (vorher 5–16 kHz), damit Höhen außerhalb unberührt bleiben.
 
 ## Änderungen 1.8.0 (Clean Song)
 

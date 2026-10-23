@@ -216,7 +216,7 @@ async function robustImport() {
     r = t(mkx(4, 0x33, (c, i) => c === 3 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske Quadro (0x33): hinten rechts landet rechts', r.ok && pk(r.r.L) === 0 && pk(r.r.R) > 0.1, r.ok ? 'L ' + pk(r.r.L).toFixed(3) + ', R ' + pk(r.r.R).toFixed(3) : r.err]);
     r = t(mkx(6, 0x60F, (c, i) => c === 3 && i === 100 ? 0.9 : 0)); res.push(['WAV-Kanalmaske 5.1 Seite (0x60F): LFE wird weggelassen und gemeldet', r.ok && pk(r.r.L) === 0 && pk(r.r.R) === 0 && /LFE/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]);
     r = t(mkx(3, 0x3, (c, i) => c === 2 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske mit fehlender Position: Kanal wird mittig eingemischt und gemeldet', r.ok && Math.abs(pk(r.r.L) - pk(r.r.R)) < 1e-4 && /keine Lautsprecherposition/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]); }
-  res.push(['Version 1.8.0 wird angezeigt', /1\.8\.0/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
+  res.push(['Version 1.8.1 wird angezeigt', /1\.8\.1/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
   return res;
 },
 async function mp3Export() {

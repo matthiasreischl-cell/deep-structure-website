@@ -287,4 +287,22 @@ Gesamt: 67 von 67 DSP-Tests, 78 von 78 Browser-Tests.
 | Browser: Testsong mit Störtönen | gefunden, −29,5 dB (Mitte) / −97 dB (Seite), Akkordton 220 Hz unverändert, ein Rückgängig-Schritt, „Entferntes anhören“ verfügbar |
 | Laden: Neuzeichnen während des Audio-Starts | kein Absturz mehr |
 
+Gesamt (1.8.0): 72 von 72 DSP-Tests, 84 von 84 Browser-Tests.
+
+## 16. Nachtrag 1.8.1: Praxistest mit „Blueprint“
+
+Verglichen wurden das ungemasterte Original, eine Fassung, die mit Gemini in vier Stems getrennt, bereinigt, wieder zusammengesetzt und gemastert wurde („Studio Stem-Mix (Master)“), und Clean Song auf das Original (Störton angehakt, Rauschteppich 60 %).
+
+| Prüfung | Original | Stem-Mix | Clean Song |
+|---|---:|---:|---:|
+| Störton 3453 Hz über den Nachbarn (Mittel über 2-s-Blöcke) | +11,9 dB | +0,9 dB | −2,0 dB |
+| … im Intro (0–2 s) | +33,1 dB | +6,3 dB | +2,6 dB |
+| Störton 2883 Hz | nicht vorhanden (max. +4 dB, 12 % der Zeit) | – | – |
+| Klangbalance gegenüber Original (normiert, 3,15 / 4 / 8 kHz) | – | −4,8 / −3,5 / −3,0 dB | −1,0 / 0,0 / 0,0 dB |
+| Stereo (Seite zu Mitte, Korrelation) | −9,9 dB, 0,81 | −11,2 dB, 0,86 | −9,9 dB, 0,81 |
+| Neue Störlinie | – | 22.050 Hz, −73 dBFS (Umrechnung 44,1 → 48 kHz) | – |
+| Rauschteppich 8,5–11,5 kHz, leiseste 20 % | – | – | −0,4 dB |
+
+Einordnung: Der Stem-Mix entfernt den Störton ebenfalls weitgehend, ist aber zusätzlich gemastert, deutlich dunkler in den oberen Mitten und schmaler im Stereobild. Clean Song verändert außer dem Störton praktisch nichts. Der von Gemini gemeldete „Schleifteppich“ ist messbar, aber schwach. Der zweite gemeldete Ton bei 2883 Hz ließ sich nicht nachweisen. Mit 1.8.0 wurde der 3453-Hz-Ton noch nicht gemeldet (Mittel 10,4 dB bei 4096 Punkten, Schwelle 12 dB), deshalb die feinere Suche in 1.8.1. Auf den fünf übrigen Test-Songs meldet 1.8.1 im hörbaren Bereich nur eine unsichere Linie bei 850 Hz (zwei Songs, nicht angehakt; sie taucht in mehreren Suno-Titeln mit unterschiedlicher Tonart auf).
+
 Gesamt: 72 von 72 DSP-Tests, 84 von 84 Browser-Tests.

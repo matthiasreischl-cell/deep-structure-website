@@ -210,6 +210,7 @@ table.metrics td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .status{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:min(680px,calc(100% - 32px));background:#202630;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:20}
 .status[data-kind=err]{border-left-color:var(--hot)}
 .status[data-kind=ok]{border-left-color:var(--ok)}
+.status[data-kind=warn]{border-left-color:var(--gold)}
 .busy{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--accent);border-right-color:transparent;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:8px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .modal{position:fixed;inset:0;background:rgba(5,6,8,.72);display:flex;align-items:center;justify-content:center;z-index:30;padding:16px}
@@ -312,11 +313,12 @@ a.btn{text-decoration:none}
 .card h3 label.chk{font:inherit;letter-spacing:inherit;text-transform:inherit}
 .dr-apply{margin-top:12px;align-items:flex-end}
 #drAB[aria-pressed=true]{background:var(--gold);color:#1a1205;border-color:var(--gold)}
+.brand .ver{opacity:.6;letter-spacing:.1em}
 </style>
 <div class="app" id="app">
   <div class="backdrop" aria-hidden="true"></div>
   <header class="top">
-    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio</small></div></div>
+    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.6.2</span></small></div></div>
     <div class="filebox">
       <button class="primary" id="btnOpen" title="Audiodatei öffnen (WAV, MP3, FLAC, M4A)">Song öffnen</button>
       <input type="file" id="fileIn" accept="audio/*,.wav,.mp3,.flac,.m4a,.aac,.ogg" hidden>
@@ -701,11 +703,22 @@ a.btn{text-decoration:none}
    im Web Worker (Messung/Export) oder als Fallback im Hauptthread.
    ============================================================ */
 const LIM_SRC = String.raw`
-/* 4-fach-Interpolator fuer True Peak (Polyphasen-FIR, 16 Taps je Phase, exakt ausgerichtet) */
-var TPH=(function(){ var P=4,T=16,N=P*T,c=N/2,h=new Float64Array(N),k,p,i;
-  for(k=0;k<N;k++){ var t=(k-c)/P, s=t===0?1:Math.sin(Math.PI*t)/(Math.PI*t), w=0.5+0.5*Math.cos(Math.PI*(k-c)/(c+1)); h[k]=s*w; }
+/* 4-fach-Interpolator fuer True Peak: Polyphasen-FIR, 48 Taps je Phase (Kaiser, beta 9), flach bis ca. 22 kHz bei 48 kHz.
+   Zwischen den 4-fach-Rasterpunkten wird die Spitze per Parabel verfeinert (Rasterfehler < 0,02 dB). */
+var TPT=48, TPD=TPT/2;
+var TPH=(function(){ var P=4,T=TPT,N=P*T,c=N/2,h=new Float64Array(N),k,p,i;
+  function i0(x){ var s=1,t=1; for(var q=1;q<40;q++){ t*=(x/2/q)*(x/2/q); s+=t; } return s; }
+  for(k=0;k<N;k++){ var t=(k-c)/P, s=t===0?1:Math.sin(Math.PI*t)/(Math.PI*t), r=(k-c)/(c+1), w=Math.abs(r)<1?i0(9*Math.sqrt(1-r*r))/i0(9):0; h[k]=s*w; }
   for(p=0;p<P;p++){ var sum=0; for(i=0;i<T;i++) sum+=h[p+P*i]; for(i=0;i<T;i++) h[p+P*i]/=sum; }
   return h; })();
+/* Schneller Vorfilter (alte 16-Tap-Variante): entscheidet nur, wo sich die genaue Rechnung lohnt (ab 1,4 dB unter Decke bzw. Maximum; der Vorfilter liegt höchstens ca. 1,2 dB zu tief) */
+var TPC16=(function(){ var P=4,T=16,N=P*T,c=N/2,h=new Float64Array(N),k,p,i,a=[];
+  for(k=0;k<N;k++){ var t=(k-c)/P, s=t===0?1:Math.sin(Math.PI*t)/(Math.PI*t), w=0.5+0.5*Math.cos(Math.PI*(k-c)/(c+1)); h[k]=s*w; }
+  for(p=0;p<P;p++){ var sum=0; for(i=0;i<T;i++) sum+=h[p+P*i]; for(i=0;i<T;i++) h[p+P*i]/=sum; }
+  for(p=1;p<4;p++){ var cc=new Float64Array(T); for(i=0;i<T;i++) cc[T-1-i]=h[p+4*i]; a.push(cc); } return a; })();
+var TPC=(function(){ var a=[]; for(var p=1;p<4;p++){ var c=new Float64Array(TPT); for(var j=0;j<TPT;j++) c[TPT-1-j]=TPH[p+4*j]; a.push(c); } return a; })();
+/* Spitze einer Parabel durch drei aufeinanderfolgende Rasterwerte (Betrag), nur an lokalen Maxima */
+function tpPar(y0,y1,y2){ var d=y0-2*y1+y2; return d<0?y1-(y0-y2)*(y0-y2)/(8*d):y1; }
 /* Lookahead-Limiter: gleitendes Minimum + Kastenglaettung (= Attack ueber die Vorschau) + Release.
    Spitzenerkennung inkl. Zwischenwerten (True Peak) ueber denselben Interpolator wie die Messung. */
 function DSLimiter(sr){ this.sr=sr; this.Lk=0; this.look=5; this.isp=true; this.ceil=Math.pow(10,-1/20); this.relCoef=0.001; this.set({}); }
@@ -718,24 +731,37 @@ DSLimiter.prototype.set=function(o){
   if(L!==this.Lk){ this.Lk=L; this.alloc(); }
 };
 DSLimiter.prototype.alloc=function(){
-  var L=this.Lk; this.W=L+4; this.D=L+9;
+  var L=this.Lk; this.W=L+4; this.D=L+TPD+1;
   this.dl=new Float32Array(this.D); this.dr=new Float32Array(this.D); this.dp=0;
   this.cap=this.W+3; this.qv=new Float64Array(this.cap); this.qi=new Float64Array(this.cap); this.qh=0; this.qt=0;
   this.box=new Float64Array(L); this.box.fill(1); this.bsum=L; this.bp=0;
-  this.env=1; this.n=0; this.hl=new Float64Array(16); this.hr=new Float64Array(16); this.hp=0; this.grMin=1; this.lastBig=-1e9;
+  this.env=1; this.n=0; this.hl=new Float64Array(2*TPT+1); this.hr=new Float64Array(2*TPT+1); this.hp=0; this.grMin=1; this.lastBig=-1e9; this.ga=[-1,-1];
 };
 DSLimiter.prototype.process=function(L,R,len){
   var ceil=this.ceil,W=this.W,D=this.D,Lk=this.Lk,cap=this.cap,qv=this.qv,qi=this.qi,box=this.box,rc=this.relCoef,h=TPH;
   var qh=this.qh,qt=this.qt,bp=this.bp,bsum=this.bsum,env=this.env,n=this.n,dp=this.dp,dl=this.dl,dr=this.dr,isp=this.isp,grMin=this.grMin;
-  var hl=this.hl,hr=this.hr,hp=this.hp,p,j,hot=ceil*0.5,lastBig=this.lastBig;
+  var hl=this.hl,hr=this.hr,hp=this.hp,p,j,hot=ceil*0.5,lastBig=this.lastBig,ga=this.ga;
   for(var i=0;i<len;i++){
     var xl=L[i],xr=R[i];
-    hl[hp]=xl; hr[hp]=xr;
-    var c8=(hp-8)&15, al=hl[c8], ar=hr[c8]; if(al<0)al=-al; if(ar<0)ar=-ar; var pk=al>ar?al:ar;
-    if(xl>hot||xl<-hot||xr>hot||xr<-hot) lastBig=n;
-    if(isp&&n-lastBig<16){ for(p=1;p<4;p++){ var sl=0,sr=0; for(j=0;j<16;j++){ var k=(hp-j)&15, c=h[p+4*j]; sl+=hl[k]*c; sr+=hr[k]*c; }
-        if(sl<0)sl=-sl; if(sr<0)sr=-sr; if(sl>pk)pk=sl; if(sr>pk)pk=sr; } }
-    hp=(hp+1)&15;
+    hl[hp]=xl; hr[hp]=xr; hl[hp+TPT]=xl; hr[hp+TPT]=xr;
+    /* hl[hp+1 .. hp+TPT] = die letzten TPT Samples in zeitlicher Reihenfolge */
+    /* Puffer: Position hp+T-a = Sample mit Alter a (a=0 neuestes). Geprüft wird das Intervall ab Alter TPD. */
+    var cd=hp+TPD, al=hl[cd], ar=hr[cd]; if(al<0)al=-al; if(ar<0)ar=-ar; var pk=al>ar?al:ar;
+    var nl8=hl[hp+TPD+8],nr8=hr[hp+TPD+8]; if(nl8>hot||nl8<-hot||nr8>hot||nr8<-hot) lastBig=n;
+    var pl=ga[0],pr=ga[1]; ga[0]=ga[1]=-1;
+    if(isp&&n-lastBig<16){
+      var b16=hp+TPD-7,cpk=pk;
+      for(p=0;p<3;p++){ var cf16=TPC16[p],u=0,w=0; for(j=0;j<16;j++){ var c0=cf16[j]; u+=hl[b16+j]*c0; w+=hr[b16+j]*c0; } if(u<0)u=-u; if(w<0)w=-w; if(u>cpk)cpk=u; if(w>cpk)cpk=w; }
+      if(cpk>=ceil*0.85){
+        var b0=hp+1,yl=[pl,al,0,0,0,0],yr=[pr,ar,0,0,0,0];
+        for(p=0;p<3;p++){ var cf=TPC[p],sl=0,sr=0; for(j=0;j<TPT;j++){ var c=cf[j]; sl+=hl[b0+j]*c; sr+=hr[b0+j]*c; } yl[p+2]=sl<0?-sl:sl; yr[p+2]=sr<0?-sr:sr; }
+        var nl=hl[cd+1],nr=hr[cd+1]; yl[5]=nl<0?-nl:nl; yr[5]=nr<0?-nr:nr;
+        for(p=1;p<5;p++){ var v1=yl[p],v2=yr[p]; if(v1>pk)pk=v1; if(v2>pk)pk=v2;
+          if(yl[p-1]>=0&&v1>=yl[p-1]&&v1>=yl[p+1]){ var q=tpPar(yl[p-1],v1,yl[p+1]); if(q>pk)pk=q; }
+          if(yr[p-1]>=0&&v2>=yr[p-1]&&v2>=yr[p+1]){ var q2=tpPar(yr[p-1],v2,yr[p+1]); if(q2>pk)pk=q2; } }
+        ga[0]=yl[4]; ga[1]=yr[4]; }
+      else if(cpk>pk) pk=cpk; }
+    hp++; if(hp===TPT) hp=0;
     var g=pk>ceil?ceil/pk:1;
     while(qt!==qh){ var bi=qt-1; if(bi<0)bi+=cap; if(qv[bi]>=g) qt=bi; else break; }
     qv[qt]=g; qi[qt]=n; qt++; if(qt===cap)qt=0;
@@ -787,10 +813,21 @@ function peakCoef(fs,fc,gdb,Q){ var A=Math.pow(10,gdb/40),w=2*Math.PI*fc/fs,cs=M
   var a0=1+al/A; return [(1+al*A)/a0,-2*cs/a0,(1-al*A)/a0,-2*cs/a0,(1-al/A)/a0]; }
 function biq(x,c,out){ var b0=c[0],b1=c[1],b2=c[2],a1=c[3],a2=c[4],x1=0,x2=0,y1=0,y2=0,n=x.length;
   for(var i=0;i<n;i++){ var xi=x[i]; var y=b0*xi+b1*x1+b2*x2-a1*y1-a2*y2; x2=x1;x1=xi;y2=y1;y1=y; out[i]=y; } return out; }
-function truePeak(x){ var h=TPH,n=x.length,max=0,i,p,j;
+function truePeak(x){ var n=x.length,T=TPT,max=0,i,p,j;
   for(i=0;i<n;i++){ var a=x[i]<0?-x[i]:x[i]; if(a>max)max=a; }
-  var big=-100,thr=max*0.5;
-  for(i=15;i<n;i++){ var xi=x[i]; if(xi>thr||xi<-thr) big=i; if(i-big>=16) continue; thr=max*0.5; for(p=1;p<4;p++){ var s=0; for(j=0;j<16;j++) s+=x[i-j]*h[p+4*j]; if(s<0)s=-s; if(s>max)max=s; } }
+  if(max===0) return 0;
+  /* Stille vor und nach der Datei annehmen, damit auch Spitzen am Anfang/Ende erfasst werden */
+  var z=new Float32Array(n+2*T+2); for(i=0;i<n;i++) z[i+T]=x[i];
+  var big=-1e9,thr=max*0.5,prev=-1,m=n+2*T,y=[0,0,0,0,0,0];
+  for(i=T;i<m;i++){ var xi=z[i-TPD+8]; if(xi>thr||xi<-thr) big=i; if(i-big>=16){ prev=-1; continue; }
+    var s0=z[i-TPD]; if(s0<0)s0=-s0; var cpk=s0,b16=i-TPD-7;
+    for(p=0;p<3;p++){ var cf16=TPC16[p],u=0; for(j=0;j<16;j++) u+=z[b16+j]*cf16[j]; if(u<0)u=-u; if(u>cpk)cpk=u; }
+    if(cpk<max*0.85){ prev=-1; continue; }
+    var b=i-T+1; y[0]=prev; y[1]=s0;
+    for(p=0;p<3;p++){ var cf=TPC[p],s=0; for(j=0;j<T;j++) s+=z[b+j]*cf[j]; y[p+2]=s<0?-s:s; }
+    var nx=z[i-TPD+1]; y[5]=nx<0?-nx:nx;
+    for(p=1;p<5;p++){ var v=y[p]; if(v>max)max=v; if(y[p-1]>=0&&v>=y[p-1]&&v>=y[p+1]){ var q=tpPar(y[p-1],v,y[p+1]); if(q>max)max=q; } }
+    prev=y[4]; }
   return max; }
 function lufsOf(ms){ return -0.691+10*Math.log10(ms+1e-30); }
 function loudness(L,R,fs){
@@ -1355,7 +1392,35 @@ const PRESETS = {
     p.eq.bands[6].type = 'peaking'; p.eq.bands[6].f = 9000; p.eq.bands[6].q = 0.9; p.eq.bands[6].g = 1;
     p.eq.bands[0].on = true; p.eq.bands[0].f = 25; }) }
 };
-let P = (() => { const s = recall('params'); if (s && s.eq && s.eq.bands && s.eq.bands.length === 8 && s.comp && s.lim) return s; return clone(DEFAULT); })();
+/* Einstellungen prüfen, bevor sie übernommen werden (aus Datei oder Browser-Speicher). Eine ungültige Datei ändert nichts,
+   beschädigte gespeicherte Werte verhindern den Start nicht. (Übernommen aus der Codex-Prüfung vom 23.10.2026.) */
+function validateSettings(s) {
+  const object = (v, label) => { if (!v || typeof v !== 'object' || Array.isArray(v)) throw new Error(label + ' fehlt oder ist ungültig'); return v; };
+  const num = (v, a, b, label) => { if (typeof v !== 'number' || !Number.isFinite(v) || v < a || v > b) throw new Error(label + ': Zahl zwischen ' + a + ' und ' + b + ' erwartet'); return v; };
+  const flag = (v, label) => { if (typeof v !== 'boolean') throw new Error(label + ': Ein/Aus erwartet'); return v; };
+  object(s, 'Einstellungen'); object(s.eq, 'Equalizer'); object(s.lim, 'Limiter');
+  const p = clone(DEFAULT);
+  if (s.inputGain !== undefined) p.inputGain = num(s.inputGain, -24, 24, 'Eingangspegel');
+  p.eq.on = flag(s.eq.on, 'Equalizer');
+  if (!Array.isArray(s.eq.bands) || s.eq.bands.length !== 8) throw new Error('Acht EQ-Bänder erwartet');
+  p.eq.bands = s.eq.bands.map((b, i) => { object(b, 'EQ-Band ' + (i + 1)); if (!Object.prototype.hasOwnProperty.call(TYPE_NAMES, b.type)) throw new Error('Ungültiger EQ-Filtertyp');
+    return { on: flag(b.on, 'EQ-Band'), type: b.type, f: num(b.f, 10, 96000, 'EQ-Frequenz'), g: num(b.g, -24, 24, 'EQ-Pegel'), q: num(b.q, 0.1, 20, 'EQ-Q') }; });
+  if (s.comp !== undefined) { const c = object(s.comp, 'Kompressor');
+    if (!Array.isArray(c.bands) || c.bands.length !== 3) throw new Error('Drei Kompressor-Bänder erwartet');
+    p.comp = { on: flag(c.on, 'Kompressor'), x1: num(c.x1, 40, 1000, 'Weiche 1'), x2: num(c.x2, 500, 12000, 'Weiche 2'), bands: c.bands.map(b => { object(b, 'Kompressor-Band');
+      return { th: num(b.th, -100, 0, 'Schwelle'), ratio: num(b.ratio, 1, 20, 'Ratio'), att: num(b.att, 0.1, 1000, 'Attack'), rel: num(b.rel, 1, 3000, 'Release'), gain: num(b.gain, -24, 24, 'Kompressor-Pegel') }; }) }; }
+  if (s.sat !== undefined) { const v = object(s.sat, 'Sättigung'); p.sat = { on: flag(v.on, 'Sättigung'), drive: num(v.drive, 0, 100, 'Sättigungs-Drive'), mix: num(v.mix, 0, 100, 'Mischung') }; }
+  if (s.stereo !== undefined) { const v = object(s.stereo, 'Stereo'); p.stereo = { on: flag(v.on, 'Stereo'), width: num(v.width, 0, 200, 'Breite'), bassMono: flag(v.bassMono, 'Bass-Mono'), monoFreq: num(v.monoFreq, 20, 1000, 'Mono-Frequenz') }; }
+  const v = s.lim; p.lim = { on: flag(v.on, 'Limiter'), drive: num(v.drive, -12, 24, 'Limiter-Drive'), ceiling: num(v.ceiling, -24, 0, 'Decke'), release: num(v.release, 1, 3000, 'Limiter-Release'), isp: flag(v.isp, 'True Peak') };
+  return p;
+}
+/* Lautheitsziel setzen; eigene Werte (z. B. −12 LUFS) bekommen einen Eintrag in der Auswahl statt verloren zu gehen */
+function setTargetValue(value) {
+  const n = Number(value); if (!Number.isFinite(n) || n < -30 || n > -5) throw new Error('Ungültiges Lautheitsziel');
+  const sel = $('#targetSel'); if (![...sel.options].some(o => Number(o.value) === n)) sel.add(new Option('Eigenes Ziel (' + String(n).replace('-', '−') + ' LUFS)', String(n)));
+  sel.value = String(n);
+}
+let P = (() => { const s = recall('params'); try { return s ? validateSettings(s) : clone(DEFAULT); } catch (e) { return clone(DEFAULT); } })();
 
 /* ============================ Zustand ============================ */
 const S = {
@@ -1430,8 +1495,15 @@ function buildChain(ctx, P0, opt = {}) {
         lim.node.port.onmessage = e => { S.limGR = Math.min(S.limGR, e.data); }; } catch (e) { lim.node = null; S.workletOK = false; }
     }
     if (!lim.node) {
-      lim.fb = ctx.createDynamicsCompressor(); lim.fb.knee.value = 0; lim.fb.ratio.value = 20; lim.fb.attack.value = 0.001;
-      lim.clip = ctx.createWaveShaper();
+      /* Ersatz ohne AudioWorklet: derselbe Limiter-Code über ScriptProcessor (größere Latenz). Nur wenn auch das fehlt: harte Begrenzung.
+         (Der frühere DynamicsCompressor hob leise Signale an und die WaveShaper-Decke war falsch skaliert – Fund der Codex-Prüfung.) */
+      try {
+        if (!ctx.createScriptProcessor) throw new Error('kein ScriptProcessor');
+        const Lim = new Function(LIM_SRC + 'return DSLimiter;')(); lim.dsp = new Lim(ctx.sampleRate);
+        lim.fb = ctx.createScriptProcessor(2048, 2, 2);
+        lim.fb.onaudioprocess = e => { const L = e.outputBuffer.getChannelData(0), R = e.outputBuffer.getChannelData(1);
+          L.set(e.inputBuffer.getChannelData(0)); R.set(e.inputBuffer.getChannelData(1)); lim.dsp.process(L, R, L.length); S.limGR = Math.min(S.limGR, lim.dsp.grMin); lim.dsp.grMin = 1; };
+      } catch (e) { lim.dsp = null; lim.fb = ctx.createGain(); lim.clip = ctx.createWaveShaper(); }
     }
   }
   let curKey = null;
@@ -1460,12 +1532,12 @@ function buildChain(ctx, P0, opt = {}) {
     } else sw.in.connect(sw.out);
     // Limiter
     lim.in.disconnect(); lim.drive.disconnect();
-    if (lim.node) lim.node.disconnect(); if (lim.fb) { lim.fb.disconnect(); lim.clip.disconnect(); }
+    if (lim.node) lim.node.disconnect(); if (lim.fb) lim.fb.disconnect(); if (lim.clip) lim.clip.disconnect();
     if (!rt) lim.in.connect(lim.out);
     else {
       lim.in.connect(lim.drive);
       if (p.lim.on && lim.node) { lim.drive.connect(lim.node); lim.node.connect(lim.out); }
-      else if (p.lim.on && lim.fb) { lim.drive.connect(lim.fb); lim.fb.connect(lim.clip); lim.clip.connect(lim.out); }
+      else if (p.lim.on && lim.fb) { lim.drive.connect(lim.fb); if (lim.clip) { lim.fb.connect(lim.clip); lim.clip.connect(lim.out); } else lim.fb.connect(lim.out); }
       else lim.drive.connect(lim.out);
     }
   }
@@ -1489,9 +1561,8 @@ function buildChain(ctx, P0, opt = {}) {
     if (rt) {
       set(lim.drive.gain, db2g(p.lim.drive));
       if (lim.node) lim.node.port.postMessage({ on: p.lim.on, ceiling: p.lim.ceiling, release: p.lim.release, isp: p.lim.isp });
-      if (lim.fb) { lim.fb.threshold.value = p.lim.ceiling - 0.5; lim.fb.release.value = p.lim.release / 1000;
-        const c = db2g(p.lim.ceiling), N = 2048, cv = new Float32Array(N); for (let i = 0; i < N; i++) { const a = (i / (N - 1) * 2 - 1) * 4; cv[i] = clamp(a, -c, c) / 4; }
-        lim.clip.curve = cv; }
+      if (lim.dsp) lim.dsp.set({ ceiling: p.lim.ceiling, release: p.lim.release, isp: p.lim.isp });
+      if (lim.clip) { const c = db2g(p.lim.ceiling), N = 8193, cv = new Float32Array(N); for (let i = 0; i < N; i++) { const a = i / (N - 1) * 2 - 1; cv[i] = clamp(a, -c, c); } lim.clip.curve = cv; }
     }
   }
   apply(P0);
@@ -1607,37 +1678,71 @@ function updateTransport() {
   b.setAttribute('aria-label', S.playing ? 'Pause' : 'Abspielen');
 }
 /* ============================ Datei laden ============================ */
+/* Mehrkanal → Stereo (ITU-Downmix für 5.1/7.1 in WAV-Reihenfolge FL FR FC LFE BL BR SL SR; sonst abwechselnd links/rechts) */
+function downmix(chs) {
+  const n = chs[0].length, L = new Float32Array(n), R = new Float32Array(n), k = Math.SQRT1_2, N = chs.length;
+  const wl = [], wr = [];
+  for (let c = 0; c < N; c++) {
+    if (N >= 6 && N <= 8) { wl.push([1, 0, k, 0, k, 0, k, 0][c]); wr.push([0, 1, k, 0, 0, k, 0, k][c]); }
+    else { wl.push(c % 2 === 0 ? 1 : 0); wr.push(c % 2 === 1 ? 1 : 0); }
+  }
+  const sl = wl.reduce((a, b) => a + b, 0) || 1, sr = wr.reduce((a, b) => a + b, 0) || 1, g = 1 / Math.max(sl, sr);
+  for (let c = 0; c < N; c++) { const x = chs[c], a = wl[c] * g, b = wr[c] * g; if (!a && !b) continue; for (let i = 0; i < n; i++) { L[i] += a * x[i]; R[i] += b * x[i]; } }
+  return { L, R };
+}
+/* WAV-Leser: tolerant wie DAWs. Unvollständige Dateien, Platzhalter-Größen (0 oder 0xFFFFFFFF aus Aufnahme-/Streaming-Programmen)
+   und ungültige Float-Werte werden gelesen bzw. bereinigt und als Hinweis gemeldet statt die Datei abzulehnen. */
 function parseWav(ab) {
   const v = new DataView(ab); if (ab.byteLength < 44) return null;
   const tag = o => String.fromCharCode(v.getUint8(o), v.getUint8(o + 1), v.getUint8(o + 2), v.getUint8(o + 3));
   if (tag(0) !== 'RIFF' || tag(8) !== 'WAVE') return null;
-  let p = 12, fmt = null, dataOff = -1, dataLen = 0;
+  let p = 12, fmt = null, dataOff = -1, dataLen = 0; const notes = [];
   while (p + 8 <= ab.byteLength) {
     const id = tag(p), len = v.getUint32(p + 4, true);
-    if (id === 'fmt ') { let f = v.getUint16(p + 8, true); const ch = v.getUint16(p + 10, true), sr = v.getUint32(p + 12, true), bits = v.getUint16(p + 22, true);
-      if (f === 0xFFFE && len >= 26) f = v.getUint16(p + 32, true); fmt = { f, ch, sr, bits }; }
-    else if (id === 'data') { dataOff = p + 8; dataLen = Math.min(len, ab.byteLength - dataOff); break; }
+    if (id === 'fmt ') {
+      if (len < 16 || p + 24 > ab.byteLength) throw new Error('Ungültiger WAV-Formatblock');
+      let f = v.getUint16(p + 8, true); const ch = v.getUint16(p + 10, true), sr = v.getUint32(p + 12, true), bits = v.getUint16(p + 22, true);
+      if (f === 0xFFFE && len >= 26 && p + 34 <= ab.byteLength) f = v.getUint16(p + 32, true);
+      if (!ch) throw new Error('Die WAV-Datei hat 0 Kanäle');
+      if (sr < 8000 || sr > 384000) throw new Error('Ungültige Abtastrate (' + sr + ' Hz)');
+      fmt = { f, ch, sr, bits };
+    }
+    else if (id === 'data') {
+      dataOff = p + 8; const avail = ab.byteLength - dataOff;
+      if (len === 0 || len === 0xFFFFFFFF) { dataLen = avail; if (avail > 0) notes.push('Der Dateikopf enthielt keine Längenangabe, gelesen wurde bis zum Dateiende.'); }
+      else if (len > avail) { dataLen = avail; notes.push('Die Datei ist unvollständig (es fehlen ' + fmtBytes(len - avail) + '). Gelesen wurde alles Vorhandene.'); }
+      else dataLen = len;
+      break;
+    }
     p += 8 + len + (len & 1);
   }
   if (!fmt || dataOff < 0) return null;
   const { f, ch, sr, bits } = fmt, bps = bits / 8, frames = Math.floor(dataLen / (bps * ch));
   if (!((f === 1 && [8, 16, 24, 32].includes(bits)) || (f === 3 && [32, 64].includes(bits)))) return null;
-  const L = new Float32Array(frames), R = new Float32Array(frames);
-  for (let c = 0; c < Math.min(ch, 2); c++) {
-    const out = c ? R : L;
+  if (!frames) throw new Error('Die WAV-Datei enthält keine Audiodaten');
+  const chs = [];
+  let bad = 0;
+  for (let c = 0; c < ch; c++) {
+    const out = new Float32Array(frames);
     for (let i = 0; i < frames; i++) {
       const o = dataOff + (i * ch + c) * bps; let x;
-      if (f === 3) x = bits === 32 ? v.getFloat32(o, true) : v.getFloat64(o, true);
+      if (f === 3) { x = bits === 32 ? v.getFloat32(o, true) : v.getFloat64(o, true); if (!Number.isFinite(x)) { x = 0; bad++; } }
       else if (bits === 16) x = v.getInt16(o, true) / 32768;
       else if (bits === 24) { let n = v.getUint8(o) | (v.getUint8(o + 1) << 8) | (v.getUint8(o + 2) << 16); if (n & 0x800000) n -= 0x1000000; x = n / 8388608; }
       else if (bits === 32) x = v.getInt32(o, true) / 2147483648;
       else x = (v.getUint8(o) - 128) / 128;
       out[i] = x;
     }
+    chs.push(out);
   }
-  if (ch === 1) R.set(L);
-  return { sr, L, R, bits: f === 3 ? bits + ' Float' : bits };
+  if (bad) notes.push(bad + ' ungültige Samples (NaN/Unendlich) wurden auf Stille gesetzt.');
+  let L, R;
+  if (ch === 1) { L = chs[0]; R = new Float32Array(L); }
+  else if (ch === 2) { L = chs[0]; R = chs[1]; }
+  else { ({ L, R } = downmix(chs)); notes.push('Die Datei hat ' + ch + ' Kanäle und wurde auf Stereo heruntergemischt.'); }
+  return { sr, L, R, bits: f === 3 ? bits + ' Float' : bits, notes };
 }
+function fmtBytes(b) { return b >= 1048576 ? (b / 1048576).toFixed(1).replace('.', ',') + ' MB' : b >= 1024 ? Math.round(b / 1024) + ' KB' : b + ' Bytes'; }
 async function decodeFile(file) {
   const ab = await file.arrayBuffer();
   const w = parseWav(ab); if (w) return w;
@@ -1646,8 +1751,11 @@ async function decodeFile(file) {
   const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
   const oc = new OAC(2, 1, sr);
   const buf = await new Promise((res, rej) => { const pr = oc.decodeAudioData(ab, res, rej); if (pr && pr.then) pr.then(res, rej); });
-  const L = new Float32Array(buf.getChannelData(0)), R = buf.numberOfChannels > 1 ? new Float32Array(buf.getChannelData(1)) : new Float32Array(L);
-  return { sr: buf.sampleRate, L, R, bits: ext.toUpperCase() };
+  const N = buf.numberOfChannels, notes = [];
+  let L, R;
+  if (N > 2) { const chs = []; for (let c = 0; c < N; c++) chs.push(buf.getChannelData(c)); ({ L, R } = downmix(chs)); notes.push('Die Datei hat ' + N + ' Kanäle und wurde auf Stereo heruntergemischt.'); }
+  else { L = new Float32Array(buf.getChannelData(0)); R = N > 1 ? new Float32Array(buf.getChannelData(1)) : new Float32Array(L); }
+  return { sr: buf.sampleRate, L, R, bits: ext.toUpperCase(), notes };
 }
 async function openFile(file) {
   if (!file) return;
@@ -1655,7 +1763,8 @@ async function openFile(file) {
   try {
     const t = await decodeFile(file); t.name = file.name.replace(/\.[^.]+$/, '');
     S.autoCheck = true; await loadTrack(t);
-    status('„' + file.name + '“ geladen: ' + fmtTime(duration(), 1) + ', ' + (t.sr / 1000) + ' kHz. Messung läuft …', 'ok');
+    const nt = t.notes && t.notes.length ? ' Hinweis: ' + t.notes.join(' ') : '';
+    status('„' + file.name + '“ geladen: ' + fmtTime(duration(), 1) + ', ' + (t.sr / 1000) + ' kHz. Messung läuft …' + nt, nt ? 'warn' : 'ok', nt ? 12000 : 4500);
   } catch (e) { console.error(e); status('Die Datei konnte nicht gelesen werden. Unterstützt: WAV, MP3, FLAC, M4A. (' + e.message + ')', 'err', 8000); }
 }
 async function loadTrack(t) {
@@ -2457,7 +2566,7 @@ async function runAI() {
       const s = await askAI(buildPrompt(round, wish, tgt, last), signal);
       if (!s || typeof s !== 'object') throw { code: 'invalid_json', message: 'leere Antwort' };
       li.querySelector('.busy')?.remove(); lastS = s;
-      tgt = applyAI(s); $('#targetSel').value = String(tgt);
+      tgt = applyAI(s); try { setTargetValue(tgt); } catch (e) {}
       const li2 = aiLog('Einstellungen übernommen, Lautheit auf ' + tgt + ' LUFS, Ergebnis wird gemessen …'); li2.insertAdjacentHTML('afterbegin', '<span class="busy"></span>');
       const r = await setDriveToTarget(tgt); if (signal.aborted) throw { code: 'cancelled' };
       last = await freshMaster(); li2.querySelector('.busy')?.remove();
@@ -2563,7 +2672,7 @@ function feedbackText() {
   const lines = ['Feedback zum Deep Structure Mastering Studio', '', 'Bewertung: ' + (FB.stars ? '★'.repeat(FB.stars) + '☆'.repeat(5 - FB.stars) + ' (' + FB.stars + '/5)' : 'keine'),
     'Name: ' + ($('#fbName').value.trim() || '–'), 'Musik: ' + ($('#fbGenre').value.trim() || '–'), '', 'Was gefällt:', $('#fbGood').value.trim() || '–', '', 'Was stört / fehlt / unklar:', $('#fbBad').value.trim() || '–'];
   if ($('#fbTech').checked) {
-    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: ' + (window.claude ? 'Claude' : location.hostname || 'lokal'));
+    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.6.2 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal'));
     if (S.track && !S.track.demo) lines.push('Song: ' + S.track.name + ' · ' + (S.track.sr / 1000) + ' kHz · ' + fmtTime(duration(), 0));
     if (CHECK) lines.push('Song-Check: ' + CHECK.score + '/100 · ' + CHECK.findings.map(f => f.title).join(' | '));
     if (S.arts) lines.push('Artefakte: ' + S.arts.regions.length + ' Stellen, ' + S.arts.clicks.length + ' Knackser, Höhen bis ' + (S.arts.cutoff || '?') + ' Hz');
@@ -3342,7 +3451,7 @@ async function runExport() {
 
 /* ============================ Einstellungen & Presets ============================ */
 Object.entries(PRESETS).forEach(([k, v]) => { const o = document.createElement('option'); o.value = k; o.textContent = v.name; $('#presetSel').appendChild(o); });
-$('#presetSel').addEventListener('change', e => { const pr = PRESETS[e.target.value]; if (!pr) return; P = clone(pr.p); if (pr.target) $('#targetSel').value = String(pr.target);
+$('#presetSel').addEventListener('change', e => { const pr = PRESETS[e.target.value]; if (!pr) return; P = clone(pr.p); if (pr.target) setTargetValue(pr.target);
   refreshAll(); onParam(); status('Preset „' + pr.name + '“ geladen.' + (pr.target ? ' Für die Lautheit: Limiter → „Drive auf Ziel einstellen“.' : ''), 'ok', 6000); e.target.value = ''; });
 $('#btnSaveSet').addEventListener('click', async () => {
   const data = JSON.stringify({ app: 'Deep Structure Mastering Studio', version: 1, savedAt: new Date().toISOString(), song: S.track ? S.track.name : null, target: +$('#targetSel').value, settings: P }, null, 2);
@@ -3351,9 +3460,11 @@ $('#btnSaveSet').addEventListener('click', async () => {
 });
 $('#btnLoadSet').addEventListener('click', () => $('#setIn').click());
 $('#setIn').addEventListener('change', async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-  try { const j = JSON.parse(await f.text()); const s = j.settings || j; if (!s.eq || !s.eq.bands || s.eq.bands.length !== 8 || !s.lim) throw new Error('keine Mastering-Einstellungen');
-    P = Object.assign(clone(DEFAULT), s); if (j.target) $('#targetSel').value = String(j.target); refreshAll(); onParam(); status('Einstellungen geladen.', 'ok'); }
-  catch (err) { status('Diese Datei enthält keine gültigen Einstellungen (' + err.message + ').', 'err'); } });
+  const previous = P, previousTarget = $('#targetSel').value;
+  try { const j = JSON.parse(await f.text()); const cand = validateSettings(j && (j.settings || j));
+    if (j.target !== undefined && (typeof j.target !== 'number' || !Number.isFinite(j.target) || j.target < -30 || j.target > -5)) throw new Error('ungültiges Lautheitsziel');
+    P = cand; if (j.target !== undefined) setTargetValue(j.target); refreshAll(); onParam(); status('Einstellungen geladen.', 'ok'); }
+  catch (err) { if (P !== previous) { P = previous; $('#targetSel').value = previousTarget; refreshAll(); } status('Diese Datei enthält keine gültigen Einstellungen (' + err.message + '). Es wurde nichts verändert.', 'err'); } });
 
 /* ============================ Bedienung ============================ */
 $('#btnOpen').addEventListener('click', () => $('#fileIn').click());
@@ -3432,7 +3543,7 @@ async function makeDemo() {
 
 /* ============================ Start ============================ */
 (async function init() {
-  const t = recall('target'); if (t) $('#targetSel').value = t;
+  const t = recall('target'); if (t) { try { setTargetValue(t); } catch (e) {} }
   compTitles(); refreshAll(); showTab(recall('tab') || 'check'); updateEditButtons(); renderAnalysis();
   requestAnimationFrame(frame);
   try { await loadTrack(await makeDemo()); $('#trackName').innerHTML = '<b>Demo-Loop</b> · synthetisch erzeugt · öffne deinen Song oder zieh ihn hierher'; }

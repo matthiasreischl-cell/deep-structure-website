@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const htmlPath = process.argv[2] || path.join(here, '..', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const grab = name => { const m = html.match(new RegExp('const ' + name + ' = String\\.raw`([\\s\\S]*?)`;')); if (!m) throw new Error(name + ' nicht gefunden'); return m[1]; };
-const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair};')();
+const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft};')();
 
 let pass = 0, fail = 0; const rows = [];
 function check(name, ok, detail) { rows.push([ok ? 'PASS' : 'FAIL', name, detail]); ok ? pass++ : fail++; }
@@ -57,6 +57,21 @@ for (const sr of [44100, 48000, 96000]) { const r = meas(sine(sr, 10, 997, 0.1))
   const r = D.handle({ L, R, sr: 48000, opts: { tp: true } }).result;
   check('Limiter: Sample-Peak ≤ Decke (−1 dB) bei +12 dB Drive', r.peak <= -1 + 1e-4, r.peak.toFixed(3) + ' dBFS');
   check('Limiter: True Peak ≤ Decke + 0,2 dB (Rauschen, extrem)', r.TP <= -0.8, r.TP.toFixed(2) + ' dBTP'); }
+{ let worst = 0, wf = ''; for (const f of [12000, 16000, 18000, 20000, 21000]) for (const ph of [0.3, 1.1, 2.5]) { const n = 48000, L = new Float32Array(n), fd = 2400; for (let i = 0; i < n; i++) L[i] = 0.5 * Math.sin(2 * Math.PI * f * i / 48000 + ph) * Math.min(1, 0.5 - 0.5 * Math.cos(Math.PI * Math.min(i, n - 1 - i) / fd));
+    const e = 20 * Math.log10(D.truePeak(L)) + 6.0206; if (Math.abs(e) > Math.abs(worst)) { worst = e; wf = f + ' Hz'; } }
+  check('True Peak: hohe Töne 12–21 kHz genau (±0,05 dB, früher bis −0,22)', Math.abs(worst) <= 0.05, 'größte Abweichung ' + worst.toFixed(3) + ' dB bei ' + wf); }
+{ let worst = -99, wf = ''; for (const f of [8000, 12000, 16000, 19000, 20000]) { const x = sine(48000, 2, f, 0.9), L = x.L.slice(), R = x.R.slice(), fd = 2400; for (let i = 0; i < L.length; i++) { const w = Math.min(1, 0.5 - 0.5 * Math.cos(Math.PI * Math.min(i, L.length - 1 - i) / fd)); L[i] *= w; R[i] *= w; }
+    D.applyLim(L, R, 48000, { on: true, drive: 6, ceiling: -1, release: 80, isp: true });
+    const t = 20 * Math.log10(Math.max(D.truePeak(L), D.truePeak(R))); if (t > worst) { worst = t; wf = f + ' Hz'; } }
+  check('Limiter: hohe Töne mit +6 dB Drive bleiben unter der Decke (≤ −0,95 dBTP)', worst <= -0.95, 'höchster Wert ' + worst.toFixed(2) + ' dBTP bei ' + wf); }
+/* Ideale Rekonstruktion (16-fach über FFT, periodisch) als unabhängige Referenz für den Rausch-Extremfall */
+function idealTP(x) { const n = x.length, U = 16, N = n * U, re = new Float64Array(N), im = new Float64Array(N), a = new Float64Array(n), b = new Float64Array(n);
+  for (let i = 0; i < n; i++) a[i] = x[i]; D.fft(a, b); const h = n / 2;
+  for (let k = 0; k < h; k++) { re[k] = a[k]; im[k] = b[k]; if (k) { re[N - k] = a[n - k]; im[N - k] = b[n - k]; } } re[h] = a[h] / 2; im[h] = b[h] / 2; re[N - h] = a[h] / 2; im[N - h] = -b[h] / 2;
+  for (let k = 0; k < N; k++) im[k] = -im[k]; D.fft(re, im); let m = 0; for (let k = 300 * U; k < N - 300 * U; k++) m = Math.max(m, Math.abs(re[k] / n)); return 20 * Math.log10(m); }
+{ const x = noise(48000, 1.5, 0.5, 7, 0), n = 65536, L = x.L.slice(0, n), R = x.R.slice(0, n); D.applyLim(L, R, 48000, { on: true, drive: 12, ceiling: -1, release: 80, isp: true });
+  const own = 20 * Math.log10(Math.max(D.truePeak(L), D.truePeak(R))), ideal = Math.max(idealTP(L), idealTP(R));
+  check('Limiter, Extremfall weißes Rauschen +12 dB: ideale Rekonstruktion ≤ +0,4 dBTP (vorher +0,9)', ideal <= 0.4, 'eigene Anzeige ' + own.toFixed(2) + ', ideal ' + ideal.toFixed(2) + ' dBTP'); }
 { const x = pink(48000, 10, 0.08), L = x.L.slice(), R = x.R.slice(), g = D.applyLim(L, R, 48000, { on: true, drive: 0, ceiling: -1, release: 80, isp: true }); let maxd = 0;
   for (let i = 0; i < L.length; i++) maxd = Math.max(maxd, Math.abs(L[i] - x.L[i]));
   check('Limiter: Signal unter der Decke bleibt unverändert (latenzkorrigiert)', maxd < 1e-6 && g === 1, 'max. Abweichung ' + maxd.toExponential(1)); }

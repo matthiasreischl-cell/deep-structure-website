@@ -32,7 +32,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 5. **Stereo:** M/S-Breite. Bass-Mono über einen Hochpass 4. Ordnung auf dem Seitensignal.
 6. **Limiter:** True-Peak-Limiter mit 5 ms Vorschau (Details unten).
 
-**True-Peak-Limiter:** gleitendes Minimum plus Kastenglättung, dadurch ist der Attack gleich der Vorschauzeit. Der Release ist exponentiell. Die Spitzenerkennung erfasst auch Zwischenwerte: ein schneller 16-Tap-Vorfilter entscheidet, wo es eng wird (ab 1,4 dB unter der Decke). Dort rechnet ein 4-fach-Polyphasen-FIR mit 48 Taps je Phase (Kaiser) plus Parabel-Feinbestimmung zwischen den Rasterpunkten. Eine harte Sicherheitsgrenze sitzt auf Sample-Ebene. Signale unterhalb der Decke laufen bitgenau durch (latenzkorrigiert).
+**True-Peak-Limiter:** gleitendes Minimum plus Kastenglättung, dadurch ist der Attack gleich der Vorschauzeit. Der Release ist exponentiell. Die Spitzenerkennung erfasst auch Zwischenwerte: ein schneller 16-Tap-Vorfilter entscheidet, wo es eng wird (ab 2,5 dB unter der Decke). Dort rechnet ein 4-fach-Polyphasen-FIR mit 128 Taps je Phase (Kaiser) plus Parabel-Feinbestimmung zwischen den Rasterpunkten. Eine Sicherheitsstufe schätzt zusätzlich Anteile nahe der Nyquist-Frequenz ab (Band per (−1)^n in den Bassbereich verschoben, tiefpassgefiltert, Hüllkurve als Zuschlag), damit die Decke auch unter idealer Rekonstruktion hält. Eine harte Sicherheitsgrenze sitzt auf Sample-Ebene. Signale unterhalb der Decke laufen bitgenau durch (latenzkorrigiert).
 
 **Export:**
 - Der Export rendert die Kette mit `OfflineAudioContext`. Die Latenz wird per Klick-Test kompensiert.
@@ -75,6 +75,13 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - STFT mit Wurzel-Hann-Fenster, verlustfrei rekonstruierend (getestet).
 - Wahlweise nur auf markierte Stellen angewendet.
 
+**Clean Song (Störtöne und Rauschteppich):**
+- Suche: STFT mit 4096 Punkten (8192 ab 88,2 kHz), Hann, in Mitte und Seite getrennt. Für jede Frequenz wird gemessen, wie weit sie über ihren Nachbarn liegt (Ring 58–150 Hz daneben, Mittel in dB).
+- Störton: steht in mindestens 60 % der hörbaren Abschnitte mehr als 8 dB über den Nachbarn und im Mittel mindestens 12 dB, ab 500 Hz. Musik wechselt Tonhöhe und Pegel, KI-Störlinien bleiben stehen. Angehakt werden Töne ab 14 dB und ab 800 Hz sowie Linien über 18 kHz; alles andere entscheidet der Nutzer nach dem Anhören.
+- Rauschteppich: im Bereich 5–16 kHz der zusammenhängende Abschnitt (mind. 1,5 kHz breit), dessen Grundpegel (15-%-Wert) höchstens 9 dB unter dem Mittelwert (50 %) liegt.
+- Entfernen: STFT 4096, Hop 1024, Hann/Hann. Störtöne werden in ±5 Bins je Fenster auf die Hälfte des Nachbarpegels begrenzt (nur der Überschuss). Der Rauschteppich wird per spektraler Subtraktion mit zeitlich (≈ 45 ms) und spektral geglätteter Leistung abgesenkt; plötzliche Anstiege (Anschläge) werden sofort durchgelassen. Untergrenze −6 bis −18 dB je nach Regler, die Seite bekommt etwas mehr. Anschließend laufen Glätter und Knackser-Reparatur über die markierten Stellen. Ohne Auswahl bleibt das Signal bitgenau.
+- Messung (synthetische Störung in „Dein Aber“): Störtöne −21 bis −32 dB, Rauschteppich in leisen Passagen −22 dB, laute Passagen und der restliche Frequenzgang praktisch unverändert.
+
 **Spiel-Daten** (Reiter „Spiel-Daten“, für Rhythmus- und Musikspiele, z. B. in Godot):
 - Onset-Hüllkurve aus logarithmischem Spektral-Fluss (STFT 2048, Hop 512, L und R getrennt).
 - Tempo: Autokorrelation mit metrischer Bewertung (Beat, halber und ganzer Takt) plus Bass-Periodizität. Eine sanfte Vorliebe für 60–200 BPM um 120 entscheidet Grenzfälle. Halbes oder doppeltes Tempo ist musikalisch oft gleichwertig, deshalb gibt es ÷ 2 und × 2 und ein Eingabefeld für ein bekanntes Tempo.
@@ -113,6 +120,14 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.8.0 (Clean Song)
+
+- **Clean Song** in der Karte „KI-Artefakte“: findet stehende Störtöne (schmales Pfeifen oder Schleifen, das über den ganzen Song gleich bleibt) in Mitte und Seite und einen gleichbleibenden Rauschteppich in den Höhen. Jeder Ton steht mit Frequenz, Abstand zu den Nachbarfrequenzen und Anteil am Song in einer Liste, lässt sich einzeln anhören und abhaken. Ein Knopf entfernt alles in einem Schritt: angehakte Störtöne, Rauschteppich (Regler), Glitzern und Flattern an den markierten Stellen und Knackser. „Entferntes anhören“ spielt nur das, was entfernt wurde.
+- Der Song-Check nennt gefundene Störtöne und den Rauschteppich mit Sprung zu Clean Song.
+- Das bisherige Glätten bleibt unverändert. Es sucht kurze Ausreißer und konnte stehende Töne grundsätzlich nicht erfassen.
+- **Start ohne Hänger:** Lädt ein Browser die Audio-Module (AudioWorklet) vor der ersten Berührung nicht, nutzt das Studio nach 5 Sekunden den eingebauten Ersatz, statt zu warten.
+- **Laden:** Die Wellenform-Übersicht wird jetzt vor dem Audio-Start berechnet. Vorher konnte ein Neuzeichnen beim allerersten Laden abstürzen oder kurz die alte Wellenform zeigen.
 
 ## Änderungen 1.7.1 (Korrekturen nach dem Prüfbericht 1.7.0)
 

@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const htmlPath = process.argv[2] || path.join(here, '..', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const grab = name => { const m = html.match(new RegExp('const ' + name + ' = String\\.raw`([\\s\\S]*?)`;')); if (!m) throw new Error(name + ' nicht gefunden'); return m[1]; };
-const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES};')();
+const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES, cleanScan, cleanSong};')();
 
 let pass = 0, fail = 0; const rows = [];
 function check(name, ok, detail) { rows.push([ok ? 'PASS' : 'FAIL', name, detail]); ok ? pass++ : fail++; }
@@ -213,6 +213,21 @@ for (const [ratio, want] of [[2, -15], [4, -17.5]]) { const x = sine(48000, 3, 1
 { const x = sine(48000, 2, 500, Math.pow(10, -6 / 20)), R = x.L.map(v => v * 0.1), y = compRun(x.L, R, { th: -20, ratio: 3, att: 10, rel: 150, knee: 6 }), gl = pkDb(y.L, 60000, 90000) - pkDb(x.L, 60000, 90000), gr2 = pkDb(y.R, 60000, 90000) - pkDb(R, 60000, 90000);
   check('Kompressor: Stereo gekoppelt (beide Kanäle gleich abgesenkt, Stereobild bleibt)', near(gl, gr2, 0.01) && gl < -5, 'L ' + gl.toFixed(2) + ' dB, R ' + gr2.toFixed(2) + ' dB'); }
 
+{ // Clean Song: stehende Störtöne in rosa Rauschen (Musik-Ersatz) finden und entfernen
+  const sr = 48000, x = pink(sr, 12, 0.2, 21), n = x.L.length, L = x.L.slice(), R = x.R.slice();
+  for (let i = 0; i < n; i++) { const t = i / sr, a = 0.06 * Math.sin(2 * Math.PI * 3455 * t), b = 0.003 * Math.sin(2 * Math.PI * 9100 * t); L[i] += a + b; R[i] += a - b; }
+  const sc0 = D.cleanScan(x.L, x.R, sr), sc = D.cleanScan(L, R, sr), f = sc.lines.map(l => l.f);
+  check('Clean Song: ohne Störung keine Störtöne gefunden', sc0.lines.length === 0, sc0.lines.length + ' gefunden');
+  check('Clean Song: 3455 Hz (Mitte) und 9100 Hz (Seite) gefunden', f.some(v => Math.abs(v - 3455) < 6) && f.some(v => Math.abs(v - 9100) < 6) && sc.lines.length === 2, f.join(', ') + ' Hz');
+  const o = D.cleanSong(L, R, sr, { lines: sc.lines }), amp = (X, Y, fq, side) => { let re = 0, im = 0, c = 0; for (let i = sr; i < n - sr; i++) { const v = side ? (X[i] - Y[i]) / 2 : (X[i] + Y[i]) / 2; re += v * Math.cos(2 * Math.PI * fq * i / sr); im += v * Math.sin(2 * Math.PI * fq * i / sr); c++; } return 2 * Math.hypot(re, im) / c; };
+  const d1 = db(amp(L, R, 3455, false) / amp(o.L, o.R, 3455, false)), d2 = db(amp(L, R, 9100, true) / amp(o.L, o.R, 9100, true));
+  check('Clean Song: Störtöne um mehr als 15 dB abgesenkt', d1 > 15 && d2 > 15, '3455 Hz −' + d1.toFixed(1) + ' dB, 9100 Hz −' + d2.toFixed(1) + ' dB');
+  let e0 = 0, e1 = 0; const sp = (X, a, b) => { const N = 65536, re = new Float64Array(N), im = new Float64Array(N); for (let i = 0; i < N; i++) re[i] = X[sr * 2 + i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / N)); D.fft(re, im); let e = 0; for (let k = Math.round(a * N / sr); k <= Math.round(b * N / sr); k++) e += re[k] * re[k] + im[k] * im[k]; return e; };
+  const band = [[200, 3300], [3700, 8800], [9400, 16000]].map(([a, b]) => db(Math.sqrt(sp(o.L, a, b) / sp(L, a, b))));
+  check('Clean Song: Musik abseits der Störtöne unverändert (±0,1 dB)', band.every(v => Math.abs(v) < 0.1), band.map(v => v.toFixed(3)).join(' / ') + ' dB');
+  const z = D.cleanSong(L, R, sr, { lines: [], carpet: 0 }); let md = 0; for (let i = 0; i < n; i++) md = Math.max(md, Math.abs(z.L[i] - L[i]));
+  check('Clean Song: nichts ausgewählt = bitgenau unverändert', md === 0, String(md));
+}
 const w = Math.max(...rows.map(r => r[1].length));
 console.log('\nDeep Structure Mastering Studio – DSP-Tests (' + path.basename(htmlPath) + ')\n');
 for (const [s, n, d] of rows) console.log((s === 'PASS' ? '  ✔ ' : '  ✘ ') + n.padEnd(w) + '  ' + d);

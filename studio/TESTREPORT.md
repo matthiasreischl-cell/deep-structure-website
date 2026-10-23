@@ -272,3 +272,19 @@ Gesamt: 63 von 63 DSP-Tests, 70 von 70 Browser-Tests.
 Hinweis zur True-Peak-Anzeige: Die Messung selbst entspricht weiter der Norm (BS.1770, wie FFmpeg) und ist genauer als diese. Bei extremem Vollband-Rauschen kann eine unendlich lange ideale Rekonstruktion bis etwa 0,5 dB höher liegen als die Anzeige. Die Sicherheitsstufe sitzt im Limiter, damit die Decke in der fertigen Datei auch dann gilt.
 
 Gesamt: 67 von 67 DSP-Tests, 78 von 78 Browser-Tests.
+
+## 15. Nachtrag 1.8.0: Clean Song
+
+| Prüfung | Ergebnis |
+|---|---|
+| Synthetische Störung in „Dein Aber“ (60 s): Störtöne 3455 Hz (Mitte), 2883 Hz (Mitte+Seite), 9100 Hz (Seite), Rauschteppich 7–11,5 kHz | alle drei Töne und der Teppich (6,1–12,3 kHz) gefunden; ohne Störung: nichts gefunden |
+| Absenkung der Störtöne | 3455 Hz −21 dB, 2883 Hz −20 dB (Mitte) / −26 dB (Seite), 9100 Hz −32 dB |
+| Rauschteppich, Regler 100 % | leiseste 25 % des Songs: +10 dB durch die Störung, nach Clean Song 22 dB darunter; laute Passagen −0,2 dB |
+| Unveränderter Song (ohne Teppich) mit Regler 100 % | Höhen 5–16 kHz −0,2 dB, 1–5 kHz −0,01 dB |
+| Echte Songs (5 Suno-Titel) | keine Störtöne im hörbaren Bereich; Linien über 19 kHz in 3 Titeln (je ca. 1,5 kHz Abstand, typische Codec-/KI-Linien) |
+| Rechenzeit, 5:27-Song | Suche 3,0 s, Clean Song 10,4 s |
+| Rosa Rauschen + 2 Störtöne (DSP-Test) | gefunden, −18,9 / −70 dB, übrige Frequenzen ±0,000 dB, ohne Auswahl bitgenau |
+| Browser: Testsong mit Störtönen | gefunden, −29,5 dB (Mitte) / −97 dB (Seite), Akkordton 220 Hz unverändert, ein Rückgängig-Schritt, „Entferntes anhören“ verfügbar |
+| Laden: Neuzeichnen während des Audio-Starts | kein Absturz mehr |
+
+Gesamt: 72 von 72 DSP-Tests, 84 von 84 Browser-Tests.

@@ -24,7 +24,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 5. **Stereo:** M/S-Breite. Bass-Mono über einen Hochpass 4. Ordnung auf dem Seitensignal.
 6. **Limiter:** True-Peak-Limiter mit 5 ms Vorschau (Details unten).
 
-**True-Peak-Limiter:** gleitendes Minimum plus Kastenglättung, dadurch ist der Attack gleich der Vorschauzeit. Der Release ist exponentiell. Die Spitzenerkennung erfasst auch Zwischenwerte (4-fach Polyphasen-FIR mit 16 Taps je Phase). Eine harte Sicherheitsgrenze sitzt auf Sample-Ebene. Signale unterhalb der Decke laufen bitgenau durch (latenzkorrigiert).
+**True-Peak-Limiter:** gleitendes Minimum plus Kastenglättung, dadurch ist der Attack gleich der Vorschauzeit. Der Release ist exponentiell. Die Spitzenerkennung erfasst auch Zwischenwerte: ein schneller 16-Tap-Vorfilter entscheidet, wo es eng wird (ab 1,4 dB unter der Decke). Dort rechnet ein 4-fach-Polyphasen-FIR mit 48 Taps je Phase (Kaiser) plus Parabel-Feinbestimmung zwischen den Rasterpunkten. Eine harte Sicherheitsgrenze sitzt auf Sample-Ebene. Signale unterhalb der Decke laufen bitgenau durch (latenzkorrigiert).
 
 **Export:**
 - Der Export rendert die Kette mit `OfflineAudioContext`. Die Latenz wird per Klick-Test kompensiert.
@@ -39,7 +39,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 | Lautheit | ITU-R BS.1770-4: K-Filter nach libebur128, Gating −70 LUFS absolut und −10 LU relativ |
 | Kurzzeit-Lautheit | Fenster 3 s |
 | Loudness Range | EBU Tech 3342: Perzentile 10 und 95, relatives Gate −20 LU |
-| True Peak | 4-fach Oversampling |
+| True Peak | 4-fach Oversampling, 48 Taps je Phase, Parabel-Feinbestimmung, Stille vor/nach der Datei berücksichtigt (hohe Töne bis 21 kHz auf ±0,02 dB genau) |
 
 **Spektrum:**
 - Linker und rechter Kanal werden getrennt transformiert (FFT 8192, Hann), die Leistung wird gemittelt. Gegenphasige Anteile löschen sich so nicht aus.
@@ -103,6 +103,20 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.6.2 (Korrekturen nach Codex-Prüfung, OGG wieder enthalten)
+
+Eine Codex-Überarbeitung vom 23.10.2026 basierte auf 1.6.0. Ihr fehlte deshalb der OGG-Export. Übernommen wurde nur, was nachweislich besser war.
+
+| Bereich | 1.6.1 | Codex-Stand | 1.6.2 |
+|---|---|---|---|
+| True Peak, weißes Rauschen +12 dB (ideale Rekonstruktion) | +0,9 dBTP | Ziel −1,2 dBTP, aber 8- bis 20-mal langsamer; überschätzt hohe Töne um bis zu 2,9 dB | +0,1 dBTP (FFmpeg: −0,9 statt −0,3). Musik und hohe Töne bleiben exakt auf der Decke. |
+| Geschwindigkeit „Dein Aber“: Messung / Drive auf Ziel | 5,3 s / 5,2 s | 27,6 s / 44 s | 6,4 s / 6,5 s |
+| WAV-Import | Größe 0 im Kopf ergab eine leere Datei | lehnte abgeschnittene Dateien und Streaming-WAVs ab | Liest alles Vorhandene mit Hinweis, NaN wird zu Stille, Mehrkanal wird heruntergemischt |
+| Offline-Cache | löschte alle Caches der Domain | behielt alte Studio-Caches für immer | Eigener Namensraum, alte Studio-Versionen werden aufgeräumt, der OGG-Encoder wird übernommen |
+| Einstellungen | einfache Prüfung | vollständige Prüfung, atomarer Import | übernommen |
+| Ersatz-Limiter ohne AudioWorklet | Kompressor + falsch skalierte Decke | Limiter-Code per ScriptProcessor | übernommen |
+| OGG-Export | vorhanden | fehlte | vorhanden |
 
 ## Änderungen 1.6.1 (OGG-Export)
 

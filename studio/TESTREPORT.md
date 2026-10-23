@@ -202,3 +202,22 @@ Nicht automatisch prüfbar: ob die Reparatur besser *klingt*. Das entscheidet de
 | Zeitversatz zum Original (Kreuzkorrelation bei 1:00) | 0 Samples. Die Spiel-Daten passen also auch zur OGG-Datei. |
 | Testton 1 kHz, Klick bei 5 s | Klick-Versatz 0 Samples, Länge exakt |
 | Browser-Test: Encoder nachladen und gültige Ogg-Datei erzeugen | Bestanden („OggS“-Kopf) |
+
+## 11. Nachtrag 1.6.2: True Peak, Import, Offline-Cache
+
+Referenz für True Peak ist eine ideale Rekonstruktion (16-fach über FFT, ohne Ränder).
+
+| Prüfung | 1.6.1 | 1.6.2 |
+|---|---|---|
+| Sinustöne 12–21 kHz, je 3 Phasen | bis −0,22 dB zu niedrig | ±0,012 dB |
+| Limiter, Töne 8–20 kHz mit +6 dB Drive, Decke −1 | −1,00 dBTP | −1,00 dBTP |
+| Limiter, weißes Rauschen +12 dB (Extremfall) | +0,90 dBTP ideal, FFmpeg −0,3 | +0,12 dBTP ideal, FFmpeg −0,9 |
+| „Dein Aber“ mit +6 dB Drive | ideal −0,97 dBTP | ideal −1,00 dBTP |
+| Mastering auf −14 LUFS, Export WAV 24 Bit (FFmpeg) | – | −14,0 LUFS, −1,0 dBTP, LRA 7,6 |
+| Dasselbe als OGG Vorbis (FFmpeg) | – | −14,1 LUFS, −1,2 dBFS Peak, 141 kbit/s |
+| Zeit: eine Master-Messung / „Drive auf Ziel“ (Browser, ganzer Song) | 5,3 s / 5,2 s | 6,4 s / 6,5 s (Codex-Stand: 27,6 s / 44 s) |
+| WAV mit Größe 0xFFFFFFFF, Größe 0, abgeschnitten, NaN-Floats, 5.1 | teils leer oder still verworfen | alle geladen bzw. bereinigt, mit Hinweis |
+| Ungültige Einstellungsdatei | konnte Teile übernehmen | abgelehnt, nichts verändert |
+| Offline-Cache mit altem Studio-Cache und fremdem Cache „radio-v3“ | löschte beide | alter Studio-Cache entfernt, fremder bleibt, offline startet 1.6.2 |
+
+Gesamt: 56 von 56 DSP-Tests, 65 von 65 Browser-Tests. Die Codex-Prüfung vom 23.10.2026 hat zwei echte Fehler gefunden: die Rausch-Überschreitung und den Ersatz-Limiter. Beide sind behoben.

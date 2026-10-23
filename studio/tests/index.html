@@ -187,6 +187,28 @@ async function oggExport() {
   res.push(['OGG Vorbis: Encoder lädt nach und erzeugt eine gültige Ogg-Datei', head === 'OggS' && blob.size > 5000, blob ? head + ', ' + blob.size + ' Bytes' : err]);
   return res;
 },
+async function robustImport() {
+  const res = [];
+  const mk = (sizeField, frames, ch = 2, opts = {}) => { const bps = opts.float ? 4 : 2, n = frames * ch * bps, b = new ArrayBuffer(44 + n), v = new DataView(b), w = (o, s) => { for (let i = 0; i < 4; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, 'RIFF'); v.setUint32(4, 36 + n, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, opts.float ? 3 : 1, true); v.setUint16(22, ch, true); v.setUint32(24, 48000, true); v.setUint32(28, 48000 * ch * bps, true); v.setUint16(32, ch * bps, true); v.setUint16(34, bps * 8, true); w(36, 'data'); v.setUint32(40, sizeField === null ? n : sizeField, true);
+    for (let i = 0; i < frames * ch; i++) { const x = 0.25 * Math.sin(i / 20); if (opts.float) v.setFloat32(44 + i * 4, (opts.nan && i === 100) ? NaN : x, true); else v.setInt16(44 + i * 2, Math.round(x * 32767), true); }
+    return opts.cut ? b.slice(0, b.byteLength - opts.cut) : b; };
+  const t = (ab) => { try { const r = parseWav(ab); return { ok: true, n: r.L.length, notes: r.notes || [], r }; } catch (e) { return { ok: false, err: e.message }; } };
+  let r = t(mk(null, 48000)); res.push(['WAV: normale Datei ohne Hinweis', r.ok && r.n === 48000 && !r.notes.length, r.ok ? r.n + ' Frames' : r.err]);
+  r = t(mk(0xFFFFFFFF, 48000)); res.push(['WAV: Streaming-Kopf (Größe 0xFFFFFFFF) wird bis Dateiende gelesen', r.ok && r.n === 48000 && r.notes.length === 1, r.ok ? r.n + ' Frames · ' + r.notes[0] : r.err]);
+  r = t(mk(0, 48000)); res.push(['WAV: Größe 0 im Kopf wird bis Dateiende gelesen (vorher leer)', r.ok && r.n === 48000, r.ok ? r.n + ' Frames' : r.err]);
+  r = t(mk(null, 48000, 2, { cut: 1001 })); res.push(['WAV: abgeschnittene Datei lädt mit Hinweis', r.ok && r.n === 47749 && /unvollständig/.test(r.notes[0] || ''), r.ok ? r.n + ' Frames · ' + r.notes[0] : r.err]);
+  r = t(mk(null, 4800, 2, { float: true, nan: true })); res.push(['WAV: ungültige Float-Samples werden zu Stille, mit Hinweis', r.ok && r.r.L.every(Number.isFinite) && r.r.R.every(Number.isFinite) && /ungültige/.test(r.notes[0] || ''), r.ok ? (r.notes[0] || 'kein Hinweis') : r.err]);
+  r = t(mk(null, 4800, 6)); res.push(['WAV: 5.1-Datei wird auf Stereo heruntergemischt', r.ok && r.n === 4800 && /heruntergemischt/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]);
+  const before = P, bad = clone(P); bad.eq.bands[0].f = 'abc';
+  let threw = false; try { validateSettings(bad); } catch (e) { threw = true; }
+  res.push(['Einstellungen: ungültige Datei wird abgelehnt und ändert nichts', threw && P === before, threw ? 'abgelehnt' : 'angenommen']);
+  let okAll = true; for (const k in PRESETS) { try { validateSettings(PRESETS[k].p); } catch (e) { okAll = false; } }
+  res.push(['Einstellungen: alle Presets und Grundeinstellungen sind gültig', okAll && !!validateSettings(DEFAULT), okAll ? Object.keys(PRESETS).length + ' Presets' : 'Fehler']);
+  setTargetValue(-12); res.push(['Lautheitsziel: eigener Wert (−12 LUFS) bleibt wählbar', $('#targetSel').value === '-12', $('#targetSel').value]); setTargetValue(-14);
+  res.push(['Version 1.6.2 wird angezeigt', /1\.6\.2/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
+  return res;
+},
 async function aiKeyStorage() {
   const res = []; try { localStorage.removeItem('dsms.aikey'); } catch (e) {}
   document.querySelector('#aiRemember').checked = false; document.querySelector('#aiKey').value = 'sk-ant-test-0000';

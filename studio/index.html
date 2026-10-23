@@ -258,7 +258,7 @@ details summary{cursor:pointer;font-size:13px;color:var(--muted)}
 .artlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
 .artlist li{display:grid;grid-template-columns:auto minmax(0,1fr) 90px auto;gap:10px;align-items:center;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px}
 .artlist .ty{font:600 10px var(--f-display);letter-spacing:.12em;text-transform:uppercase;padding:2px 6px;border-radius:3px}
-.ty.line{background:#5FD0C8;color:#04201e}.ty.carpet{background:#8FA3B8;color:#0b1520}.cleanbox{border-top:1px solid var(--line);padding-top:12px;margin-top:4px;display:flex;flex-direction:column;gap:10px}.cleanbox h3{margin:0}.artlist.cleanlist{max-height:none}.artlist.cleanlist li{grid-template-columns:auto auto minmax(0,1fr) 90px auto}.artlist input[type=checkbox]{margin:0}@media (max-width:640px){ .artlist.cleanlist li{grid-template-columns:auto auto minmax(0,1fr) auto} }.ty.shimmer{background:var(--gold);color:#1b1205}.ty.warble{background:var(--ref);color:#160d24}.ty.click{background:var(--hot);color:#1a0503}
+.hearcard{margin-top:12px;display:flex;flex-direction:column;gap:10px}.hearcard h3{display:flex;justify-content:space-between;align-items:baseline;margin:0}.hearhead{display:flex;gap:16px;align-items:center}.hearscore{min-width:92px;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--field)}.hearscore b{display:block;font:600 34px var(--f-display);line-height:1.1}.hearscore small{color:var(--muted)}.hearhead h4{margin:0 0 4px;font:600 15px var(--f-display);letter-spacing:.08em;text-transform:uppercase}.heareq{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.heareq div{background:var(--field);border:1px solid var(--line);border-radius:6px;padding:6px;text-align:center;font-size:12px}.heareq b{display:block;font:600 14px var(--f-mono)}.hearmap canvas{width:100%;height:200px;display:block;cursor:pointer}@media (max-width:640px){.heareq{grid-template-columns:repeat(3,minmax(0,1fr))}.hearhead{align-items:flex-start}}.notchbox{margin-top:10px;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}.notchbox .row{align-items:center;gap:10px}.notchbox .nh{font:600 12px var(--f-display);letter-spacing:.14em;text-transform:uppercase}.notchbox .hint{flex:1 1 260px;margin:0}.notches{display:flex;flex-wrap:wrap;gap:8px}.notch{display:flex;align-items:center;gap:8px;background:var(--field);border:1px solid var(--line);border-left:3px solid #FF6B8A;border-radius:6px;padding:6px 8px;font-size:13px}.notch label{display:flex;align-items:center;gap:4px;color:var(--muted)}.notch input[type=number]{width:78px}.notch button{min-height:28px;padding:0 9px}.artlist .actbtns{display:flex;gap:6px}.ty.line{background:#5FD0C8;color:#04201e}.ty.carpet{background:#8FA3B8;color:#0b1520}.cleanbox{border-top:1px solid var(--line);padding-top:12px;margin-top:4px;display:flex;flex-direction:column;gap:10px}.cleanbox h3{margin:0}.artlist.cleanlist{max-height:none}.artlist.cleanlist li{grid-template-columns:auto auto minmax(0,1fr) 90px auto}.artlist input[type=checkbox]{margin:0}@media (max-width:640px){ .artlist.cleanlist li{grid-template-columns:auto auto minmax(0,1fr) auto} }.ty.shimmer{background:var(--gold);color:#1b1205}.ty.warble{background:var(--ref);color:#160d24}.ty.click{background:var(--hot);color:#1a0503}
 .artlist .bar{height:6px;border-radius:3px;background:#1c2a36;overflow:hidden}.artlist .bar i{display:block;height:100%;background:var(--gold)}
 .artlist button{min-height:28px;padding:0 9px}
 .stars{display:flex;gap:6px}
@@ -320,7 +320,7 @@ a.btn{text-decoration:none}
 <div class="app" id="app">
   <div class="backdrop" aria-hidden="true"></div>
   <header class="top">
-    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.8.2</span></small></div></div>
+    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.9.0</span></small></div></div>
     <div class="filebox">
       <button class="primary" id="btnOpen" title="Audiodatei öffnen (WAV, MP3, FLAC, M4A)">Song öffnen</button>
       <input type="file" id="fileIn" accept="audio/*,.wav,.mp3,.flac,.m4a,.aac,.ogg" hidden>
@@ -464,6 +464,10 @@ a.btn{text-decoration:none}
         </div>
         <div class="graph"><canvas id="eqCanvas"></canvas></div>
         <div class="bands" id="eqBands"></div>
+        <div class="notchbox">
+          <div class="row"><b class="nh">Kerben</b><span class="hint">Sehr schmale Schnitte gegen einzelne Störtöne, zum Beispiel aus Clean Song. Sie wirken im ganzen Song, auch dort, wo Musik auf dieser Frequenz spielt.</span><button id="btnNotchAdd">Kerbe hinzufügen</button></div>
+          <div class="notches" id="eqNotches"></div>
+        </div>
       </div>
 
       <div class="panel" data-panel="comp" hidden>
@@ -596,6 +600,22 @@ a.btn{text-decoration:none}
         <div class="graph"><canvas id="histCanvas"></canvas></div>
         <div class="legend"><span><i style="background:var(--orig)"></i>Original</span><span><i style="background:var(--amber)"></i>Master</span><span class="muted">Kurzzeit-Lautheit (LUFS, 3 s) über die Songdauer</span></div>
         <ul class="notes" id="notes"></ul>
+        <div class="card hearcard" id="hearCard">
+          <h3><span>Hör-Vergleich</span><span class="mono small muted">Näherung an PEAQ und ViSQOL</span></h3>
+          <p class="hint">Vergleicht zwei Fassungen über ein Modell des Gehörs: Was die Musik verdeckt, zählt nicht. Die Lautstärke wird vorher angeglichen, feste Klangfarben-Unterschiede (EQ) werden getrennt angezeigt. Übrig bleibt, was man als Veränderung oder Störung hört.</p>
+          <div class="row">
+            <label class="field" style="flex:1 1 260px"><span>Was vergleichen?</span>
+              <select id="hearMode"><option value="master">Original-Datei ↔ Master (alles)</option><option value="edit">Original-Datei ↔ Bearbeitung ohne Mastering (z. B. Clean Song)</option><option value="mastering">Bearbeitung ↔ Master (nur das Mastering)</option></select></label>
+            <button class="primary" id="btnHear">Vergleichen</button>
+          </div>
+          <div id="hearOut" hidden>
+            <div class="hearhead"><div class="hearscore"><b id="hearNum">–</b><small>von 5</small></div><div><h4 id="hearVerdict"></h4><p class="hint" id="hearText"></p></div></div>
+            <div class="heareq" id="hearEq"></div>
+            <div class="graph hearmap"><canvas id="hearCanvas"></canvas></div>
+            <div class="legend"><span><i style="background:#F2C94C"></i>gerade hörbar</span><span><i style="background:#FF8A3D"></i>deutlich</span><span><i style="background:#FF4D6D"></i>stark</span><span class="muted">Zeit nach rechts, Frequenz nach oben. Antippen spielt ab dieser Stelle.</span></div>
+            <ul class="artlist" id="hearSpots"></ul>
+          </div>
+        </div>
       </div>
 
       <div class="panel" data-panel="game" hidden>
@@ -1486,6 +1506,77 @@ function cleanSong(L,R,sr,o){
   for(i=0;i<n;i++){ var m=Mo[i+N],s=So[i+N]; oL[i]=m+s; oR[i]=m-s; }
   return {L:oL,R:oR};
 }
+/* ---------- Hör-Vergleich: Näherung an PEAQ (ITU-R BS.1387) und ViSQOL ----------
+   Gehörmodell: STFT 2048 (Hann), Außen-/Mittelohr-Gewichtung (Terhardt), 32 Bänder im ERB-Abstand (50 Hz–16 kHz),
+   Erregung mit Frequenzspreizung (27 dB/Band nach unten, 12 dB/Band nach oben) und Nachverdeckung (≈ 30 ms),
+   Ruhehörschwelle bei Vollaussteuerung = 92 dB SPL. Feste Klangfarben-Unterschiede je Band werden gemessen,
+   berichtet und vor dem Vergleich ausgeglichen; verglichen werden Betragsspektren (phasenunabhängig).
+   Kennwerte: Rauschen-zu-Maske-Verhältnis (NMR) je Band und Zeit, Anteil hörbar gestörter Abschnitte,
+   NSIM-Ähnlichkeit der Gehör-Spektrogramme (wie ViSQOL). Daraus eine Zahl von 1 bis 5 (eigene Kalibrierung). */
+function hearBands(sr,N){ var nb=32,lo=50,hi=Math.min(16000,sr/2-500),e=function(f){return 21.4*Math.log10(1+0.00437*f);},ie=function(x){return (Math.pow(10,x/21.4)-1)/0.00437;};
+  var a=e(lo),b=e(hi),ed=[],cf=[],i,k; for(i=0;i<=nb;i++) ed.push(ie(a+(b-a)*i/nb)); for(i=0;i<nb;i++) cf.push(Math.sqrt(ed[i]*ed[i+1]));
+  var bin=new Int16Array(N/2+1).fill(-1); for(k=1;k<=N/2;k++){ var f=k*sr/N; if(f<ed[0]||f>=ed[nb]) continue; for(i=0;i<nb;i++) if(f<ed[i+1]){ bin[k]=i; break; } }
+  var w=new Float64Array(N/2+1); for(k=1;k<=N/2;k++){ var fk=Math.max(0.02,k*sr/N/1000); var A=-3.64*Math.pow(fk,-0.8)+6.5*Math.exp(-0.6*(fk-3.3)*(fk-3.3))-0.001*Math.pow(fk,3.6); w[k]=Math.pow(10,A/10); }
+  var thr=cf.map(function(f){ return Math.pow(10,0.4); }); // Hörschwelle nach der Ohr-Gewichtung: etwa 4 dB SPL in allen Bändern
+  return {nb:nb,cf:cf,ed:ed,bin:bin,w:w,thr:thr}; }
+function hearFrame(X,o,N,w,re,im,gain){ for(var i=0;i<N;i++){ var j=o+i; re[i]=(j>=0&&j<X.length?X[j]:0)*w[i]*gain; im[i]=0; } fft(re,im); }
+function hearCompare(rL,rR,dL,dR,sr,o){
+  o=o||{}; var N=sr>60000?4096:2048,hop=N/2,half=N/2,HB=hearBands(sr,N),nb=HB.nb,i,k,f,c,b;
+  var n=Math.min(rL.length,dL.length); if(n<N*8) return {error:'zu kurz'};
+  // Versatz suchen (±100 ms) per Kreuzkorrelation auf einem Ausschnitt aus der Mitte
+  var lag=0; if(o.align!==false){ var W=131072,maxLag=Math.round(sr*0.1); if(n>W+2*maxLag){ var st=Math.floor((n-W)/2),M2=W*2,ar=new Float64Array(M2),ai=new Float64Array(M2),br=new Float64Array(M2),bi=new Float64Array(M2);
+      for(i=0;i<W;i++){ ar[i]=rL[st+i]+rR[st+i]; br[i]=dL[st+i]+dR[st+i]; } fft(ar,ai); fft(br,bi);
+      for(k=0;k<M2;k++){ var xr=ar[k]*br[k]+ai[k]*bi[k],xi=ai[k]*br[k]-ar[k]*bi[k]; ar[k]=xr; ai[k]=-xi; } fft(ar,ai);
+      var best=-Infinity,bl=0; for(k=-maxLag;k<=maxLag;k++){ var v=ar[(k+M2)%M2]; if(v>best){best=v;bl=k;} } lag=-bl; } }
+  // Lautheit angleichen (integriert nach BS.1770), damit nur Klang und Störungen zählen
+  var Ir=loudness(rL,rR,sr).I,Id=loudness(dL,dR,sr).I,gdb=(isFinite(Ir)&&isFinite(Id))?Ir-Id:0,g=Math.pow(10,gdb/20);
+  var frames=Math.floor((n-N)/hop)+1,w=hannP(N,false),re=new Float64Array(N),im=new Float64Array(N),norm=Math.pow(10,92/10)/Math.pow(N*0.25,2)*2;
+  var X=[rL,rR,dL,dR],P=X.map(function(){ return new Float32Array(frames*nb); });
+  // Durchgang 1: Bandleistungen (Ohr-gewichtet, dB SPL-Skala)
+  for(c=0;c<4;c++){ var gn=c<2?1:g,off=c<2?0:lag; for(f=0;f<frames;f++){ hearFrame(X[c],f*hop+off,N,w,re,im,gn);
+      for(k=1;k<=half;k++){ b=HB.bin[k]; if(b>=0) P[c][f*nb+b]+=(re[k]*re[k]+im[k]*im[k])*norm*HB.w[k]; } } }
+  var act=new Uint8Array(frames),nAct=0; for(f=0;f<frames;f++){ var on=0; for(b=0;b<nb&&!on;b++) if(P[0][f*nb+b]+P[1][f*nb+b]>HB.thr[b]*20) on=1; act[f]=on; nAct+=on; }
+  if(nAct<8) return {error:'zu leise'};
+  // feste Klangfarben-Unterschiede je Band (Median der dB-Differenz)
+  var eqDb=new Float64Array(nb),tmp=[];
+  for(b=0;b<nb;b++){ tmp.length=0; for(f=0;f<frames;f++) if(act[f]){ var pr=P[0][f*nb+b]+P[1][f*nb+b],pd=P[2][f*nb+b]+P[3][f*nb+b]; if(pr>HB.thr[b]*100&&pd>HB.thr[b]*100) tmp.push(10*Math.log10(pd/pr)); }
+    tmp.sort(function(x,y){return x-y;}); eqDb[b]=tmp.length>20?tmp[tmp.length>>1]:0; }
+  var compA=new Float64Array(half+1),compP=new Float64Array(nb); for(k=1;k<=half;k++){ b=HB.bin[k]; compA[k]=b>=0?Math.pow(10,-eqDb[b]/20):1; } for(b=0;b<nb;b++) compP[b]=Math.pow(10,-eqDb[b]/10);
+  // Durchgang 2: Rauschen (Betragsdifferenz) gegen Maske (gespreizte Erregung der Referenz), Gehör-Spektrogramme für NSIM
+  var spDn=Math.pow(10,-27/10),spUp=Math.pow(10,-12/10),tau=Math.exp(-hop/sr/0.03),mOff=Math.pow(10,-4/10);
+  function spread(src,dst,prev){ var x; for(x=0;x<nb;x++) dst[x]=src[x]; for(x=1;x<nb;x++) if(dst[x-1]*spUp>dst[x]) dst[x]=dst[x-1]*spUp; for(x=nb-2;x>=0;x--) if(dst[x+1]*spDn>dst[x]) dst[x]=dst[x+1]*spDn;
+    for(x=0;x<nb;x++){ var dec=prev[x]*tau; if(dec>dst[x]) dst[x]=dec; prev[x]=dst[x]; } }
+  var nmr=new Float32Array(frames*nb).fill(-60),sR=[new Float32Array(frames*nb),new Float32Array(frames*nb)],sD=[new Float32Array(frames*nb),new Float32Array(frames*nb)];
+  var re2=new Float64Array(N),im2=new Float64Array(N),noise=new Float64Array(nb),src=new Float64Array(nb),Er=new Float64Array(nb),Ed=new Float64Array(nb);
+  var prevR=[new Float64Array(nb),new Float64Array(nb)],prevD=[new Float64Array(nb),new Float64Array(nb)],nmrSum=0,nmrCnt=0,distFrames=0;
+  for(f=0;f<frames;f++){ var fmax=-99;
+    for(c=0;c<2;c++){ hearFrame(X[c],f*hop,N,w,re,im,1); hearFrame(X[c+2],f*hop+lag,N,w,re2,im2,g);
+      for(b=0;b<nb;b++) noise[b]=0;
+      for(k=1;k<=half;k++){ b=HB.bin[k]; if(b<0) continue; var mr=Math.sqrt((re[k]*re[k]+im[k]*im[k])*norm*HB.w[k]),md=Math.sqrt((re2[k]*re2[k]+im2[k]*im2[k])*norm*HB.w[k])*compA[k],dm=md-mr; noise[b]+=dm*dm; }
+      for(b=0;b<nb;b++) src[b]=P[c][f*nb+b]; spread(src,Er,prevR[c]);
+      for(b=0;b<nb;b++) src[b]=P[c+2][f*nb+b]*compP[b]; spread(src,Ed,prevD[c]);
+      for(b=0;b<nb;b++){ var idx=f*nb+b,mask=Math.max(Er[b]*mOff,HB.thr[b]),r=noise[b]/mask,rd=10*Math.log10(r+1e-9);
+        if(rd>nmr[idx]) nmr[idx]=rd; if(rd>fmax) fmax=rd; if(act[f]){ nmrSum+=r; nmrCnt++; }
+        sR[c][idx]=10*Math.log10(Math.max(Er[b],HB.thr[b])/HB.thr[b]); sD[c][idx]=10*Math.log10(Math.max(Ed[b],HB.thr[b])/HB.thr[b]); } }
+    if(act[f]&&fmax>1.5) distFrames++; }
+  // NSIM wie ViSQOL: 3×3-Fenster auf den Gehör-Spektrogrammen, je Band gemittelt
+  var Lr=1; for(i=0;i<sR[0].length;i++) if(sR[0][i]>Lr) Lr=sR[0][i]; var C1=Math.pow(0.01*Lr,2),C2=Math.pow(0.03*Lr,2)/2;
+  var bandSim=new Float64Array(nb),bandCnt=new Float64Array(nb);
+  for(c=0;c<2;c++) for(f=1;f<frames-1;f++){ if(!act[f]) continue; for(b=1;b<nb-1;b++){ var s1=0,s2=0,s11=0,s22=0,s12=0;
+      for(var df=-1;df<=1;df++) for(var dbb=-1;dbb<=1;dbb++){ var q=(f+df)*nb+b+dbb,u=sR[c][q],v2=sD[c][q]; s1+=u; s2+=v2; s11+=u*u; s22+=v2*v2; s12+=u*v2; }
+      var m1=s1/9,m2=s2/9,v1=Math.max(0,s11/9-m1*m1),vv2=Math.max(0,s22/9-m2*m2),cv=s12/9-m1*m2;
+      bandSim[b]+=((2*m1*m2+C1)/(m1*m1+m2*m2+C1))*((cv+C2)/(Math.sqrt(v1*vv2)+C2)); bandCnt[b]++; } }
+  var nsim=0,nsc=0; for(b=1;b<nb-1;b++) if(bandCnt[b]){ bandSim[b]/=bandCnt[b]; nsim+=bandSim[b]; nsc++; } nsim=nsc?nsim/nsc:1;
+  var totNMR=10*Math.log10(nmrSum/Math.max(1,nmrCnt)+1e-12),relDist=distFrames/nAct;
+  // Karte: 0,5-s-Spalten, je Band der höchste NMR-Wert; deutlichste Stellen
+  var col=Math.max(1,Math.round(0.5*sr/hop)),nc=Math.ceil(frames/col),map=new Float32Array(nc*nb).fill(-60);
+  for(f=0;f<frames;f++){ var cc=Math.floor(f/col); for(b=0;b<nb;b++){ var vv=nmr[f*nb+b]; if(vv>map[cc*nb+b]) map[cc*nb+b]=vv; } }
+  var spots=[]; for(var q2=0;q2<nc;q2++){ var s3=0,bb=0,mx2=-99; for(b=0;b<nb;b++){ var m3=map[q2*nb+b]; if(m3>0) s3+=m3; if(m3>mx2){mx2=m3;bb=b;} } if(s3>0) spots.push({t:q2*col*hop/sr,score:s3,f:Math.round(HB.cf[bb]),nmr:Math.round(mx2*10)/10}); }
+  spots.sort(function(x,y){return y.score-x.score;}); var picked=[]; spots.forEach(function(s4){ if(picked.length<6&&picked.every(function(p2){return Math.abs(p2.t-s4.t)>3;})) picked.push(s4); });
+  return {mos:hearMos(totNMR,relDist,nsim),nsim:nsim,totNMR:totNMR,relDist:relDist,lagMs:lag/sr*1000,gainDb:gdb,eqDb:Array.prototype.slice.call(eqDb),cf:HB.cf,map:map,mapCols:nc,mapBands:nb,colSec:col*hop/sr,spots:picked}; }
+/* Zahl 1–5 (5 = kein Unterschied hörbar). Eigene Kalibrierung an MP3 64–320 kbit/s, Vorbis q0–q8, Rauschen, Tiefpass,
+   Bit-Reduktion und Clipping auf drei Songs, ausgerichtet an üblichen Hörtest-Ergebnissen. Kein zertifizierter PEAQ/ViSQOL-Wert. */
+function hearMos(totNMR,relDist,nsim){ var x=0.06*(Math.max(-60,totNMR)+20)+1.4*relDist+6*(1-nsim); var m=5-4/(1+Math.exp(-2*(x-1.6))); return Math.max(1,Math.min(5,m)); }
 function db2gW(d){ return Math.pow(10,d/20); }
 function drumPreview(sr,o){ var k=o.kick||{},s2=o.snare||{}; return {kick:k.sample?resampleLin(k.sample,k.sampleSr||sr,sr):synthKick(sr,o.kickHz||50,k.len!=null?k.len:0.4,k.preset), snare:s2.sample?resampleLin(s2.sample,s2.sampleSr||sr,sr):synthSnare(sr,o.snareHz||200,s2.tone!=null?s2.tone:0.5,s2.len!=null?s2.len:0.4,s2.preset)}; }
 function handle(d){
@@ -1496,6 +1587,7 @@ function handle(d){
   if(d.cmd==='drumrepair'){ var rr=drumRepair(L,R,sr,o); return {result:rr,transfer:[rr.L.buffer,rr.R.buffer]}; }
   if(d.cmd==='drumpreview'){ var pv=drumPreview(sr,o); return {result:pv,transfer:[pv.kick.buffer,pv.snare.buffer]}; }
   if(d.cmd==='smooth'){ var sres=smoothHF(L,R,sr,o); return {result:sres,transfer:[sres.L.buffer,sres.R.buffer]}; }
+  if(d.cmd==='hearcmp'){ var hc=hearCompare(L,R,d.L2,d.R2,sr,o); return {result:hc,transfer:hc.map?[hc.map.buffer]:[]}; }
   if(d.cmd==='cleanscan'){ var cs=cleanScan(L,R,sr); return {result:cs,transfer:[]}; }
   if(d.cmd==='clean'){ var c1=cleanSong(L,R,sr,o); if(o.smooth&&(o.smooth.strength>0||(o.smooth.clicks&&o.smooth.clicks.length))) c1=smoothHF(c1.L,c1.R,sr,o.smooth); return {result:c1,transfer:[c1.L.buffer,c1.R.buffer]}; }
   if(d.lim){ res.grMin=applyLim(L,R,sr,d.lim); }
@@ -1546,7 +1638,8 @@ const DEFAULT = {
     { on: true, type: 'peaking', f: 1400, g: 0, q: 1 },
     { on: true, type: 'peaking', f: 3500, g: 0, q: 1 },
     { on: true, type: 'highshelf', f: 9000, g: 0, q: 0.71 },
-    { on: false, type: 'lowpass', f: 19000, g: 0, q: 0.71 } ] },
+    { on: false, type: 'lowpass', f: 19000, g: 0, q: 0.71 } ],
+    notch: Array.from({ length: 6 }, () => ({ on: false, f: 1000, q: 30 })) },
   comp: { on: false, x1: 160, x2: 3200, bands: [
     /* Schwellen für den eigenen Kompressor (Spitzenpegel-Erkennung) kalibriert: gleiche Wirkung wie die früheren −20/−20/−22 dB im Browser-Kompressor */
     { th: -15, ratio: 2, att: 30, rel: 220, gain: 0 },
@@ -1594,6 +1687,8 @@ function validateSettings(s) {
   if (!Array.isArray(s.eq.bands) || s.eq.bands.length !== 8) throw new Error('Acht EQ-Bänder erwartet');
   p.eq.bands = s.eq.bands.map((b, i) => { object(b, 'EQ-Band ' + (i + 1)); if (!Object.prototype.hasOwnProperty.call(TYPE_NAMES, b.type)) throw new Error('Ungültiger EQ-Filtertyp');
     return { on: flag(b.on, 'EQ-Band'), type: b.type, f: num(b.f, 10, 96000, 'EQ-Frequenz'), g: num(b.g, -24, 24, 'EQ-Pegel'), q: num(b.q, 0.1, 20, 'EQ-Q') }; });
+  if (s.eq.notch !== undefined) { if (!Array.isArray(s.eq.notch) || s.eq.notch.length > 6) throw new Error('Höchstens sechs Kerben erwartet');
+    s.eq.notch.forEach((n, i) => { object(n, 'Kerbe ' + (i + 1)); p.eq.notch[i] = { on: flag(n.on, 'Kerbe'), f: num(n.f, 20, 24000, 'Kerben-Frequenz'), q: num(n.q, 2, 300, 'Kerben-Güte') }; }); }
   if (s.comp !== undefined) { const c = object(s.comp, 'Kompressor');
     if (!Array.isArray(c.bands) || c.bands.length !== 3) throw new Error('Drei Kompressor-Bänder erwartet');
     p.comp = { on: flag(c.on, 'Kompressor'), x1: num(c.x1, 40, 1000, 'Weiche 1'), x2: num(c.x2, 500, 12000, 'Weiche 2'), bands: c.bands.map(b => { object(b, 'Kompressor-Band');
@@ -1632,7 +1727,7 @@ const DSP = (() => {
   return function run(msg) {
     if (worker) {
       return new Promise((res, rej) => { const id = ++seq; pending.set(id, { res, rej }); msg.id = id;
-        const tr = [msg.L.buffer, msg.R.buffer]; worker.postMessage(msg, tr); });
+        const tr = [msg.L.buffer, msg.R.buffer]; if (msg.L2) tr.push(msg.L2.buffer, msg.R2.buffer); worker.postMessage(msg, tr); });
     }
     return new Promise((res, rej) => setTimeout(() => { try { res(getInline().handle(msg).result); } catch (e) { rej(e); } }, 10));
   };
@@ -1642,7 +1737,7 @@ const DSP = (() => {
 function setQ(f, q) { f.Q.value = (f.type === 'lowpass' || f.type === 'highpass') ? 20 * Math.log10(q) : q; }
 const satActive = p => !!(p.sat.on && p.sat.mix > 0);
 function structKey(p) {
-  return JSON.stringify([p.eq.on, p.eq.bands.map(b => b.on), p.comp.on, satActive(p), p.stereo.on, p.stereo.bassMono, p.lim.on]);
+  return JSON.stringify([p.eq.on, p.eq.bands.map(b => b.on), (p.eq.notch || []).map(n => n.on), p.comp.on, satActive(p), p.stereo.on, p.stereo.bassMono, p.lim.on]);
 }
 /* Sättigungskennlinie. Der WaveShaper bildet Eingänge im Bereich −1…+1 ab; damit auch Pegel über 0 dBFS
    (nach EQ-Anhebungen) nicht hart abgeschnitten werden, wird vorher mit SAT_PRE (−12 dB) abgesenkt und die
@@ -1666,7 +1761,7 @@ function buildChain(ctx, P0, opt = {}) {
   const rt = !!opt.realtime;
   const G = () => ctx.createGain(), BQ = t => { const f = ctx.createBiquadFilter(); f.type = t; return f; };
   const input = G(), inGain = G(); input.connect(inGain);
-  const eq = { in: G(), out: G(), f: Array.from({ length: 8 }, () => BQ('peaking')) };
+  const eq = { in: G(), out: G(), f: Array.from({ length: 8 }, () => BQ('peaking')), n: Array.from({ length: 6 }, () => BQ('notch')) };
   const cp = { in: G(), out: G(), lp1a: BQ('lowpass'), lp1b: BQ('lowpass'), ap2: BQ('allpass'), hp1a: BQ('highpass'), hp1b: BQ('highpass'),
     lp2a: BQ('lowpass'), lp2b: BQ('lowpass'), hp2a: BQ('highpass'), hp2b: BQ('highpass'), c: [0, 1, 2].map(i => makeComp(ctx, opt.worklet, P0.comp.bands[i])), mk: [G(), G(), G()] };
   const st = { in: G(), out: G(), pre: G(), sh: ctx.createWaveShaper(), trim: G(), key: '' };
@@ -1705,8 +1800,8 @@ function buildChain(ctx, P0, opt = {}) {
   let curKey = null;
   function wire(p) {
     // EQ
-    eq.in.disconnect(); eq.f.forEach(f => f.disconnect());
-    const act = p.eq.on ? eq.f.filter((f, i) => p.eq.bands[i].on) : [];
+    eq.in.disconnect(); eq.f.forEach(f => f.disconnect()); eq.n.forEach(f => f.disconnect());
+    const act = p.eq.on ? eq.f.filter((f, i) => p.eq.bands[i].on).concat(eq.n.filter((f, i) => p.eq.notch && p.eq.notch[i] && p.eq.notch[i].on)) : [];
     let n = eq.in; act.forEach(f => { n.connect(f); n = f; }); n.connect(eq.out);
     // Kompressor
     cp.in.disconnect(); ['lp1a', 'lp1b', 'ap2', 'hp1a', 'hp1b', 'lp2a', 'lp2b', 'hp2a', 'hp2b'].forEach(k => cp[k].disconnect());
@@ -1744,6 +1839,7 @@ function buildChain(ctx, P0, opt = {}) {
     set(inGain.gain, db2g(p.inputGain));
     p.eq.bands.forEach((b, i) => { const f = eq.f[i]; if (f.type !== b.type) f.type = b.type;
       set(f.frequency, clamp(b.f, 10, nyq)); f.gain.value = b.g; setQ(f, b.q); });
+    (p.eq.notch || []).forEach((n, i) => { const f = eq.n[i]; f.frequency.value = clamp(n.f, 20, nyq); f.Q.value = clamp(n.q, 2, 300); });
     const x1 = clamp(p.comp.x1, 40, 1000), x2 = clamp(Math.max(p.comp.x2, x1 * 1.6), 500, 12000);
     ['lp1a', 'lp1b', 'hp1a', 'hp1b'].forEach(k => { cp[k].frequency.value = x1; setQ(cp[k], Math.SQRT1_2); });
     ['lp2a', 'lp2b', 'hp2a', 'hp2b'].forEach(k => { cp[k].frequency.value = x2; setQ(cp[k], Math.SQRT1_2); });
@@ -2321,7 +2417,7 @@ function onParam() {
   S.pver++; updateDots(); scheduleMeasure(); drawEqSoon();
   clearTimeout(saveT); saveT = setTimeout(() => store('params', P), 400);
 }
-function refreshAll() { CTLS.forEach(c => c.refresh()); refreshBands(); updateDots(); if (S.chain) S.chain.apply(P); drawEqSoon(); }
+function refreshAll() { CTLS.forEach(c => c.refresh()); refreshBands(); renderNotches(); updateDots(); if (S.chain) S.chain.apply(P); drawEqSoon(); }
 
 /* ============================ EQ ============================ */
 const eqBandsEl = $('#eqBands'); const bandEls = [];
@@ -2350,6 +2446,24 @@ function refreshBands() {
     el.querySelector('[data-k="q"]').disabled = (b.type === 'lowshelf' || b.type === 'highshelf');
     el.classList.toggle('off', !b.on); el.classList.toggle('sel', S.selBand === i); });
 }
+/* Kerben: schmale Notch-Filter gegen einzelne Störtöne */
+function renderNotches() {
+  const box = $('#eqNotches'); box.innerHTML = '';
+  P.eq.notch.forEach((n, i) => { if (!n.on) return;
+    const el = document.createElement('div'); el.className = 'notch';
+    el.innerHTML = '<b>Kerbe</b><label>Hz<input type="number" min="20" max="24000" step="0.1" data-k="f"></label><label>Güte<input type="number" min="2" max="300" step="1" data-k="q"></label><span class="mono small muted"></span><button class="ghost" aria-label="Kerbe entfernen">Entfernen</button>';
+    const bw = () => el.querySelector('.mono').textContent = '≈ ' + nf(n.f / n.q, 0) + ' Hz breit';
+    el.querySelectorAll('input').forEach(inp => { const k = inp.dataset.k; inp.value = k === 'f' ? Math.round(n.f * 10) / 10 : Math.round(n.q);
+      inp.addEventListener('change', () => { const v = parseFloat(String(inp.value).replace(',', '.')); if (isFinite(v)) n[k] = k === 'f' ? clamp(v, 20, 24000) : clamp(v, 2, 300); inp.value = k === 'f' ? Math.round(n.f * 10) / 10 : Math.round(n.q); bw(); onParam(); }); });
+    el.querySelector('button').addEventListener('click', () => { n.on = false; renderNotches(); onParam(); });
+    bw(); box.appendChild(el); });
+  if (!box.children.length) box.innerHTML = '<span class="hint" style="margin:0">Keine Kerben gesetzt.</span>';
+}
+function addNotch(f, q) {
+  const slot = P.eq.notch.find(n => !n.on); if (!slot) { status('Alle sechs Kerben sind belegt. Entferne zuerst eine im Equalizer.', 'warn'); return false; }
+  slot.on = true; slot.f = f; slot.q = q; if (!P.eq.on) P.eq.on = true; refreshAll(); onParam(); return true;
+}
+$('#btnNotchAdd').addEventListener('click', () => { if (addNotch(1000, 30)) status('Kerbe bei 1000 Hz angelegt. Frequenz und Güte unten im Equalizer einstellen.', 'ok', 5000); });
 const EQF = (() => { const n = 300, a = new Float32Array(n); for (let i = 0; i < n; i++) a[i] = 20 * Math.pow(1000, i / (n - 1)); return a; })();
 const fx = (f, w) => Math.log(f / 20) / Math.log(1000) * w, xf = (x, w) => 20 * Math.pow(1000, x / w);
 const EQR = 15;
@@ -2383,6 +2497,10 @@ function drawEq() {
   g.beginPath(); for (let k = 0; k < EQF.length; k++) { const x = fx(EQF[k], w), y = h / 2 - clamp(g2db(mag[k]), -EQR - 3, EQR + 3) / EQR * (h / 2 - 12); k ? g.lineTo(x, y) : g.moveTo(x, y); }
   g.strokeStyle = P.eq.on ? '#9ADFFF' : '#6b727c'; g.lineWidth = 2; g.stroke();
   g.lineTo(w, h / 2); g.lineTo(0, h / 2); g.closePath(); g.fillStyle = P.eq.on ? 'rgba(154,223,255,.07)' : 'rgba(0,0,0,0)'; g.fill();
+  // Kerben: so schmal, dass die Kurve sie nicht auflöst, deshalb als Marke
+  if (P.eq.on) P.eq.notch.forEach(n => { if (!n.on) return; const x = Math.round(fx(clamp(n.f, 20, 20000), w)) + 0.5;
+    g.fillStyle = 'rgba(255,107,138,.85)'; g.fillRect(x - 0.5, 14, 1.5, h - 30); g.beginPath(); g.moveTo(x - 6, h - 16); g.lineTo(x + 6, h - 16); g.lineTo(x, h - 6); g.closePath(); g.fill();
+    g.font = '600 10px JetBrains Mono, monospace'; g.textBaseline = 'top'; g.fillText(Math.round(n.f) + ' Hz', x + 4, 34); });
   // Griffe
   P.eq.bands.forEach((b, i) => { const x = fx(clamp(b.f, 20, 20000), w), y = bandY(b, h), r = S.selBand === i ? 9 : 7;
     g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fillStyle = b.on && P.eq.on ? BAND_COLORS[i] : '#060B0F'; g.fill();
@@ -2457,7 +2575,7 @@ function compTitles() { const t = ['Bass < ' + fmtHz(P.comp.x1) + 'Hz', 'Mitten'
 
 /* ============================ Tabs ============================ */
 function showTab(t) { $$('.tabs [role=tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === t ? 'true' : 'false'));
-  $$('.panel').forEach(p => p.hidden = p.dataset.panel !== t); store('tab', t); drawEqSoon(); if (t === 'ref') drawSpec(); if (t === 'ana') renderAnalysis(); }
+  $$('.panel').forEach(p => p.hidden = p.dataset.panel !== t); store('tab', t); drawEqSoon(); if (t === 'ref') drawSpec(); if (t === 'ana') { renderAnalysis(); if (typeof drawHear === 'function') drawHear(); } }
 $$('.tabs [role=tab]').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
 
 /* ============================ Meter ============================ */
@@ -2789,6 +2907,7 @@ function applyAI(s) {
   if (s.stereo) { p.stereo.on = s.stereo.on !== false; p.stereo.width = Math.round(num(s.stereo.width, 70, 140, 100)); p.stereo.bassMono = !!s.stereo.bassMono; p.stereo.monoFreq = Math.round(num(s.stereo.monoFreq, 60, 200, 120)); }
   if (s.lim) { p.lim.ceiling = r1(num(s.lim.ceiling, -3, -0.3, -1)); p.lim.release = Math.round(num(s.lim.release, 20, 400, 80)); }
   p.lim.on = true; p.lim.isp = true;
+  p.eq.notch = clone(P.eq.notch); // Kerben bleiben erhalten
   P = p; refreshAll(); onParam();
   const t = num(s.targetLufs, -18, -8, +$('#targetSel').value);
   return TARGETS.reduce((a, b) => Math.abs(b - t) < Math.abs(a - t) ? b : a);
@@ -2946,11 +3065,13 @@ function renderClean() {
   $('#cleanSummary').textContent = txt;
   C.lines.forEach(l => {
     const li = document.createElement('li'), k = lineKey(l), sc = Math.min(100, Math.round(l.db / 30 * 100));
-    li.innerHTML = '<input type="checkbox" aria-label="Entfernen"><span class="ty line">Störton</span><span class="mono"></span><span class="bar"><i style="width:' + sc + '%"></i></span><button>Anhören</button>';
+    li.innerHTML = '<input type="checkbox" aria-label="Entfernen"><span class="ty line">Störton</span><span class="mono"></span><span class="bar"><i style="width:' + sc + '%"></i></span><span class="actbtns"><button>Anhören</button><button title="Als feste, sehr schmale Kerbe in den Equalizer legen (wirkt im Master, über den ganzen Song)">Kerbe</button></span>';
     const cb = li.querySelector('input'); cb.checked = !!S.cleanPick[k]; cb.addEventListener('change', () => { S.cleanPick[k] = cb.checked; });
     li.querySelector('.mono').textContent = Math.round(l.f) + ' Hz · +' + nf(l.db, 0) + ' dB · ' + l.pct + ' %';
     li.title = 'Steht ' + nf(l.db, 1) + ' dB über den Nachbarfrequenzen, in ' + l.pct + ' % des Songs, ' + (l.m && l.s ? 'in Mitte und Seite' : l.m ? 'in der Mitte' : 'nur in der Seite (Stereo-Anteil)') + (l.f >= 18000 ? '. Über 18 kHz, für die meisten Menschen unhörbar.' : '');
-    li.querySelector('button').addEventListener('click', () => cleanListen(Math.max(20, l.f - 25), l.f + 25, 'den Ton bei ' + Math.round(l.f) + ' Hz'));
+    const bts = li.querySelectorAll('button');
+    bts[0].addEventListener('click', () => cleanListen(Math.max(20, l.f - 25), l.f + 25, 'den Ton bei ' + Math.round(l.f) + ' Hz'));
+    bts[1].addEventListener('click', () => { const q = Math.round(clamp(l.f / 12, 20, 300)); if (addNotch(Math.round(l.f * 10) / 10, q)) status('Kerbe bei ' + Math.round(l.f) + ' Hz im Equalizer angelegt (Güte ' + q + ', etwa 12 Hz breit). Sie wirkt im Master. Hake den Ton hier ab, wenn du ihn nicht zusätzlich mit Clean Song entfernen willst.', 'ok', 8000); });
     list.appendChild(li);
   });
   if (C.carpet) { const li = document.createElement('li');
@@ -3028,7 +3149,7 @@ function feedbackText() {
   const lines = ['Feedback zum Deep Structure Mastering Studio', '', 'Bewertung: ' + (FB.stars ? '★'.repeat(FB.stars) + '☆'.repeat(5 - FB.stars) + ' (' + FB.stars + '/5)' : 'keine'),
     'Name: ' + ($('#fbName').value.trim() || '–'), 'Musik: ' + ($('#fbGenre').value.trim() || '–'), '', 'Was gefällt:', $('#fbGood').value.trim() || '–', '', 'Was stört / fehlt / unklar:', $('#fbBad').value.trim() || '–'];
   if ($('#fbTech').checked) {
-    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.8.2 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal'));
+    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.9.0 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal'));
     if (S.track && !S.track.demo) lines.push('Song: ' + S.track.name + ' · ' + (S.track.sr / 1000) + ' kHz · ' + fmtTime(duration(), 0));
     if (CHECK) lines.push('Song-Check: ' + CHECK.score + '/100 · ' + CHECK.findings.map(f => f.title).join(' | '));
     if (S.arts) lines.push('Artefakte: ' + S.arts.regions.length + ' Stellen, ' + S.arts.clicks.length + ' Knackser, Höhen bis ' + (S.arts.cutoff || '?') + ' Hz');
@@ -3601,6 +3722,70 @@ $('#drApply').addEventListener('click', drApply);
 $('#drAB').addEventListener('click', () => drSetAB(!DRS.ab));
 $('#drSens').addEventListener('change', () => { if (DRS.det) drScan(); });
 $$('.tabs [role=tab]').forEach(b => b.addEventListener('click', () => { if (b.dataset.tab === 'drums' && S.track && !drDetValid() && !DRS.busy) drScan(); }));
+/* ============================ Hör-Vergleich (Näherung an PEAQ/ViSQOL) ============================ */
+const HEAR = { res: null, ver: -1, mode: null, busy: false };
+const hearVerdict = m => m >= 4.75 ? ['Kein Unterschied hörbar', 'unhörbar'] : m >= 4 ? ['Hörbar, aber nicht störend', 'leicht'] : m >= 3 ? ['Leicht störend', 'deutlich'] : m >= 2 ? ['Störend', 'stark'] : ['Sehr störend', 'sehr stark'];
+async function hearSources(mode) {
+  const sr = S.track.sr, trk = S.track;
+  const master = async () => { const pre = await getPre(sr); const r = await DSP({ cmd: 'analyze', sr, L: pre.L.slice(), R: pre.R.slice(), lim: limParams(), opts: { returnAudio: true } }); return { L: r.L, R: r.R }; };
+  const fileOK = S.file && S.file.sr === sr && S.file.L.length === trk.L.length;
+  if (mode === 'edit') { if (!fileOK) throw new Error('Nach Schnitten ist die Originaldatei nicht mehr deckungsgleich. Vergleiche „Bearbeitung ↔ Master“.'); return [{ L: S.file.L, R: S.file.R }, { L: trk.L, R: trk.R }]; }
+  if (mode === 'mastering') return [{ L: trk.L, R: trk.R }, await master()];
+  if (!fileOK) throw new Error('Nach Schnitten ist die Originaldatei nicht mehr deckungsgleich. Vergleiche „Bearbeitung ↔ Master“.');
+  return [{ L: S.file.L, R: S.file.R }, await master()];
+}
+$('#btnHear').addEventListener('click', async () => {
+  if (!S.track || HEAR.busy) return; const mode = $('#hearMode').value, ver = S.ver;
+  if (mode === 'edit' && S.file && S.file.L === S.track.L) { status('Der Song ist noch unbearbeitet. Wende zuerst zum Beispiel Clean Song an.'); return; }
+  HEAR.busy = true; $('#btnHear').disabled = true; status('Hör-Vergleich läuft … bei einem ganzen Song einige Sekunden.', 'busy');
+  try {
+    const [a, b] = await hearSources(mode);
+    const r = await DSP({ cmd: 'hearcmp', sr: S.track.sr, L: a.L.slice(), R: a.R.slice(), L2: b.L.slice(), R2: b.R.slice() });
+    if (S.ver !== ver) { status('Der Song wurde inzwischen bearbeitet. Bitte neu vergleichen.', 'warn', 6000); return; }
+    if (r.error) throw new Error(r.error);
+    HEAR.res = r; HEAR.ver = ver; HEAR.mode = mode; renderHear(); status('Hör-Vergleich fertig.', 'ok', 2500);
+  } catch (e) { console.error(e); status('Hör-Vergleich nicht möglich: ' + e.message, 'err', 8000); }
+  finally { HEAR.busy = false; $('#btnHear').disabled = false; }
+});
+function renderHear() {
+  const r = HEAR.res; if (!r) return; $('#hearOut').hidden = false;
+  const [v] = hearVerdict(r.mos); $('#hearNum').textContent = nf(r.mos, 1); $('#hearVerdict').textContent = v;
+  const what = { master: 'Original-Datei und Master', edit: 'Original-Datei und Bearbeitung', mastering: 'Bearbeitung und Master' }[HEAR.mode];
+  $('#hearText').textContent = 'Verglichen: ' + what + '. In ' + Math.round(r.relDist * 100) + ' % der Zeit ist eine Veränderung über der Hörschwelle der Musik. ' +
+    (Math.abs(r.gainDb) > 0.3 ? 'Lautstärke vorher um ' + nf(Math.abs(r.gainDb), 1) + ' dB angeglichen. ' : '') +
+    (HEAR.mode === 'edit' ? 'Bei Reparaturen ist das gewollt: Die Karte zeigt, wo sie zu hören sind. ' : HEAR.mode !== 'edit' ? 'Beim Mastern ist eine hörbare Veränderung normal; entscheidend ist, ob sie besser klingt. ' : '') +
+    'Eine Näherung an PEAQ/ViSQOL, kein zertifizierter Normwert.';
+  const regs = [['Bass', 0, 150], ['Tiefmitten', 150, 500], ['Mitten', 500, 2000], ['Präsenz', 2000, 5000], ['Höhen', 5000, 10000], ['Luft', 10000, 24000]];
+  $('#hearEq').innerHTML = ''; regs.forEach(([nm, a, b]) => { const v2 = r.cf.map((c, i) => [c, r.eqDb[i]]).filter(x => x[0] >= a && x[0] < b).map(x => x[1]); const m = v2.length ? v2.reduce((s, x) => s + x, 0) / v2.length : 0;
+    const d = document.createElement('div'); d.innerHTML = '<b></b><span class="muted"></span>'; d.querySelector('b').textContent = (m > 0.05 ? '+' : '') + nf(m, 1) + ' dB'; d.querySelector('span').textContent = nm; d.title = 'Fester Klangfarben-Unterschied ' + nm; $('#hearEq').appendChild(d); });
+  const ul = $('#hearSpots'); ul.innerHTML = '';
+  r.spots.slice(0, 5).forEach(sp => { const li = document.createElement('li');
+    li.innerHTML = '<span class="ty warble">Stelle</span><span class="mono"></span><span class="bar"><i style="width:' + Math.min(100, Math.round(sp.nmr / 20 * 100)) + '%"></i></span><button>Anhören</button>';
+    li.querySelector('.mono').textContent = fmtTime(sp.t, 1) + ' · um ' + (sp.f >= 1000 ? nf(sp.f / 1000, 1) + ' kHz' : sp.f + ' Hz') + ' · ' + (sp.nmr > 0 ? '+' : '') + nf(sp.nmr, 0) + ' dB über der Maske';
+    li.querySelector('button').addEventListener('click', () => hearListen(sp.t)); ul.appendChild(li); });
+  if (!r.spots.length) ul.innerHTML = '<li><span></span><span>Keine Stelle über der Hörschwelle.</span></li>';
+  requestAnimationFrame(() => requestAnimationFrame(drawHear));
+}
+function hearListen(t) {
+  const d = duration(); S.sel = { a: Math.max(0, t - 1), b: Math.min(d, t + 3) }; S.view = { a: Math.max(0, t - 6), b: Math.min(d, t + 8) }; clampView();
+  S.loop = true; $('#btnLoop').setAttribute('aria-pressed', 'true'); drawAll(); play(S.sel.a);
+  status('Schleife über die Stelle. Oben zwischen „Original“ und „Master“ umschalten, um zu vergleichen.', '', 5000);
+}
+function drawHear() {
+  const r = HEAR.res, cv = $('#hearCanvas'); if (!r || !cv.offsetParent) return; const { g, w, h } = fitCanvas(cv);
+  g.fillStyle = '#060B0F'; g.fillRect(0, 0, w, h);
+  const nc = r.mapCols, nb = r.mapBands, cw = w / nc, bh = (h - 16) / nb;
+  for (let c = 0; c < nc; c++) for (let b = 0; b < nb; b++) { const v = r.map[c * nb + b]; if (v <= 0) continue;
+    g.fillStyle = v > 12 ? '#FF4D6D' : v > 6 ? '#FF8A3D' : '#F2C94C'; g.globalAlpha = Math.min(1, 0.35 + v / 20); g.fillRect(c * cw, (nb - 1 - b) * bh, Math.ceil(cw), Math.ceil(bh)); }
+  g.globalAlpha = 1; g.font = '500 10px JetBrains Mono, monospace'; g.fillStyle = '#6b727c'; g.textBaseline = 'middle';
+  [100, 1000, 10000].forEach(f => { let bi = 0; r.cf.forEach((c, i) => { if (Math.abs(Math.log(c / f)) < Math.abs(Math.log(r.cf[bi] / f))) bi = i; }); const y = (nb - 1 - bi + 0.5) * bh; g.fillRect(0, Math.round(y), w, 1); g.fillText((f >= 1000 ? f / 1000 + ' kHz' : f + ' Hz'), 4, y - 7); });
+  const dur = nc * r.colSec, step = dur > 240 ? 60 : 30; g.textBaseline = 'bottom';
+  for (let t = step; t < dur; t += step) { const x = t / dur * w; g.fillRect(Math.round(x), h - 14, 1, 6); g.fillText(fmtTime(t, 0), x + 3, h - 2); }
+  if (S.track) { const x = curPos() / dur * w; g.fillStyle = '#9ADFFF'; g.fillRect(Math.round(x), 0, 1, h - 16); }
+}
+$('#hearCanvas').addEventListener('click', e => { const r = HEAR.res; if (!r || !S.track) return; const b = e.currentTarget.getBoundingClientRect(); const t = (e.clientX - b.left) / b.width * r.mapCols * r.colSec; seek(clamp(t, 0, duration())); if (!S.playing) play(S.cursor); });
+window.addEventListener('resize', () => { if (HEAR.res) drawHear(); });
+(function hearLoop() { if (HEAR.res && S.playing && curTab() === 'ana') drawHear(); setTimeout(hearLoop, 250); })();
 /* ============================ Offline-Rendern & Messung ============================ */
 const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 async function measureLatency(p, sr) {
@@ -3793,6 +3978,7 @@ async function assistant() {
   p.sat.on = false; p.stereo.on = true; p.stereo.width = 100;
   if (o.bassSide != null && o.bassSide > -18) { p.stereo.bassMono = true; p.stereo.monoFreq = 120; done.push('Bass-Mono 120 Hz'); } else p.stereo.bassMono = false;
   p.lim = { on: true, drive: 0, ceiling: tgt <= -18 ? -3 : -1, release: 80, isp: true };
+  p.eq.notch = clone(P.eq.notch); // Kerben sind songbezogene Reparaturen und bleiben erhalten
   P = p; refreshAll(); onParam();
   let lt = '';
   if (isFinite(o.I) && Math.abs(o.I - tgt) > 1) { const r = await setDriveToTarget(tgt); lt = r && r.reached ? 'Lautheit ' + tgt + ' LUFS' : 'Lautheitsziel nicht ganz erreichbar'; }
@@ -3893,8 +4079,8 @@ function mp3InfoFrame(mp3, nSamples, encDelay) {
 async function measureEncoded(blob, sr) {
   try { const ctx = new OfflineAudioContext(2, 1, sr), buf = await ctx.decodeAudioData(await blob.arrayBuffer());
     const L = buf.getChannelData(0).slice(), R = (buf.numberOfChannels > 1 ? buf.getChannelData(1) : buf.getChannelData(0)).slice();
-    const m = await DSP({ cmd: 'analyze', sr: buf.sampleRate, L, R, opts: { tp: true } });
-    return isFinite(m.TP) ? m : null; }
+    const m = await DSP({ cmd: 'analyze', sr: buf.sampleRate, L: L.slice(), R: R.slice(), opts: { tp: true } });
+    if (!isFinite(m.TP)) return null; m.L = L; m.R = R; return m; }
   catch (e) { console.warn('Nachmessen der kodierten Datei nicht möglich', e); return null; } }
 async function runExport() {
   const mode = $('#expMode').value, fmt = $('#expFmt').value, ogg = /^ogg/.test(fmt), mp3 = /^mp3/.test(fmt), lossy = ogg || mp3, oggQ = fmt === 'ogg8' ? 0.8 : 0.5, kbps = fmt === 'mp3192' ? 192 : 320, bits = lossy ? 0 : +fmt, rs = $('#expRate').value;
@@ -3914,7 +4100,9 @@ async function runExport() {
     const blob = ogg ? await encodeOgg(r.L, r.R, sr, oggQ, prog('OGG Vorbis')) : mp3 ? await encodeMp3(r.L, r.R, sr, kbps, prog('MP3')) : new Blob([r.wav], { type: 'audio/wav' });
     // MP3/OGG: die fertige Datei wieder dekodieren und messen, denn die Kodierung verändert die Spitzen (Prüfbericht 1.7.0)
     let enc = null;
-    if (lossy) { hint.innerHTML = '<span class="busy"></span>Fertige ' + label + ' wird nachgemessen …'; enc = await measureEncoded(blob, sr); }
+    if (lossy) { hint.innerHTML = '<span class="busy"></span>Fertige ' + label + ' wird nachgemessen …'; enc = await measureEncoded(blob, sr);
+      // Hör-Vergleich Master ↔ fertige Datei: wie viel der Kodierung hörbar ist
+      if (enc && enc.L) { try { hint.innerHTML = '<span class="busy"></span>Hörbarer Kodierverlust wird geschätzt …'; const hc = await DSP({ cmd: 'hearcmp', sr, L: r.L.slice(), R: r.R.slice(), L2: enc.L, R2: enc.R }); if (!hc.error) enc.hear = hc; } catch (e) { console.warn(e); } enc.L = enc.R = null; } }
     hint.innerHTML = '<span class="busy"></span>Datei wird übergeben …';
     const how = await deliver(blob, name);
     const res = $('#expResult'); res.hidden = false;
@@ -3922,7 +4110,8 @@ async function runExport() {
     const m = enc || r, info = (sr / 1000) + ' kHz / ' + fmtTxt + ' · ' + (blob.size / 1048576).toFixed(1) + ' MB';
     const what = !lossy ? '' : enc ? 'Gemessen in der fertigen ' + label + ':<br>' : 'Messung vor der ' + (ogg ? 'OGG' : 'MP3') + '-Kodierung (dieser Browser kann die fertige Datei nicht nachmessen):<br>';
     res.innerHTML = '<b></b><br><span class="mono">' + what + nf(m.I, 1) + ' LUFS · True Peak ' + nf(m.TP, 1) + ' dBTP · LRA ' + nf(m.LRA, 1) + ' LU · ' + info
-      + (enc ? '<br>vor der Kodierung: ' + nf(r.I, 1) + ' LUFS · True Peak ' + nf(r.TP, 1) + ' dBTP' : '') + '</span>';
+      + (enc ? '<br>vor der Kodierung: ' + nf(r.I, 1) + ' LUFS · True Peak ' + nf(r.TP, 1) + ' dBTP' : '')
+      + (enc && enc.hear ? '<br>Hörbarer Kodierverlust: ' + nf(enc.hear.mos, 1) + ' von 5 (' + (v0 => v0[0].toLowerCase() + v0.slice(1))(hearVerdict(enc.hear.mos)[0]) + ', Näherung an PEAQ/ViSQOL)' : '') + '</span>';
     res.querySelector('b').textContent = how === 'declined' ? 'Speichern abgebrochen.' : name;
     const ceilT = mode === 'master' && P.lim.on ? P.lim.ceiling : null, over = enc && ceilT !== null ? enc.TP - ceilT : 0;
     const codecTip = !lossy || how === 'declined' ? '' : enc && enc.TP > 0 ? ' Achtung: Die fertige Datei hat einen True Peak über 0 dBTP und kann beim Abspielen übersteuern. Bitte die Limiter-Decke um mindestens ' + nf(Math.ceil((enc.TP + 0.2) * 10) / 10, 1) + ' dB senken und neu exportieren.'
@@ -3937,7 +4126,7 @@ async function runExport() {
 
 /* ============================ Einstellungen & Presets ============================ */
 Object.entries(PRESETS).forEach(([k, v]) => { const o = document.createElement('option'); o.value = k; o.textContent = v.name; $('#presetSel').appendChild(o); });
-$('#presetSel').addEventListener('change', e => { const pr = PRESETS[e.target.value]; if (!pr) return; P = clone(pr.p); if (pr.target) setTargetValue(pr.target);
+$('#presetSel').addEventListener('change', e => { const pr = PRESETS[e.target.value]; if (!pr) return; const keepN = clone(P.eq.notch); P = clone(pr.p); P.eq.notch = keepN; if (pr.target) setTargetValue(pr.target);
   refreshAll(); onParam(); status('Preset „' + pr.name + '“ geladen.' + (pr.target ? ' Für die Lautheit: Limiter → „Drive auf Ziel einstellen“.' : ''), 'ok', 6000); e.target.value = ''; });
 $('#btnSaveSet').addEventListener('click', async () => {
   const data = JSON.stringify({ app: 'Deep Structure Mastering Studio', version: 1, savedAt: new Date().toISOString(), song: S.track ? S.track.name : null, target: +$('#targetSel').value, settings: P }, null, 2);

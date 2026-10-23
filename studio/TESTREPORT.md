@@ -221,3 +221,16 @@ Referenz für True Peak ist eine ideale Rekonstruktion (16-fach über FFT, ohne 
 | Offline-Cache mit altem Studio-Cache und fremdem Cache „radio-v3“ | löschte beide | alter Studio-Cache entfernt, fremder bleibt, offline startet 1.6.2 |
 
 Gesamt: 56 von 56 DSP-Tests, 65 von 65 Browser-Tests. Die Codex-Prüfung vom 23.10.2026 hat zwei echte Fehler gefunden: die Rausch-Überschreitung und den Ersatz-Limiter. Beide sind behoben.
+
+## 12. Nachtrag 1.6.3: MP3-Export
+
+| Prüfung | Ergebnis |
+|---|---|
+| „Dein Aber“, auf −14 LUFS gemastert, als MP3 320 kbit/s | 7,9 MB. Kodierzeit im Test-Browser ca. 36 s (am Handy länger), mit Fortschrittsanzeige. |
+| FFmpeg-Gegenprüfung | −14,0 LUFS, LRA 8,0. Dekodierte Länge 9.964.800 Samples (= WAV), Zeitversatz 0 Samples. |
+| MP3 192 kbit/s | 4,8 MB, −14,2 LUFS |
+| Chrome dekodiert die MP3 (Testton mit Klick) | Länge exakt, Klick auf das Sample genau |
+| MP3 ohne Lückenlos-Angabe (zum Vergleich) | +1105 Samples Versatz, +1152 Samples Länge. Deshalb setzt die App den Info-Frame. |
+| Import einer 48-kHz-MP3 | jetzt 48 kHz, 9.964.800 Samples (vorher auf 44,1 kHz umgerechnet) |
+
+Gesamt: 56 von 56 DSP-Tests, 67 von 67 Browser-Tests.

@@ -251,3 +251,24 @@ Gesamt: 56 von 56 DSP-Tests, 67 von 67 Browser-Tests.
 | „Im Song probehören“, „Dein Aber“ ab 2:01 | erste Probe 2,3 s, Klangwechsel 0,7–1,0 s, Original-Taste wechselt ohne Unterbrechung, Song bleibt unverändert bis „Anwenden“ |
 
 Gesamt: 63 von 63 DSP-Tests, 70 von 70 Browser-Tests.
+
+## 14. Nachtrag 1.7.1: Korrekturen nach dem Prüfbericht 1.7.0
+
+| Prüfung | Ergebnis |
+|---|---|
+| Original-Taste nach Bearbeitung (ganzer Song −12 dB) | Original −13,8 dB, Master −25,7 dB, Anzeige „Original-Datei“ (vorher gleich laut) |
+| Original-Taste nach Schnitt / nach Rückgängig | „Ohne Mastering“ / wieder „Original“ |
+| Songwechsel während Drum-Reparatur, Drum-Probe, Glätten | Ergebnis wird verworfen, Hinweis statt falschem Song |
+| Limiter aus, Drive +12 dB | Signal unverändert (Drive ebenfalls umgangen) |
+| Grenzlasttest Prüfbericht (weißes Rauschen, Seed 92113, 0,95, +12 dB, Decke −1) | ideale FFT-Rekonstruktion 1.7.0: −0,55 dBTP · 1.7.1: −1,08 dBTP |
+| Weitere Härtefälle 44,1/48 kHz (5 Rausch-Seeds, Sinus 0,45–0,499 × Rate, Sweep, Rechteck) | ungünstigster Wert ideal −1,07 dBTP, alle ≤ Decke |
+| Rosa Rauschen +10 dB | ohne Sicherheitsstufe −0,88, mit −1,10 dBTP |
+| „Dein Aber“, Drive +6 / +12 dB | ideal −1,00 / −1,00 dBTP, also keine zusätzliche Absenkung bei Musik |
+| Rechenzeit (Messung ganzer Song) | ca. 4 s statt 2,3 s (genaueres Filter + Sicherheitsstufe); Echtzeit unkritisch |
+| MP3 320 / OGG Q8, „Dein Aber“ auf −14 LUFS | Anzeige der fertigen Datei: MP3 −13,9 LUFS / −2,1 dBTP (FFmpeg −14,0 / −2,1), OGG −13,9 / −2,2 (FFmpeg −14,0 / −2,3); vor der Kodierung −14,0 / −2,4 |
+| WAV 3 Kanäle, Maske 0x7, nur Center | links 0,207, rechts 0,207 (vorher links 0,25, rechts 0) |
+| WAV Quadro 0x33 / 5.1 Seite 0x60F / Maske ohne Position | richtig zugeordnet / LFE weggelassen und gemeldet / mittig eingemischt und gemeldet |
+
+Hinweis zur True-Peak-Anzeige: Die Messung selbst entspricht weiter der Norm (BS.1770, wie FFmpeg) und ist genauer als diese. Bei extremem Vollband-Rauschen kann eine unendlich lange ideale Rekonstruktion bis etwa 0,5 dB höher liegen als die Anzeige. Die Sicherheitsstufe sitzt im Limiter, damit die Decke in der fertigen Datei auch dann gilt.
+
+Gesamt: 67 von 67 DSP-Tests, 78 von 78 Browser-Tests.

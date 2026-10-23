@@ -114,6 +114,15 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
 
+## Änderungen 1.7.1 (Korrekturen nach dem Prüfbericht 1.7.0)
+
+- **Original-Taste:** Nach einer Bearbeitung (Drum-Reparatur, Glätten, Pegel) spielt „Original“ jetzt synchron die geladene Datei. Vorher lief dort der bearbeitete Stand ohne Mastering, dadurch klang beides fast gleich. Nach einem Schnitt (andere Länge) zeigt die Taste „Ohne Mastering“, weil die Originaldatei dann nicht mehr deckungsgleich ist.
+- **Kein falscher Song nach Wechsel:** Drum-Reparatur, Drum-Probe und Glätten verwerfen ihr Ergebnis, wenn der Song inzwischen gewechselt oder bearbeitet wurde.
+- **Limiter aus = komplett umgangen,** auch der Drive. Vorher blieb die Drive-Verstärkung aktiv (Übersteuerungsfalle).
+- **True-Peak-Sicherheitsstufe:** Spitzen ganz nah an der Nyquist-Frequenz sieht jeder endliche Interpolator etwas zu niedrig. Der Limiter schätzt diesen Anteil jetzt gesondert ab und regelt entsprechend mehr. Ergebnis: Die Decke hält auch unter idealer (unendlich langer) Rekonstruktion, im Grenzlasttest des Prüfberichts −1,08 statt −0,55 dBTP. Bei Musik kostet das nichts (gemessen „Dein Aber“: ideal −1,00 dBTP wie vorher), bei Vollband-Rauschen etwa 0,1 bis 0,5 dB Lautheit.
+- **MP3-/OGG-Export:** Die angezeigten Werte stammen jetzt aus der fertigen, wieder dekodierten Datei. Die Werte vor der Kodierung stehen darunter. Kann ein Browser das Format nicht dekodieren, steht ausdrücklich „Messung vor der Kodierung“ da.
+- **Mehrkanal-WAV:** Die Kanalmaske (WAVE_FORMAT_EXTENSIBLE) wird ausgewertet. Center und andere mittige Kanäle gehen gleich stark auf beide Seiten, LFE entfällt, Kanäle ohne bekannte Position werden mittig eingemischt und gemeldet. Ohne Maske gelten die üblichen Belegungen (3 = L R C, 4 = Quadro, 5 = L R C Ls Rs, 6 = 5.1, 7 = 6.1, 8 = 7.1).
+
 ## Änderungen 1.7.0 (eigener Kompressor, Drum-Klänge)
 
 - **Eigener Kompressor** statt Browser-Kompressor: Er klingt in jedem Browser und im Export gleich und hebt nichts automatisch an.

@@ -206,7 +206,17 @@ async function robustImport() {
   let okAll = true; for (const k in PRESETS) { try { validateSettings(PRESETS[k].p); } catch (e) { okAll = false; } }
   res.push(['Einstellungen: alle Presets und Grundeinstellungen sind gültig', okAll && !!validateSettings(DEFAULT), okAll ? Object.keys(PRESETS).length + ' Presets' : 'Fehler']);
   setTargetValue(-12); res.push(['Lautheitsziel: eigener Wert (−12 LUFS) bleibt wählbar', $('#targetSel').value === '-12', $('#targetSel').value]); setTargetValue(-14);
-  res.push(['Version 1.7.0 wird angezeigt', /1\.7\.0/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
+  { // WAVE_FORMAT_EXTENSIBLE mit Kanalmaske (Prüfbericht 1.7.0): Center darf nicht einseitig landen
+    const mkx = (ch, mask, fill) => { const fr = 4800, n = fr * ch * 2, b = new ArrayBuffer(68 + n), v = new DataView(b), w = (o, s) => { for (let i = 0; i < 4; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+      w(0, 'RIFF'); v.setUint32(4, 60 + n, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 40, true); v.setUint16(20, 0xFFFE, true); v.setUint16(22, ch, true); v.setUint32(24, 48000, true); v.setUint32(28, 48000 * ch * 2, true); v.setUint16(32, ch * 2, true); v.setUint16(34, 16, true);
+      v.setUint16(36, 22, true); v.setUint16(38, 16, true); v.setUint32(40, mask, true); v.setUint16(44, 1, true); w(60, 'data'); v.setUint32(64, n, true);
+      for (let i = 0; i < fr; i++) for (let c = 0; c < ch; c++) v.setInt16(68 + (i * ch + c) * 2, Math.round(fill(c, i) * 32767), true); return b; };
+    const pk = x => x.reduce((m, y) => Math.max(m, Math.abs(y)), 0);
+    let r = t(mkx(3, 0x7, (c, i) => c === 2 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske L/R/C (0x7): reiner Center landet gleich laut links und rechts', r.ok && pk(r.r.L) > 0.1 && Math.abs(pk(r.r.L) - pk(r.r.R)) < 1e-4, r.ok ? 'L ' + pk(r.r.L).toFixed(3) + ', R ' + pk(r.r.R).toFixed(3) + ' · ' + r.notes.join(' ') : r.err]);
+    r = t(mkx(4, 0x33, (c, i) => c === 3 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske Quadro (0x33): hinten rechts landet rechts', r.ok && pk(r.r.L) === 0 && pk(r.r.R) > 0.1, r.ok ? 'L ' + pk(r.r.L).toFixed(3) + ', R ' + pk(r.r.R).toFixed(3) : r.err]);
+    r = t(mkx(6, 0x60F, (c, i) => c === 3 && i === 100 ? 0.9 : 0)); res.push(['WAV-Kanalmaske 5.1 Seite (0x60F): LFE wird weggelassen und gemeldet', r.ok && pk(r.r.L) === 0 && pk(r.r.R) === 0 && /LFE/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]);
+    r = t(mkx(3, 0x3, (c, i) => c === 2 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske mit fehlender Position: Kanal wird mittig eingemischt und gemeldet', r.ok && Math.abs(pk(r.r.L) - pk(r.r.R)) < 1e-4 && /keine Lautsprecherposition/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]); }
+  res.push(['Version 1.7.1 wird angezeigt', /1\.7\.1/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
   return res;
 },
 async function mp3Export() {
@@ -218,6 +228,8 @@ async function mp3Export() {
   res.push(['MP3: Encoder lädt nach, Datei mit Lückenlos-Angabe (LAME-Info)', !!u8 && u8[0] === 0xFF && info === 'Info', u8 ? info + ', ' + u8.length + ' Bytes' : err]);
   if (u8) { const oc = new OfflineAudioContext(2, 1, sr); const buf = await oc.decodeAudioData(u8.buffer.slice(0)); const d = buf.getChannelData(0); let mi = 0; for (let i = 0; i < d.length; i++) if (Math.abs(d[i]) > Math.abs(d[mi])) mi = i;
     res.push(['MP3: Browser dekodiert sample-genau (Länge und Klick-Position)', buf.length === n && Math.abs(mi - sr) <= 1, 'Länge ' + buf.length + ' (Soll ' + n + '), Klick bei ' + mi + ' (Soll ' + sr + ')']); }
+  if (blob) { const m = await measureEncoded(blob, sr), pre = await DSP({ cmd: 'analyze', sr, L: L.slice(), R: R.slice(), opts: { tp: true } });
+    res.push(['MP3: Exportanzeige misst die fertige Datei (dekodiert), nicht das Signal davor', !!m && isFinite(m.TP) && Math.abs(m.I - pre.I) < 0.5, m ? 'fertige Datei ' + m.I.toFixed(2) + ' LUFS / ' + m.TP.toFixed(2) + ' dBTP, vorher ' + pre.I.toFixed(2) + ' LUFS / ' + pre.TP.toFixed(2) + ' dBTP' : 'nicht dekodierbar']); }
   return res;
 },
 async function ownCompressor() {
@@ -232,6 +244,22 @@ async function ownCompressor() {
   res.push(['Kompressor: Export/Offline gleiche Kennlinie (−10 dBFS → −15 dBFS bei 2:1)', w && Math.abs(db + 15) < 0.5, db.toFixed(2) + ' dBFS']);
   const lat = await measureLatency(p, sr); res.push(['Kompressor: praktisch keine Latenz (nur Frequenzweichen, wird ausgeglichen)', lat <= 5, lat + ' Samples (Browser-Kompressor: 6 ms Vorschau)']);
   return res;
+},
+async function originalMonitor() {
+  const res = [], sr = 48000, n = sr * 6, L = new Float32Array(n); for (let i = 0; i < n; i++) L[i] = 0.3 * Math.sin(2 * Math.PI * 440 * i / sr);
+  const keep = S.track, keepP = clone(P), keepMatch = S.match; await loadTrack({ sr, L, R: L.slice(), name: 'Monitor-Test', demo: true });
+  for (let i = 0; i < 100 && !S.orig; i++) await sleep(100);
+  P = clone(PRESETS.neutral.p); refreshAll(); onParam(); S.match = false;
+  const rms = async m => { setMode(m); await sleep(400); const an = S.ctx.createAnalyser(); an.fftSize = 8192; S.out.connect(an); const b = new Float32Array(8192); let a = 0; for (let k = 0; k < 4; k++) { await sleep(120); an.getFloatTimeDomainData(b); let s = 0; for (const v of b) s += v * v; a += s / b.length; } S.out.disconnect(an); return 10 * Math.log10(a / 4); };
+  // Bearbeitung ohne Längenänderung: ganzer Song −12 dB
+  S.sel = { a: 0, b: duration() }; mapSel('Test −12 dB', (l, r, a, b) => { for (let i = a; i < b; i++) { l[i] *= 0.2512; r[i] *= 0.2512; } });
+  await play(1); await sleep(300); const m1 = await rms('master'), o1 = await rms('orig'); const lab = document.querySelector('#monLabel').textContent; pause();
+  res.push(['Monitor: „Original“ spielt nach einer Bearbeitung die geladene Datei', o1 - m1 > 10 && /Original-Datei/i.test(lab), 'Original ' + o1.toFixed(1) + ' dB, Master ' + m1.toFixed(1) + ' dB, Anzeige „' + lab + '“']);
+  // Schnitt: Länge ändert sich -> Original = bearbeiteter Stand ohne Mastering
+  S.sel = { a: 0, b: 1 }; opDelete(); await play(1); await sleep(300); const o2 = await rms('orig'), lab2 = document.querySelector('#monLabel').textContent, m2 = await rms('master'); pause();
+  res.push(['Monitor: nach einem Schnitt „Ohne Mastering“ statt versetzter Datei', Math.abs(o2 - m2) < 1 && /Ohne Mastering/i.test(lab2), 'Original ' + o2.toFixed(1) + ' dB, Master ' + m2.toFixed(1) + ' dB, Anzeige „' + lab2 + '“']);
+  undo(); undo(); await sleep(200); setMode('orig'); res.push(['Monitor: nach Rückgängig wieder „Original“', S.track.L === S.file.L && document.querySelector('#monLabel').textContent === 'Original', document.querySelector('#monLabel').textContent]);
+  setMode('master'); S.match = keepMatch; P = keepP; refreshAll(); onParam(); if (keep) await loadTrack(keep); return res;
 },
 async function aiKeyStorage() {
   const res = []; try { localStorage.removeItem('dsms.aikey'); } catch (e) {}

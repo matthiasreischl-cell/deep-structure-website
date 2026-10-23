@@ -71,7 +71,18 @@ function idealTP(x) { const n = x.length, U = 16, N = n * U, re = new Float64Arr
   for (let k = 0; k < N; k++) im[k] = -im[k]; D.fft(re, im); let m = 0; for (let k = 300 * U; k < N - 300 * U; k++) m = Math.max(m, Math.abs(re[k] / n)); return 20 * Math.log10(m); }
 { const x = noise(48000, 1.5, 0.5, 7, 0), n = 65536, L = x.L.slice(0, n), R = x.R.slice(0, n); D.applyLim(L, R, 48000, { on: true, drive: 12, ceiling: -1, release: 80, isp: true });
   const own = 20 * Math.log10(Math.max(D.truePeak(L), D.truePeak(R))), ideal = Math.max(idealTP(L), idealTP(R));
-  check('Limiter, Extremfall weißes Rauschen +12 dB: ideale Rekonstruktion ≤ +0,4 dBTP (vorher +0,9)', ideal <= 0.4, 'eigene Anzeige ' + own.toFixed(2) + ', ideal ' + ideal.toFixed(2) + ' dBTP'); }
+  check('Limiter, Extremfall weißes Rauschen +12 dB: ideale Rekonstruktion hält die Decke −1 dBTP', ideal <= -0.99, 'eigene Anzeige ' + own.toFixed(2) + ', ideal ' + ideal.toFixed(2) + ' dBTP'); }
+{ // Grenzlasttest aus dem Prüfbericht 1.7.0: Seed 92113, Amplitude 0,95, +12 dB, Decke −1, 48 kHz (hier 65536 Samples wegen FFT-Länge)
+  let s = 92113; const r = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 * 2 - 1; }; const n = 65536, L = new Float32Array(n), R = new Float32Array(n);
+  for (let i = 0; i < n; i++) { L[i] = 0.95 * r(); R[i] = 0.95 * r(); } D.applyLim(L, R, 48000, { on: true, drive: 12, ceiling: -1, release: 80, isp: true });
+  const ideal = Math.max(idealTP(L), idealTP(R)); check('Limiter, Grenzlasttest Prüfbericht (Seed 92113): ideale Rekonstruktion ≤ −1 dBTP', ideal <= -0.99, 'ideal ' + ideal.toFixed(3) + ' dBTP'); }
+for (const f of [0.49, 0.499]) { // Sinus knapp unter der Nyquist-Frequenz: der schwierigste Fall für endliche Interpolatoren
+  const n = 65536, L = new Float32Array(n), R = new Float32Array(n); for (let i = 0; i < n; i++) { L[i] = 0.9 * Math.sin(2 * Math.PI * f * i + 0.3); R[i] = 0.9 * Math.sin(2 * Math.PI * f * (i + 7) + 0.3); }
+  D.applyLim(L, R, 44100, { on: true, drive: 12, ceiling: -1, release: 80, isp: true });
+  const ideal = Math.max(idealTP(L), idealTP(R)); check('Limiter, Sinus bei ' + String(f).replace('.', ',') + ' × Abtastrate: ideale Rekonstruktion ≤ −1 dBTP', ideal <= -0.99, 'ideal ' + ideal.toFixed(2) + ' dBTP'); }
+{ // Rosa Rauschen (ohne Sicherheitsstufe ideal −0,88 dBTP, also über der Decke): jetzt gehalten, Zusatzabsenkung höchstens 0,2 dB
+  const x = pink(48000, 1.4, 0.3), n = 65536, L = x.L.slice(0, n), R = x.R.slice(0, n); const g = D.applyLim(L, R, 48000, { on: true, drive: 10, ceiling: -1, release: 80, isp: true });
+  const ideal = Math.max(idealTP(L), idealTP(R)); check('Limiter, rosa Rauschen +10 dB: ideale Rekonstruktion ≤ −1 dBTP, Zusatzabsenkung ≤ 0,2 dB', ideal <= -0.99 && ideal >= -1.2, 'ideal ' + ideal.toFixed(3) + ' dBTP'); }
 { const x = pink(48000, 10, 0.08), L = x.L.slice(), R = x.R.slice(), g = D.applyLim(L, R, 48000, { on: true, drive: 0, ceiling: -1, release: 80, isp: true }); let maxd = 0;
   for (let i = 0; i < L.length; i++) maxd = Math.max(maxd, Math.abs(L[i] - x.L[i]));
   check('Limiter: Signal unter der Decke bleibt unverändert (latenzkorrigiert)', maxd < 1e-6 && g === 1, 'max. Abweichung ' + maxd.toExponential(1)); }
@@ -85,7 +96,7 @@ function idealTP(x) { const n = x.length, U = 16, N = n * U, re = new Float64Arr
     res[rel] = db(rmsAt(a, 0.58) / (rmsAt(L, 0.58) * Math.pow(10, 6 / 20))); }
   check('Limiter: Release wirkt (40 ms erholt sich schneller als 300 ms)', res[40] > res[300] + 0.5 && res[40] > -1, '80 ms nach der Spitze: 40 ms → ' + res[40].toFixed(2) + ' dB, 300 ms → ' + res[300].toFixed(2) + ' dB Verstärkungsabweichung'); }
 { // Transienten: kurzer Schlag unter der Decke bleibt erhalten
-  const sr = 48000, n = sr, L = new Float32Array(n); for (let i = 0; i < n; i++) L[i] = 0.05 * Math.sin(2 * Math.PI * 100 * i / sr); for (let i = 24000; i < 24048; i++) L[i] += 0.8 * Math.exp(-(i - 24000) / 10);
+  const sr = 48000, n = sr, L = new Float32Array(n); for (let i = 0; i < n; i++) L[i] = 0.05 * Math.sin(2 * Math.PI * 100 * i / sr); for (let i = 24000; i < 24048; i++) L[i] += 0.78 * Math.exp(-(i - 24000) / 10); // True Peak ideal ca. −1,2 dBTP, also klar unter der Decke
   const a = L.slice(), b = L.slice(); D.applyLim(a, b, sr, { on: true, drive: 0, ceiling: -1, release: 80, isp: true }); let m1 = 0, m2 = 0; for (let i = 23990; i < 24060; i++) { m1 = Math.max(m1, Math.abs(L[i])); m2 = Math.max(m2, Math.abs(a[i])); }
   check('Limiter: Transiente unter der Decke unverändert', near(m1, m2, 1e-6), db(m2).toFixed(2) + ' dBFS'); }
 /* 6  WAV-Export */

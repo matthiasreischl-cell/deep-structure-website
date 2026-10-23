@@ -179,6 +179,14 @@ async function drumRepairUI() {
   res.push(['Drums: Vorher/Nachher schaltet den Abspiel-Puffer um', abOn && S.abuf !== DRS.beforeBuf, abOn ? 'ok' : 'nicht umgeschaltet']);
   document.querySelector('#drPunchOn').checked = false; showTab('check'); if (keep) await loadTrack(keep); return res;
 },
+async function oggExport() {
+  const res = [], sr = 48000, n = sr * 3, L = new Float32Array(n), R = new Float32Array(n);
+  for (let i = 0; i < n; i++) { L[i] = 0.3 * Math.sin(2 * Math.PI * 440 * i / sr); R[i] = 0.3 * Math.sin(2 * Math.PI * 660 * i / sr); }
+  let blob = null, err = ''; try { blob = await encodeOgg(L, R, sr, 0.5); } catch (e) { err = e.message; }
+  const head = blob ? new TextDecoder().decode(new Uint8Array(await blob.slice(0, 4).arrayBuffer())) : '';
+  res.push(['OGG Vorbis: Encoder lädt nach und erzeugt eine gültige Ogg-Datei', head === 'OggS' && blob.size > 5000, blob ? head + ', ' + blob.size + ' Bytes' : err]);
+  return res;
+},
 async function aiKeyStorage() {
   const res = []; try { localStorage.removeItem('dsms.aikey'); } catch (e) {}
   document.querySelector('#aiRemember').checked = false; document.querySelector('#aiKey').value = 'sk-ant-test-0000';

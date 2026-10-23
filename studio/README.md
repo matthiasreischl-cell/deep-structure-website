@@ -8,6 +8,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 |---|---|
 | `index.html` | Die komplette App (HTML, CSS, JavaScript in einer Datei, ohne Build-Schritt) |
 | `sw.js` | Service Worker: Offline-Start und Updates |
+| `vorbis-encoder.js` | OGG-Vorbis-Encoder, wird nur beim OGG-Export nachgeladen (Lizenzen im Dateikopf) |
 | `manifest.webmanifest`, `icon-*.png`, `favicon.png`, `apple-touch-icon.png` | Installation als App |
 | `tests/` | Automatisierte Tests (siehe `tests/README.md`) |
 | `TESTREPORT.md` | Ergebnisse der letzten Prüfung inklusive FFmpeg-Gegenmessung |
@@ -28,7 +29,8 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 **Export:**
 - Der Export rendert die Kette mit `OfflineAudioContext`. Die Latenz wird per Klick-Test kompensiert.
 - Limiter, Messung und WAV-Kodierung laufen im Web Worker, mit demselben Limiter-Code wie in der Echtzeit-Wiedergabe (AudioWorklet).
-- Formate: WAV 16 und 24 Bit (TPDF-Dither, deterministisch) sowie 32 Bit Float.
+- Formate: WAV 16 und 24 Bit (TPDF-Dither, deterministisch), 32 Bit Float sowie OGG Vorbis (ca. 140 oder 240 kbit/s, VBR).
+- OGG Vorbis: libvorbis über `vorbis-encoder.js` (OggVorbisEncoder.js, MIT; libogg/libvorbis, BSD, Xiph.org). Die Datei wird erst beim ersten OGG-Export geladen und danach vom Service Worker zwischengespeichert. Die Kodierung läuft in Stücken, damit die Oberfläche bedienbar bleibt. Länge und Startzeit sind sample-genau wie beim WAV, die Spiel-Daten passen also auch zur OGG-Datei.
 
 **Messung:**
 
@@ -101,6 +103,11 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.6.1 (OGG-Export)
+
+- Export als **OGG Vorbis**: ca. 140 kbit/s für Spiele und Web, ca. 240 kbit/s für hohe Qualität. Gut für Godot.
+- Länge und Startzeit sind sample-genau wie beim WAV (geprüft mit FFmpeg).
 
 ## Änderungen 1.6.0 (Drum-Reparatur)
 

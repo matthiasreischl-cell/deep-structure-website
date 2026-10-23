@@ -83,6 +83,16 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - Entfernen: STFT 4096, Hop 1024, Hann/Hann (das Rauschprofil der Suche wird in Frequenz und Pegel auf diese Länge umgerechnet). Störtöne werden in ±5 Bins je Fenster auf die Hälfte des Nachbarpegels begrenzt (nur der Überschuss). Der Rauschteppich wird per spektraler Subtraktion mit zeitlich (≈ 45 ms) und spektral geglätteter Leistung abgesenkt; plötzliche Anstiege (Anschläge) werden sofort durchgelassen. Untergrenze −6 bis −18 dB je nach Regler, die Seite bekommt etwas mehr. Anschließend laufen Glätter und Knackser-Reparatur über die markierten Stellen. Ohne Auswahl bleibt das Signal bitgenau.
 - Messung (synthetische Störung in „Dein Aber“): Störtöne −21 bis −32 dB, Rauschteppich in leisen Passagen −22 dB, laute Passagen und der restliche Frequenzgang praktisch unverändert.
 
+**EQ-Kerben:** bis zu sechs Web-Audio-Notch-Filter hinter den acht Bändern, Güte 2–300 (bei 3,4 kHz und Güte 290 etwa 12 Hz breit, Mitte −145 dB, 155 Hz daneben −0,01 dB). Sie werden wie die Bänder im Export und in der Messung mitgerendert und bleiben bei Assistent, Presets und KI-Mastering erhalten. Clean Song kann einen gefundenen Störton direkt als Kerbe anlegen (Güte = Frequenz/12).
+
+**Hör-Vergleich** (Näherung an PEAQ, ITU-R BS.1387, und ViSQOL):
+- Gehörmodell: STFT 2048 (Hann, Hop 1024), Außen-/Mittelohr-Gewichtung nach Terhardt, 32 Bänder im ERB-Abstand von 50 Hz bis 16 kHz, Pegelbezug 0 dBFS = 92 dB SPL.
+- Vorbereitung: Versatz per Kreuzkorrelation (±100 ms), Lautheit nach BS.1770 angeglichen, feste Klangfarben-Unterschiede je Band (Median) gemessen, angezeigt und vor dem Vergleich ausgeglichen. Verglichen werden Betragsspektren (phasenunabhängig).
+- Verdeckung: Erregung mit Frequenzspreizung (27 dB/Band nach unten, 12 dB/Band nach oben) und Nachverdeckung (30 ms), Maske 4 dB unter der Erregung, mindestens Ruhehörschwelle.
+- Kennwerte: Rauschen-zu-Maske-Verhältnis (NMR) je Band und Zeit, Anteil hörbar veränderter Abschnitte (NMR > 1,5 dB), NSIM-Ähnlichkeit der Gehör-Spektrogramme (3×3-Fenster, wie ViSQOL).
+- Zahl 1–5 über eine eigene Kalibrierung an MP3 64–320 kbit/s, Vorbis q0–q8, Rauschen, Tiefpass, Bit-Reduktion und Clipping auf drei Songs: MP3 320 → 4,9, 192 → 4,75, 128 → 4,5, 96 → 3,3–3,9, 64 → 1,5–1,9; Vorbis q8 → 4,8, q5 → 4,6; Tiefpass 16 kHz → 5,0, 11 kHz → 3,6; reine EQ-Änderung → 5,0. Kein zertifizierter PEAQ- oder ViSQOL-Wert.
+- Im Export wird bei MP3/OGG automatisch der Master mit der fertig dekodierten Datei verglichen („Hörbarer Kodierverlust“).
+
 **Spiel-Daten** (Reiter „Spiel-Daten“, für Rhythmus- und Musikspiele, z. B. in Godot):
 - Onset-Hüllkurve aus logarithmischem Spektral-Fluss (STFT 2048, Hop 512, L und R getrennt).
 - Tempo: Autokorrelation mit metrischer Bewertung (Beat, halber und ganzer Takt) plus Bass-Periodizität. Eine sanfte Vorliebe für 60–200 BPM um 120 entscheidet Grenzfälle. Halbes oder doppeltes Tempo ist musikalisch oft gleichwertig, deshalb gibt es ÷ 2 und × 2 und ein Eingabefeld für ein bekanntes Tempo.
@@ -121,6 +131,12 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.9.0 (Hör-Vergleich, EQ-Kerben)
+
+- **Hör-Vergleich** im Reiter „Analyse“ (Näherung an PEAQ und ViSQOL): vergleicht Original-Datei ↔ Master, Original-Datei ↔ Bearbeitung (z. B. Clean Song) oder Bearbeitung ↔ Master über ein Gehörmodell mit Verdeckung. Ergebnis: Zahl von 1 bis 5 mit Einordnung, feste Klangfarben-Unterschiede in sechs Bereichen, eine Karte, wo im Song und in welchem Frequenzbereich ein Unterschied hörbar ist (antippen spielt ab), und die deutlichsten Stellen zum Anhören.
+- **Export:** Bei MP3 und OGG steht zusätzlich der „Hörbare Kodierverlust“ (Master gegen fertige Datei).
+- **EQ-Kerben:** bis zu sechs sehr schmale Schnitte (Güte bis 300) gegen einzelne Störtöne, mit Marke in der EQ-Kurve. In der Clean-Song-Liste legt „Kerbe“ einen gefundenen Störton direkt als Kerbe an. Kerben bleiben bei Assistent, Presets und KI-Mastering erhalten.
 
 ## Änderungen 1.8.2 (Anleitung zum Herunterladen)
 

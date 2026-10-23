@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const htmlPath = process.argv[2] || path.join(here, '..', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const grab = name => { const m = html.match(new RegExp('const ' + name + ' = String\\.raw`([\\s\\S]*?)`;')); if (!m) throw new Error(name + ' nicht gefunden'); return m[1]; };
-const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES, cleanScan, cleanSong};')();
+const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES, cleanScan, cleanSong, hearCompare};')();
 
 let pass = 0, fail = 0; const rows = [];
 function check(name, ok, detail) { rows.push([ok ? 'PASS' : 'FAIL', name, detail]); ok ? pass++ : fail++; }
@@ -227,6 +227,25 @@ for (const [ratio, want] of [[2, -15], [4, -17.5]]) { const x = sine(48000, 3, 1
   check('Clean Song: Musik abseits der Störtöne unverändert (±0,1 dB)', band.every(v => Math.abs(v) < 0.1), band.map(v => v.toFixed(3)).join(' / ') + ' dB');
   const z = D.cleanSong(L, R, sr, { lines: [], carpet: 0 }); let md = 0; for (let i = 0; i < n; i++) md = Math.max(md, Math.abs(z.L[i] - L[i]));
   check('Clean Song: nichts ausgewählt = bitgenau unverändert', md === 0, String(md));
+}
+{ // Hör-Vergleich (Näherung an PEAQ/ViSQOL)
+  const sr = 48000, x = pink(sr, 12, 0.25, 31), n = x.L.length;
+  const same = D.hearCompare(x.L, x.R, x.L.slice(), x.R.slice(), sr, {});
+  check('Hör-Vergleich: identische Fassungen = 5,0', same.mos > 4.99 && same.relDist === 0, same.mos.toFixed(2));
+  // tonale Musik (Akkorde) + Rauschen 30 dB darunter: in Pausen und zwischen den Tönen hörbar
+  const tL = new Float32Array(n), tR = new Float32Array(n); for (let i = 0; i < n; i++) { const t = i / sr, f0 = [220, 247, 196, 262][Math.floor(t / 1.5) % 4]; tL[i] = tR[i] = 0.25 * (Math.sin(2 * Math.PI * f0 * t) + 0.5 * Math.sin(2 * Math.PI * f0 * 2.01 * t) + 0.3 * Math.sin(2 * Math.PI * f0 * 3 * t)) * (0.55 + 0.45 * Math.cos(2 * Math.PI * t / 1.5)); }
+  const r = rng(77), nL = tL.slice(), nR = tR.slice(); let e = 0; for (let i = 0; i < n; i++) e += tL[i] * tL[i]; const a = Math.sqrt(e / n) * Math.pow(10, -30 / 20) * 3.46;
+  for (let i = 0; i < n; i++) { nL[i] += a * r(); nR[i] += a * r(); }
+  const noisy = D.hearCompare(tL, tR, nL, nR, sr, {}), ok3 = D.hearCompare(tL, tR, tL.slice(), tR.slice(), sr, {});
+  check('Hör-Vergleich: Rauschen 30 dB unter tonaler Musik wird als störend erkannt (< 3,5)', noisy.mos < 3.5 && noisy.relDist > 0.2 && ok3.mos > 4.99, noisy.mos.toFixed(2) + ', ' + Math.round(noisy.relDist * 100) + ' % hörbar');
+  check('Hör-Vergleich: Rauschen in Rauschen ist verdeckt (rosa Rauschen + weißes −25 dB > 4,5)', (() => { const r2 = rng(78), mL = x.L.slice(), mR = x.R.slice(); let e2 = 0; for (let i = 0; i < n; i++) e2 += x.L[i] * x.L[i]; const a2 = Math.sqrt(e2 / n) * Math.pow(10, -25 / 20) * 3.46; for (let i = 0; i < n; i++) { mL[i] += a2 * r2(); mR[i] += a2 * r2(); } return D.hearCompare(x.L, x.R, mL, mR, sr, {}).mos > 4.5; })(), 'Verdeckung');
+  const sh = x.L.slice(), sh2 = x.R.slice(); let p1 = 0, p2 = 0; const c = Math.exp(-2 * Math.PI * 4000 / sr);
+  for (let i = 0; i < n; i++) { const hp1 = x.L[i] - p1, hp2 = x.R[i] - p2; p1 = c * p1 + (1 - c) * x.L[i]; p2 = c * p2 + (1 - c) * x.R[i]; sh[i] += hp1; sh2[i] += hp2; }
+  const eq = D.hearCompare(x.L, x.R, sh, sh2, sr, {}), hi = eq.eqDb.slice(26).reduce((s2, v) => s2 + v, 0) / 6;
+  check('Hör-Vergleich: reine EQ-Änderung wird als Klangfarbe gemeldet, nicht als Störung', eq.mos > 4.7 && hi > 2, 'Zahl ' + eq.mos.toFixed(2) + ', Höhen ' + hi.toFixed(1) + ' dB');
+  const sft = 960, dL = new Float32Array(n), dR = new Float32Array(n); for (let i = sft; i < n; i++) { dL[i] = x.L[i - sft]; dR[i] = x.R[i - sft]; }
+  const lagd = D.hearCompare(x.L, x.R, dL, dR, sr, {});
+  check('Hör-Vergleich: zeitlicher Versatz (20 ms) wird ausgeglichen', Math.abs(lagd.lagMs - 20) < 0.1 && lagd.mos > 4.9, lagd.lagMs.toFixed(2) + ' ms, Zahl ' + lagd.mos.toFixed(2));
 }
 const w = Math.max(...rows.map(r => r[1].length));
 console.log('\nDeep Structure Mastering Studio – DSP-Tests (' + path.basename(htmlPath) + ')\n');

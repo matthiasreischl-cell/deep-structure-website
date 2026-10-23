@@ -313,3 +313,18 @@ Gesamt: 72 von 72 DSP-Tests, 84 von 84 Browser-Tests.
 |---|---|
 | Knopf „Anleitung“ in der Kopfzeile, Desktop und Handy | sichtbar neben Feedback |
 | PDF liegt neben der App und ist gültig | Browser-Test bestanden |
+
+## 18. Nachtrag 1.9.0: Hör-Vergleich und EQ-Kerben
+
+| Prüfung | Ergebnis |
+|---|---|
+| Kerbe 3455 Hz, Güte 290 (offline gerendert wie im Export) | 3455 Hz −145,8 dB, 3300 Hz −0,01 dB, 1 kHz 0,00 dB |
+| Kerben in Einstellungsdateien | mit und ohne Kerben gültig, fehlerhafte abgelehnt; bleiben beim Preset-Wechsel erhalten |
+| Hör-Vergleich: identische Fassungen / 20 ms versetzt / reine EQ-Änderung (+2 dB Höhen) | 5,0 / 4,99 (Versatz 20,00 ms erkannt) / 4,98 mit gemeldeter Klangfarbe |
+| Rauschen 30 dB unter tonaler Musik / weißes Rauschen in rosa Rauschen (−25 dB) | 1,0 (100 % hörbar) / > 4,5 (verdeckt) |
+| Kalibrierung (3 Songs, je 30 s) | MP3 320/192/128/96/64: 4,9 / 4,75 / 4,5 / 3,3–3,9 / 1,5–1,9; Vorbis q8/q5/q2/q0: 4,8 / 4,6 / 4,2–4,4 / 2,6–3,6; Tiefpass 16/11/7 kHz: 5,0 / 3,6 / 1,9–2,6 |
+| Blueprint: Original ↔ Clean Song / ↔ Stem-Mix des Freundes | 4,6 (hörbar v. a. der entfernte Störton und der Rauschteppich am Songende) / 3,8 (Präsenz −3 dB als Klangfarbe getrennt gemeldet) |
+| Blueprint in der App: Clean Song + Kerbe + Assistent, Original ↔ Master | 3,4 in 8,6 s, Unterschiede vor allem im Bass (Bass-Mono, Kompression) |
+| Export MP3 320 von Blueprint | Hörbarer Kodierverlust 4,9 von 5 |
+
+Gesamt: 77 von 77 DSP-Tests, 90 von 90 Browser-Tests.

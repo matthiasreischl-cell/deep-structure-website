@@ -218,7 +218,7 @@ async function robustImport() {
     r = t(mkx(3, 0x3, (c, i) => c === 2 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske mit fehlender Position: Kanal wird mittig eingemischt und gemeldet', r.ok && Math.abs(pk(r.r.L) - pk(r.r.R)) < 1e-4 && /keine Lautsprecherposition/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]); }
   { let ok = false, info = ''; try { const r = await fetch('Anleitung.pdf'); const u = new Uint8Array(await r.arrayBuffer()); ok = r.ok && String.fromCharCode(...u.slice(0, 5)) === '%PDF-' && !!$('#btnGuide'); info = r.status + ', ' + Math.round(u.length / 1024) + ' KB'; } catch (e) { info = e.message; }
     res.push(['Anleitung: Knopf oben vorhanden, PDF liegt neben der App', ok, info]); }
-  res.push(['Version 1.8.2 wird angezeigt', /1\.8\.2/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
+  res.push(['Version 1.9.0 wird angezeigt', /1\.9\.0/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
   return res;
 },
 async function mp3Export() {
@@ -284,6 +284,33 @@ async function cleanSongTest() {
   // Ladereihenfolge: Neuzeichnen direkt nach Laden-Start darf nicht abstürzen (vorher S.peaks null)
   S.peaks = null; let err = ''; const pr = loadTrack({ sr: 44100, L: new Float32Array(44100), R: new Float32Array(44100), name: 'Kurz', demo: true }); try { drawAll(); } catch (e) { err = e.message; } await pr;
   res.push(['Laden: Wellenform zeichnet schon während der Audio-Start läuft', !err, err || 'ok']);
+  if (keep) await loadTrack(keep); return res;
+},
+async function notchAndHear() {
+  const res = [], sr = 48000;
+  // Kerbe: offline gerendert wie im Export
+  const p = clone(DEFAULT); p.eq.on = true; p.eq.bands.forEach(b => b.on = false); p.comp.on = false; p.sat.on = false; p.stereo.on = false; p.lim.on = false; p.eq.notch[0] = { on: true, f: 3455, q: 290 };
+  const lvl = async (f) => { const n = sr * 2, oc = new OfflineAudioContext(2, n, sr), b = oc.createBuffer(2, n, sr); for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < n; i++) d[i] = 0.3 * Math.sin(2 * Math.PI * f * i / sr); }
+    const ch = buildChain(oc, p, {}), s = oc.createBufferSource(); s.buffer = b; s.connect(ch.input); ch.output.connect(oc.destination); s.start(0); const o = await oc.startRendering(), d = o.getChannelData(0); let m = 0; for (let i = sr; i < n; i++) m = Math.max(m, Math.abs(d[i])); return 20 * Math.log10(m / 0.3); };
+  const a0 = await lvl(3455), a1 = await lvl(3300), a2 = await lvl(1000);
+  res.push(['Kerbe 3455 Hz (Güte 290): Ton weg, 155 Hz daneben unverändert', a0 < -30 && Math.abs(a1) < 0.5 && Math.abs(a2) < 0.1, '3455 Hz ' + a0.toFixed(1) + ' dB, 3300 Hz ' + a1.toFixed(2) + ' dB, 1 kHz ' + a2.toFixed(2) + ' dB']);
+  let ok1 = true; try { validateSettings(p); } catch (e) { ok1 = false; } const old = clone(DEFAULT); delete old.eq.notch; let ok2 = true; try { ok2 = validateSettings(old).eq.notch.length === 6; } catch (e) { ok2 = false; }
+  const bad = clone(p); bad.eq.notch[0].q = 'x'; let rej = false; try { validateSettings(bad); } catch (e) { rej = true; }
+  res.push(['Kerben: Einstellungen mit und ohne Kerben gültig, fehlerhafte abgelehnt', ok1 && ok2 && rej, [ok1, ok2, rej].join(' / ')]);
+  const keepP = clone(P); P.eq.notch[0] = { on: true, f: 2883, q: 200 }; refreshAll(); const shown = $$('#eqNotches .notch').length;
+  $('#presetSel').value = 'stream'; $('#presetSel').dispatchEvent(new Event('change')); const kept = P.eq.notch[0].on && P.eq.notch[0].f === 2883;
+  res.push(['Kerben: werden im EQ angezeigt und bleiben beim Preset-Wechsel erhalten', shown === 1 && kept, shown + ' angezeigt, erhalten: ' + kept]);
+  P = keepP; refreshAll(); onParam();
+  // Hör-Vergleich in der App: Bearbeitung mit Rauschen in einem Bereich
+  const n = sr * 16, L = new Float32Array(n); let sd = 3; const rnd = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 - 0.5; };
+  for (let i = 0; i < n; i++) { const t = i / sr; L[i] = 0.2 * Math.sin(2 * Math.PI * [220, 330, 262, 294][Math.floor(t / 2) % 4] * t) * (0.6 + 0.4 * Math.sin(2 * Math.PI * 2 * t)) + 0.01 * rnd(); }
+  const keep = S.track; await loadTrack({ sr, L, R: L.slice(), name: 'Hör-Test', demo: true }); for (let i = 0; i < 100 && !S.orig; i++) await sleep(100);
+  S.sel = { a: 9, b: 11 }; mapSel('Test Rauschen', (l, r, a, b) => { for (let i = a; i < b; i++) { const v = 0.05 * rnd(); l[i] += v; r[i] += v; } });
+  showTab('ana'); $('#hearMode').value = 'edit'; $('#btnHear').click(); for (let i = 0; i < 300 && (HEAR.busy || !HEAR.res || HEAR.ver !== S.ver); i++) await sleep(100);
+  const hr = HEAR.res, sp = hr && hr.spots[0];
+  res.push(['Hör-Vergleich: Bearbeitung mit Rauschen (9–11 s) erkannt, Stelle gefunden', !!hr && hr.mos < 4.75 && sp && sp.t > 8 && sp.t < 12 && !$('#hearOut').hidden, hr ? 'Zahl ' + hr.mos.toFixed(2) + ', Stelle ' + (sp ? sp.t.toFixed(1) + ' s' : '–') : 'kein Ergebnis']);
+  $('#hearMode').value = 'mastering'; HEAR.res = null; $('#btnHear').click(); for (let i = 0; i < 400 && (HEAR.busy || !HEAR.res); i++) await sleep(100);
+  res.push(['Hör-Vergleich: Bearbeitung ↔ Master läuft (rendert den Master)', !!HEAR.res && HEAR.res.mos >= 1 && HEAR.res.mos <= 5, HEAR.res ? 'Zahl ' + HEAR.res.mos.toFixed(2) + ', Pegel angeglichen ' + HEAR.res.gainDb.toFixed(1) + ' dB' : 'kein Ergebnis']);
   if (keep) await loadTrack(keep); return res;
 },
 async function aiKeyStorage() {

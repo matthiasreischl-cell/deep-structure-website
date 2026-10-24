@@ -123,6 +123,15 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Vorschlag:** die k = 5 nächsten Beispiele, Gewicht 1/(0,15 + d)². Zahlen gewichtet gemittelt (Frequenzen, Güten, Zeiten, Ratio logarithmisch), Schalter per Mehrheit, Filtertypen nach dem stärksten Gewicht. Ausgeschaltete EQ-Bänder zählen als 0 dB. Ergebnis wird gerundet und über `validateSettings` geprüft. Die Ziel-Lautheit ist das gewichtete Mittel der erreichten Lautheit, eingestellt über `setDriveToTarget`.
 - **Speicher:** IndexedDB `dsms-style` auf dem Gerät, nichts verlässt das Gerät. Sicherung als `*.dsstyle.json` (Format `deepstructure.style.v1`); beim Laden werden Einträge mit ungültigen Einstellungen übersprungen.
 
+## Album-Review
+
+- **Speicher:** IndexedDB `dsms-album` mit den Bereichen `projects` (Projekt mit Songs, Versionen, Kommentaren, Entscheidungen) und `blobs` (Originaldateien unverändert; bearbeitete Audiodaten einer Version als WAV 24 Bit, gleiche Bearbeitung wird über einen Fingerabdruck nur einmal gespeichert). Gespeichert wird nach jedem Schritt, dadurch übersteht ein Projekt Abbruch und Neustart. Dekodiert im Arbeitsspeicher liegt nur der geöffnete Song.
+- **Version:** `n`, Datum, Quelle, Modell (z. B. Claude API oder Mein Stil mit Vorbildern), App-Version, vollständige Einstellungen inkl. Kerben, Lautheitsziel, Bearbeitung (`editKey`, Beschreibung), Merkmale für Mein Stil, Messwerte (I, TP, LRA), Prüfergebnis, die zum Zeitpunkt offenen Kommentare.
+- **Status:** `neu` (Nicht geprüft) nach jeder neuen oder zurückgeholten Version; `ueberarbeiten`; `frei` nur nach bestandener Prüfung und ausdrücklicher Freigabe; `blockiert` bei blockierendem Prüffehler. Alle Entscheidungen stehen mit Datum und Version im Protokoll des Songs.
+- **Technische Prüfung:** Rendern des vollständigen Masters mit Limiter wie beim Export, dann: ungültige Samples (block), Sample-Spitze ≥ −0,001 dBFS (block), True Peak > 0 dBTP oder > Decke + 0,15 dB (block), Renderlänge ≠ Songlänge (block), Länge ≠ Original (Hinweis, Schnitt), ein Kanal stumm (block), Korrelation < −0,2 (block) bzw. < 0,2 (Hinweis), Bass unter 150 Hz verliert in Mono > 6 dB (block) bzw. > 3 dB (Hinweis), Gleichspannung > 0,5 % (Hinweis), Lautheit > 1,5 LU vom Ziel (Hinweis), Hör-Vergleich gegen das Original < 2 (Hinweis).
+- **Lernen:** Freigabe schreibt genau ein positives Beispiel pro Song (`album:<Projekt>:<Song>:v<n>`, Bewertung `ok`), frühere positive Beispiele desselben Songs werden zu Entwürfen. „Überarbeiten“ schreibt die aktuelle Version als `schlecht`. `styleSuggest` und die gelernten Gewichte verwenden ausschließlich Beispiele mit Bewertung `ok`.
+- **Export:** nur Songs mit Status `frei`, deren letzte Entscheidung die Freigabe der aktuellen Version ist; die Einstellungen werden vor dem Export gegen die freigegebene Version verglichen. Ausgabe über die vorhandene Export-Funktion (gleiche Formate und Messung), am PC per Ordnerauswahl (File System Access API), sonst als Downloads.
+
 ## KI-Mastering und Datenschutz
 
 - **Claude-Version** (Artifact in claude.ai): Sie nutzt das Claude-Konto des Nutzers. Hier wird kein Schlüssel benötigt.
@@ -139,6 +148,17 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.12.0 (Album-Review und Freigabe; Mein Stil lernt nur aus Bestätigtem)
+
+- **Neuer Reiter „Album“:** Album-Projekt mit bis zu 12 Songs. Originale werden unverändert im Gerätespeicher abgelegt (IndexedDB), dekodiert wird immer nur der geöffnete Song.
+- **Arbeitsversionen:** Vorschläge aus Assistent, Mein Stil, KI (Claude) oder einer Einstellungsdatei vom Chat „Mastering“ werden als Version gespeichert, eigene Änderungen mit „Als Version speichern“. Jede Version enthält Einstellungen, Bearbeitungen (z. B. Clean Song), Quelle und Modell, App-Version, Messwerte und Prüfergebnis. Jede frühere Version lässt sich wieder öffnen.
+- **Review:** Trackliste mit Status („Nicht geprüft“, „Überarbeiten“, „Freigegeben“, „Technisch blockiert“), A/B-Vergleich über die vorhandene Original/Master-Umschaltung mit Pegelgleich, Kommentare mit Zeitbereich und Fehlertyp (als Markierung in der Wellenform), „Überarbeitungsauftrag kopieren“ für den Chat, „Mit KI überarbeiten“.
+- **Technische Prüfung vor jeder Freigabe:** ungültige Samples, Clipping, True Peak gegen die Decke, Länge, stummer Kanal, Phase und Mono-Verträglichkeit im Bass, Gleichspannung, Abweichung vom Lautheitsziel, Hör-Vergleich gegen das Original. Blockierende Fehler verhindern die Freigabe.
+- **Album-Lautheit:** Ziele mit Balance (die Hälfte der ursprünglichen Unterschiede bleibt, höchstens ±3 LU) oder alle gleich; Prüfung der Spanne mit Hinweisen statt Zwang.
+- **Veröffentlichen:** Exportiert werden nur ausdrücklich freigegebene Songs, deren aktuelle Version die freigegebene ist. Am PC in einen gewählten Ordner („Album – Master“), sonst als Downloads, dazu ein Mastering-Protokoll. Fehlgeschlagene Exporte werden gemeldet, die übrigen laufen weiter.
+- **Mein Stil lernt nur aus Bestätigtem:** Ein gemasterter Export ist jetzt nur ein Entwurf. Gelernt wird erst nach „Passt“ (in der Beispielliste) oder nach einer Freigabe im Album. „Passt nicht“ und „Überarbeiten“ werden als Negativbeispiel dokumentiert und nie nachgeahmt. Wird ein freigegebener Song geändert, zählt er bis zur erneuten Freigabe nicht mehr.
+- **Album-Werkzeug:** höchstens 12 Songs, Clean-Stufen aus der App, Anpassungen pro Song (`"songs": {"3": {...}}`), `--nur 3,5` mastert nur einzelne Songs neu. Einstellungsdateien enthalten die Clean-Stufe und lassen sich im Album als Version laden.
 
 ## Änderungen 1.11.0 (Mein Stil: lernt aus deinen Masters)
 

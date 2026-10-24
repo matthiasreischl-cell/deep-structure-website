@@ -1,7 +1,7 @@
 /* Deep Structure Mastering Studio – Offline-Cache. Version bei jedem Update erhöhen. */
 // Eigener Namensraum je Installationsort (Scope): andere Apps auf derselben Domain (z. B. das Radio) bleiben unberührt.
 const PREFIX = 'ds-studio:' + self.registration.scope + ':';
-const VERSION = PREFIX + 'v1.9.2';
+const VERSION = PREFIX + 'v1.9.3';
 // Ältere Studio-Versionen (bis 1.6.1) hießen 'ds-studio-v…' ohne Namensraum. Sie gehörten nur zu diesem Studio und werden aufgeräumt.
 const isOwnOld = k => k !== VERSION && (k.startsWith(PREFIX) || /^ds-studio-v\d/.test(k));
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon.png'];

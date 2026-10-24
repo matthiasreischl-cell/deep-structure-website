@@ -132,6 +132,12 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
 
+## Änderungen 1.9.3 (PC-Fassung: Audio-Module)
+
+- **PC-Fassung lädt die Audio-Module ohne Umweg:** Edge lehnt bei direkt geöffneten Dateien (`file://`) das erste Ladeverfahren ab und meldete „AudioWorklet-Variante fehlgeschlagen … AbortError“. Das zweite Verfahren (data:) funktionierte, die Meldung war also harmlos. Die PC-Fassung nimmt jetzt gleich das passende Verfahren. Gewarnt wird nur noch, wenn wirklich keins klappt.
+- **Rückmeldung:** Die technischen Daten nennen jetzt, ob das Audio-Modul (AudioWorklet) oder der Ersatz läuft.
+- **Tests:** Der Browser-Testlauf öffnet zusätzlich die PC-Fassung aus der Datei und prüft, dass die Module ohne Warnung laden.
+
 ## Änderungen 1.9.2 (Korrekturen nach dem Prüfbericht 1.9.0)
 
 - **Statuszeile nur noch als Text:** Meldungen mit Dateinamen oder Fehlertexten wurden als HTML gedeutet. Ein präparierter Dateiname hätte so HTML oder Skript-Code in die Seite bringen können. Jetzt wird alles als reiner Text angezeigt.

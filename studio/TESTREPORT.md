@@ -362,3 +362,16 @@ Jeder Befund wurde zuerst am Stand 1.9.1 nachgeprüft. Die neuen Tests schlagen 
 Zum Hinweis im Bericht, 1.9.1 fehle: Der Bericht prüfte Commit `0d1c243` (1.9.0). 1.9.1 kam danach mit Pull Request #6 (`f4799ed`) auf `main`.
 
 Gesamt: 78 von 78 DSP-Tests, 95 von 95 Browser-Tests.
+
+## 21. Nachtrag 1.9.3: PC-Fassung und Audio-Module
+
+Anlass: In der PC-Fassung (Edge, aus der Datei geöffnet) stand in der Konsole „AudioWorklet-Variante fehlgeschlagen AbortError: Unable to load a worklet's module.“
+
+Ursache: Die App lädt ihre Audio-Module zuerst über eine blob:-Adresse, bei Ablehnung über eine data:-Adresse. Edge lehnt blob: bei `file://`-Seiten ab. Die zweite Variante lief, die Meldung war eine Warnung ohne Folgen. Wären beide gescheitert, hätte die App beim Start den Hinweis auf den Ersatz-Limiter gezeigt.
+
+| Prüfung | Ergebnis |
+|---|---|
+| PC-Fassung über `file://` in Chromium | Module geladen, data: als erstes Verfahren, keine Warnung |
+| Website-Fassung (https) | unverändert blob: zuerst |
+
+Gesamt: 78 von 78 DSP-Tests, 95 von 95 Browser-Tests plus 2 Prüfungen der PC-Fassung.

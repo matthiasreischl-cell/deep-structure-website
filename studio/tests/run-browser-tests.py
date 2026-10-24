@@ -27,7 +27,21 @@ async def main():
         for s, n, d in r['rows']: print(('  ✔ ' if s == 'PASS' else '  ✘ ') + n + '   ' + d)
         print(f"\n{r['pass']} bestanden, {r['fail']} fehlgeschlagen")
         if errs: print('Seitenfehler:', errs)
+        fail = r['fail']
+        # PC-Fassung wie unter Windows direkt aus der Datei (file://) öffnen: Audio-Module müssen ohne Warnung laden.
+        desk = os.path.join(ROOT, 'desktop', 'Deep Structure Mastering Studio.html')
+        if os.path.exists(desk):
+            dp = await b.new_page(); warns = []
+            dp.on('console', lambda m: warns.append(m.text) if m.type in ('warning', 'error') and 'ERR_' not in m.text else None)
+            dp.on('pageerror', lambda e: warns.append(str(e)))
+            await dp.goto('file://' + desk.replace(' ', '%20'))
+            await dp.wait_for_function('typeof S !== "undefined" && S.master && !S.measuring', timeout=120000)
+            st = await dp.evaluate('({ ok: S.workletOK, url: workletUrlOK, ver: document.querySelector(".brand .ver").textContent })')
+            for n, ok, d in [('PC-Fassung (file://): Audio-Module geladen, data: zuerst', st['ok'] and st['url'] == 1, json.dumps(st)),
+                             ('PC-Fassung (file://): keine Warnungen beim Start', not warns, '; '.join(warns)[:200] or 'keine')]:
+                print(('  ✔ ' if ok else '  ✘ ') + n + '   ' + d); fail += 0 if ok else 1
+            print(f"PC-Fassung: {'bestanden' if fail == r['fail'] else 'fehlgeschlagen'}")
         await b.close()
-    srv.shutdown(); sys.exit(1 if r['fail'] else 0)
+    srv.shutdown(); sys.exit(1 if fail else 0)
 
 asyncio.run(main())

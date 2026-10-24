@@ -133,6 +133,14 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
 
+## Änderungen 1.10.1 (Equalizer: Punkte ziehen)
+
+- **Hochziehen verschiebt die Frequenz nicht mehr:** Beim Ziehen eines EQ-Punkts wurden Frequenz und Pegel immer gleichzeitig aus der Zeigerposition gesetzt. Ein Zug senkrecht nach oben mit ein paar Pixeln Wackeln verschob Band 4 deshalb von 550 auf 567 Hz (Maus) bzw. 599 Hz (Finger). Außerdem sprang der Punkt beim Anfassen neben der Mitte auf die Zeigerposition. Gemeldet von einem Tester mit Studio- und DJ-Erfahrung.
+  - Jetzt wird relativ gezogen: Der Punkt springt nicht mehr.
+  - Jede Richtung reagiert erst nach einer kleinen Schwelle (Maus 10 px seitlich / 3 px hoch, Finger 18 / 6 px). Senkrecht ändert nur den Pegel, waagerecht nur die Frequenz, schräg beides.
+  - Am PC hält Umschalt die Frequenz fest, Alt oder Strg den Pegel.
+- **Hinweis im EQ:** Die Kurve zeigt die Summe aller Bänder. Nachbarbänder überlappen (bei Q 1 hebt +9 dB bei 550 Hz die Kurve bei 220 und 1400 Hz um etwa 1,8 dB mit an). Das ist normales EQ-Verhalten, die anderen Bänder selbst bleiben unverändert.
+
 ## Änderungen 1.10.0 (Spiel-Daten folgen schwankendem Tempo)
 
 - **Beat-Verfolgung:** Die Spiel-Daten legten bisher immer ein streng gleichmäßiges Beat-Raster an. KI-Songs schwanken aber oft leicht im Tempo. Bei „Prologue: Awakening the Stars“ (Level 1) lief das Raster dadurch bis zu ±200 ms, also fast einen halben Beat, neben der Musik. Jetzt verfolgt das Studio die tatsächlichen Schläge (Kick und Breitband-Einsätze) und glättet sie. Bei festem Tempo bleibt das Raster exakt gleichmäßig wie bisher.

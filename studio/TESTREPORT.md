@@ -400,3 +400,20 @@ Gesamt: 78 von 78 DSP-Tests, 95 von 95 Browser-Tests plus 2 Prüfungen der PC-Fa
 **Godot 4.5.1 (headless, echte Spiel-Daten dieses Songs, neuer `track_data.gd`):** JSON lädt; `beat_index` trifft alle 723 Beats; `beat_time`, `beat_phase` (0,5 genau zwischen zwei Beats), `bar_index` und `is_downbeat` (180 Takte), `section_at` (15 Abschnitte) und `intensity_at` (0–1) sind über den ganzen Song korrekt. Die OGG lädt in Godot, die Länge stimmt mit den Daten überein. Bei der Wiedergabe ab 1:00 löste die MusicClock in 8 s 18 Beats aus, im Median 4,2 ms (höchstens 6,0 ms) nach dem Beat. Zum Vergleich: Ein gleichmäßiges Raster mit dem mittleren Tempo läge bis zu 330 ms daneben.
 
 Gesamt: 81 von 81 DSP-Tests, 97 von 97 Browser-Tests.
+
+## 23. Nachtrag 1.10.1: Equalizer-Bedienung
+
+Anlass: Ein Tester (DJ, eigenes Studio) meldete, dass sich beim Hochziehen eines EQ-Punkts die Frequenz mitverändert und andere Bänder „mitgezogen“ werden.
+
+| Prüfung (Chromium, echte Maus bzw. echte Touch-Ereignisse, 1280 px bzw. Handy 390 px) | 1.10.0 | 1.10.1 |
+|---|---|---|
+| Band 4 senkrecht hochziehen, 5 px neben der Mitte angesetzt, ±3 px Wackeln | Maus 550 → 567 Hz, Finger 550 → 599 Hz | 550 Hz bleibt, +7,6 / +9,2 dB |
+| Band 5 waagerecht ziehen | – | nur Frequenz (1400 → 2405 / 5208 Hz), 0 dB bleibt |
+| Band 3 schräg ziehen | – | Frequenz und Pegel |
+| Punkt antippen (5 px neben der Mitte) | Punkt springt | keine Änderung |
+| Andere Bänder beim Ziehen | unverändert | unverändert |
+| Zuordnung Band ↔ Filter im Audio-Pfad (auch mit abgeschalteten Bändern) | korrekt | korrekt |
+
+Überlappung (RBJ-Glockenfilter, +9 dB bei 550 Hz): bei Q 1 +1,8 dB bei 220 Hz und +1,7 dB bei 1400 Hz, bei Q 2 +0,6 / +0,5 dB, bei Q 4 +0,1 / +0,1 dB. Das ist normales EQ-Verhalten und steht jetzt als Hinweis im EQ.
+
+Gesamt: 81 von 81 DSP-Tests, 101 von 101 Browser-Tests (neu: vier EQ-Zieh-Tests).

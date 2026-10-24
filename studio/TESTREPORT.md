@@ -328,3 +328,20 @@ Gesamt: 72 von 72 DSP-Tests, 84 von 84 Browser-Tests.
 | Export MP3 320 von Blueprint | Hörbarer Kodierverlust 4,9 von 5 |
 
 Gesamt: 77 von 77 DSP-Tests, 90 von 90 Browser-Tests.
+
+## 19. Nachtrag 1.9.1: Wiedergabe auf dem Smartphone
+
+Anlass: Nach dem Mastering klang der Track auf dem Smartphone schlechter (fehlende Teile am Gesang, neue Knackser).
+
+| Prüfung | Ergebnis |
+|---|---|
+| Export auf emuliertem Smartphone (Clean Song + Assistent + WAV), Vergleich mit dem Original | keine neuen Knackser, Gesangsbereich unverändert; nur leise Intro- und Outro-Höhen verändert (Rauschteppich, gewollt) |
+| Rechenzeit Limiter Wiedergabe (sparsam) gegen Export (genau) | etwa 3,5-mal geringer |
+| Rechenzeit Kompressor 1.9.1 gegen 1.9.0 | etwa 2,3-mal geringer, Ergebnis gleich |
+| Vorschau gegen Export, Blueprint | Unterschied −61,5 dB, Pegel 0,006 dB |
+| Vorschau gegen Export, synthetisches Testsignal (Grenzfall mit vielen Spitzen nahe der Decke) | Unterschied −33,3 dB (Testschwelle −30 dB) |
+| AudioWorklet lädt verspätet | Studio wechselt nachträglich vom Ersatz auf das Worklet, Wiedergabe läuft weiter |
+
+Schlussfolgerung: Die fertige Datei ist sauber. Die Störungen entstehen bei der Echtzeit-Wiedergabe, wenn das Gerät die Kette nicht rechtzeitig schafft. Diese Last ist jetzt deutlich kleiner.
+
+Gesamt: 78 von 78 DSP-Tests, 90 von 90 Browser-Tests.

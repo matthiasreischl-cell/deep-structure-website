@@ -218,7 +218,9 @@ async function robustImport() {
     r = t(mkx(3, 0x3, (c, i) => c === 2 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske mit fehlender Position: Kanal wird mittig eingemischt und gemeldet', r.ok && Math.abs(pk(r.r.L) - pk(r.r.R)) < 1e-4 && /keine Lautsprecherposition/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]); }
   { let ok = false, info = ''; try { const r = await fetch('Anleitung.pdf'); const u = new Uint8Array(await r.arrayBuffer()); ok = r.ok && String.fromCharCode(...u.slice(0, 5)) === '%PDF-' && !!$('#btnGuide'); info = r.status + ', ' + Math.round(u.length / 1024) + ' KB'; } catch (e) { info = e.message; }
     res.push(['Anleitung: Knopf oben vorhanden, PDF liegt neben der App', ok, info]); }
-  res.push(['Version 1.9.1 wird angezeigt', /1\.9\.1/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
+  { const v = (document.querySelector('.brand .ver') || {}).textContent || ''; let sw = '';
+    try { sw = ((await (await fetch('sw.js', { cache: 'no-store' })).text()).match(/const VERSION = PREFIX \+ 'v([^']+)'/) || [])[1] || ''; } catch (e) { sw = e.message; }
+    res.push(['Version einheitlich: Anzeige und Offline-Cache gleich, kein Platzhalter übrig', /^\d+\.\d+\.\d+$/.test(v) && v === sw && !/@VERSION@/.test(document.documentElement.innerHTML), 'Anzeige ' + v + ', Cache ' + sw]); }
   return res;
 },
 async function mp3Export() {
@@ -311,6 +313,11 @@ async function notchAndHear() {
   res.push(['Hör-Vergleich: Bearbeitung mit Rauschen (9–11 s) erkannt, Stelle gefunden', !!hr && hr.mos < 4.75 && sp && sp.t > 8 && sp.t < 12 && !$('#hearOut').hidden, hr ? 'Zahl ' + hr.mos.toFixed(2) + ', Stelle ' + (sp ? sp.t.toFixed(1) + ' s' : '–') : 'kein Ergebnis']);
   $('#hearMode').value = 'mastering'; HEAR.res = null; $('#btnHear').click(); for (let i = 0; i < 400 && (HEAR.busy || !HEAR.res); i++) await sleep(100);
   res.push(['Hör-Vergleich: Bearbeitung ↔ Master läuft (rendert den Master)', !!HEAR.res && HEAR.res.mos >= 1 && HEAR.res.mos <= 5, HEAR.res ? 'Zahl ' + HEAR.res.mos.toFixed(2) + ', Pegel angeglichen ' + HEAR.res.gainDb.toFixed(1) + ' dB' : 'kein Ergebnis']);
+  { const g0 = P.eq.bands[0].gain; const had = !!HEAR.res; P.eq.bands[0].gain = g0 + 1.5; onParam();
+    res.push(['Hör-Vergleich: nach EQ-Änderung wird das alte Ergebnis verworfen und „neu vergleichen“ angezeigt', had && !HEAR.res && $('#hearOut').hidden && !$('#hearStale').hidden, 'vorher Ergebnis: ' + had + ', jetzt: ' + !!HEAR.res]);
+    $('#btnHear').click(); await sleep(30); const busy = HEAR.busy; P.eq.bands[0].gain = g0; onParam();
+    for (let i = 0; i < 400 && HEAR.busy; i++) await sleep(100);
+    res.push(['Hör-Vergleich: Änderung während der Berechnung → kein veraltetes Ergebnis', busy && !HEAR.res && $('#hearOut').hidden, 'lief: ' + busy + ', Ergebnis angezeigt: ' + !!HEAR.res]); }
   if (keep) await loadTrack(keep); return res;
 },
 async function aiKeyStorage() {
@@ -319,6 +326,10 @@ async function aiKeyStorage() {
   document.querySelector('#btnAIKey').click(); let stored = null; try { stored = localStorage.getItem('dsms.aikey'); } catch (e) {}
   res.push(['API-Schlüssel: ohne Häkchen nur im Arbeitsspeicher', stored === null && AI.key === 'sk-ant-test-0000', 'localStorage: ' + stored]);
   document.querySelector('#btnAIKeyDel').click(); res.push(['API-Schlüssel: Entfernen löscht ihn', AI.key === null, String(AI.key)]);
+  res.push(['KI-Anzeige: nach dem Entfernen steht wieder „nicht verbunden“', AI.mode !== 'api' && (AI.mode === 'claude' || document.querySelector('#aiBadge').textContent === 'nicht verbunden'), document.querySelector('#aiBadge').textContent]);
+  window.__xss = 0; status('Datei <img src=x onerror="window.__xss=1">.wav geladen', 'ok'); await sleep(50); const st = document.querySelector('#status');
+  res.push(['Statuszeile: Dateinamen und Fehlertexte werden nur als Text gezeigt (kein HTML)', !st.querySelector('img') && st.textContent.includes('<img') && window.__xss === 0, st.children.length + ' Elemente']);
+  status('Läuft <b>x</b>', 'busy'); res.push(['Statuszeile: Lade-Kreisel bleibt, Text bleibt Text', st.firstChild.className === 'busy' && !st.querySelector('b') && st.textContent === 'Läuft <b>x</b>', st.innerHTML.slice(0, 60)]); status('Fertig.', 'ok', 10);
   return res;
 }
 ];

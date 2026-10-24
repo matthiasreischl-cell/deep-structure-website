@@ -247,6 +247,11 @@ for (const [ratio, want] of [[2, -15], [4, -17.5]]) { const x = sine(48000, 3, 1
   const lagd = D.hearCompare(x.L, x.R, dL, dR, sr, {});
   check('Hör-Vergleich: zeitlicher Versatz (20 ms) wird ausgeglichen', Math.abs(lagd.lagMs - 20) < 0.1 && lagd.mos > 4.9, lagd.lagMs.toFixed(2) + ' ms, Zahl ' + lagd.mos.toFixed(2));
 }
+{ // Echtzeit-Vorschau (sparsamer Limiter-Modus) klingt wie der Export
+  const sr = 48000, x0 = song(128, sr), x = { L: x0.L.map(v => v * 2), R: (x0.R || x0.L).map(v => v * 2) }, a = { L: x.L.slice(), R: x.R.slice() }, b = { L: x.L.slice(), R: x.R.slice() };
+  const run = (s, lite) => { const l = new D.DSLimiter(sr); l.lite = lite; l.set({ ceiling: -1, isp: true, release: 80 }); for (let o = 0; o < s.L.length; o += 128) l.process(s.L.subarray(o, o + 128), s.R.subarray(o, o + 128), Math.min(128, s.L.length - o)); };
+  run(a, false); run(b, true); let ea = 0, ed = 0; for (let i = sr; i < a.L.length; i++) { ea += a.L[i] * a.L[i]; ed += (a.L[i] - b.L[i]) ** 2; }
+  check('Limiter-Vorschau (sparsam, fürs Handy) entspricht dem Export (Unterschied < −30 dB; Blueprint: −61 dB)', 10 * Math.log10(ed / ea) < -30, (10 * Math.log10(ed / ea)).toFixed(1) + ' dB'); }
 const w = Math.max(...rows.map(r => r[1].length));
 console.log('\nDeep Structure Mastering Studio – DSP-Tests (' + path.basename(htmlPath) + ')\n');
 for (const [s, n, d] of rows) console.log((s === 'PASS' ? '  ✔ ' : '  ✘ ') + n.padEnd(w) + '  ' + d);

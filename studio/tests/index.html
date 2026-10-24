@@ -218,7 +218,7 @@ async function robustImport() {
     r = t(mkx(3, 0x3, (c, i) => c === 2 && i === 100 ? 0.5 : 0)); res.push(['WAV-Kanalmaske mit fehlender Position: Kanal wird mittig eingemischt und gemeldet', r.ok && Math.abs(pk(r.r.L) - pk(r.r.R)) < 1e-4 && /keine Lautsprecherposition/.test(r.notes.join(' ')), r.ok ? r.notes.join(' ') : r.err]); }
   { let ok = false, info = ''; try { const r = await fetch('Anleitung.pdf'); const u = new Uint8Array(await r.arrayBuffer()); ok = r.ok && String.fromCharCode(...u.slice(0, 5)) === '%PDF-' && !!$('#btnGuide'); info = r.status + ', ' + Math.round(u.length / 1024) + ' KB'; } catch (e) { info = e.message; }
     res.push(['Anleitung: Knopf oben vorhanden, PDF liegt neben der App', ok, info]); }
-  res.push(['Version 1.9.0 wird angezeigt', /1\.9\.0/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
+  res.push(['Version 1.9.1 wird angezeigt', /1\.9\.1/.test(document.querySelector('.brand').textContent), document.querySelector('.brand small').textContent]);
   return res;
 },
 async function mp3Export() {

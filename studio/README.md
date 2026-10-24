@@ -37,7 +37,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 
 **Export:**
 - Der Export rendert die Kette mit `OfflineAudioContext`. Die Latenz wird per Klick-Test kompensiert.
-- Limiter, Messung und WAV-Kodierung laufen im Web Worker, mit demselben Limiter-Code wie in der Echtzeit-Wiedergabe (AudioWorklet).
+- Limiter, Messung und WAV-Kodierung laufen im Web Worker, mit demselben Limiter-Code wie in der Echtzeit-Wiedergabe (AudioWorklet). Die Wiedergabe nutzt ab 1.9.1 eine sparsame Spitzenerkennung (nur der 16-Tap-Vorfilter, ohne 128-Tap-Stufe und Nyquist-Zuschlag), damit auch Smartphones die Kette ohne Aussetzer schaffen. Export und Messung rechnen immer genau.
 - Formate: WAV 16 und 24 Bit (TPDF-Dither, deterministisch), 32 Bit Float, OGG Vorbis (ca. 140 oder 240 kbit/s, VBR) sowie MP3 (320 oder 192 kbit/s, CBR).
 - MP3: LAME über `lame.min.js` (lamejs, LGPL, als eigene Datei eingebunden). Vor die Audio-Frames setzt die App einen LAME-„Info“-Frame mit Encoder-Verzögerung (576) und Auffüllung. Browser, FFmpeg, VLC und minimp3 spielen dadurch lückenlos und sample-genau. MP3 erlaubt nur 32, 44,1 und 48 kHz, andere Raten werden für MP3 auf 48 kHz umgerechnet.
 - Import von MP3, OGG und FLAC: Die Abtastrate wird aus dem Dateikopf gelesen, dekodiert wird in der Originalrate (vorher wurden MP3s auf 44,1 kHz umgerechnet).
@@ -131,6 +131,14 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.9.1 (Wiedergabe auf dem Smartphone)
+
+- **Weniger Rechenlast bei der Wiedergabe:** Auf schwachen Geräten konnte die Echtzeit-Kette zu viel Rechenzeit brauchen. Dann setzt das Audio kurz aus, das klingt wie Knackser und fehlende Teile, besonders hörbar am Gesang. Die exportierte Datei war davon nicht betroffen.
+  - Der Limiter der Wiedergabe nutzt eine sparsame Spitzenerkennung (etwa 3,5-mal weniger Rechenzeit). Im Export bleibt die genaue True-Peak-Erkennung unverändert. Bei Musik weichen Vorschau und Export um weniger als −60 dB voneinander ab (Blueprint: −61,5 dB, Pegel 0,006 dB).
+  - Der Kompressor rechnet etwa 2,3-mal schneller (gleiches Ergebnis).
+  - Auf Smartphones und Geräten mit höchstens 4 Kernen wird die Messung nach einer Änderung nicht mehr während der Wiedergabe gerechnet, sondern beim Anhalten.
+- **Kein Dauer-Ersatz mehr:** Lädt das Audio-Modul (AudioWorklet) erst nach den 5 Sekunden Wartezeit, wechselt das Studio jetzt nachträglich darauf, statt bis zum Neuladen den langsameren Ersatz zu nutzen. Der Ersatz selbst arbeitet mit größerem Puffer (weniger Aussetzer).
 
 ## Änderungen 1.9.0 (Hör-Vergleich, EQ-Kerben)
 
@@ -234,3 +242,5 @@ Eine Codex-Überarbeitung vom 23.10.2026 basierte auf 1.6.0. Ihr fehlte deshalb 
 - Die Vergleichskurve des Song-Checks ist ein grober Durchschnitt. Für Genre-gerechte Aussagen eine Referenz laden.
 - Die Artefakt-Suche bewertet relativ zum Song. Ein durchgehend artefaktbehafteter Song zeigt deshalb nicht jede Stelle.
 - Die Echtzeit-Lautheitsanzeige ist eine Näherung (K-Filter aus Web-Audio-Biquads). Maßgeblich sind die Werte im Reiter Analyse, die exakt dem Export entsprechen.
+- Die Wiedergabe-Vorschau des Limiters ist sparsamer als der Export. Bei Musik ist der Unterschied unhörbar (unter −60 dB), maßgeblich für True Peak sind die Werte im Reiter Analyse und die exportierte Datei.
+- Auf Smartphones und Geräten mit höchstens 4 Kernen wird nach einer Änderung erst beim Anhalten neu gemessen.

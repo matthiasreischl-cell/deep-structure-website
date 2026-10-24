@@ -159,6 +159,14 @@ async function gameData() {
   const sel = document.querySelector('#gmSections tbody select'); sel.value = 'drop'; sel.dispatchEvent(new Event('change'));
   res.push(['Spiel-Daten: Abschnittstyp umbenennen landet im JSON', JSON.parse(document.querySelector('#gmOut').value).sections[0].type === 'drop', GAME.sections[0].type]);
   const gd = godotCode(), cx = codexGuide();
+  res.push(['Spiel-Daten: festes Tempo → steadyTempo true, Godot-Code nutzt die Beat-Liste (bsearch)', j.track.steadyTempo === true && /beats\.bsearch\(t, false\)/.test(gd) && /func beat_time/.test(gd), 'steadyTempo ' + j.track.steadyTempo]);
+  { const sr2 = 44100, n2 = sr2 * 60, L2 = new Float32Array(n2), tb = []; let t = 0.5; while (t < 59) { tb.push(t); t += 60 / (120 + 4 * t / 60); }
+    tb.forEach(x => { const i0 = Math.round(x * sr2); for (let i = 0; i < 6000 && i0 + i < n2; i++) L2[i0 + i] += 0.8 * Math.sin(2 * Math.PI * 60 * i / sr2) * Math.exp(-i / 1500); });
+    await loadTrack({ sr: sr2, L: L2, R: L2.slice(), name: 'Tempo schwankt', demo: true }); GAME.raw = null; await runGame(true); for (let i = 0; i < 100 && (GAME.busy || !GAME.raw); i++) await sleep(100);
+    document.querySelector('#gmInc [data-inc="beats"]').checked = false; updateGameOut(); const j2 = JSON.parse(document.querySelector('#gmOut').value);
+    const err = tb.slice(2, -2).map(x => Math.min(...j2.beats.map(b => Math.abs(b - x))) * 1000).sort((a, b) => a - b);
+    res.push(['Spiel-Daten: schwankendes Tempo → steadyTempo false, Beats immer im JSON, treffen die Schläge', j2.track.steadyTempo === false && Array.isArray(j2.beats) && err[err.length >> 1] < 8 && /schwankt/.test(codexGuide()), 'Median ' + (err[err.length >> 1] || 0).toFixed(1) + ' ms, ' + j2.track.tempoRangeBpm.join('–') + ' BPM']);
+    document.querySelector('#gmInc [data-inc="beats"]').checked = true; }
   res.push(['Spiel-Daten: Godot-Code und Codex-Anleitung erzeugt', /class_name TrackData/.test(gd) && /func song_time/.test(gd) && /TECHNISCHE REGELN/.test(cx) && cx.includes('120 BPM'), gd.length + ' / ' + cx.length + ' Zeichen']);
   document.querySelector('#gmLevel').value = ''; showTab('check'); if (keep) await loadTrack(keep); return res;
 },

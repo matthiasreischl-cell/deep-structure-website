@@ -375,3 +375,28 @@ Ursache: Die App lädt ihre Audio-Module zuerst über eine blob:-Adresse, bei Ab
 | Website-Fassung (https) | unverändert blob: zuerst |
 
 Gesamt: 78 von 78 DSP-Tests, 95 von 95 Browser-Tests plus 2 Prüfungen der PC-Fassung.
+
+## 22. Nachtrag 1.10.0: Praxistest „Lvl 1 Prologue: Awakening the Stars“ (OGG-Master) und Spiel-Daten
+
+**Master (OGG Vorbis, 48 kHz, 256 kbit/s nominal, 5:22,8), nachgemessen mit FFmpeg:**
+
+| Messung | Ergebnis |
+|---|---|
+| Integrierte Lautheit / LRA | −10,6 LUFS / 3,2 LU |
+| True Peak (FFmpeg, 4-fach) | −1,1 dBTP, kein Clipping (Flat factor 0) |
+| DC-Versatz | < 0,00001 |
+| Knackser-Suche (2. Ableitung, Hochton-Dauer) | keine Knackser; die stärksten Kandidaten sind HiHat- und Perkussions-Einsätze mit normalem Ausklang |
+| Spektrum | Höhen bis etwa 20 kHz (Vorbis-Grenze), viel Energie unter 60 Hz |
+| Songende | endet bei −26,5 dBFS ohne Ausblenden (letzte 100 ms gleich laut) |
+
+**Spiel-Daten:** Die unabhängige Prüfung (eigene Onset-Kurve, Autokorrelation, Beat-Verfolgung in numpy) ergab: Das Tempo steigt über den Song leicht von etwa 134,0 auf 135,5 BPM. Das gleichmäßige Raster aus 1.9.3 (134,37 BPM, Sicherheit 0,14) lag bis zu ±200 ms neben den Schlägen. Die Einsatzstärke auf dem Raster war 1,1-mal so hoch wie der Mittelwert, also praktisch Zufall.
+
+| Raster | Einsatzstärke Breitband / Kick (× Mittelwert) |
+|---|---|
+| 1.9.3, gleichmäßig | 3,35 / 2,00 (zeitlich optimal verschoben) |
+| 1.10.0, verfolgt | 8,15 / 3,78 |
+| unabhängige Referenz-Verfolgung | 8,59 / 3,70 |
+
+**Godot 4.5.1 (headless, echte Spiel-Daten dieses Songs, neuer `track_data.gd`):** JSON lädt; `beat_index` trifft alle 723 Beats; `beat_time`, `beat_phase` (0,5 genau zwischen zwei Beats), `bar_index` und `is_downbeat` (180 Takte), `section_at` (15 Abschnitte) und `intensity_at` (0–1) sind über den ganzen Song korrekt. Die OGG lädt in Godot, die Länge stimmt mit den Daten überein. Bei der Wiedergabe ab 1:00 löste die MusicClock in 8 s 18 Beats aus, im Median 4,2 ms (höchstens 6,0 ms) nach dem Beat. Zum Vergleich: Ein gleichmäßiges Raster mit dem mittleren Tempo läge bis zu 330 ms daneben.
+
+Gesamt: 81 von 81 DSP-Tests, 97 von 97 Browser-Tests.

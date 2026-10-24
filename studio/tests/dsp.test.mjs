@@ -157,6 +157,19 @@ for (const bpm of [75, 90, 128, 140, 174]) {
 { const x = song(128), g = gd(x, { bpm: 127.5 }); check('Spiel-Daten: eingetragenes Tempo wird exakt übernommen', g.bpm === 127.5 && Math.abs(g.beatSec - 60 / 127.5) < 1e-9, g.bpm + ' BPM, Beat ' + g.beatSec.toFixed(6) + ' s'); }
 { const x = song(128), g = gd(x, { bpm: 128, downbeatPhase: 2 }); check('Spiel-Daten: Taktanfang lässt sich verschieben', g.downbeatPhase === 2, 'Phase ' + g.downbeatPhase); }
 { const x = noise(44100, 30, 0.2, 11), g = gd(x); check('Spiel-Daten: Rauschen ohne Rhythmus → Raster als unsicher markiert', g.bpmConfidence < 0.3, 'Sicherheit ' + g.bpmConfidence.toFixed(2)); }
+{ // Tempo schwankt (KI-Songs, Live-Einspielungen): 128 → 131 BPM über 3 Minuten, Kick + HiHat + Bass
+  const sr = 44100, dur = 180, n = sr * dur, L = new Float32Array(n), r = rng(17), truth = []; let t = 0.5;
+  while (t < dur - 1) { truth.push(t); t += 60 / (128 + 3 * t / dur); }
+  const add = (t0, len, f) => { const i0 = Math.round(t0 * sr); for (let i = 0; i < len && i0 + i < n; i++) L[i0 + i] += f(i / sr); };
+  truth.forEach((tb, k) => { let p = 0; add(tb, sr * 0.25, s => { p += 2 * Math.PI * 55 * (1 + 2 * Math.exp(-s / 0.02)) / sr; return 0.6 * Math.sin(p) * Math.exp(-s / 0.12); });
+    if (k % 2) add(tb, sr * 0.15, s => 0.3 * (r() * 2 - 1) * Math.exp(-s / 0.05));
+    const nx = truth[k + 1] || tb + 0.47; add((tb + nx) / 2, sr * 0.04, s => 0.1 * (r() * 2 - 1) * Math.exp(-s / 0.01)); });
+  const g = gd({ L, R: L.slice(), sr }), err = truth.slice(4, -4).map(tb => Math.min(...g.beats.map(b => Math.abs(b - tb))) * 1000).sort((a, b) => a - b);
+  const med = err[err.length >> 1], p95 = err[Math.floor(err.length * 0.95)];
+  check('Spiel-Daten: schwankendes Tempo (128 → 131 BPM) wird verfolgt (Median < 8 ms, 95 % < 20 ms)', !g.steady && med < 8 && p95 < 20, 'Median ' + med.toFixed(1) + ' ms, 95 % ' + p95.toFixed(1) + ' ms, ' + g.tempoMin + '–' + g.tempoMax + ' BPM');
+  const fixed = truth.slice(4, -4).map(tb => { const k = Math.round((tb - truth[0]) / (60 / 129.5)); return Math.abs(truth[0] + k * 60 / 129.5 - tb) * 1000; }).sort((a, b) => a - b);
+  check('Spiel-Daten: Gegenprobe, ein festes Raster läge bei diesem Song weit daneben (> 60 ms)', fixed[Math.floor(fixed.length * 0.95)] > 60, '95 % ' + fixed[Math.floor(fixed.length * 0.95)].toFixed(0) + ' ms'); }
+{ const g = gd(song(128)); check('Spiel-Daten: festes Tempo bleibt ein exakt gleichmäßiges Raster', g.steady === true, 'gleichmäßig: ' + g.steady); }
 { const g = gd(sine(44100, 2, 440, 0.1)); check('Spiel-Daten: zu kurzer Song → verständliche Meldung statt Fehler', typeof g.error === 'string', g.error || '–'); }
 
 /* 10  Drum-Reparatur: Testmix mit Kick, Snare (mit metallischem Nachklingen), HiHats, Bass-Tönen und gesangsähnlichem Ton */

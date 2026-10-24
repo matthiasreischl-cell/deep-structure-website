@@ -97,11 +97,12 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - Onset-Hüllkurve aus logarithmischem Spektral-Fluss (STFT 2048, Hop 512, L und R getrennt).
 - Tempo: Autokorrelation mit metrischer Bewertung (Beat, halber und ganzer Takt) plus Bass-Periodizität. Eine sanfte Vorliebe für 60–200 BPM um 120 entscheidet Grenzfälle. Halbes oder doppeltes Tempo ist musikalisch oft gleichwertig, deshalb gibt es ÷ 2 und × 2 und ein Eingabefeld für ein bekanntes Tempo.
 - Beat-Raster: gleichmäßig (konstantes Tempo). Periode und Phase werden fein gesucht, sodass möglichst viele Einsätze getroffen werden. Ganzzahlige Tempi werden eingerastet, wenn sie innerhalb von 0,04 BPM liegen. Genauigkeit an Testsignalen: unter 1 ms.
+- Beat-Verfolgung (ab 1.10.0): Ausgehend vom festen Raster verfolgt eine dynamische Programmierung (nach Ellis 2007) die Schläge auf Breitband- plus Bass-Einsätzen (Kick), mit Straffheit 400 und Abständen von 85–118 % des Grundbeats. Danach wird über ±8 Beats linear geglättet. Weicht das Ergebnis bei 95 % der Beats um mehr als 20 ms vom festen Raster ab und trifft es die Einsätze deutlich besser (mindestens 8 %), gilt es (`steadyTempo: false`), sonst bleibt das exakt gleichmäßige Raster.
 - Taktanfang (4/4): deutliche Bass-Akzente entscheiden. Fehlen sie, zählen Abschnittswechsel, die meist auf der „1“ liegen. Mit ‹ 1 und 1 › verschiebbar.
 - Abschnitte: Neuheitskurve über Takt-Merkmale (Pegel, Bass, Mitten, Höhen, Einsatzstärke) mit etwa 5,5 s Kontext, unabhängig davon, ob halbes oder doppeltes Tempo gewählt ist. Die Typen (Intro, Aufbau, Hauptteil, Höhepunkt, Drop, Ruhephase, Outro) leitet eine Heuristik aus dem Energieverlauf ab. Sie sind frei umbenennbar.
 - Schläge: adaptive Spitzensuche im Fluss je Band (Bass 30–150 Hz, Mitten 150–2500 Hz, Höhen 5–16 kHz) mit Stärke 0–1. Wahlweise auf 1/16 eingerastet.
 - Export: JSON im Format `deepstructure.trackdata.v1`. Dazu gibt es GDScript (`TrackData`-Klasse mit `song_time()` nach Godot-Empfehlung) und eine Anleitung zum Einfügen in Codex. Mit „Klick“ läuft beim Abspielen ein Metronom am Mastering vorbei, um das Raster zu prüfen.
-- Grenzen: Tempowechsel innerhalb eines Songs werden nicht verfolgt (das Raster ist gleichmäßig). Die Abschnittstypen sind Vorschläge, kein Songtext-Verständnis.
+- Grenzen: Leichte Tempo-Schwankungen werden verfolgt, harte Tempowechsel (z. B. plötzlich halb so schnell) nur, solange der neue Beat innerhalb von 85–118 % des alten liegt. Die Taktart ist immer 4/4. Die Abschnittstypen sind Vorschläge, kein Songtext-Verständnis.
 
 **Drum-Reparatur** (Reiter „Drums“, für typische KI-Drums im fertigen Stereo-Mix, ohne Stems):
 - Erkennung: Einsätze in Bändern (Kick < 110 Hz mit Quadratur-Hüllkurve, Snare 1,2–5 kHz, HiHat > 7 kHz). Kick nur mit Tonhöhenabfall (unterscheidet sie von Bass-Tönen). Snare nur bei breitbandigem Anstieg in mindestens 4 von 5 Bändern. Zusätzlich werden nur Rasterplätze behalten, an denen regelmäßig Snares liegen. Marken erscheinen in der Wellenform.
@@ -131,6 +132,13 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.10.0 (Spiel-Daten folgen schwankendem Tempo)
+
+- **Beat-Verfolgung:** Die Spiel-Daten legten bisher immer ein streng gleichmäßiges Beat-Raster an. KI-Songs schwanken aber oft leicht im Tempo. Bei „Prologue: Awakening the Stars“ (Level 1) lief das Raster dadurch bis zu ±200 ms, also fast einen halben Beat, neben der Musik. Jetzt verfolgt das Studio die tatsächlichen Schläge (Kick und Breitband-Einsätze) und glättet sie. Bei festem Tempo bleibt das Raster exakt gleichmäßig wie bisher.
+- **JSON:** neue Felder `track.steadyTempo` und `track.tempoRangeBpm`. Schwankt das Tempo, sind `beats[]` und `downbeats[]` immer enthalten (auch wenn „Beats und Takte“ abgewählt ist). `bpm` und `beatSec` sind dann Mittelwerte.
+- **Godot-Code (`track_data.gd`):** `beat_index`, `bar_index` und `beat_phase` nutzen die Beat-Liste (Binärsuche), neu ist `beat_time(b)`. Ohne Liste rechnen sie wie bisher mit dem gleichmäßigen Raster. Geprüft in Godot 4.5.1. Die Codex-Anleitung sagt bei schwankendem Tempo ausdrücklich, dass `beats[]` zu verwenden ist.
+- **Einrasten der Schläge** (hits) richtet sich nach den tatsächlichen Beats.
 
 ## Änderungen 1.9.3 (PC-Fassung: Audio-Module)
 

@@ -417,3 +417,27 @@ Anlass: Ein Tester (DJ, eigenes Studio) meldete, dass sich beim Hochziehen eines
 Überlappung (RBJ-Glockenfilter, +9 dB bei 550 Hz): bei Q 1 +1,8 dB bei 220 Hz und +1,7 dB bei 1400 Hz, bei Q 2 +0,6 / +0,5 dB, bei Q 4 +0,1 / +0,1 dB. Das ist normales EQ-Verhalten und steht jetzt als Hinweis im EQ.
 
 Gesamt: 81 von 81 DSP-Tests, 101 von 101 Browser-Tests (neu: vier EQ-Zieh-Tests).
+
+## 24. Nachtrag 1.11.0: Mein Stil
+
+| Prüfung | Ergebnis |
+|---|---|
+| Drei Beispiele (dunkel, hell, mittel) merken, neuer dunkler Song | ähnlichstes Beispiel „Dunkel A“ (100 %), „Mitte C“ 10 %, „Hell B“ 0 % |
+| Vorschlag übernehmen | Höhen-Shelf +4,0 dB und Kompressor wie beim Vorbild, Ziel −9 LUFS, erreicht −9,1 LUFS |
+| „Vorherige Einstellungen“ | stellt den Stand vor dem Vorschlag wieder her |
+| Sicherung speichern → alles löschen → laden | 3 von 3 Beispielen zurück; fremde Datei abgelehnt, nichts verloren |
+| Export „Nur Schnitt“ / „Gemastert“ | kein Beispiel / ein Beispiel |
+
+Lernkurve mit simuliertem Nutzer (seine Methode: Höhen- und Bass-Shelf hängen von der Klangbalance ab, Kompressor und Lautheit vom Lautheitsumfang; dazu zufällige Abweichungen), 300 Testsongs:
+
+| Beispiele | Fehler Höhen-Shelf | Fehler Bass-Shelf | Kompressor falsch | Fehler Lautheit |
+|---|---|---|---|---|
+| 5 | 1,03 dB | 0,95 dB | 46 % | 1,14 LU |
+| 20 | 0,57 dB | 0,48 dB | 37 % | 1,05 LU |
+| 50 | 0,35 dB | 0,26 dB | 24 % | 0,85 LU |
+| 200 | 0,23 dB | 0,24 dB | 17 % | 0,67 LU |
+| 1000 | 0,20 dB | 0,20 dB | 9 % | 0,43 LU |
+
+Ohne gelernte Merkmalsgewichte (nur feste Gewichte) lagen die Werte bei 1000 Beispielen bei 0,57 dB / 0,52 dB / 23 % / 0,86 LU. Immer dieselbe Durchschnittseinstellung: 1,03 dB.
+
+Gesamt: 81 von 81 DSP-Tests, 109 von 109 Browser-Tests.

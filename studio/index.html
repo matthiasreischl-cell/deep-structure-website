@@ -29,7 +29,7 @@
   --line:#1C2A36;
   --text:#E6F2F8;
   --muted:#7F94A4;
-  --accent:#9ADFFF;   /* Eisblau aus dem Logo-Licht */
+  --accent:#9ADFFF; --amber:var(--accent);   /* Eisblau aus dem Logo-Licht */
   --accent-ink:#02131B;
   --accent-dim:#2C5C70;
   --gold:#D9A441;     /* Kintsugi-Gold: Schnitte und Auswahl */
@@ -217,6 +217,13 @@ table.metrics td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .modal .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(560px,100%);max-height:calc(100% - 20px);overflow:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
 .modal .box h2{font-size:20px}
 .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.assist.mystyle[data-n]:not([data-n="0"])::after{content:attr(data-n);margin-left:6px;font:600 11px var(--f-mono);opacity:.75}
+.stylesug{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.stylenb,.stylelist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.stylenb li{display:grid;grid-template-columns:44px minmax(0,1fr) 80px;gap:8px;align-items:center;font-size:13px}
+.stylenb .bar{display:block;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}.stylenb .bar i{display:block;height:100%;background:var(--amber)}
+.stylenb .nm,.stylelist .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stylelist{max-height:220px;overflow:auto;margin-top:6px}.stylelist .nm small{display:block;font-size:11px;margin-top:1px}.stylelist li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
 .result{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px}
 
 
@@ -320,7 +327,7 @@ a.btn{text-decoration:none}
 <div class="app" id="app">
   <div class="backdrop" aria-hidden="true"></div>
   <header class="top">
-    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.10.1</span></small></div></div>
+    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.11.0</span></small></div></div>
     <div class="filebox">
       <button class="primary" id="btnOpen" title="Audiodatei öffnen (WAV, MP3, FLAC, M4A)">Song öffnen</button>
       <input type="file" id="fileIn" accept="audio/*,.wav,.mp3,.flac,.m4a,.aac,.ogg" hidden>
@@ -402,6 +409,7 @@ a.btn{text-decoration:none}
         <button role="tab" data-tab="ana" aria-selected="false">Analyse</button>
         <button role="tab" data-tab="game" aria-selected="false">Spiel-Daten</button>
         <button class="assist" id="btnAssist" title="Analysiert den Song und stellt einen Startpunkt ein">Assistent</button>
+        <button class="assist mystyle" id="btnStyle" data-n="0" title="Lernt aus deinen gemasterten Songs und schlägt Einstellungen in deinem Stil vor">Mein Stil</button>
       </nav>
 
       <div class="panel" data-panel="check" hidden>
@@ -717,6 +725,24 @@ a.btn{text-decoration:none}
     </div>
   </div>
 
+  <div class="modal" id="styleModal" hidden>
+    <div class="box" role="dialog" aria-modal="true" aria-labelledby="styleTitle">
+      <h2 id="styleTitle">Mein Stil</h2>
+      <p class="hint" id="styleIntro"></p>
+      <div class="stylesug" id="styleSug" hidden>
+        <div class="row" style="align-items:center;gap:10px"><b>Vorschlag für diesen Song</b><span class="pill" id="styleConf"></span></div>
+        <p class="hint" style="margin:0">Ähnlichste Songs, die du schon gemastert hast (Ähnlichkeit von Klangbalance, Lautheit, Dynamik und Stereobild):</p>
+        <ul class="stylenb" id="styleNb"></ul>
+        <p class="hint mono" id="styleTarget" style="margin:0"></p>
+        <div class="row"><button class="primary" id="btnStyleApply">Vorschlag übernehmen</button><button id="btnStyleUndo" hidden>Vorherige Einstellungen</button></div>
+      </div>
+      <label class="chk"><input type="checkbox" id="styleLearn" checked> Gemasterte Exporte als Beispiel merken (nur auf diesem Gerät)</label>
+      <details id="styleListWrap" hidden><summary>Beispiele (<span id="styleCount">0</span>)</summary><ul class="stylelist" id="styleList"></ul></details>
+      <div class="row" style="flex-wrap:wrap"><button id="btnStyleSave" title="Alle Beispiele als Datei sichern, z. B. um sie aufs Handy zu übertragen">Sicherung speichern</button><button id="btnStyleLoad" title="Beispiele aus einer Sicherung übernehmen">Sicherung laden</button><button class="ghost" id="btnStyleClear">Alle löschen</button>
+        <input type="file" id="styleIn" accept=".json,application/json" hidden></div>
+      <div class="row" style="justify-content:flex-end"><button id="styleClose">Schließen</button></div>
+    </div>
+  </div>
   <div class="modal" id="expModal" hidden>
     <div class="box" role="dialog" aria-modal="true" aria-labelledby="expTitle">
       <h2 id="expTitle">Exportieren</h2>
@@ -3207,7 +3233,7 @@ function feedbackText() {
   const lines = ['Feedback zum Deep Structure Mastering Studio', '', 'Bewertung: ' + (FB.stars ? '★'.repeat(FB.stars) + '☆'.repeat(5 - FB.stars) + ' (' + FB.stars + '/5)' : 'keine'),
     'Name: ' + ($('#fbName').value.trim() || '–'), 'Musik: ' + ($('#fbGenre').value.trim() || '–'), '', 'Was gefällt:', $('#fbGood').value.trim() || '–', '', 'Was stört / fehlt / unklar:', $('#fbBad').value.trim() || '–'];
   if ($('#fbTech').checked) {
-    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.10.1 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal') + ' · Audio-Modul: ' + (S.workletOK ? 'AudioWorklet' : 'Ersatz'));
+    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.11.0 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal') + ' · Audio-Modul: ' + (S.workletOK ? 'AudioWorklet' : 'Ersatz'));
     if (S.track && !S.track.demo) lines.push('Song: ' + S.track.name + ' · ' + (S.track.sr / 1000) + ' kHz · ' + fmtTime(duration(), 0));
     if (CHECK) lines.push('Song-Check: ' + CHECK.score + '/100 · ' + CHECK.findings.map(f => f.title).join(' | '));
     if (S.arts) lines.push('Artefakte: ' + S.arts.regions.length + ' Stellen, ' + S.arts.clicks.length + ' Knackser, Höhen bis ' + (S.arts.cutoff || '?') + ' Hz');
@@ -3884,6 +3910,168 @@ function drawHear() {
 $('#hearCanvas').addEventListener('click', e => { const r = HEAR.res; if (!r || !S.track) return; const b = e.currentTarget.getBoundingClientRect(); const t = (e.clientX - b.left) / b.width * r.mapCols * r.colSec; seek(clamp(t, 0, duration())); if (!S.playing) play(S.cursor); });
 window.addEventListener('resize', () => { if (HEAR.res) drawHear(); });
 (function hearLoop() { if (HEAR.res && S.playing && curTab() === 'ana') drawHear(); setTimeout(hearLoop, 250); })();
+/* ============================ Mein Stil: lernt aus den eigenen Masters ============================
+   Jeder gemasterte Export wird ein Beispiel: Messwerte des Songs vor dem Mastering (Klangbalance, Lautheit,
+   Dynamik, Stereo) und die Einstellungen, die daraus gemacht wurden. Für einen neuen Song werden die
+   ähnlichsten Beispiele gesucht (gewichtete Nächste-Nachbarn-Suche) und ihre Einstellungen gemittelt.
+   Alles bleibt auf dem Gerät (IndexedDB). Sicherung als Datei zum Übertragen zwischen PC und Handy. */
+const STYLE = { db: null, list: [], loaded: false, last: null, before: null };
+const STYLE_VER = 1;
+// Merkmale und ihre Maßstäbe: ein Unterschied von einem Maßstab zählt als "deutlich anders"
+const STYLE_SPEC = [[0, 2], [3, 5], [6, 8], [9, 11], [12, 14], [15, 17], [18, 20], [21, 23], [24, 26], [27, 30]];
+const STYLE_SCALE = { spec: 3, I: 3, LRA: 3, PLR: 3, sideMid: 4, bassSide: 6, corr: 0.15 };
+
+/* Merkmale eines Songs aus der Messung (S.orig) */
+function styleFeatures(m) {
+  if (!m || !m.spec || !isFinite(m.I)) return null;
+  const n = norm(m.spec), spec = STYLE_SPEC.map(([a, b]) => { let s = 0, c = 0; for (let i = a; i <= b; i++) if (isFinite(n[i])) { s += n[i]; c++; } return c ? Math.round(s / c * 10) / 10 : 0; });
+  const r1 = v => v == null || !isFinite(v) ? null : Math.round(v * 100) / 100;
+  return { spec, I: r1(m.I), LRA: r1(m.LRA), PLR: r1(m.TP - m.I), sideMid: r1(m.sideMid), bassSide: r1(m.bassSide), corr: r1(m.corr) };
+}
+const STYLE_KEYS = ['I', 'LRA', 'PLR', 'sideMid', 'bassSide', 'corr'];
+/* Merkmale als Liste in Maßstab-Einheiten (10 Klangbänder + 6 Messwerte) */
+const styleVec = f => f.spec.map(v => v / STYLE_SCALE.spec).concat(STYLE_KEYS.map(k => f[k] == null ? NaN : f[k] / STYLE_SCALE[k]));
+const STYLE_W0 = Array(10).fill(1).concat([1.5, 1.5, 1, 1, 1, 1]);
+/* Abstand zweier Songs: 0 = gleich, 1 = im Mittel um einen Maßstab verschieden. w: Gewicht je Merkmal */
+function styleDistance(a, b, w) {
+  const va = styleVec(a), vb = styleVec(b); w = w || STYLE_W0; let s = 0, c = 0;
+  for (let i = 0; i < va.length; i++) { if (!isFinite(va[i]) || !isFinite(vb[i])) continue; const d = va[i] - vb[i]; s += w[i] * d * d; c += w[i]; }
+  return Math.sqrt(s / Math.max(1e-9, c));
+}
+/* Was zählt für dich? Ab 15 Beispielen lernt das Studio, welche Merkmale mit deinen Entscheidungen zusammenhängen
+   (stärkster Zusammenhang je Merkmal mit EQ, Kompressor, Sättigung, Stereo und Ziel-Lautheit). Unwichtiges zählt weniger. */
+function styleWeights(examples) {
+  if (examples.length < 15) return STYLE_W0;
+  const X = examples.map(e => styleVec(e.feat)), Y = examples.map(e => { const q = styleNeutral(e.settings); return q.eq.bands.map(b => b.g).concat([q.comp.on ? 1 : 0, q.sat.on ? 1 : 0, q.stereo.width, q.stereo.bassMono ? 1 : 0, isFinite(e.result.I) ? e.result.I : 0]); });
+  const n = X.length, corr = (a, b) => { const ok = a.map((v, i) => isFinite(v) && isFinite(b[i])); let ma = 0, mb = 0, c = 0; a.forEach((v, i) => { if (ok[i]) { ma += v; mb += b[i]; c++; } }); if (c < 8) return 0; ma /= c; mb /= c;
+    let sab = 0, saa = 0, sbb = 0; a.forEach((v, i) => { if (!ok[i]) return; sab += (v - ma) * (b[i] - mb); saa += (v - ma) ** 2; sbb += (b[i] - mb) ** 2; }); return saa > 1e-9 && sbb > 1e-9 ? sab / Math.sqrt(saa * sbb) : 0; };
+  return X[0].map((_, j) => { const col = X.map(x => x[j]); let m = 0; Y[0].forEach((_, k) => { const r = corr(col, Y.map(y => y[k])); if (r * r > m) m = r * r; }); return 0.1 + 3 * m; });
+}
+/* Einstellungen für die Mittelung vorbereiten: ausgeschaltete EQ-Bänder zählen als 0 dB */
+function styleNeutral(p) {
+  const q = clone(p); delete q.eq.notch;
+  q.eq.bands.forEach(b => { if (!b.on || !q.eq.on) b.g = 0; });
+  return q;
+}
+const STYLE_LOG = new Set(['f', 'q', 'x1', 'x2', 'monoFreq', 'att', 'rel', 'release', 'ratio']);
+/* Gewichtetes Mittel beliebiger Einstellungs-Bäume: Zahlen gemittelt (Frequenzen, Zeiten, Güten logarithmisch),
+   Schalter per Mehrheit, Auswahlfelder nach dem stärksten Gewicht */
+function styleBlend(items) {
+  const W = items.reduce((s, x) => s + x.w, 0) || 1;
+  const walk = (vals, key) => {
+    const v0 = vals[0].v;
+    if (typeof v0 === 'number') {
+      if (STYLE_LOG.has(key) && vals.every(x => x.v > 0)) return Math.exp(vals.reduce((s, x) => s + x.w * Math.log(x.v), 0) / W);
+      return vals.reduce((s, x) => s + x.w * x.v, 0) / W; }
+    if (typeof v0 === 'boolean') return vals.reduce((s, x) => s + (x.v ? x.w : 0), 0) / W >= 0.5;
+    if (typeof v0 === 'string') { const t = {}; vals.forEach(x => t[x.v] = (t[x.v] || 0) + x.w); return Object.keys(t).sort((a, b) => t[b] - t[a])[0]; }
+    if (Array.isArray(v0)) return v0.map((_, i) => walk(vals.map(x => ({ v: x.v[i], w: x.w })), key));
+    if (v0 && typeof v0 === 'object') { const o = {}; Object.keys(v0).forEach(k => { if (vals.every(x => x.v && x.v[k] !== undefined)) o[k] = walk(vals.map(x => ({ v: x.v[k], w: x.w })), k); }); return o; }
+    return v0; };
+  return walk(items.map(x => ({ v: x.v, w: x.w })), '');
+}
+const styleRound = p => { const r = (v, d) => Math.round(v * d) / d;
+  p.inputGain = r(p.inputGain, 10);
+  p.eq.bands.forEach(b => { b.f = Math.round(b.f); b.g = r(b.g, 10); b.q = r(b.q, 100); });
+  p.comp.x1 = Math.round(p.comp.x1); p.comp.x2 = Math.round(p.comp.x2); p.comp.bands.forEach(b => { b.th = r(b.th, 10); b.ratio = r(b.ratio, 100); b.att = Math.round(b.att); b.rel = Math.round(b.rel); b.gain = r(b.gain, 10); });
+  p.sat.drive = Math.round(p.sat.drive); p.sat.mix = Math.round(p.sat.mix); p.stereo.width = Math.round(p.stereo.width); p.stereo.monoFreq = Math.round(p.stereo.monoFreq);
+  p.lim.ceiling = r(p.lim.ceiling, 10); p.lim.release = Math.round(p.lim.release); p.lim.drive = r(p.lim.drive, 10); return p; };
+/* Vorschlag: die k ähnlichsten Beispiele, gewichtet nach Ähnlichkeit */
+function styleSuggest(examples, feat, k = 5) {
+  if (!feat || !examples.length) return null;
+  const w = styleWeights(examples);
+  const nb = examples.map(e => ({ e, d: styleDistance(feat, e.feat, w) })).sort((a, b) => a.d - b.d).slice(0, Math.min(k, examples.length));
+  nb.forEach(x => { x.w = 1 / (0.15 + x.d) ** 2; x.sim = Math.round(100 * Math.exp(-x.d * x.d / 2)); });
+  const p = styleRound(styleBlend(nb.map(x => ({ v: styleNeutral(x.e.settings), w: x.w }))));
+  const W = nb.reduce((s, x) => s + x.w, 0), tI = nb.every(x => isFinite(x.e.result.I)) ? nb.reduce((s, x) => s + x.w * x.e.result.I, 0) / W : null;
+  const conf = examples.length < 5 ? 'wenige' : nb[0].d < 0.8 && examples.length >= 20 ? 'gut' : nb[0].d < 1.4 ? 'mittel' : 'unsicher';
+  return { p, targetI: tI == null ? null : Math.round(tI * 2) / 2, neighbors: nb.map(x => ({ name: x.e.name, sim: x.sim, d: x.d, id: x.e.id })), conf, n: examples.length };
+}
+
+/* ---------- Speicher (IndexedDB, nur auf diesem Gerät) ---------- */
+function styleDB() {
+  if (STYLE.db) return Promise.resolve(STYLE.db);
+  return new Promise((res, rej) => { let rq; try { rq = indexedDB.open('dsms-style', 1); } catch (e) { rej(e); return; }
+    rq.onupgradeneeded = () => { const db = rq.result; if (!db.objectStoreNames.contains('examples')) db.createObjectStore('examples', { keyPath: 'id' }); };
+    rq.onsuccess = () => { STYLE.db = rq.result; res(STYLE.db); }; rq.onerror = () => rej(rq.error); });
+}
+async function styleTx(mode, fn) { const db = await styleDB(); return new Promise((res, rej) => { const tx = db.transaction('examples', mode), st = tx.objectStore('examples'); let out; try { out = fn(st); } catch (e) { rej(e); return; }
+  tx.oncomplete = () => res(out && out.result !== undefined ? out.result : out); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error); }); }
+async function styleLoad() { try { STYLE.list = (await styleTx('readonly', st => st.getAll())) || []; } catch (e) { console.warn('Mein Stil: Speicher nicht verfügbar', e); STYLE.list = []; } STYLE.loaded = true; return STYLE.list; }
+async function stylePut(ex) { await styleTx('readwrite', st => st.put(ex)); const i = STYLE.list.findIndex(x => x.id === ex.id); if (i >= 0) STYLE.list[i] = ex; else STYLE.list.push(ex); }
+async function styleDelete(id) { await styleTx('readwrite', st => id == null ? st.clear() : st.delete(id)); STYLE.list = id == null ? [] : STYLE.list.filter(x => x.id !== id); }
+const styleLearnOn = () => recall('styleLearn') !== false;
+
+/* Beim gemasterten Export: Beispiel merken (gleicher Song = gleicher Eintrag, wird aktualisiert) */
+async function styleLearnFromExport(res) {
+  try {
+    if (!styleLearnOn() || !S.track || S.track.demo) return false;
+    const feat = styleFeatures(S.orig); if (!feat) return false;
+    const name = (S.track.name || 'Song').replace(/\.[a-z0-9]{2,4}$/i, ''), dur = Math.round(duration());
+    const ex = { v: STYLE_VER, id: name + '|' + dur, name, dur, sr: S.track.sr, date: new Date().toISOString().slice(0, 10), app: (document.querySelector('.brand .ver') || {}).textContent || '',
+      feat, settings: (() => { const q = clone(P); delete q.eq.notch; return q; })(), target: +$('#targetSel').value, result: { I: res && isFinite(res.I) ? Math.round(res.I * 10) / 10 : null, TP: res && isFinite(res.TP) ? Math.round(res.TP * 10) / 10 : null, LRA: res && isFinite(res.LRA) ? Math.round(res.LRA * 10) / 10 : null } };
+    if (!STYLE.loaded) await styleLoad(); await stylePut(ex); styleRenderCount(); return true;
+  } catch (e) { console.warn('Mein Stil: Beispiel nicht gespeichert', e); return false; }
+}
+
+/* ---------- Oberfläche ---------- */
+function styleRenderCount() { const b = $('#btnStyle'); if (b) b.dataset.n = STYLE.list.length; const c = $('#styleCount'); if (c) c.textContent = STYLE.list.length; }
+const STYLE_CONF = { gut: ['Vorschlag sicher', 'good'], mittel: ['Vorschlag brauchbar', 'mid'], unsicher: ['Kein wirklich ähnlicher Song dabei', 'low'], wenige: ['Noch wenige Beispiele', 'low'] };
+async function styleOpen() {
+  if (!STYLE.loaded) await styleLoad();
+  $('#styleModal').hidden = false; $('#styleLearn').checked = styleLearnOn(); styleRender();
+}
+function styleRender() {
+  const n = STYLE.list.length, feat = S.track ? styleFeatures(S.orig) : null, sug = feat && n ? styleSuggest(STYLE.list, feat) : null; STYLE.last = sug; styleRenderCount();
+  $('#styleIntro').textContent = n === 0
+    ? 'Noch keine Beispiele. Jeder Song, den du gemastert exportierst, wird ab jetzt ein Beispiel: Das Studio merkt sich, wie der Song vorher klang und was du eingestellt hast. Ab etwa 20 bis 30 Beispielen werden die Vorschläge gut.'
+    : n + (n === 1 ? ' Beispiel' : ' Beispiele') + ' aus deinen Masters. Für den geladenen Song werden die ähnlichsten gesucht und ihre Einstellungen gemischt. Kerben bleiben songbezogen und werden nicht übernommen.';
+  const box = $('#styleSug'); box.hidden = !sug; $('#btnStyleApply').disabled = !sug;
+  if (sug) { const [t, cls] = STYLE_CONF[sug.conf], pill = $('#styleConf'); pill.textContent = t; pill.className = 'pill ' + cls;
+    $('#styleTarget').textContent = sug.targetI != null ? 'Lautheit wie bei diesen Songs: ' + nf(sug.targetI, 1) + ' LUFS' : '';
+    const ul = $('#styleNb'); ul.innerHTML = '';
+    sug.neighbors.forEach(x => { const li = document.createElement('li'); li.innerHTML = '<span class="mono"></span><span class="nm"></span><span class="bar"><i></i></span>';
+      li.querySelector('.mono').textContent = x.sim + ' %'; li.querySelector('.nm').textContent = x.name; li.querySelector('.bar i').style.width = Math.max(4, x.sim) + '%'; ul.appendChild(li); }); }
+  else if (n && !feat) { box.hidden = false; $('#styleConf').textContent = S.track ? 'Song wird noch gemessen …' : 'Lade zuerst einen Song.'; $('#styleConf').className = 'pill low'; $('#styleNb').innerHTML = ''; $('#styleTarget').textContent = ''; }
+  const ul = $('#styleList'); ul.innerHTML = '';
+  STYLE.list.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.name.localeCompare(b.name)).forEach(ex => { const li = document.createElement('li');
+    li.innerHTML = '<span class="nm"><b></b><small class="mono muted"></small></span><button class="ghost" title="Dieses Beispiel vergessen">Entfernen</button>';
+    li.querySelector('.nm b').textContent = ex.name; li.querySelector('.nm small').textContent = ex.date + (ex.result && ex.result.I != null ? ' · ' + nf(ex.result.I, 1) + ' LUFS' : '');
+    li.querySelector('button').addEventListener('click', async () => { await styleDelete(ex.id); styleRender(); }); ul.appendChild(li); });
+  $('#styleListWrap').hidden = !n; $('#btnStyleUndo').hidden = !STYLE.before;
+}
+async function styleApply() {
+  const sug = STYLE.last; if (!sug || !S.track) return;
+  let p; try { p = validateSettings(sug.p); } catch (e) { status('Vorschlag nicht anwendbar: ' + e.message, 'err', 8000); return; }
+  STYLE.before = clone(P); p.eq.notch = clone(P.eq.notch); P = p; refreshAll(); onParam();
+  if (sug.targetI != null && P.lim.on && isFinite(S.orig && S.orig.I)) { status('Mein Stil: stelle die Lautheit ein …', 'busy'); await setDriveToTarget(sug.targetI); }
+  status('Mein Stil übernommen, nach dem Vorbild von ' + sug.neighbors.slice(0, 3).map(x => '„' + x.name + '“').join(', ') + '. Jetzt mit den Ohren nachregeln.', 'ok', 8000);
+  styleRender();
+}
+function styleBackup() {
+  const o = { format: 'deepstructure.style.v1', created: new Date().toISOString(), examples: STYLE.list };
+  const blob = new Blob([JSON.stringify(o)], { type: 'application/json' });
+  deliver(blob, 'Mein_Stil_' + new Date().toISOString().slice(0, 10) + '.dsstyle.json').then(how => { if (how !== 'declined') status(STYLE.list.length + ' Beispiele gesichert.', 'ok'); });
+}
+async function styleRestore(file) {
+  try { const o = JSON.parse(await file.text()); if (!o || o.format !== 'deepstructure.style.v1' || !Array.isArray(o.examples)) throw new Error('keine Mein-Stil-Sicherung');
+    let ok = 0; for (const ex of o.examples) { if (!ex || typeof ex.id !== 'string' || !ex.feat || !Array.isArray(ex.feat.spec) || ex.feat.spec.length !== STYLE_SPEC.length || !ex.settings || !ex.result) continue;
+      try { validateSettings(ex.settings); } catch (e) { continue; } await stylePut(ex); ok++; }
+    status(ok + ' Beispiele übernommen (gleiche Songs ersetzt).', 'ok', 6000); styleRender();
+  } catch (e) { status('Sicherung nicht lesbar: ' + e.message, 'err', 8000); }
+}
+$('#btnStyle').addEventListener('click', styleOpen);
+$('#styleClose').addEventListener('click', () => $('#styleModal').hidden = true);
+$('#btnStyleApply').addEventListener('click', styleApply);
+$('#btnStyleUndo').addEventListener('click', () => { if (!STYLE.before) return; P = STYLE.before; STYLE.before = null; refreshAll(); onParam(); status('Einstellungen von vorher wiederhergestellt.', 'ok'); styleRender(); });
+$('#styleLearn').addEventListener('change', e => { store('styleLearn', e.target.checked); });
+$('#btnStyleSave').addEventListener('click', styleBackup);
+$('#btnStyleLoad').addEventListener('click', () => $('#styleIn').click());
+$('#styleIn').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) styleRestore(f); });
+$('#btnStyleClear').addEventListener('click', async () => { if (!STYLE.list.length) return; const b = $('#btnStyleClear');
+  if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Wirklich alle löschen?'; setTimeout(() => { b.dataset.sure = ''; b.textContent = 'Alle löschen'; }, 4000); return; }
+  b.dataset.sure = ''; b.textContent = 'Alle löschen'; await styleDelete(null); styleRender(); status('Alle Beispiele gelöscht.'); });
+styleLoad().then(styleRenderCount);
 /* ============================ Offline-Rendern & Messung ============================ */
 const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 async function measureLatency(p, sr) {
@@ -4215,6 +4403,7 @@ async function runExport() {
       + (enc ? '<br>vor der Kodierung: ' + nf(r.I, 1) + ' LUFS · True Peak ' + nf(r.TP, 1) + ' dBTP' : '')
       + (enc && enc.hear ? '<br>Hörbarer Kodierverlust: ' + nf(enc.hear.mos, 1) + ' von 5 (' + (v0 => v0[0].toLowerCase() + v0.slice(1))(hearVerdict(enc.hear.mos)[0]) + ', Näherung an PEAQ/ViSQOL)' : '') + '</span>';
     res.querySelector('b').textContent = how === 'declined' ? 'Speichern abgebrochen.' : name;
+    if (mode === 'master' && how !== 'declined') styleLearnFromExport(r).then(ok => { if (ok) hint.textContent += ' Als Beispiel für „Mein Stil“ gemerkt (' + STYLE.list.length + ').'; });
     const ceilT = mode === 'master' && P.lim.on ? P.lim.ceiling : null, over = enc && ceilT !== null ? enc.TP - ceilT : 0;
     const codecTip = !lossy || how === 'declined' ? '' : enc && enc.TP > 0 ? ' Achtung: Die fertige Datei hat einen True Peak über 0 dBTP und kann beim Abspielen übersteuern. Bitte die Limiter-Decke um mindestens ' + nf(Math.ceil((enc.TP + 0.2) * 10) / 10, 1) + ' dB senken und neu exportieren.'
       : over > 0.05 ? ' Durch die ' + (ogg ? 'OGG' : 'MP3') + '-Kodierung liegt der True Peak ' + nf(over, 1) + ' dB über der Limiter-Decke. Das ist bei verlustbehafteten Formaten normal und übersteuert nicht, solange er unter 0 dBTP bleibt.'

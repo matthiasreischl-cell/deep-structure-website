@@ -116,6 +116,13 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 
 **Assistent:** Er korrigiert nur deutliche Abweichungen (Totzone ±2 dB, höchstens ±3 dB). Kompression setzt er nur bei großer Dynamik ein, Sättigung nie. Ein technisch sauberer Song bleibt nahezu unverändert.
 
+## Mein Stil (lernendes Gedächtnis)
+
+- **Beispiel:** Beim gemasterten Export (`styleLearnFromExport`) werden gespeichert: Merkmale des Songs vor dem Mastering aus `S.orig` (Terzband-Spektrum, auf 1 kHz-Mittel normiert und zu 10 Bereichen zusammengefasst; Lautheit I, LRA, PLR = TP − I, Seite/Mitte, Stereo im Bass, Korrelation), alle Einstellungen außer den Kerben, das gewählte Lautheitsziel und die erreichten Werte (I, TP, LRA). Schlüssel: Songname + Dauer; ein erneuter Export desselben Songs ersetzt das Beispiel.
+- **Abstand:** gewichteter euklidischer Abstand in Maßstab-Einheiten (Spektrum 3 dB, I/LRA/PLR 3, Seite/Mitte 4 dB, Bass-Stereo 6 dB, Korrelation 0,15). Unter 15 Beispielen feste Gewichte (I und LRA 1,5, sonst 1). Ab 15 Beispielen gelernte Gewichte: je Merkmal 0,1 + 3 · r², r = stärkste Korrelation mit einer Entscheidung (EQ-Gains, Kompressor an, Sättigung an, Stereobreite, Bass-Mono, erreichte Lautheit).
+- **Vorschlag:** die k = 5 nächsten Beispiele, Gewicht 1/(0,15 + d)². Zahlen gewichtet gemittelt (Frequenzen, Güten, Zeiten, Ratio logarithmisch), Schalter per Mehrheit, Filtertypen nach dem stärksten Gewicht. Ausgeschaltete EQ-Bänder zählen als 0 dB. Ergebnis wird gerundet und über `validateSettings` geprüft. Die Ziel-Lautheit ist das gewichtete Mittel der erreichten Lautheit, eingestellt über `setDriveToTarget`.
+- **Speicher:** IndexedDB `dsms-style` auf dem Gerät, nichts verlässt das Gerät. Sicherung als `*.dsstyle.json` (Format `deepstructure.style.v1`); beim Laden werden Einträge mit ungültigen Einstellungen übersprungen.
+
 ## KI-Mastering und Datenschutz
 
 - **Claude-Version** (Artifact in claude.ai): Sie nutzt das Claude-Konto des Nutzers. Hier wird kein Schlüssel benötigt.
@@ -132,6 +139,14 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Symbole und Schriften:** Sie kommen aus dem Cache und werden im Hintergrund aktualisiert.
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
+
+## Änderungen 1.11.0 (Mein Stil: lernt aus deinen Masters)
+
+- **Knopf „Mein Stil“** neben dem Assistenten. Jeder gemasterte Export wird automatisch ein Beispiel: wie der Song vorher klang (Klangbalance in 10 Bereichen, Lautheit, Lautheitsumfang, Abstand Spitze–Lautheit, Stereobreite, Stereo im Bass, Korrelation) und was du eingestellt hast (EQ, Dynamik, Sättigung, Stereo, Limiter, erreichte Lautheit). „Nur Schnitt“-Exporte zählen nicht, Kerben bleiben songbezogen.
+- **Vorschlag für einen neuen Song:** Die fünf ähnlichsten Beispiele werden gesucht und ihre Einstellungen nach Ähnlichkeit gemischt (Frequenzen, Zeiten und Güten logarithmisch, Schalter per Mehrheit). Die Lautheit wird auf den Wert dieser Songs gebracht. Angezeigt werden die Vorbild-Songs mit Ähnlichkeit und eine Einschätzung, wie sicher der Vorschlag ist. Übernommen wird nur auf Knopfdruck, „Vorherige Einstellungen“ stellt zurück.
+- **Lernt, was für dich zählt:** Ab 15 Beispielen gewichtet das Studio die Merkmale danach, wie stark sie mit deinen Entscheidungen zusammenhängen. In der Simulation sank der Fehler beim Höhen-Shelf von 1,03 dB (5 Beispiele) auf 0,35 dB (50) und 0,20 dB (1000), falsche Kompressor-Entscheidungen von 46 % auf 9 %.
+- **Speicher nur auf dem Gerät** (IndexedDB). „Sicherung speichern/laden“ überträgt die Beispiele zwischen PC und Handy, einzelne Beispiele lassen sich entfernen, das Merken lässt sich abschalten.
+- **Korrektur:** Die Farbe der Master-Kurve in den Legenden im Reiter Analyse und die Hervorhebungen im Hör-Vergleich waren unsichtbar (fehlende Farbvariable).
 
 ## Änderungen 1.10.1 (Equalizer: Punkte ziehen)
 

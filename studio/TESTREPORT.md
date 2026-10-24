@@ -345,3 +345,20 @@ Anlass: Nach dem Mastering klang der Track auf dem Smartphone schlechter (fehlen
 Schlussfolgerung: Die fertige Datei ist sauber. Die Störungen entstehen bei der Echtzeit-Wiedergabe, wenn das Gerät die Kette nicht rechtzeitig schafft. Diese Last ist jetzt deutlich kleiner.
 
 Gesamt: 78 von 78 DSP-Tests, 90 von 90 Browser-Tests.
+
+## 20. Nachtrag 1.9.2: Prüfbericht zu 1.9.0 (ChatGPT, 24.10.2026)
+
+Jeder Befund wurde zuerst am Stand 1.9.1 nachgeprüft. Die neuen Tests schlagen am Stand 1.9.1 fehl (6 von 95) und bestehen mit 1.9.2.
+
+| Befund | Am Stand 1.9.1 | Ergebnis 1.9.2 |
+|---|---|---|
+| H1 Statuszeile deutet Text als HTML | bestätigt: `status()` setzte `innerHTML`; Dateiname mit `<img onerror>` ergab ein echtes Bild-Element | nur noch Text (`textContent`), Kreisel als eigenes Element; die übrigen 42 `innerHTML`-Stellen geprüft: sie setzen nur feste Texte oder Zahlen ein |
+| H2 Hör-Vergleich nach Änderung veraltet | bestätigt: nach EQ-Änderung und bei Änderung während der Berechnung blieb das alte Ergebnis sichtbar | Ergebnis an Song-Stand und Einstellungsstand gebunden, wird bei Änderung ausgeblendet mit Hinweis „Bitte neu vergleichen“ |
+| M1 KI-Anzeige nach Trennung | bestätigt: `else` hing an der Checkbox-Prüfung | korrigiert, Test prüft „nicht verbunden“ |
+| M2 Zahl als Qualitätsnote missverständlich | berechtigt | Beschriftung „Klangunterschied, keine Qualitätsnote“, Klangfarbe ab 1 dB im Text und hervorgehoben, Urteil „Nur die Klangfarbe ist verändert“ |
+| M3 API-Schlüssel im Browser | bekannt und dokumentiert; Standard nur Arbeitsspeicher | Warnung „unverschlüsselt“ an der Merken-Option. Ein Proxy oder OAuth bräuchte einen eigenen Server und ist ohne laufende Kosten nicht umsetzbar; bleibt bewusst offen |
+| M4 Keine CI, Version verteilt | bestätigt | GitHub Actions (Build-Vergleich, Versionsprüfung, DSP- und Browser-Tests), Version nur in `VERSION` |
+
+Zum Hinweis im Bericht, 1.9.1 fehle: Der Bericht prüfte Commit `0d1c243` (1.9.0). 1.9.1 kam danach mit Pull Request #6 (`f4799ed`) auf `main`.
+
+Gesamt: 78 von 78 DSP-Tests, 95 von 95 Browser-Tests.

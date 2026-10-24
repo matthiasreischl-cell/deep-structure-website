@@ -132,6 +132,16 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Neue Version:** Bei jeder Änderung `VERSION` in `sw.js` erhöhen. Alte Caches werden dann automatisch gelöscht.
 - **Einstellungen:** Gespeicherte Einstellungen (`localStorage`, Präfix `dsms.`) bleiben bei Updates erhalten.
 
+## Änderungen 1.9.2 (Korrekturen nach dem Prüfbericht 1.9.0)
+
+- **Statuszeile nur noch als Text:** Meldungen mit Dateinamen oder Fehlertexten wurden als HTML gedeutet. Ein präparierter Dateiname hätte so HTML oder Skript-Code in die Seite bringen können. Jetzt wird alles als reiner Text angezeigt.
+- **Hör-Vergleich veraltet nicht mehr unbemerkt:** Nach einer Änderung an EQ, Kompressor, Sättigung, Limiter oder am Song wird das alte Ergebnis ausgeblendet, stattdessen steht „Bitte neu vergleichen“. Wird während der Berechnung etwas geändert, wird das Ergebnis verworfen. Beim Vergleich „Original-Datei ↔ Bearbeitung“ zählen nur Änderungen am Song, weil das Mastering dort nicht beteiligt ist.
+- **Hör-Vergleich klarer beschriftet:** „Klangunterschied, keine Qualitätsnote“ und „5 = kein Unterschied“. Eine feste Klangfarben-Änderung ab 1 dB wird im Text genannt und hervorgehoben. Ist sonst nichts hörbar, lautet das Urteil „Nur die Klangfarbe ist verändert“ statt „Kein Unterschied hörbar“.
+- **KI-Anzeige:** Nach „Entfernen“ des API-Schlüssels steht wieder „nicht verbunden“ (vorher blieb „API-Schlüssel (Sitzung)“ stehen).
+- **API-Schlüssel merken:** Der Hinweis sagt jetzt deutlich, dass der Schlüssel dann unverschlüsselt im Browser liegt.
+- **Version an einer Stelle** (im Quell-Repository Deep-Structure-Mastering-Studio): Datei `VERSION`, `build.sh` überträgt sie überall hin.
+- **Automatische Tests auf GitHub** bei jedem Push (GitHub Actions).
+
 ## Änderungen 1.9.1 (Wiedergabe auf dem Smartphone)
 
 - **Weniger Rechenlast bei der Wiedergabe:** Auf schwachen Geräten konnte die Echtzeit-Kette zu viel Rechenzeit brauchen. Dann setzt das Audio kurz aus, das klingt wie Knackser und fehlende Teile, besonders hörbar am Gesang. Die exportierte Datei war davon nicht betroffen.

@@ -353,7 +353,9 @@ async function myStyle() {
   await styleDelete(null);
   const learn = async (t, hs, comp) => { await meas(t); P = clone(DEFAULT); P.eq.bands[6].g = hs; P.comp.on = comp; refreshAll(); onParam(); return styleLearnFromExport({ I: comp ? -9 : -14, TP: -1, LRA: 5 }); };
   const ok1 = await learn(mk(-1, 11, 'Dunkel A.wav'), 4, true), ok2 = await learn(mk(1, 22, 'Hell B.wav'), -4, false), ok3 = await learn(mk(0, 33, 'Mitte C.wav'), 0, false);
-  res.push(['Mein Stil: drei Beispiele gemerkt (Speicher auf dem Gerät)', ok1 && ok2 && ok3 && STYLE.list.length === 3, STYLE.list.map(e => e.name).join(', ')]);
+  res.push(['Mein Stil: drei Exporte als Entwurf gemerkt (Speicher auf dem Gerät)', ok1 && ok2 && ok3 && STYLE.list.length === 3 && STYLE.list.every(e => styleRating(e) === 'offen'), STYLE.list.map(e => e.name + ' (' + styleRating(e) + ')').join(', ')]);
+  res.push(['Mein Stil: unbestätigte Entwürfe werden nicht gelernt', styleSuggest(STYLE.list, styleFeatures(S.orig)) === null, 'kein Vorschlag ohne Bestätigung']);
+  for (const e of STYLE.list.slice()) await styleRate(e.id, 'ok');
   await meas(mk(-1, 44, 'Dunkel neu.wav')); P = clone(DEFAULT); refreshAll(); onParam();
   const sug = styleSuggest(STYLE.list, styleFeatures(S.orig));
   res.push(['Mein Stil: neuer dunkler Song → ähnlichstes Beispiel ist der dunkle', !!sug && sug.neighbors[0].name === 'Dunkel A', sug ? sug.neighbors.map(x => x.name + ' ' + x.sim + ' %').join(', ') : '–']);
@@ -373,16 +375,80 @@ async function myStyle() {
   const keepDel2 = deliver; deliver = async () => 'saved'; const before = STYLE.list.length;
   await meas(mk(1, 55, 'Export Test.wav')); $('#expName').value = 'Test'; $('#expMode').value = 'edit'; $('#expFmt').value = '16'; $('#expRate').value = 'orig'; await runExport(); await sleep(300); const afterEdit = STYLE.list.length;
   $('#expMode').value = 'master'; await runExport(); for (let i = 0; i < 40 && STYLE.list.length === afterEdit; i++) await sleep(100); deliver = keepDel2;
-  res.push(['Mein Stil: gemasterter Export wird gemerkt, „Nur Schnitt“ nicht', afterEdit === before && STYLE.list.length === before + 1 && STYLE.list.some(e => e.name === 'Export Test'), before + ' → ' + afterEdit + ' → ' + STYLE.list.length]);
+  res.push(['Mein Stil: gemasterter Export wird als Entwurf gemerkt, „Nur Schnitt“ nicht', afterEdit === before && STYLE.list.length === before + 1 && STYLE.list.some(e => e.name === 'Export Test' && styleRating(e) === 'offen'), before + ' → ' + afterEdit + ' → ' + STYLE.list.length]);
   { // Lernkurve mit simuliertem Nutzer: seine Methode hängt von Höhen, Bass und Dynamik ab
     let a = 12345; const rnd = () => { a = (a * 1664525 + 1013904223) >>> 0; return a / 4294967296; }, g = () => { let s = 0; for (let i = 0; i < 6; i++) s += rnd(); return (s - 3) * 1.4; };
     const song = () => ({ spec: Array.from({ length: 10 }, (_, i) => g() * 2 + (i - 4.5) * -0.8), I: -14 + g() * 2.5, LRA: 6 + Math.abs(g()) * 2, PLR: 12 + g() * 2, sideMid: -12 + g() * 3, bassSide: -22 + g() * 4, corr: 0.8 });
     const method = (f, nz) => { const p = clone(DEFAULT); p.eq.bands[6].g = clamp(-0.7 * (f.spec[8] + 3.6) + nz * g() * 0.4, -6, 6); p.eq.bands[1].g = clamp(-0.6 * (f.spec[1] - 2.8) + nz * g() * 0.4, -6, 6); p.comp.on = f.LRA > 7.5; return { p, I: f.LRA > 7.5 ? -10 : -12.5 }; };
-    const test = Array.from({ length: 150 }, song), pool = Array.from({ length: 200 }, (_, i) => { const f = song(), m = method(f, 1); return { id: 'x' + i, name: 'S' + i, feat: f, settings: m.p, result: { I: m.I } }; });
+    const test = Array.from({ length: 150 }, song), pool = Array.from({ length: 200 }, (_, i) => { const f = song(), m = method(f, 1); return { id: 'x' + i, name: 'S' + i, feat: f, settings: m.p, result: { I: m.I }, rating: 'ok' }; });
     const err = n => { let e = 0, c = 0; test.forEach(f => { const t = method(f, 0), s2 = styleSuggest(pool.slice(0, n), f); e += Math.abs(s2.p.eq.bands[6].g - t.p.eq.bands[6].g); c += s2.p.comp.on !== t.p.comp.on ? 1 : 0; }); return [e / test.length, c / test.length * 100]; };
     const e5 = err(5), e50 = err(50), e200 = err(200);
     res.push(['Mein Stil: lernt mit mehr Beispielen (simulierter Nutzer, 150 Testsongs)', e50[0] < e5[0] * 0.5 && e200[0] < e50[0] && e200[1] < 25, 'Höhen-Fehler ' + e5[0].toFixed(2) + ' → ' + e50[0].toFixed(2) + ' → ' + e200[0].toFixed(2) + ' dB (5/50/200 Beispiele), Kompressor falsch ' + e200[1].toFixed(0) + ' %']); }
   $('#styleModal').hidden = true; $('#expModal').hidden = true; await styleDelete(null); P = keepP; refreshAll(); onParam(); if (keep) await loadTrack(keep); return res;
+},
+async function albumReview() {
+  const res = [], keep = S.track, keepP = clone(P), sr = 44100;
+  const wav = (gainDb, seed, secs = 6) => { const n = sr * secs, b = new ArrayBuffer(44 + n * 4), v = new DataView(b), g = Math.pow(10, gainDb / 20); let a = seed >>> 0, lp = 0;
+    const ws = (o, t) => [...t].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0))); ws(0, 'RIFF'); v.setUint32(4, 36 + n * 4, true); ws(8, 'WAVE'); ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 2, true); v.setUint32(24, sr, true); v.setUint32(28, sr * 4, true); v.setUint16(32, 4, true); v.setUint16(34, 16, true); ws(36, 'data'); v.setUint32(40, n * 4, true);
+    for (let i = 0; i < n; i++) { a = (a * 1664525 + 1013904223) >>> 0; const w = a / 4294967296 * 2 - 1; lp += 0.08 * (w - lp); const beat = Math.exp(-((i % 22050) / sr) * 18) * Math.sin(2 * Math.PI * 55 * i / sr);
+      const x = g * (0.25 * lp * 3 + 0.35 * beat + 0.04 * w); v.setInt16(44 + i * 4, Math.max(-32767, Math.min(32767, x * 32767)), true); v.setInt16(46 + i * 4, Math.max(-32767, Math.min(32767, x * 0.9 * 32767)), true); }
+    return b; };
+  const files = Array.from({ length: 13 }, (_, i) => new File([wav([-2, -4, -9, -3, -6, -12, -1, -5, -8, -3, -4, -4, -4][i], 100 + i)], String(i + 1).padStart(2, '0') + ' Track ' + (i + 1) + '.wav', { type: 'audio/wav' }));
+  await styleDelete(null);
+  for (const p of ALB.list.filter(p => /^Testalbum/.test(p.name))) await albDeleteProject(p.id);
+  const pr = await albNew('Testalbum Review');
+  const r1 = await albAddFiles(files.slice(0, 10)), r2 = await albAddFiles(files.slice(10));
+  res.push(['Album: 10 Songs übernommen, höchstens 12 pro Album (13. abgelehnt)', r1.added === 10 && r2.added === 2 && r2.skipped === 1 && pr.tracks.length === 12, r1.added + ' + ' + r2.added + ', abgelehnt ' + r2.skipped]);
+  await albRemoveTrack(pr.tracks[11].id); await albRemoveTrack(pr.tracks[10].id);
+  // Unterbrochene Verarbeitung: nach drei Songs anhalten
+  const run = albProposeAll('assistent'); for (let i = 0; i < 1200 && pr.tracks.filter(t => t.versions.length).length < 3; i++) await sleep(100); ALB.abort = true; const ra = await run;
+  const n1 = pr.tracks.filter(t => t.versions.length).length;
+  res.push(['Album: Verarbeitung lässt sich anhalten, Fertiges bleibt gespeichert', ra.aborted && n1 >= 3 && n1 < 10, n1 + ' von 10 berechnet']);
+  // Neustart simulieren: Speicher neu einlesen, dann fortsetzen
+  const id = pr.id; ALB.proj = null; ALB.list = []; ALB.open = null; ALB.db.close(); ALB.db = null; await albLoadList(); const pr2 = await albSelect(id);
+  const kept = pr2 && pr2.tracks.filter(t => t.versions.length).length;
+  const rb = await albProposeAll('assistent'); const all = pr2.tracks.every(t => t.versions.length === 1);
+  res.push(['Album: nach Neustart wird fortgesetzt, nichts doppelt berechnet', kept === n1 && !rb.aborted && all && rb.done.length === 10 - n1, 'gespeichert ' + kept + ', danach ' + rb.done.length + ' berechnet, je 1 Version: ' + all]);
+  const T = pr2.tracks, Iorig = T.map(t => t.measOrig.I), Imast = T.map(t => albCur(t).meas.I), sp = a => Math.max(...a) - Math.min(...a);
+  res.push(['Album: unterschiedliche Lautheit wird ausgeglichen, aber nicht zwangsweise gleich gemacht', sp(Imast) < sp(Iorig) && sp(Imast) > 0.8 && !!albBalance(), 'Spanne vorher ' + nf(sp(Iorig), 1) + ' LU, nachher ' + nf(sp(Imast), 1) + ' LU']);
+  // Song 1: Kommentar, Überarbeiten, wiederholte Versionen, zurück zu Version 2
+  const t1 = T[0]; await albOpenTrack(t1.id); const c = await albAddComment(t1.id, 1, 2.5, 'Höhen zu scharf', 'Becken klirren'); await albRevise(t1.id);
+  for (const d of [1, 0.5]) { P.eq.bands[6].g = clamp(P.eq.bands[6].g - d, -15, 15); refreshAll(); onParam(); await albSaveVersion('Manuell'); }
+  await albOpenTrack(t1.id, 2);
+  res.push(['Album: Kommentar mit Zeitbereich und Typ, Überarbeitungsauftrag enthält ihn', t1.comments.length === 1 && /0:01\.0–0:02\.5 · Höhen zu scharf: Becken klirren/.test(albBrief(t1.id)), albBrief(t1.id).split('\n').find(l => /Höhen zu scharf/.test(l)) || '–']);
+  res.push(['Album: wiederholte Überarbeitungen, alle Versionen bleiben, Rückkehr zu Version 2', t1.versions.length === 3 && t1.cur === 2 && t1.status === 'neu' && JSON.stringify(P) === JSON.stringify(validateSettings(t1.versions[1].settings)), 'Versionen ' + t1.versions.length + ', aktuell v' + t1.cur + ', Status ' + t1.status]);
+  // Song 2: technisch blockiert (Übersteuerung ohne Limiter)
+  const t2 = T[1]; await albOpenTrack(t2.id); P.lim.on = false; P.inputGain = 18; refreshAll(); onParam(); await albSaveVersion('Manuell'); const ap2 = await albApprove(t2.id);
+  res.push(['Album: Übersteuerung wird vor der Freigabe erkannt, Song technisch blockiert', !ap2.ok && t2.status === 'blockiert' && ap2.check.items.some(x => x.level === 'block' && /Clipping|True Peak/.test(x.text)), ap2.check.items.filter(x => x.level === 'block').map(x => x.text).join(' | ')]);
+  // Songs 3–5 freigeben
+  const okIds = []; for (const t of T.slice(2, 5)) { const r = await albApprove(t.id); if (r.ok) okIds.push(albStyleId(t, t.cur)); }
+  const conf = () => STYLE.list.filter(e => styleRating(e) === 'ok');
+  res.push(['Album: drei Songs freigegeben (technische Prüfung bestanden)', okIds.length === 3 && T.slice(2, 5).every(t => t.status === 'frei' && albCur(t).check.ok), T.slice(2, 5).map(t => t.status).join(', ')]);
+  res.push(['Mein Stil: genau die freigegebenen Songs sind positive Beispiele, Überarbeiten/Blockiert/Ungeprüft nie', conf().length === 3 && conf().every(e => okIds.includes(e.id)) && STYLE.list.some(e => e.id === albStyleId(t1, 1) && styleRating(e) === 'schlecht') && !STYLE.list.some(e => e.id.includes(':' + t2.id + ':') && styleRating(e) === 'ok'),
+    'bestätigt ' + conf().length + ', passt nicht ' + STYLE.list.filter(e => styleRating(e) === 'schlecht').length + ', Entwurf ' + STYLE.list.filter(e => styleRating(e) === 'offen').length]);
+  const sug = styleSuggest(STYLE.list, styleFeatures(S.orig)); res.push(['Mein Stil: Vorschläge stützen sich nur auf freigegebene Songs', !!sug && sug.neighbors.every(x => okIds.includes(x.id)), sug ? sug.neighbors.map(x => x.name).join(', ') : '–']);
+  // Änderung nach Freigabe: Freigabe erlischt, Lernbeispiel wird zum Entwurf, neue Prüfung nötig
+  const t5 = T[4]; await albOpenTrack(t5.id); P.eq.bands[5].g = 1; refreshAll(); onParam(); await albSaveVersion('Manuell');
+  res.push(['Album: neue Version nach Freigabe → wieder ungeprüft, nicht exportierbar, nicht mehr als positives Beispiel', t5.status === 'neu' && !albExportable(t5) && conf().length === 2, 'Status ' + t5.status + ', bestätigt ' + conf().length]);
+  const r5 = await albApprove(t5.id); res.push(['Album: nach erneuter Prüfung wieder freigegeben (eine Version pro Song lernt)', r5.ok && conf().length === 3 && conf().filter(e => e.id.includes(':' + t5.id + ':')).length === 1, 'bestätigt ' + conf().length]);
+  // Export: nur freigegebene, ein fehlgeschlagener Export bricht die anderen nicht ab
+  const written = {}, dir = { getFileHandle: async name => ({ createWritable: async () => { const parts = []; return { write: async b => parts.push(b), close: async () => { written[name] = new Blob(parts); } }; } }) };
+  const gp = getPre; getPre = async (...a) => { if (S.track && S.track.name === T[3].name) throw new Error('Testfehler beim Rendern'); return gp(...a); };
+  let pub; try { pub = await albPublish('24', { dir }); } finally { getPre = gp; }
+  const names = Object.keys(written).filter(n => /\.wav$/.test(n)), okF = pub.files.filter(f => f.ok), bad = pub.files.filter(f => !f.ok);
+  res.push(['Album: Export nur freigegebener Songs, gesperrte bleiben gesperrt', pub.files.length === 3 && pub.locked.length === 7 && names.every(n => [T[2], T[3], T[4]].some(t => n.includes(t.name))), 'exportiert ' + names.join(', ') + ' · gesperrt ' + pub.locked.length]);
+  res.push(['Album: fehlgeschlagener Export wird gemeldet, die übrigen laufen weiter', okF.length === 2 && bad.length === 1 && /Testfehler|fehlgeschlagen/.test(bad[0].err) && !!written['Mastering-Protokoll.json'], 'ok ' + okF.length + ', Fehler: ' + (bad[0] ? bad[0].err : '–')]);
+  const w0 = written[names[0]] && parseWav(await written[names[0]].arrayBuffer()), t3 = T[2]; let pk0 = 0; if (w0) for (let i = 0; i < w0.L.length; i++) pk0 = Math.max(pk0, Math.abs(w0.L[i]), Math.abs(w0.R[i]));
+  res.push(['Album: exportierter Master hat volle Länge und hält die Decke', !!w0 && w0.L.length === sr * 6 && pk0 < 0.95, w0 ? (w0.L.length / sr) + ' s, Spitze ' + nf(20 * Math.log10(pk0), 1) + ' dBFS' : 'keine Datei']);
+  { const t6 = T[5], q = clone(DEFAULT); q.eq.bands[6].g = -1.5; const v6 = await albImportSettings(t6.id, JSON.stringify({ format: 'deepstructure.settings', settings: q, target: -15, clean: 'leicht', source: 'Claude (Chat)' }), 'Claude (Chat)');
+    res.push(['Album: Einstellungsdatei aus dem Chat wird neue Version (mit Clean-Stufe), Status ungeprüft', v6.source === 'Claude (Chat)' && v6.n === 2 && v6.target === -15 && v6.settings.eq.bands[6].g === -1.5 && /Clean Song: /.test(v6.note) && t6.status === 'neu', 'v' + v6.n + ', ' + v6.note]); }
+  { const q = clone(DEFAULT); q.eq.bands[1].g = 1; const mk = nm => new File([JSON.stringify({ settings: q, target: -14, clean: 'aus' })], nm + ' (Master).dsmaster.json');
+    const r = await albImportMany([mk(T[6].name), mk(T[7].name), mk('Gibt es nicht')]);
+    res.push(['Album: mehrere Chat-Vorschläge auf einmal, Zuordnung über den Namen', r.done.length === 2 && r.miss.length === 1 && albCur(T[6]).source === 'Claude (Chat)' && albCur(T[7]).settings.eq.bands[1].g === 1, r.done.join(', ') + ' · nicht zugeordnet: ' + r.miss.join(', ')]); }
+  let lockedErr = ''; const pr3 = await albNew('Testalbum leer'); await albAddFiles(files.slice(0, 1)); try { await albPublish('24', { dir }); } catch (e) { lockedErr = e.message; }
+  res.push(['Album: ohne Freigabe kein Export', /Kein Song freigegeben/.test(lockedErr), lockedErr]);
+  const orig = await blobGet(t3.blobKey); res.push(['Album: Original unverändert gespeichert', !!orig && orig.size === files[2].size, orig ? orig.size + ' Bytes' : 'fehlt']);
+  await albDeleteProject(pr3.id); await albDeleteProject(id); await styleDelete(null); P = keepP; refreshAll(); onParam(); if (keep) await loadTrack(keep); showTab('check'); return res;
 },
 async function aiKeyStorage() {
   const res = []; try { localStorage.removeItem('dsms.aikey'); } catch (e) {}

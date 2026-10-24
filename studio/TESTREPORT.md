@@ -441,3 +441,38 @@ Lernkurve mit simuliertem Nutzer (seine Methode: Höhen- und Bass-Shelf hängen 
 Ohne gelernte Merkmalsgewichte (nur feste Gewichte) lagen die Werte bei 1000 Beispielen bei 0,57 dB / 0,52 dB / 23 % / 0,86 LU. Immer dieselbe Durchschnittseinstellung: 1,03 dB.
 
 Gesamt: 81 von 81 DSP-Tests, 109 von 109 Browser-Tests.
+
+## 25. Nachtrag 1.12.0: Album-Review, Freigabe und Mein Stil (technischer Testbericht)
+
+Programmstand: Deep Structure Mastering Studio 1.12.0 (`web/index.html`, `desktop/…html`), Chromium (Playwright) ohne Fenster. Testsignale: 10 bzw. 13 künstliche Songs (Rauschen mit Bass-Schlag, 6 s, 44,1 kHz, Pegel von −1 bis −12 dB gestaffelt).
+
+| Prüfung | Erwartung | Ergebnis |
+|---|---|---|
+| 10 Songs importieren, dann 3 weitere | höchstens 12 pro Album | 10 + 2 übernommen, 13. abgelehnt |
+| „Alle berechnen“, nach 3 Songs anhalten | Fertiges bleibt gespeichert | 4 von 10 berechnet und gespeichert |
+| Neustart simuliert (Datenbank geschlossen, neu eingelesen), fortsetzen | nichts doppelt | 4 gespeichert, danach 6 berechnet, je genau 1 Version |
+| Neustart echt (Seite neu geladen) mitten im Album | Projekt und Version noch da, Rest fortgesetzt | vorher [1, 0], nachher [1, 1] Versionen |
+| Unterschiedliche Lautheit | ausgleichen, nicht gleich machen | Spanne vorher 11,0 LU, nachher 4,4 LU |
+| Kommentar mit Zeitbereich und Typ | im Überarbeitungsauftrag | „0:01.0–0:02.5 · Höhen zu scharf: Becken klirren“ |
+| Wiederholte Überarbeitungen, zurück zu Version 2 | alle Versionen bleiben | 3 Versionen, aktuell v2, Status „Nicht geprüft“, Einstellungen identisch mit v2 |
+| Übersteuerung (Limiter aus, +18 dB) freigeben | technisch blockiert | blockiert: Clipping 0 dBFS, True Peak +11,1 dBTP |
+| Drei Songs freigeben | Prüfung bestanden | 3 × freigegeben |
+| Mein Stil nach Freigaben | nur Freigegebene positiv | 3 bestätigt, 1 „passt nicht“ (Überarbeiten), blockierter Song nie positiv |
+| Mein-Stil-Vorschlag | stützt sich nur auf Freigegebene | Vorbilder: Track 5, 4, 3 |
+| Neue Version nach Freigabe | wieder ungeprüft, nicht exportierbar, kein positives Beispiel | Status neu, bestätigt 2 |
+| Erneute Freigabe | genau ein positives Beispiel pro Song | bestätigt 3 |
+| Einstellungsdatei aus dem Chat laden | neue Version mit Clean-Stufe, ungeprüft | v2, Clean Song: Rauschteppich 30 % |
+| Mehrere Chat-Vorschläge auf einmal | Zuordnung über den Namen | 2 zugeordnet, 1 unbekannte Datei gemeldet |
+| PC-Fassung (file://): Album anlegen, Seite neu laden | Projekt noch da | ja |
+| Veröffentlichen | nur Freigegebene, Rest gesperrt | 3 Songs versucht, 7 gesperrt |
+| Fehlgeschlagener Export (Renderfehler bei einem Song) | gemeldet, übrige laufen weiter | 2 exportiert, 1 Fehler gemeldet, Protokoll geschrieben |
+| Exportierter Master | volle Länge, Decke gehalten | 6,0 s, Spitze −4,2 dBFS |
+| Veröffentlichen ohne Freigabe | verweigert | „Kein Song freigegeben …“ |
+| Original im Speicher | unverändert | gleiche Dateigröße |
+| Mein Stil: Export ohne „Passt“ | nur Entwurf, kein Vorschlag | 3 Entwürfe, kein Vorschlag; nach „Passt“ wie bisher |
+| Album-Werkzeug: Nachbessern `--nur 2` mit Anpassung | nur Song 2 neu, Song 1 bleibt | Ziel −15, Anpassung übernommen, Einstellungsdatei mit Clean-Stufe |
+| Album-Werkzeug mit 13 Songs | abgelehnt | „höchstens 12“ |
+
+Bewusst nicht automatisch getestet: die Ordnerauswahl am PC (File System Access API braucht eine Nutzeraktion; getestet über einen gleichwertigen Ordner-Ersatz) und das KI-Überarbeiten (braucht eine Verbindung zu Claude; der Weg nutzt das vorhandene, bereits getestete KI-Mastering mit den Kommentaren als Wunsch).
+
+Gesamt: 81 von 81 DSP-Tests, 129 von 129 Browser-Tests, PC-Fassung, Neustart-Test, Album-Werkzeug-Test.

@@ -223,7 +223,15 @@ table.metrics td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .stylenb li{display:grid;grid-template-columns:44px minmax(0,1fr) 80px;gap:8px;align-items:center;font-size:13px}
 .stylenb .bar{display:block;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}.stylenb .bar i{display:block;height:100%;background:var(--amber)}
 .stylenb .nm,.stylelist .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.stylelist{max-height:220px;overflow:auto;margin-top:6px}.stylelist .nm small{display:block;font-size:11px;margin-top:1px}.stylelist li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.stylelist{max-height:220px;overflow:auto;margin-top:6px}.stylelist .nm small{display:block;font-size:11px;margin-top:1px}.stylelist .acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.stylelist .acts button{min-height:30px;padding:0 9px}.stylelist li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+.albtop{align-items:flex-end;flex-wrap:wrap;gap:10px}.albopts .row,.albdetail .row{flex-wrap:wrap;gap:10px;align-items:flex-end}.albopts,.albdetail{display:flex;flex-direction:column;gap:10px;margin-top:10px}.albopts h3,.albdetail h3{display:flex;justify-content:space-between;align-items:center;margin:0;gap:10px}
+.albtracks,.albcomments,.albversions,.albcheck{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.albtracks li{display:grid;grid-template-columns:28px minmax(0,1fr) auto auto auto;gap:10px;align-items:center;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px}.albtracks li.open{border-color:var(--accent)}
+.albtracks .nm,.albcomments .nm,.albversions .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.albtracks .nm small{display:block}.albtracks .lu{font-size:12px;color:var(--muted)}
+.albcomments li,.albversions li{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:8px;align-items:center;font-size:13px;background:var(--field);border:1px solid var(--line);border-left:3px solid #FFB36B;border-radius:6px;padding:4px 8px}.albcomments li.done{opacity:.55;border-left-color:var(--line)}
+.albversions li{grid-template-columns:auto minmax(0,1fr) auto;border-left-color:var(--accent)}.albcheck li{font-size:13px;padding:4px 8px;border-radius:6px;background:var(--field);border-left:3px solid var(--line)}.albcheck li.block{border-left-color:#FF8A7A}.albcheck li.warn{border-left-color:var(--gold)}.albcheck li.ok{border-left-color:#7EE2B8}
+.albdirty{color:var(--gold)}
+@media (max-width:640px){ .albtracks li{grid-template-columns:24px minmax(0,1fr) auto;} .albtracks .st{grid-column:3;grid-row:1} .albtracks .lu{grid-column:2;grid-row:2} .albtracks li>button{grid-column:3;grid-row:2} .albcomments .nm{white-space:normal} .albcomments li{grid-template-columns:auto minmax(0,1fr) auto} .albcomments li .mono{grid-column:2} .albcomments li .nm{grid-column:1/4;grid-row:2} .albcomments li button{grid-column:3;grid-row:1} }
 .result{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px}
 
 
@@ -294,7 +302,7 @@ a.btn{text-decoration:none}
 /* Spiel-Daten */
 .gm-top{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
 .pill{font:600 11px var(--f-mono);letter-spacing:.04em;padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);text-transform:none}
-.pill.good{color:#7EE2B8;border-color:#2a5a48}.pill.mid{color:var(--gold);border-color:#5a4a26}.pill.low{color:#FF8A7A;border-color:#5e2c26}
+.pill.good{color:#7EE2B8;border-color:#2a5a48}.pill.rev{color:#FFB36B;border-color:#5e4426}.pill.mid{color:var(--gold);border-color:#5a4a26}.pill.low{color:#FF8A7A;border-color:#5e2c26}
 .gm-bpm{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .gm-bpm b{font:400 40px/1 var(--f-display);color:var(--accent);font-variant-numeric:tabular-nums}
 .gm-bpm small{font:600 12px var(--f-display);letter-spacing:.12em;color:var(--muted)}
@@ -327,7 +335,7 @@ a.btn{text-decoration:none}
 <div class="app" id="app">
   <div class="backdrop" aria-hidden="true"></div>
   <header class="top">
-    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.11.0</span></small></div></div>
+    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.12.0</span></small></div></div>
     <div class="filebox">
       <button class="primary" id="btnOpen" title="Audiodatei öffnen (WAV, MP3, FLAC, M4A)">Song öffnen</button>
       <input type="file" id="fileIn" accept="audio/*,.wav,.mp3,.flac,.m4a,.aac,.ogg" hidden>
@@ -408,6 +416,7 @@ a.btn{text-decoration:none}
         <button role="tab" data-tab="ref" aria-selected="false">Referenz</button>
         <button role="tab" data-tab="ana" aria-selected="false">Analyse</button>
         <button role="tab" data-tab="game" aria-selected="false">Spiel-Daten</button>
+        <button role="tab" data-tab="album" aria-selected="false">Album</button>
         <button class="assist" id="btnAssist" title="Analysiert den Song und stellt einen Startpunkt ein">Assistent</button>
         <button class="assist mystyle" id="btnStyle" data-n="0" title="Lernt aus deinen gemasterten Songs und schlägt Einstellungen in deinem Stil vor">Mein Stil</button>
       </nav>
@@ -627,6 +636,51 @@ a.btn{text-decoration:none}
         </div>
       </div>
 
+      <div class="panel" data-panel="album" hidden>
+        <div class="phead"><p>Album-Review: bis zu 12 Songs pro Album. Vorschläge werden als Arbeitsversionen gespeichert, nichts gilt als fertig, bevor du es angehört und freigegeben hast. Originale bleiben unverändert, alles liegt nur auf diesem Gerät. Exportiert werden nur freigegebene Songs, und nur sie zählen für „Mein Stil“.</p></div>
+        <div class="row albtop">
+          <label class="field" style="flex:1 1 220px"><span>Album</span><select id="albProj"></select></label>
+          <label class="field" style="flex:1 1 180px"><span>Name (neu / umbenennen)</span><input type="text" id="albNewName" maxlength="80" placeholder="z. B. Floodline"></label>
+          <button class="primary" id="albNew">Neues Album</button><button id="albRename">Umbenennen</button><button class="ghost" id="albDelete">Album löschen</button>
+        </div>
+        <p class="hint mono" id="albMsg"></p><button id="albStop" hidden>Anhalten</button>
+        <div id="albBody" hidden>
+          <div class="card albopts">
+            <h3><span>Vorgaben für das Album</span><span class="mono small muted" id="albCount"></span></h3>
+            <div class="row">
+              <label class="field"><span>Clean Song</span><select id="albO_clean"><option value="aus">aus</option><option value="leicht">leicht (nur sichere Störtöne, Teppich 30 %)</option><option value="mittel">mittel (Teppich 60 %)</option><option value="stark">stark (auch Glätten)</option></select></label>
+              <label class="field"><span>Vorschlag aus</span><select id="albO_basis"><option value="assistent">Assistent</option><option value="stil">Mein Stil</option><option value="ki">KI (Claude)</option><option value="neutral">Neutral (nur Limiter)</option></select></label>
+              <label class="field"><span>Ziel (LUFS)</span><input type="number" id="albO_target" min="-30" max="-5" step="0.5"></label>
+              <label class="field"><span>Album-Lautheit</span><select id="albO_balance"><option value="album">Balance (Unterschiede zur Hälfte erhalten)</option><option value="gleich">alle gleich laut</option></select></label>
+            </div>
+            <label class="field"><span>Klangwunsch (für die KI)</span><input type="text" id="albO_wish" maxlength="300" placeholder="z. B. klar, Artefakte reduzieren aber nicht zu viel, Dynamik leicht anpassen"></label>
+            <div class="row"><button id="albAdd">Songs hinzufügen</button><input type="file" id="albFiles" accept="audio/*,.wav,.flac,.mp3,.ogg,.m4a,.aif,.aiff" multiple hidden><button class="primary" id="albAll" title="Berechnet für alle Songs ohne Version einen Vorschlag. Nach Abbruch oder Neustart geht es dort weiter.">Alle berechnen</button><button id="albImportAll" title="Die .dsmaster.json-Dateien vom Chat „Mastering“ auf einmal laden; sie werden über den Namen den Songs zugeordnet">Vorschläge vom Chat laden</button><input type="file" id="albSetMany" accept=".json,application/json" multiple hidden></div>
+          </div>
+          <ul class="albtracks" id="albTracks"></ul>
+          <p class="hint" id="albBal"></p>
+          <div class="card albdetail" id="albDetail" hidden>
+            <h3><span id="albDTitle"></span><span id="albDStatus"></span></h3>
+            <p class="hint" id="albDInfo"></p>
+            <p class="hint albdirty" id="albDirty" hidden>Geändert, noch nicht als Version gespeichert.</p>
+            <div class="row"><label class="field"><span>Neuer Vorschlag aus</span><select id="albSrc"><option value="assistent">Assistent</option><option value="stil">Mein Stil</option><option value="ki">KI (Claude)</option><option value="neutral">Neutral</option></select></label>
+              <button id="albPropose">Vorschlag berechnen</button><button id="albSave" title="Den aktuellen Stand (deine Einstellungen und Bearbeitungen) als neue Version speichern">Als Version speichern</button><button id="albImport" title="Einstellungsdatei (.dsmaster.json) vom Chat „Mastering“ als neue Version laden">Einstellungsdatei laden</button><input type="file" id="albSetIn" accept=".json,application/json" hidden></div>
+            <p class="hint" style="margin:0">Anhören: oben zwischen „Master“ und „Original“ umschalten, „Pegelgleich“ an. Stellen markieren: in der Wellenform einen Bereich ziehen, dann Kommentar hinzufügen.</p>
+            <div class="row albcadd"><select id="albCType" aria-label="Fehlertyp"></select><input type="text" id="albCText" maxlength="500" placeholder="Was fällt dir auf? (optional)" style="flex:1 1 200px"><button id="albCAdd">Kommentar zur Auswahl</button></div>
+            <ul class="albcomments" id="albComments"></ul>
+            <div class="row"><button id="albBrief">Überarbeitungsauftrag kopieren</button><button id="albKI">Mit KI überarbeiten</button></div>
+            <div class="row"><button id="albCheck">Technische Prüfung</button><button class="primary" id="albApprove">Freigeben</button><button id="albRevise">Überarbeiten</button></div>
+            <ul class="albcheck" id="albCheckOut"></ul>
+            <details><summary>Versionen</summary><ul class="albversions" id="albVersions"></ul></details>
+          </div>
+          <div class="card">
+            <h3><span>Veröffentlichen</span></h3>
+            <p class="hint" id="albPubInfo"></p>
+            <div class="row"><label class="field"><span>Format</span><select id="albFmt"><option value="24">WAV 24 Bit</option><option value="16">WAV 16 Bit</option><option value="mp3320">MP3 320 kbit/s</option><option value="ogg8">OGG Vorbis (Spiel)</option></select></label>
+              <button class="primary" id="albPublish" title="Exportiert nur freigegebene Songs. Am PC wählst du einen Ordner, darin entsteht „Album – Master“.">Freigegebene exportieren</button></div>
+          </div>
+        </div>
+      </div>
+
       <div class="panel" data-panel="game" hidden>
         <div class="phead"><p>Tempo, Takte, Song-Abschnitte, Energie und Schläge als Daten für dein Spiel. Alle Zeiten in Sekunden ab Dateianfang. Prüfe das Raster mit dem Klick beim Abspielen, bevor du kopierst.</p><button id="gmRun">Neu analysieren</button></div>
         <div class="gm-top">
@@ -736,7 +790,7 @@ a.btn{text-decoration:none}
         <p class="hint mono" id="styleTarget" style="margin:0"></p>
         <div class="row"><button class="primary" id="btnStyleApply">Vorschlag übernehmen</button><button id="btnStyleUndo" hidden>Vorherige Einstellungen</button></div>
       </div>
-      <label class="chk"><input type="checkbox" id="styleLearn" checked> Gemasterte Exporte als Beispiel merken (nur auf diesem Gerät)</label>
+      <label class="chk"><input type="checkbox" id="styleLearn" checked> Gemasterte Exporte als Entwurf merken (nur auf diesem Gerät; gelernt wird erst nach „Passt“)</label>
       <details id="styleListWrap" hidden><summary>Beispiele (<span id="styleCount">0</span>)</summary><ul class="stylelist" id="styleList"></ul></details>
       <div class="row" style="flex-wrap:wrap"><button id="btnStyleSave" title="Alle Beispiele als Datei sichern, z. B. um sie aufs Handy zu übertragen">Sicherung speichern</button><button id="btnStyleLoad" title="Beispiele aus einer Sicherung übernehmen">Sicherung laden</button><button class="ghost" id="btnStyleClear">Alle löschen</button>
         <input type="file" id="styleIn" accept=".json,application/json" hidden></div>
@@ -2248,7 +2302,7 @@ function drawWave() {
     g.fillStyle = 'rgba(217,164,65,.13)'; g.fillRect(x0, RULER, x1 - x0, H);
     g.fillStyle = '#D9A441'; g.fillRect(Math.round(x0), RULER, 1, H); g.fillRect(Math.round(x1), RULER, 1, H);
     g.fillRect(x0, RULER - 3, x1 - x0, 3); }
-  drawArtMarks(g, w, t => t2x(t, w), RULER, 4); drawGameMarks(g, w, t => t2x(t, w), RULER, 4); drawDrumMarks(g, w, t => t2x(t, w), RULER, 4);
+  drawArtMarks(g, w, t => t2x(t, w), RULER, 4); drawGameMarks(g, w, t => t2x(t, w), RULER, 4); drawDrumMarks(g, w, t => t2x(t, w), RULER, 4); drawAlbumMarks(g, w, t => t2x(t, w), RULER, 4);
   // Wellenform
   const spp = span * sr / w;
   if (spp < 2) {
@@ -2288,7 +2342,7 @@ function drawOverview() {
     for (let b = b0; b < b1 && b < nb; b++) { if (S.peaks.mn[b] < lo) lo = S.peaks.mn[b]; if (S.peaks.mx[b] > hi) hi = S.peaks.mx[b]; }
     g.fillRect(x, mid - hi * mid * 0.9, 1, Math.max(1, (hi - lo) * mid * 0.9)); }
   const d = n / S.track.sr, x0 = S.view.a / d * w, x1 = S.view.b / d * w;
-  drawArtMarks(g, w, t => t / d * w, 0, 3); drawGameMarks(g, w, t => t / d * w, 0, 3); drawDrumMarks(g, w, t => t / d * w, 0, 3);
+  drawArtMarks(g, w, t => t / d * w, 0, 3); drawGameMarks(g, w, t => t / d * w, 0, 3); drawDrumMarks(g, w, t => t / d * w, 0, 3); drawAlbumMarks(g, w, t => t / d * w, 0, 3);
   g.fillStyle = 'rgba(154,223,255,.10)'; g.fillRect(x0, 0, Math.max(2, x1 - x0), h);
   g.strokeStyle = '#9ADFFF'; g.lineWidth = 1; g.strokeRect(Math.round(x0) + 0.5, 0.5, Math.max(2, x1 - x0) - 1, h - 1);
   if (S.sel) { g.fillStyle = 'rgba(154,223,255,.45)'; g.fillRect(S.sel.a / d * w, h - 3, Math.max(1, (S.sel.b - S.sel.a) / d * w), 3); }
@@ -3233,7 +3287,7 @@ function feedbackText() {
   const lines = ['Feedback zum Deep Structure Mastering Studio', '', 'Bewertung: ' + (FB.stars ? '★'.repeat(FB.stars) + '☆'.repeat(5 - FB.stars) + ' (' + FB.stars + '/5)' : 'keine'),
     'Name: ' + ($('#fbName').value.trim() || '–'), 'Musik: ' + ($('#fbGenre').value.trim() || '–'), '', 'Was gefällt:', $('#fbGood').value.trim() || '–', '', 'Was stört / fehlt / unklar:', $('#fbBad').value.trim() || '–'];
   if ($('#fbTech').checked) {
-    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.11.0 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal') + ' · Audio-Modul: ' + (S.workletOK ? 'AudioWorklet' : 'Ersatz'));
+    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.12.0 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal') + ' · Audio-Modul: ' + (S.workletOK ? 'AudioWorklet' : 'Ersatz'));
     if (S.track && !S.track.demo) lines.push('Song: ' + S.track.name + ' · ' + (S.track.sr / 1000) + ' kHz · ' + fmtTime(duration(), 0));
     if (CHECK) lines.push('Song-Check: ' + CHECK.score + '/100 · ' + CHECK.findings.map(f => f.title).join(' | '));
     if (S.arts) lines.push('Artefakte: ' + S.arts.regions.length + ' Stellen, ' + S.arts.clicks.length + ' Knackser, Höhen bis ' + (S.arts.cutoff || '?') + ' Hz');
@@ -3977,7 +4031,12 @@ const styleRound = p => { const r = (v, d) => Math.round(v * d) / d;
   p.sat.drive = Math.round(p.sat.drive); p.sat.mix = Math.round(p.sat.mix); p.stereo.width = Math.round(p.stereo.width); p.stereo.monoFreq = Math.round(p.stereo.monoFreq);
   p.lim.ceiling = r(p.lim.ceiling, 10); p.lim.release = Math.round(p.lim.release); p.lim.drive = r(p.lim.drive, 10); return p; };
 /* Vorschlag: die k ähnlichsten Beispiele, gewichtet nach Ähnlichkeit */
-function styleSuggest(examples, feat, k = 5) {
+/* Bewertung eines Beispiels: 'ok' = ausdrücklich bestätigt (nur daraus wird gelernt), 'offen' = Entwurf, noch nicht angehört,
+   'schlecht' = passt nicht (wird dokumentiert, nie nachgeahmt). Ältere Einträge ohne Bewertung gelten als 'offen'. */
+const styleRating = e => e && (e.rating === 'ok' || e.rating === 'schlecht') ? e.rating : 'offen';
+const styleConfirmed = list => list.filter(e => styleRating(e) === 'ok');
+function styleSuggest(all, feat, k = 5) {
+  const examples = styleConfirmed(all || []);
   if (!feat || !examples.length) return null;
   const w = styleWeights(examples);
   const nb = examples.map(e => ({ e, d: styleDistance(feat, e.feat, w) })).sort((a, b) => a.d - b.d).slice(0, Math.min(k, examples.length));
@@ -4004,28 +4063,36 @@ const styleLearnOn = () => recall('styleLearn') !== false;
 
 /* Beim gemasterten Export: Beispiel merken (gleicher Song = gleicher Eintrag, wird aktualisiert) */
 async function styleLearnFromExport(res) {
+  // Ein Export ist nur ein Entwurf: gelernt wird erst, wenn der Master nach dem Anhören mit „Passt“ bestätigt wurde
   try {
     if (!styleLearnOn() || !S.track || S.track.demo) return false;
     const feat = styleFeatures(S.orig); if (!feat) return false;
     const name = (S.track.name || 'Song').replace(/\.[a-z0-9]{2,4}$/i, ''), dur = Math.round(duration());
     const ex = { v: STYLE_VER, id: name + '|' + dur, name, dur, sr: S.track.sr, date: new Date().toISOString().slice(0, 10), app: (document.querySelector('.brand .ver') || {}).textContent || '',
-      feat, settings: (() => { const q = clone(P); delete q.eq.notch; return q; })(), target: +$('#targetSel').value, result: { I: res && isFinite(res.I) ? Math.round(res.I * 10) / 10 : null, TP: res && isFinite(res.TP) ? Math.round(res.TP * 10) / 10 : null, LRA: res && isFinite(res.LRA) ? Math.round(res.LRA * 10) / 10 : null } };
-    if (!STYLE.loaded) await styleLoad(); await stylePut(ex); styleRenderCount(); return true;
+      feat, settings: (() => { const q = clone(P); delete q.eq.notch; return q; })(), target: +$('#targetSel').value, rating: 'offen', source: 'export', result: { I: res && isFinite(res.I) ? Math.round(res.I * 10) / 10 : null, TP: res && isFinite(res.TP) ? Math.round(res.TP * 10) / 10 : null, LRA: res && isFinite(res.LRA) ? Math.round(res.LRA * 10) / 10 : null } };
+    if (!STYLE.loaded) await styleLoad();
+    const old = STYLE.list.find(x => x.id === ex.id);
+    if (old && styleRating(old) === 'ok' && JSON.stringify(old.settings) === JSON.stringify(ex.settings)) return true; // derselbe bestätigte Master noch einmal exportiert
+    await stylePut(ex); styleRenderCount(); return true;
   } catch (e) { console.warn('Mein Stil: Beispiel nicht gespeichert', e); return false; }
 }
 
 /* ---------- Oberfläche ---------- */
-function styleRenderCount() { const b = $('#btnStyle'); if (b) b.dataset.n = STYLE.list.length; const c = $('#styleCount'); if (c) c.textContent = STYLE.list.length; }
+function styleRenderCount() { const n = styleConfirmed(STYLE.list).length, b = $('#btnStyle'); if (b) b.dataset.n = n; const c = $('#styleCount'); if (c) c.textContent = STYLE.list.length; }
+async function styleRate(id, rating) { const ex = STYLE.list.find(x => x.id === id); if (!ex || !['ok', 'offen', 'schlecht'].includes(rating)) return false;
+  await stylePut(Object.assign({}, ex, { rating, ratedAt: new Date().toISOString() })); styleRenderCount(); return true; }
 const STYLE_CONF = { gut: ['Vorschlag sicher', 'good'], mittel: ['Vorschlag brauchbar', 'mid'], unsicher: ['Kein wirklich ähnlicher Song dabei', 'low'], wenige: ['Noch wenige Beispiele', 'low'] };
 async function styleOpen() {
   if (!STYLE.loaded) await styleLoad();
   $('#styleModal').hidden = false; $('#styleLearn').checked = styleLearnOn(); styleRender();
 }
 function styleRender() {
-  const n = STYLE.list.length, feat = S.track ? styleFeatures(S.orig) : null, sug = feat && n ? styleSuggest(STYLE.list, feat) : null; STYLE.last = sug; styleRenderCount();
-  $('#styleIntro').textContent = n === 0
-    ? 'Noch keine Beispiele. Jeder Song, den du gemastert exportierst, wird ab jetzt ein Beispiel: Das Studio merkt sich, wie der Song vorher klang und was du eingestellt hast. Ab etwa 20 bis 30 Beispielen werden die Vorschläge gut.'
-    : n + (n === 1 ? ' Beispiel' : ' Beispiele') + ' aus deinen Masters. Für den geladenen Song werden die ähnlichsten gesucht und ihre Einstellungen gemischt. Kerben bleiben songbezogen und werden nicht übernommen.';
+  const all = STYLE.list.length, n = styleConfirmed(STYLE.list).length, nOpen = STYLE.list.filter(e => styleRating(e) === 'offen').length, nBad = STYLE.list.filter(e => styleRating(e) === 'schlecht').length;
+  const feat = S.track ? styleFeatures(S.orig) : null, sug = feat && n ? styleSuggest(STYLE.list, feat) : null; STYLE.last = sug; styleRenderCount();
+  $('#styleIntro').textContent = (n === 0
+    ? 'Noch keine bestätigten Beispiele. Gemasterte Exporte werden als Entwurf gemerkt. Gelernt wird erst, wenn du nach dem Anhören unten bei „Beispiele“ auf „Passt“ tippst oder einen Song im Album freigibst. Ab etwa 20 bis 30 bestätigten Beispielen werden die Vorschläge gut.'
+    : n + (n === 1 ? ' bestätigtes Beispiel' : ' bestätigte Beispiele') + ' aus deinen Masters. Für den geladenen Song werden die ähnlichsten gesucht und ihre Einstellungen gemischt. Kerben bleiben songbezogen und werden nicht übernommen.')
+    + (nOpen ? ' ' + nOpen + (nOpen === 1 ? ' Entwurf wartet' : ' Entwürfe warten') + ' auf dein Urteil.' : '') + (nBad ? ' ' + nBad + ' als „passt nicht“ markiert (wird nie nachgeahmt).' : '');
   const box = $('#styleSug'); box.hidden = !sug; $('#btnStyleApply').disabled = !sug;
   if (sug) { const [t, cls] = STYLE_CONF[sug.conf], pill = $('#styleConf'); pill.textContent = t; pill.className = 'pill ' + cls;
     $('#styleTarget').textContent = sug.targetI != null ? 'Lautheit wie bei diesen Songs: ' + nf(sug.targetI, 1) + ' LUFS' : '';
@@ -4034,11 +4101,15 @@ function styleRender() {
       li.querySelector('.mono').textContent = x.sim + ' %'; li.querySelector('.nm').textContent = x.name; li.querySelector('.bar i').style.width = Math.max(4, x.sim) + '%'; ul.appendChild(li); }); }
   else if (n && !feat) { box.hidden = false; $('#styleConf').textContent = S.track ? 'Song wird noch gemessen …' : 'Lade zuerst einen Song.'; $('#styleConf').className = 'pill low'; $('#styleNb').innerHTML = ''; $('#styleTarget').textContent = ''; }
   const ul = $('#styleList'); ul.innerHTML = '';
-  STYLE.list.slice().sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.name.localeCompare(b.name)).forEach(ex => { const li = document.createElement('li');
-    li.innerHTML = '<span class="nm"><b></b><small class="mono muted"></small></span><button class="ghost" title="Dieses Beispiel vergessen">Entfernen</button>';
-    li.querySelector('.nm b').textContent = ex.name; li.querySelector('.nm small').textContent = ex.date + (ex.result && ex.result.I != null ? ' · ' + nf(ex.result.I, 1) + ' LUFS' : '');
-    li.querySelector('button').addEventListener('click', async () => { await styleDelete(ex.id); styleRender(); }); ul.appendChild(li); });
-  $('#styleListWrap').hidden = !n; $('#btnStyleUndo').hidden = !STYLE.before;
+  const RT = { ok: ['Passt', 'good'], offen: ['Entwurf', 'mid'], schlecht: ['Passt nicht', 'low'] }, ord = { offen: 0, ok: 1, schlecht: 2 };
+  STYLE.list.slice().sort((a, b) => ord[styleRating(a)] - ord[styleRating(b)] || (b.date || '').localeCompare(a.date || '') || a.name.localeCompare(b.name)).forEach(ex => { const li = document.createElement('li'), r = styleRating(ex);
+    li.innerHTML = '<span class="nm"><b></b><small class="mono muted"></small></span><span class="acts"><span class="pill"></span><button class="ghost" data-r="ok" title="Nach dem Anhören: dieser Master passt, daraus lernen">Passt</button><button class="ghost" data-r="schlecht" title="Passt nicht: wird dokumentiert, aber nie nachgeahmt">Passt nicht</button><button class="ghost" data-del title="Dieses Beispiel vergessen">Entfernen</button></span>';
+    li.querySelector('.nm b').textContent = ex.name; li.querySelector('.nm small').textContent = ex.date + (ex.result && ex.result.I != null ? ' · ' + nf(ex.result.I, 1) + ' LUFS' : '') + (ex.album ? ' · Album „' + ex.album + '“' : '');
+    const pill = li.querySelector('.pill'); pill.textContent = RT[r][0]; pill.className = 'pill ' + RT[r][1];
+    li.querySelectorAll('[data-r]').forEach(b => { b.hidden = b.dataset.r === r; b.addEventListener('click', async () => { await styleRate(ex.id, b.dataset.r); styleRender(); }); });
+    li.querySelector('[data-del]').addEventListener('click', async () => { await styleDelete(ex.id); styleRender(); }); ul.appendChild(li); });
+  $('#styleListWrap').hidden = !all; $('#btnStyleUndo').hidden = !STYLE.before;
+  if (nOpen && !$('#styleListWrap').dataset.seen) { $('#styleListWrap').open = true; $('#styleListWrap').dataset.seen = '1'; }
 }
 async function styleApply() {
   const sug = STYLE.last; if (!sug || !S.track) return;
@@ -4056,7 +4127,7 @@ function styleBackup() {
 async function styleRestore(file) {
   try { const o = JSON.parse(await file.text()); if (!o || o.format !== 'deepstructure.style.v1' || !Array.isArray(o.examples)) throw new Error('keine Mein-Stil-Sicherung');
     let ok = 0; for (const ex of o.examples) { if (!ex || typeof ex.id !== 'string' || !ex.feat || !Array.isArray(ex.feat.spec) || ex.feat.spec.length !== STYLE_SPEC.length || !ex.settings || !ex.result) continue;
-      try { validateSettings(ex.settings); } catch (e) { continue; } await stylePut(ex); ok++; }
+      try { validateSettings(ex.settings); } catch (e) { continue; } await stylePut(Object.assign({}, ex, { rating: styleRating(ex) })); ok++; }
     status(ok + ' Beispiele übernommen (gleiche Songs ersetzt).', 'ok', 6000); styleRender();
   } catch (e) { status('Sicherung nicht lesbar: ' + e.message, 'err', 8000); }
 }
@@ -4072,6 +4143,406 @@ $('#btnStyleClear').addEventListener('click', async () => { if (!STYLE.list.leng
   if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Wirklich alle löschen?'; setTimeout(() => { b.dataset.sure = ''; b.textContent = 'Alle löschen'; }, 4000); return; }
   b.dataset.sure = ''; b.textContent = 'Alle löschen'; await styleDelete(null); styleRender(); status('Alle Beispiele gelöscht.'); });
 styleLoad().then(styleRenderCount);
+/* ============================ Album: Projekt, Review, Freigabe ============================
+   Nicht-destruktiv: Originale liegen unverändert als Datei im Gerätespeicher (IndexedDB), jeder Arbeitsstand ist eine
+   Version (Einstellungen + gegebenenfalls bearbeitete Audiodaten, z. B. nach Clean Song). Nur der gerade geöffnete
+   Song liegt dekodiert im Arbeitsspeicher. Exportiert wird erst nach ausdrücklicher Freigabe und bestandener
+   technischer Prüfung. Nur freigegebene Masters werden in „Mein Stil“ als positives Beispiel gelernt. */
+const ALBUM_MAX = 12;
+const ALB_STATUS = { neu: ['Nicht geprüft', 'mid'], ueberarbeiten: ['Überarbeiten', 'rev'], frei: ['Freigegeben', 'good'], blockiert: ['Technisch blockiert', 'low'] };
+const ALB_TYPES = ['Knackser', 'Störton / Pfeifen', 'Rauschen', 'Höhen zu scharf', 'Höhen zu dumpf', 'Bass zu viel', 'Bass zu wenig', 'Mitten / Stimme', 'Zu laut', 'Zu leise', 'Verzerrung', 'Pumpen / zu stark komprimiert', 'Stereo / Phase', 'KI-Artefakt', 'Übergang / Schnitt', 'Sonstiges'];
+const ALB_DEF = { clean: 'mittel', basis: 'assistent', target: -14, balance: 'album', keep: 0.5, ceiling: -1, wish: '' };
+const ALB = { db: null, list: [], proj: null, open: null, busy: false, abort: false, msg: '' };
+const appVersion = () => (document.querySelector('.brand .ver') || {}).textContent || '';
+
+/* ---------- Speicher ---------- */
+function albDB() {
+  if (ALB.db) return Promise.resolve(ALB.db);
+  return new Promise((res, rej) => { let rq; try { rq = indexedDB.open('dsms-album', 1); } catch (e) { rej(e); return; }
+    rq.onupgradeneeded = () => { const db = rq.result; if (!db.objectStoreNames.contains('projects')) db.createObjectStore('projects', { keyPath: 'id' }); if (!db.objectStoreNames.contains('blobs')) db.createObjectStore('blobs', { keyPath: 'key' }); };
+    rq.onsuccess = () => { ALB.db = rq.result; res(ALB.db); }; rq.onerror = () => rej(rq.error); });
+}
+async function albTx(store, mode, fn) { const db = await albDB(); return new Promise((res, rej) => { const tx = db.transaction(store, mode), st = tx.objectStore(store); let out; try { out = fn(st); } catch (e) { rej(e); return; }
+  tx.oncomplete = () => res(out && out.result !== undefined ? out.result : out); tx.onerror = () => rej(tx.error); tx.onabort = () => rej(tx.error || new Error('Speichern abgebrochen (Speicher voll?)')); }); }
+const blobPut = (key, blob) => albTx('blobs', 'readwrite', st => st.put({ key, blob }));
+const blobGet = async key => { const r = await albTx('blobs', 'readonly', st => st.get(key)); return r ? r.blob : null; };
+const blobDel = key => albTx('blobs', 'readwrite', st => st.delete(key));
+async function albLoadList() { try { ALB.list = (await albTx('projects', 'readonly', st => st.getAll())) || []; } catch (e) { console.warn('Album: Speicher nicht verfügbar', e); ALB.list = []; } return ALB.list; }
+async function albSave(p = ALB.proj) { p.updated = new Date().toISOString(); await albTx('projects', 'readwrite', st => st.put(p)); const i = ALB.list.findIndex(x => x.id === p.id); if (i >= 0) ALB.list[i] = p; else ALB.list.push(p); }
+const albTrack = id => ALB.proj && ALB.proj.tracks.find(t => t.id === id);
+const albCur = t => t && t.versions.find(v => v.n === t.cur) || null;
+const albLog = (t, action, extra = {}) => t.decisions.push(Object.assign({ date: new Date().toISOString(), action, n: t.cur }, extra));
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+/* ---------- Projekt ---------- */
+async function albNew(name) {
+  const p = { id: uid('p'), name: (name || 'Neues Album').trim().slice(0, 80), created: new Date().toISOString(), opts: clone(ALB_DEF), tracks: [], published: [] };
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch (e) {}
+  ALB.proj = p; await albSave(p); store('albumLast', p.id); return p;
+}
+async function albSelect(id) { if (!ALB.list.length) await albLoadList(); ALB.proj = ALB.list.find(p => p.id === id) || null; ALB.open = null; if (ALB.proj) store('albumLast', id); return ALB.proj; }
+async function albDeleteProject(id) {
+  const p = ALB.list.find(x => x.id === id); if (!p) return;
+  for (const t of p.tracks) { await blobDel(t.blobKey); for (const v of t.versions) if (v.editKey) await blobDel(v.editKey); }
+  await albTx('projects', 'readwrite', st => st.delete(id)); ALB.list = ALB.list.filter(x => x.id !== id); if (ALB.proj && ALB.proj.id === id) { ALB.proj = null; ALB.open = null; }
+}
+const natCmp = (a, b) => a.localeCompare(b, 'de', { numeric: true, sensitivity: 'base' });
+async function albAddFiles(files) {
+  const p = ALB.proj; if (!p) throw new Error('Kein Album geöffnet');
+  const list = [...files].filter(f => /\.(wav|wave|flac|mp3|ogg|m4a|aac|aif|aiff)$/i.test(f.name) || /^audio\//.test(f.type)).sort((a, b) => natCmp(a.name, b.name));
+  const room = ALBUM_MAX - p.tracks.length, take = list.slice(0, Math.max(0, room)), skipped = list.length - take.length;
+  for (const f of take) { const key = uid('o'); await blobPut(key, f);
+    p.tracks.push({ id: uid('t'), name: f.name.replace(/\.[^.]+$/, ''), file: f.name, size: f.size, blobKey: key, status: 'neu', cur: null, versions: [], comments: [], decisions: [], measOrig: null, added: new Date().toISOString() }); }
+  p.tracks.sort((a, b) => natCmp(a.file, b.file)); await albSave(p);
+  return { added: take.length, skipped };
+}
+async function albRemoveTrack(tid) { const p = ALB.proj, t = albTrack(tid); if (!t) return; await blobDel(t.blobKey); for (const v of t.versions) if (v.editKey && !p.tracks.some(o => o !== t && o.versions.some(w => w.editKey === v.editKey))) await blobDel(v.editKey);
+  p.tracks = p.tracks.filter(x => x !== t); if (ALB.open && ALB.open.tid === tid) ALB.open = null; await albSave(p); }
+
+/* ---------- Song öffnen (nur dieser liegt dekodiert im Speicher) ---------- */
+const albWait = async (cond, ms = 300000) => { const t0 = Date.now(); while (!cond()) { if (Date.now() - t0 > ms) throw new Error('Zeitüberschreitung'); await sleep(100); } };
+const albSig = () => JSON.stringify(P) + '|' + S.ver + '|' + $('#targetSel').value;
+const albIsOpen = tid => !!(ALB.open && S.track && S.track === ALB.open.track && (tid == null || ALB.open.tid === tid));
+const albDirty = () => albIsOpen() && ALB.open.sig !== albSig();
+async function albOpenTrack(tid, n) {
+  const t = albTrack(tid); if (!t) throw new Error('Song nicht gefunden');
+  const blob = await blobGet(t.blobKey); if (!blob) throw new Error('Originaldatei fehlt im Speicher');
+  const d = await decodeFile(new File([blob], t.file)); d.name = t.name; await loadTrack(d);
+  await albWait(() => S.orig && S.orig.spec && !S.measuring);
+  if (!t.measOrig) { t.measOrig = { I: S.orig.I, TP: S.orig.TP, LRA: S.orig.LRA, dur: duration(), sr: S.track.sr }; await albSave(); }
+  const v = n != null ? t.versions.find(x => x.n === n) : albCur(t);
+  if (v) await albApplyVersion(v);
+  else { P = clone(DEFAULT); P.eq.notch = clone(DEFAULT.eq.notch); refreshAll(); onParam(); }
+  ALB.open = { tid, track: S.track, n: v ? v.n : null, sig: albSig(), base: v };
+  if (n != null && v && t.cur !== n) { t.cur = n; t.status = 'neu'; albLog(t, 'zurück zu Version', { n }); await albSave(); }
+  return t;
+}
+async function albApplyVersion(v) {
+  if (v.editKey) { const b = await blobGet(v.editKey); if (!b) throw new Error('Bearbeitete Audiodaten der Version ' + v.n + ' fehlen');
+    const e = await decodeFile(new File([b], 'version.wav')); const ver = S.ver; commit(e.L, e.R, 'Album: Bearbeitung aus Version ' + v.n, null, 0);
+    await albWait(() => S.ver !== ver && S.orig && S.orig.spec && !S.measuring); }
+  P = validateSettings(v.settings); setTargetValue(v.target); refreshAll(); onParam();
+}
+/* Fingerabdruck der Audiodaten (gleiche Bearbeitung = gleiche Datei, wird nicht doppelt gespeichert) */
+function audioSig(L, R) { let a = 0, b = 0; const st = Math.max(1, Math.floor(L.length / 4096)); for (let i = 0; i < L.length; i += st) { a += L[i] * (i % 7 + 1); b += R[i] * (i % 5 + 1); } return L.length + ':' + a.toFixed(6) + ':' + b.toFixed(6); }
+
+/* ---------- Version speichern ---------- */
+async function albSaveVersion(source, extra = {}) {
+  if (!albIsOpen()) throw new Error('Kein Album-Song geöffnet');
+  const t = albTrack(ALB.open.tid), m = await freshMaster();
+  let editKey = null, editSig = null, editLabel = null;
+  if (S.track.L !== S.file.L) {
+    editSig = audioSig(S.track.L, S.track.R); const same = t.versions.find(v => v.editSig === editSig && v.editKey);
+    const labels = S.undo.map(u => u.label).filter(l => !/^Album: Bearbeitung aus Version/.test(l));
+    editLabel = [ALB.open.base && ALB.open.base.editLabel, ...labels].filter(Boolean).join(' · ') || 'bearbeitet';
+    if (same) editKey = same.editKey;
+    else { const r = await DSP({ cmd: 'analyze', sr: S.track.sr, L: S.track.L.slice(), R: S.track.R.slice(), opts: { encode: 24 } }); editKey = uid('e'); await blobPut(editKey, new Blob([r.wav], { type: 'audio/wav' })); }
+  }
+  const v = { n: t.versions.reduce((a, x) => Math.max(a, x.n), 0) + 1, date: new Date().toISOString(), source, model: extra.model || null, note: extra.note || '', app: appVersion(),
+    settings: clone(P), target: +$('#targetSel').value, editKey, editSig, editLabel, feat: styleFeatures(S.orig),
+    meas: m ? { I: m.I, TP: m.TP, LRA: m.LRA } : null, check: null, comments: t.comments.filter(c => !c.done).map(c => c.id) };
+  const wasFree = t.status === 'frei';
+  t.versions.push(v); t.cur = v.n; t.status = 'neu'; albLog(t, 'neue Version', { n: v.n, source });
+  await albSave(); ALB.open.n = v.n; ALB.open.sig = albSig(); ALB.open.base = v;
+  if (wasFree) await albDemoteStyle(t); // Nach einer Änderung gilt die alte Freigabe nicht mehr als Lernbeispiel
+  return v;
+}
+
+/* ---------- Clean Song in Stufen (gleiche Regeln wie das Album-Werkzeug) ---------- */
+async function albCleanLevel(level) {
+  if (!level || level === 'aus') return 'aus';
+  const ver = S.ver; if (!(S.arts && S.artsVer === S.ver)) runArtifacts();
+  await albWait(() => S.arts && S.artsVer === ver && S.clean && S.cleanVer === ver, 600000);
+  const C = S.clean, arts = S.arts;
+  const lines = C.lines.filter(l => level === 'leicht' ? l.sure : (l.sure || l.f >= 18000));
+  const carpet = C.carpet ? (level === 'leicht' ? 0.3 : level === 'mittel' ? 0.6 : 0.8) : 0;
+  const clicks = arts.clicks || [], regions = level === 'stark' ? arts.regions.map(r => [r.a, r.b]) : [];
+  if (!lines.length && !carpet && !clicks.length && !regions.length) return 'nichts gefunden';
+  const trk = S.track;
+  const r = await DSP({ cmd: 'clean', sr: trk.sr, L: trk.L.slice(), R: trk.R.slice(), opts: { lines, carpet, profM: C.profM, profS: C.profS, profN: C.N,
+    bandLo: C.carpet ? C.carpet.lo : C.bandLo, bandHi: C.carpet ? C.carpet.hi : C.bandHi,
+    smooth: { strength: regions.length ? ART.strength / 100 : 0, freq: ART.freq, regions: regions.length ? regions : [[0, 0]], clicks } } });
+  const parts = [lines.length && (lines.length + ' Störton' + (lines.length > 1 ? 'e' : '') + ' (' + lines.map(l => Math.round(l.f) + ' Hz').join(', ') + ')'),
+    carpet && 'Rauschteppich ' + Math.round(carpet * 100) + ' %', regions.length && regions.length + ' Stellen geglättet', clicks.length && clicks.length + ' Knackser'].filter(Boolean);
+  commit(r.L, r.R, 'Clean Song ' + level + ' (' + parts.join(', ') + ')', null, 0);
+  await albWait(() => S.orig && S.orig.spec && !S.measuring && S.ver !== ver);
+  return parts.join(', ');
+}
+
+/* ---------- Album-Lautheit: Unterschiede teilweise erhalten, nie alle zwangsweise gleich ---------- */
+function albTargets(p = ALB.proj) {
+  const o = p.opts, vals = p.tracks.map(t => t.measOrig && isFinite(t.measOrig.I) ? t.measOrig.I : null), ok = vals.filter(v => v != null).sort((a, b) => a - b);
+  const med = ok.length ? ok[ok.length >> 1] : o.target;
+  return p.tracks.map((t, i) => o.balance === 'gleich' || vals[i] == null ? o.target : Math.round((o.target + clamp(o.keep * (vals[i] - med), -3, 3)) * 2) / 2);
+}
+function albBalance(p = ALB.proj) {
+  const rows = p.tracks.map((t, i) => ({ i, t, I: albCur(t) && albCur(t).meas ? albCur(t).meas.I : null })).filter(r => r.I != null && isFinite(r.I));
+  if (rows.length < 2) return null;
+  const Is = rows.map(r => r.I).sort((a, b) => a - b), med = Is[Is.length >> 1], spread = Is[Is.length - 1] - Is[0], warn = [];
+  if (spread > 6) warn.push('Die Lautheit der Songs liegt ' + nf(spread, 1) + ' LU auseinander. Gewollt (z. B. leise Ballade)? Sonst einzelne Songs angleichen.');
+  rows.forEach(r => { const d = r.I - med; if (d > 2.5) warn.push('„' + r.t.name + '“ ist ' + nf(d, 1) + ' LU lauter als die Album-Mitte.'); if (d < -4) warn.push('„' + r.t.name + '“ ist ' + nf(-d, 1) + ' LU leiser als die Album-Mitte.'); });
+  return { rows, med, spread, min: Is[0], max: Is[Is.length - 1], warn };
+}
+
+/* ---------- Vorschläge berechnen ---------- */
+const ALB_SOURCES = { assistent: 'Assistent', stil: 'Mein Stil', ki: 'KI (Claude)', neutral: 'Neutral (nur Limiter)' };
+async function albPropose(tid, source, opt = {}) {
+  const p = ALB.proj, t = albTrack(tid), idx = p.tracks.indexOf(t), tgt = opt.target != null ? opt.target : albTargets()[idx];
+  if (!albIsOpen(tid)) await albOpenTrack(tid);
+  if (!opt.keepEdits && S.track.L !== S.file.L) { await albOpenTrack(tid); if (S.track.L !== S.file.L) { const ver = S.ver; setTrackData(S.file.L, S.file.R, null, 0); await albWait(() => S.ver !== ver && S.orig && S.orig.spec && !S.measuring); } }
+  const cl = opt.clean != null ? opt.clean : p.opts.clean, cleaned = S.track.L === S.file.L ? await albCleanLevel(cl) : 'vorhandene Bearbeitung';
+  setTargetValue(tgt); let model = null, note = 'Clean Song: ' + cleaned;
+  if (source === 'assistent') await assistant();
+  else if (source === 'neutral') { const n = clone(PRESETS.neutral.p); n.lim.on = true; n.eq.notch = clone(P.eq.notch); P = n; refreshAll(); onParam(); }
+  else if (source === 'stil') { if (!STYLE.loaded) await styleLoad(); const sug = styleSuggest(STYLE.list, styleFeatures(S.orig));
+    if (!sug) throw new Error('Mein Stil hat noch keine bestätigten Beispiele.'); STYLE.last = sug; await styleApply(); model = 'Mein Stil, ' + sug.n + ' Beispiele, Vorbilder: ' + sug.neighbors.slice(0, 3).map(x => x.name).join(', '); }
+  else if (source === 'ki') { if (!AI.mode) throw new Error('KI ist nicht verbunden (Song-Check → KI-Mastering).');
+    const before = JSON.stringify(P), w0 = $('#aiWish').value; $('#aiWish').value = [p.opts.wish, opt.brief].filter(Boolean).join('\n\n');
+    try { await runAI(); } finally { $('#aiWish').value = w0; }
+    if (JSON.stringify(P) === before) throw new Error('Die KI hat keine neuen Einstellungen geliefert.'); model = AI.mode === 'api' ? 'Claude API (claude-sonnet-5-5)' : 'Claude-Konto'; note += opt.brief ? ' · Überarbeitung nach Kommentaren' : ''; }
+  else throw new Error('Unbekannte Quelle');
+  P.lim.on = true; P.lim.ceiling = p.opts.ceiling; P.lim.isp = true; refreshAll(); onParam();
+  if (source !== 'ki') await setDriveToTarget(tgt);
+  return albSaveVersion(ALB_SOURCES[source], { model, note });
+}
+/* Einstellungsdatei (z. B. vom Album-Werkzeug im Chat) als neue Version übernehmen */
+async function albImportSettings(tid, json, label) {
+  const j = typeof json === 'string' ? JSON.parse(json) : json, p0 = validateSettings(j && (j.settings || j));
+  if (!albIsOpen(tid)) await albOpenTrack(tid);
+  if (S.track.L !== S.file.L) { const ver = S.ver; setTrackData(S.file.L, S.file.R, null, 0); await albWait(() => S.ver !== ver && S.orig && S.orig.spec && !S.measuring); }
+  const cleaned = j.clean ? await albCleanLevel(j.clean) : 'aus';
+  p0.eq.notch = j.settings && j.settings.eq && j.settings.eq.notch ? p0.eq.notch : clone(P.eq.notch); P = p0;
+  if (j.target !== undefined) setTargetValue(j.target); refreshAll(); onParam();
+  return albSaveVersion(label || 'Claude (Chat)', { note: 'Clean Song: ' + cleaned + (j.note ? ' · ' + j.note : ''), model: j.model || null });
+}
+/* Mehrere Einstellungsdateien vom Chat auf einmal: Zuordnung über den Dateinamen („<Song> (Master).dsmaster.json“) */
+async function albImportMany(files) {
+  const done = [], miss = [];
+  for (const f of [...files].sort((a, b) => natCmp(a.name, b.name))) {
+    const base = f.name.replace(/\.dsmaster\.json$/i, '').replace(/\.json$/i, '').replace(/ \(Master\)$/i, '').trim();
+    const t = ALB.proj.tracks.find(x => x.name === base) || ALB.proj.tracks.find(x => base.startsWith(x.name) || x.name.startsWith(base));
+    if (!t) { miss.push(f.name); continue; }
+    ALB.msg = 'Übernehme Vorschlag für „' + t.name + '“ …'; albRenderSoon();
+    try { await albImportSettings(t.id, await f.text(), 'Claude (Chat)'); done.push(t.name); } catch (e) { miss.push(f.name + ' (' + e.message + ')'); }
+  }
+  ALB.msg = ''; return { done, miss };
+}
+/* Alle Songs ohne Version berechnen. Fortschritt wird nach jedem Song gespeichert: nach Abbruch oder Neustart geht es dort weiter. */
+async function albProposeAll(source, onlyMissing = true) {
+  const p = ALB.proj; ALB.abort = false; const done = [], failed = [];
+  for (const t of p.tracks) { if (ALB.abort) break; if (t.measOrig) continue; ALB.msg = 'Messe „' + t.name + '“ …'; albRenderSoon();
+    try { await albOpenTrack(t.id); } catch (e) { failed.push([t.name, e.message]); } }
+  for (const t of p.tracks) { if (ALB.abort) break; if (onlyMissing && t.versions.length) continue;
+    ALB.msg = 'Berechne „' + t.name + '“ (' + (p.tracks.indexOf(t) + 1) + '/' + p.tracks.length + ') …'; albRenderSoon();
+    try { await albPropose(t.id, source); done.push(t.name); } catch (e) { console.error(e); failed.push([t.name, e.message]); } }
+  ALB.msg = ''; return { done, failed, aborted: ALB.abort };
+}
+
+/* ---------- Technische Prüfung vor der Freigabe ---------- */
+async function albCheck(tid) {
+  if (!albIsOpen(tid)) await albOpenTrack(tid);
+  if (albDirty()) throw new Error('Es gibt ungespeicherte Änderungen. Erst als Version speichern.');
+  const t = albTrack(tid), v = albCur(t); if (!v) throw new Error('Noch keine Version');
+  const sr = S.track.sr, pre = await getPre(sr), r = await DSP({ cmd: 'analyze', sr, L: pre.L.slice(), R: pre.R.slice(), lim: limParams(), opts: { tp: true, returnAudio: true } });
+  const L = r.L, R = r.R, n = L.length, items = [], add = (level, text) => items.push({ level, text });
+  let bad = 0, pk = 0, sl = 0, sr2 = 0, slr = 0, dc = 0, lpL = 0, lpR = 0, eM = 0, eS = 0; const a = 1 - Math.exp(-2 * Math.PI * 150 / sr);
+  for (let i = 0; i < n; i++) { const l = L[i], rr = R[i]; if (!Number.isFinite(l) || !Number.isFinite(rr)) { bad++; continue; }
+    const m = Math.max(Math.abs(l), Math.abs(rr)); if (m > pk) pk = m; sl += l * l; sr2 += rr * rr; slr += l * rr; dc += l + rr;
+    lpL += a * (l - lpL); lpR += a * (rr - lpR); eM += ((lpL + lpR) / 2) ** 2; eS += (lpL * lpL + lpR * lpR) / 2; }
+  const db = x => 10 * Math.log10(x + 1e-30), rmsL = db(sl / n), rmsR = db(sr2 / n), corr = sl > 0 && sr2 > 0 ? slr / Math.sqrt(sl * sr2) : 1, monoBass = eS > 1e-12 ? db(eM / eS) : 0, dcv = Math.abs(dc / (2 * n));
+  if (bad) add('block', bad + ' ungültige Samples (NaN/Unendlich) im Master.'); else add('ok', 'Alle Samples gültig.');
+  if (pk >= 0.9999) add('block', 'Clipping: Spitzen erreichen 0 dBFS.'); else add('ok', 'Kein Clipping (Spitze ' + nf(20 * Math.log10(pk + 1e-12), 1) + ' dBFS).');
+  if (r.TP > 0) add('block', 'True Peak über 0 dBTP (' + nf(r.TP, 2) + ').');
+  else if (P.lim.on && r.TP > P.lim.ceiling + 0.15) add('block', 'True Peak ' + nf(r.TP, 2) + ' dBTP liegt über der Decke (' + nf(P.lim.ceiling, 1) + ').');
+  else add('ok', 'True Peak ' + nf(r.TP, 1) + ' dBTP.');
+  if (n !== S.track.L.length) add('block', 'Master hat eine andere Länge als der Song (' + n + ' statt ' + S.track.L.length + ' Samples).');
+  else if (S.file.L.length !== n) add('warn', 'Länge gegenüber dem Original um ' + nf((n - S.file.L.length) / sr, 2) + ' s verändert (Schnitt). Gewollt?');
+  else add('ok', 'Länge gleich dem Original (' + fmtTime(n / sr, 2) + ').');
+  if ((rmsL < -70 && rmsR > -50) || (rmsR < -70 && rmsL > -50)) add('block', 'Ein Kanal ist stumm.');
+  if (corr < -0.2) add('block', 'Links und rechts sind gegenphasig (Korrelation ' + nf(corr, 2) + ').'); else if (corr < 0.2) add('warn', 'Sehr breites Stereobild (Korrelation ' + nf(corr, 2) + '), in Mono prüfen.'); else add('ok', 'Stereo in Ordnung (Korrelation ' + nf(corr, 2) + ').');
+  if (monoBass < -6) add('block', 'Bass löscht sich in Mono aus (' + nf(monoBass, 1) + ' dB).'); else if (monoBass < -3) add('warn', 'Bass verliert in Mono ' + nf(-monoBass, 1) + ' dB.');
+  if (dcv > 0.005) add('warn', 'Gleichspannungsanteil im Master (' + nf(dcv * 100, 2) + ' %).');
+  if (isFinite(r.I) && Math.abs(r.I - v.target) > 1.5) add('warn', 'Lautheit ' + nf(r.I, 1) + ' LUFS weicht ' + nf(Math.abs(r.I - v.target), 1) + ' LU vom Ziel ab.');
+  let hear = null;
+  if (S.file.L.length === n) { try { const h = await DSP({ cmd: 'hearcmp', sr, L: S.file.L.slice(), R: S.file.R.slice(), L2: L, R2: R }); if (!h.error) hear = { mos: h.mos, relDist: h.relDist, spots: h.spots.slice(0, 3).map(s => ({ t: s.t, f: s.f, nmr: s.nmr })) }; } catch (e) { console.warn(e); } }
+  if (hear && hear.mos < 2) add('warn', 'Starke Klangveränderung gegenüber dem Original (Hör-Vergleich ' + nf(hear.mos, 1) + '), deutlichste Stelle bei ' + (hear.spots[0] ? fmtTime(hear.spots[0].t, 1) : '–') + '. Gewollt?');
+  const ok = !items.some(x => x.level === 'block');
+  v.check = { date: new Date().toISOString(), ok, items, meas: { I: r.I, TP: r.TP, LRA: r.LRA, peak: pk, corr, monoBass }, hear };
+  if (v.meas == null) v.meas = { I: r.I, TP: r.TP, LRA: r.LRA };
+  await albSave(); return v.check;
+}
+
+/* ---------- Entscheidung ---------- */
+const albStyleId = (t, n) => 'album:' + ALB.proj.id + ':' + t.id + ':v' + n;
+async function albStyleExample(t, v, rating) {
+  if (!v.feat) return false; if (!STYLE.loaded) await styleLoad();
+  const q = clone(v.settings); delete q.eq.notch;
+  await stylePut({ v: STYLE_VER, id: albStyleId(t, v.n), name: t.name, album: ALB.proj.name, version: v.n, dur: Math.round((t.measOrig && t.measOrig.dur) || 0), sr: t.measOrig ? t.measOrig.sr : null,
+    date: new Date().toISOString().slice(0, 10), app: v.app, source: 'album', rating, ratedAt: new Date().toISOString(), feat: v.feat, settings: q, target: v.target,
+    result: { I: v.meas ? Math.round(v.meas.I * 10) / 10 : null, TP: v.meas ? Math.round(v.meas.TP * 10) / 10 : null, LRA: v.meas ? Math.round(v.meas.LRA * 10) / 10 : null } });
+  styleRenderCount(); return true;
+}
+async function albDemoteStyle(t) { if (!STYLE.loaded) await styleLoad(); const pre = 'album:' + ALB.proj.id + ':' + t.id + ':';
+  for (const e of STYLE.list.filter(x => x.id.startsWith(pre) && styleRating(x) === 'ok')) await styleRate(e.id, 'offen'); }
+async function albApprove(tid, note = '') {
+  const t = albTrack(tid); const chk = await albCheck(tid), v = albCur(t);
+  if (!chk.ok) { t.status = 'blockiert'; albLog(t, 'technisch blockiert', { items: chk.items.filter(x => x.level === 'block').map(x => x.text) }); await albSave(); return { ok: false, check: chk }; }
+  await albDemoteStyle(t); // höchstens eine freigegebene Version pro Song lernt
+  t.status = 'frei'; albLog(t, 'freigegeben', { note, check: chk.items.filter(x => x.level !== 'ok').map(x => x.text) }); await albSave();
+  await albStyleExample(t, v, 'ok'); return { ok: true, check: chk };
+}
+async function albRevise(tid, note = '') {
+  const t = albTrack(tid), v = albCur(t); if (!v) throw new Error('Noch keine Version');
+  await albDemoteStyle(t); t.status = 'ueberarbeiten'; albLog(t, 'überarbeiten', { note, comments: t.comments.filter(c => !c.done).map(c => c.id) }); await albSave();
+  await albStyleExample(t, v, 'schlecht'); // dokumentiert, wird nie nachgeahmt
+}
+
+/* ---------- Kommentare mit Zeitbereich ---------- */
+async function albAddComment(tid, a, b, type, text) {
+  const t = albTrack(tid); if (!t) return null; const d = t.measOrig ? t.measOrig.dur : duration();
+  const c = { id: uid('c'), a: clamp(Math.min(a, b), 0, d), b: clamp(Math.max(a, b), 0, d), type: ALB_TYPES.includes(type) ? type : 'Sonstiges', text: String(text || '').slice(0, 500), n: t.cur, date: new Date().toISOString(), done: false };
+  t.comments.push(c); await albSave(); return c;
+}
+function albSummary(p) {
+  if (!p) return '–'; const T = { highpass: 'Low Cut', lowpass: 'High Cut' }, fz = f => f >= 1000 ? nf(f / 1000, 1) + ' kHz' : Math.round(f) + ' Hz', out = [];
+  if (p.eq.on) { p.eq.bands.forEach(b => { if (!b.on) return; if (T[b.type]) out.push(T[b.type] + ' ' + fz(b.f)); else if (Math.abs(b.g) >= 0.1) out.push(fz(b.f) + ' ' + sf(b.g, 1) + ' dB'); });
+    const nn = (p.eq.notch || []).filter(x => x.on); if (nn.length) out.push('Kerben ' + nn.map(x => fz(x.f)).join(', ')); }
+  if (p.comp.on) out.push('Kompressor (Ratio ' + p.comp.bands.map(b => nf(b.ratio, 1)).join('/') + ')');
+  if (p.sat.on) out.push('Sättigung ' + p.sat.mix + ' %');
+  if (p.stereo.on && p.stereo.width !== 100) out.push('Breite ' + p.stereo.width + ' %'); if (p.stereo.on && p.stereo.bassMono) out.push('Bass-Mono ' + p.stereo.monoFreq + ' Hz');
+  if (p.lim.on) out.push('Limiter +' + nf(p.lim.drive, 1) + ' dB, Decke ' + nf(p.lim.ceiling, 1) + ' dBTP');
+  return out.join(', ') || 'nichts verändert';
+}
+/* Überarbeitungsauftrag für Claude (Chat) mit allen offenen Kommentaren */
+function albBrief(tid) {
+  const p = ALB.proj, t = albTrack(tid), v = albCur(t), open = t.comments.filter(c => !c.done);
+  const L = ['Überarbeitungsauftrag · Album „' + p.name + '“ · Song ' + (p.tracks.indexOf(t) + 1) + ' „' + t.name + '“ (Datei: ' + t.file + ')',
+    v ? 'Aktuelle Version ' + v.n + ' (' + v.source + ', ' + v.date.slice(0, 10) + ', Studio ' + v.app + '): ' + albSummary(v.settings) + (v.editLabel ? ' · Bearbeitung: ' + v.editLabel : '') : 'Noch keine Version.',
+    v && v.meas ? 'Messung: ' + nf(v.meas.I, 1) + ' LUFS, True Peak ' + nf(v.meas.TP, 1) + ' dBTP, LRA ' + nf(v.meas.LRA, 1) + ' LU, Ziel ' + nf(v.target, 1) + ' LUFS' : '',
+    '', 'Meine Rückmeldung nach dem Anhören:'];
+  open.forEach(c => L.push('- ' + fmtTime(c.a, 1) + '–' + fmtTime(c.b, 1) + ' · ' + c.type + (c.text ? ': ' + c.text : '')));
+  if (!open.length) L.push('- (keine offenen Kommentare)');
+  L.push('', 'Bitte nur diese Punkte gezielt ändern, alles andere so lassen. Ausgang ist das unveränderte Original. Ergebnis als Einstellungsdatei (.dsmaster.json, mit "clean"-Stufe) liefern, ich lade sie im Album als neue Version.');
+  return L.filter(x => x !== null).join('\n');
+}
+
+/* ---------- Export nur freigegebener Masters ---------- */
+function albExportable(t) { if (t.status !== 'frei') return false; const last = [...t.decisions].reverse().find(d => d.action === 'freigegeben' || d.action === 'neue Version' || d.action === 'zurück zu Version'); return !!(last && last.action === 'freigegeben' && last.n === t.cur); }
+async function albPublish(fmt = '24', opt = {}) {
+  const p = ALB.proj, tracks = p.tracks.filter(albExportable), locked = p.tracks.filter(t => !albExportable(t)).map(t => t.name);
+  if (!tracks.length) throw new Error('Kein Song freigegeben. Exportiert wird nur, was du ausdrücklich freigegeben hast.');
+  let dir = opt.dir || null;
+  if (!dir && !opt.noPicker && window.showDirectoryPicker) { try { const base = await window.showDirectoryPicker({ mode: 'readwrite' }); dir = await base.getDirectoryHandle((p.name + ' – Master').replace(/[\\/:*?"<>|]+/g, '_'), { create: true }); } catch (e) { if (e && e.name === 'AbortError') throw new Error('Kein Ordner gewählt.'); dir = null; } }
+  const res = [], keepDel = deliver;
+  for (const t of tracks) {
+    const v = albCur(t), base = (/^\d/.test(t.name) ? t.name : String(p.tracks.indexOf(t) + 1).padStart(2, '0') + ' ' + t.name) + ' (Master)';
+    try {
+      await albOpenTrack(t.id); if (JSON.stringify(P) !== JSON.stringify(validateSettings(v.settings))) throw new Error('Einstellungen stimmen nicht mit der freigegebenen Version überein');
+      let got = null; deliver = async (blob, name) => { got = { blob, name }; return 'file'; };
+      openExport(); $('#expMode').value = 'master'; $('#expFmt').value = fmt; $('#expRate').value = 'orig'; $('#expName').value = base;
+      await runExport(); deliver = keepDel; $('#expModal').hidden = true;
+      if (!got) throw new Error(($('#expHint').textContent || 'Export fehlgeschlagen').slice(0, 200));
+      if (dir) { const fh = await dir.getFileHandle(got.name, { create: true }), w = await fh.createWritable(); await w.write(got.blob); await w.close(); }
+      else { const how = await keepDel(got.blob, got.name); if (how === 'declined') throw new Error('Speichern abgebrochen'); }
+      res.push({ tid: t.id, name: got.name, n: v.n, ok: true, size: got.blob.size });
+    } catch (e) { deliver = keepDel; console.error(e); res.push({ tid: t.id, name: base, n: v ? v.n : null, ok: false, err: e.message }); }
+  }
+  const rec = { date: new Date().toISOString(), fmt, files: res, locked, app: appVersion() }; p.published.push(rec); await albSave();
+  const proto = new Blob([JSON.stringify({ format: 'deepstructure.album.protocol.v1', album: p.name, published: rec, tracks: p.tracks.map(t => ({ name: t.name, file: t.file, status: t.status, measOrig: t.measOrig, versions: t.versions.map(v => Object.assign({}, v, { feat: undefined })), comments: t.comments, decisions: t.decisions })) }, null, 1)], { type: 'application/json' });
+  try { if (dir) { const fh = await dir.getFileHandle('Mastering-Protokoll.json', { create: true }), w = await fh.createWritable(); await w.write(proto); await w.close(); } else if (!opt.noProtocol) await keepDel(proto, (p.name + ' – Mastering-Protokoll.json').replace(/[\\/:*?"<>|]+/g, '_')); } catch (e) { console.warn(e); }
+  return rec;
+}
+
+/* ---------- Oberfläche ---------- */
+let albRT = 0; function albRenderSoon() { clearTimeout(albRT); albRT = setTimeout(albRender, 30); }
+function albPill(st) { const [t, c] = ALB_STATUS[st] || ALB_STATUS.neu; const s = document.createElement('span'); s.className = 'pill ' + c; s.textContent = t; return s; }
+function albRender() {
+  const P0 = ALB.proj, sel = $('#albProj'); if (!sel) return;
+  sel.innerHTML = ''; ALB.list.slice().sort((a, b) => (b.updated || '').localeCompare(a.updated || '')).forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.name + ' (' + p.tracks.length + ')'; sel.appendChild(o); });
+  if (!ALB.list.length) { const o = document.createElement('option'); o.value = ''; o.textContent = 'Noch kein Album'; sel.appendChild(o); }
+  sel.value = P0 ? P0.id : ''; $('#albBody').hidden = !P0; $('#albMsg').textContent = ALB.msg; $('#albStop').hidden = !ALB.busy;
+  ['#albAdd', '#albRename', '#albDelete', '#albAll', '#albPublish', '#albImportAll'].forEach(s => $(s).disabled = !P0 || ALB.busy);
+  if (!P0) return;
+  $('#albCount').textContent = P0.tracks.length + ' / ' + ALBUM_MAX + ' Songs';
+  ['clean', 'basis', 'balance'].forEach(k => $('#albO_' + k).value = P0.opts[k]); $('#albO_target').value = P0.opts.target; $('#albO_wish').value = P0.opts.wish || '';
+  const tb = $('#albTracks'); tb.innerHTML = ''; const tg = albTargets();
+  P0.tracks.forEach((t, i) => { const v = albCur(t), tr = document.createElement('li'); tr.className = albIsOpen(t.id) ? 'open' : '';
+    tr.innerHTML = '<span class="no mono"></span><span class="nm"><b></b><small class="mono muted"></small></span><span class="st"></span><span class="mono lu"></span><button class="ghost">Öffnen</button>';
+    tr.querySelector('.no').textContent = i + 1; tr.querySelector('.nm b').textContent = t.name;
+    tr.querySelector('.nm small').textContent = v ? 'Version ' + v.n + ' · ' + v.source + (t.comments.filter(c => !c.done).length ? ' · ' + t.comments.filter(c => !c.done).length + ' offene Kommentare' : '') : 'noch keine Version';
+    tr.querySelector('.st').appendChild(albPill(t.status));
+    tr.querySelector('.lu').textContent = (t.measOrig ? nf(t.measOrig.I, 1) : '–') + ' → ' + (v && v.meas ? nf(v.meas.I, 1) : '–') + ' LUFS' + (t.measOrig ? ' (Ziel ' + nf(tg[i], 1) + ')' : '');
+    tr.querySelector('button').addEventListener('click', () => albRun('Öffne „' + t.name + '“ …', async () => { await albOpenTrack(t.id); }));
+    tb.appendChild(tr); });
+  const bal = albBalance(); $('#albBal').textContent = bal ? 'Album-Lautheit: ' + nf(bal.min, 1) + ' bis ' + nf(bal.max, 1) + ' LUFS (Spanne ' + nf(bal.spread, 1) + ' LU, Mitte ' + nf(bal.med, 1) + '). ' + (bal.warn.length ? bal.warn.join(' ') : 'Ausgewogen.') : 'Album-Lautheit: wird angezeigt, sobald mindestens zwei Songs eine Version haben.';
+  const nFree = P0.tracks.filter(albExportable).length; $('#albPubInfo').textContent = nFree + ' von ' + P0.tracks.length + ' Songs freigegeben. Exportiert werden nur diese' + (nFree < P0.tracks.length ? ', die übrigen bleiben gesperrt.' : '.');
+  $('#albPublish').disabled = !nFree || ALB.busy;
+  // Detail des geöffneten Songs
+  const open = ALB.open && albTrack(ALB.open.tid), on = !!open && albIsOpen(); $('#albDetail').hidden = !on;
+  if (!on) return; const t = open, v = albCur(t);
+  $('#albDTitle').textContent = (P0.tracks.indexOf(t) + 1) + '. ' + t.name; const st = $('#albDStatus'); st.innerHTML = ''; st.appendChild(albPill(t.status));
+  $('#albDirty').hidden = !albDirty();
+  $('#albDInfo').textContent = v ? 'Version ' + v.n + ' (' + v.source + '): ' + albSummary(v.settings) + (v.editLabel ? ' · ' + v.editLabel : '') : 'Noch keine Version. Vorschlag berechnen oder eigene Einstellungen als Version speichern.';
+  const ck = $('#albCheckOut'); ck.innerHTML = '';
+  if (v && v.check) { v.check.items.filter(x => x.level !== 'ok' || !v.check.ok).forEach(x => { const li = document.createElement('li'); li.className = x.level; li.textContent = (x.level === 'block' ? 'Blockiert: ' : x.level === 'warn' ? 'Hinweis: ' : '') + x.text; ck.appendChild(li); });
+    if (v.check.ok && !ck.children.length) { const li = document.createElement('li'); li.className = 'ok'; li.textContent = 'Technische Prüfung bestanden: kein Clipping, True Peak ' + nf(v.check.meas.TP, 1) + ' dBTP, Länge und Stereo in Ordnung.'; ck.appendChild(li); } }
+  const vl = $('#albVersions'); vl.innerHTML = '';
+  t.versions.slice().reverse().forEach(x => { const li = document.createElement('li'); li.innerHTML = '<span class="mono"></span><span class="nm"></span><button class="ghost">Zu dieser Version</button>';
+    li.querySelector('.mono').textContent = 'v' + x.n + (x.n === t.cur ? ' ●' : ''); li.querySelector('.nm').textContent = x.date.slice(0, 16).replace('T', ' ') + ' · ' + x.source + (x.meas ? ' · ' + nf(x.meas.I, 1) + ' LUFS / ' + nf(x.meas.TP, 1) + ' dBTP' : '') + (x.check ? (x.check.ok ? ' · Prüfung bestanden' : ' · blockiert') : '');
+    const b = li.querySelector('button'); b.hidden = x.n === t.cur; b.addEventListener('click', () => albRun('Lade Version ' + x.n + ' …', async () => { await albOpenTrack(t.id, x.n); })); vl.appendChild(li); });
+  const cl = $('#albComments'); cl.innerHTML = '';
+  t.comments.forEach(c => { const li = document.createElement('li'); li.className = c.done ? 'done' : '';
+    li.innerHTML = '<input type="checkbox" title="Erledigt"><span class="mono"></span><span class="nm"><b></b> <span></span></span><button class="ghost">Anhören</button>';
+    li.querySelector('input').checked = c.done; li.querySelector('.mono').textContent = fmtTime(c.a, 1) + '–' + fmtTime(c.b, 1); li.querySelector('.nm b').textContent = c.type; li.querySelector('.nm span').textContent = (c.text ? c.text + ' ' : '') + '(v' + c.n + ')';
+    li.querySelector('input').addEventListener('change', async e => { c.done = e.target.checked; await albSave(); albRender(); drawAll(); });
+    li.querySelector('button').addEventListener('click', () => { S.sel = { a: c.a, b: Math.max(c.b, c.a + 0.5) }; S.view = { a: Math.max(0, c.a - 4), b: Math.min(duration(), c.b + 4) }; clampView(); S.loop = true; $('#btnLoop').setAttribute('aria-pressed', 'true'); drawAll(); play(S.sel.a); });
+    cl.appendChild(li); });
+  $('#albKI').disabled = !AI.mode || ALB.busy; ['#albSave', '#albPropose', '#albCheck', '#albApprove', '#albRevise', '#albCAdd', '#albImport'].forEach(s => $(s).disabled = ALB.busy);
+}
+async function albRun(msg, fn) {
+  if (ALB.busy) return; ALB.busy = true; ALB.msg = msg; albRender(); status(msg, 'busy');
+  try { const r = await fn(); status(typeof r === 'string' ? r : 'Fertig.', 'ok', 5000); return r; }
+  catch (e) { console.error(e); status(e.message || String(e), 'err', 8000); }
+  finally { ALB.busy = false; ALB.msg = ''; albRender(); }
+}
+function drawAlbumMarks(g, w, map, y, h) {
+  if (!albIsOpen()) return; const t = albTrack(ALB.open.tid); if (!t) return;
+  t.comments.forEach(c => { if (c.done) return; const x0 = map(c.a), x1 = map(c.b); if (x1 < 0 || x0 > w) return; g.fillStyle = '#FFB36B'; g.globalAlpha = 0.9; g.fillRect(x0, y, Math.max(3, x1 - x0), h); g.globalAlpha = 0.06; g.fillRect(x0, y + h, Math.max(3, x1 - x0), 999); g.globalAlpha = 1; });
+}
+(function albUI() {
+  const ts = $('#albCType'); ALB_TYPES.forEach(x => { const o = document.createElement('option'); o.textContent = x; ts.appendChild(o); });
+  $('#albProj').addEventListener('change', async e => { await albSelect(e.target.value); albRender(); });
+  $('#albNew').addEventListener('click', async () => { const nm = $('#albNewName').value.trim() || 'Album ' + new Date().toISOString().slice(0, 10); await albNew(nm); $('#albNewName').value = ''; albRender(); status('Album „' + nm + '“ angelegt. Jetzt bis zu ' + ALBUM_MAX + ' Songs hinzufügen.', 'ok'); });
+  $('#albRename').addEventListener('click', async () => { const nm = $('#albNewName').value.trim(); if (!nm) { status('Neuen Namen ins Feld schreiben, dann „Umbenennen“.'); return; } ALB.proj.name = nm.slice(0, 80); await albSave(); $('#albNewName').value = ''; albRender(); });
+  $('#albDelete').addEventListener('click', async () => { const b = $('#albDelete'); if (b.dataset.sure !== '1') { b.dataset.sure = '1'; b.textContent = 'Wirklich löschen?'; setTimeout(() => { b.dataset.sure = ''; b.textContent = 'Album löschen'; }, 4000); return; }
+    b.dataset.sure = ''; b.textContent = 'Album löschen'; await albDeleteProject(ALB.proj.id); albRender(); status('Album gelöscht (nur im Studio, deine Dateien bleiben unberührt).'); });
+  $('#albAdd').addEventListener('click', () => $('#albFiles').click());
+  $('#albFiles').addEventListener('change', async e => { const fs = [...e.target.files]; e.target.value = ''; if (!fs.length) return;
+    await albRun('Songs werden übernommen …', async () => { const r = await albAddFiles(fs); return r.added + ' Songs übernommen.' + (r.skipped ? ' ' + r.skipped + ' nicht übernommen: höchstens ' + ALBUM_MAX + ' Songs pro Album.' : ''); }); });
+  ['clean', 'basis', 'balance', 'target', 'wish'].forEach(k => $('#albO_' + k).addEventListener('change', async e => { if (!ALB.proj) return; ALB.proj.opts[k] = k === 'target' ? clamp(+e.target.value || -14, -30, -5) : e.target.value; await albSave(); albRender(); }));
+  $('#albAll').addEventListener('click', () => albRun('Vorschläge werden berechnet …', async () => { const r = await albProposeAll(ALB.proj.opts.basis);
+    return (r.aborted ? 'Angehalten. ' : '') + r.done.length + ' Songs berechnet' + (r.failed.length ? ', nicht möglich: ' + r.failed.map(f => f[0] + ' (' + f[1] + ')').join('; ') : '') + '. Alles ist gespeichert, „Alle berechnen“ macht später dort weiter.'; }));
+  $('#albStop').addEventListener('click', () => { ALB.abort = true; ALB.msg = 'Wird nach diesem Song angehalten …'; albRender(); });
+  $('#albPropose').addEventListener('click', () => albRun('Vorschlag wird berechnet …', async () => { const v = await albPropose(ALB.open.tid, $('#albSrc').value); return 'Version ' + v.n + ' gespeichert (' + v.source + '). Jetzt anhören.'; }));
+  $('#albSave').addEventListener('click', () => albRun('Version wird gespeichert …', async () => { const v = await albSaveVersion('Manuell'); return 'Version ' + v.n + ' gespeichert.'; }));
+  $('#albCheck').addEventListener('click', () => albRun('Technische Prüfung läuft …', async () => { const c = await albCheck(ALB.open.tid); return c.ok ? 'Technische Prüfung bestanden.' : 'Technische Prüfung: blockiert, siehe Liste.'; }));
+  $('#albApprove').addEventListener('click', () => albRun('Prüfe und gebe frei …', async () => { const r = await albApprove(ALB.open.tid); return r.ok ? 'Freigegeben. Dieser Master ist jetzt ein bestätigtes Beispiel für „Mein Stil“.' : 'Nicht freigegeben: technisch blockiert. Siehe Prüfliste.'; }));
+  $('#albRevise').addEventListener('click', () => albRun('Wird markiert …', async () => { await albRevise(ALB.open.tid); return 'Als „Überarbeiten“ markiert. Kommentare setzen, dann Auftrag kopieren oder mit KI überarbeiten.'; }));
+  $('#albCAdd').addEventListener('click', () => albRun('Kommentar wird gespeichert …', async () => { const a = S.sel ? S.sel.a : Math.max(0, S.cursor - 1.5), b = S.sel ? S.sel.b : S.cursor + 1.5;
+    await albAddComment(ALB.open.tid, a, b, $('#albCType').value, $('#albCText').value.trim()); $('#albCText').value = ''; drawAll(); return 'Kommentar gespeichert.'; }));
+  $('#albBrief').addEventListener('click', () => copyText(albBrief(ALB.open.tid), 'Überarbeitungsauftrag kopiert. Im Chat „Mastering“ einfügen.'));
+  $('#albKI').addEventListener('click', () => albRun('KI überarbeitet nach deinen Kommentaren …', async () => { const v = await albPropose(ALB.open.tid, 'ki', { brief: albBrief(ALB.open.tid), keepEdits: true }); return 'Version ' + v.n + ' von der KI. Anhören und vergleichen.'; }));
+  $('#albImport').addEventListener('click', () => $('#albSetIn').click());
+  $('#albImportAll').addEventListener('click', () => $('#albSetMany').click());
+  $('#albSetMany').addEventListener('change', async e => { const fs = [...e.target.files]; e.target.value = ''; if (!fs.length) return;
+    await albRun('Vorschläge vom Chat werden übernommen …', async () => { const r = await albImportMany(fs); return r.done.length + ' Vorschläge als neue Version übernommen' + (r.miss.length ? '. Nicht zugeordnet: ' + r.miss.join(', ') : '.'); }); });
+  $('#albSetIn').addEventListener('change', async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    await albRun('Einstellungsdatei wird übernommen …', async () => { const v = await albImportSettings(ALB.open.tid, await f.text(), 'Claude (Chat)'); return 'Version ' + v.n + ' aus „' + f.name + '“ übernommen.'; }); });
+  $('#albPublish').addEventListener('click', () => albRun('Freigegebene Masters werden exportiert …', async () => { const r = await albPublish($('#albFmt').value);
+    const ok = r.files.filter(f => f.ok).length, bad = r.files.filter(f => !f.ok); return ok + ' Masters exportiert' + (bad.length ? ', fehlgeschlagen: ' + bad.map(f => f.name + ' (' + f.err + ')').join('; ') : '') + (r.locked.length ? '. Gesperrt (nicht freigegeben): ' + r.locked.length + ' Songs.' : '.'); }));
+  setInterval(() => { if (curTab() === 'album' && ALB.open) { const d = $('#albDirty'); if (d) d.hidden = !albDirty(); } }, 1000);
+  albLoadList().then(async () => { const last = recall('albumLast'); if (last && ALB.list.some(p => p.id === last)) await albSelect(last); albRender(); });
+})();
 /* ============================ Offline-Rendern & Messung ============================ */
 const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
 async function measureLatency(p, sr) {
@@ -4403,7 +4874,7 @@ async function runExport() {
       + (enc ? '<br>vor der Kodierung: ' + nf(r.I, 1) + ' LUFS · True Peak ' + nf(r.TP, 1) + ' dBTP' : '')
       + (enc && enc.hear ? '<br>Hörbarer Kodierverlust: ' + nf(enc.hear.mos, 1) + ' von 5 (' + (v0 => v0[0].toLowerCase() + v0.slice(1))(hearVerdict(enc.hear.mos)[0]) + ', Näherung an PEAQ/ViSQOL)' : '') + '</span>';
     res.querySelector('b').textContent = how === 'declined' ? 'Speichern abgebrochen.' : name;
-    if (mode === 'master' && how !== 'declined') styleLearnFromExport(r).then(ok => { if (ok) hint.textContent += ' Als Beispiel für „Mein Stil“ gemerkt (' + STYLE.list.length + ').'; });
+    if (mode === 'master' && how !== 'declined') styleLearnFromExport(r).then(ok => { if (ok) hint.textContent += ' Als Entwurf für „Mein Stil“ gemerkt. Wenn er nach dem Anhören passt, dort unter „Beispiele“ auf „Passt“ tippen. Erst dann lernt das Studio daraus.'; });
     const ceilT = mode === 'master' && P.lim.on ? P.lim.ceiling : null, over = enc && ceilT !== null ? enc.TP - ceilT : 0;
     const codecTip = !lossy || how === 'declined' ? '' : enc && enc.TP > 0 ? ' Achtung: Die fertige Datei hat einen True Peak über 0 dBTP und kann beim Abspielen übersteuern. Bitte die Limiter-Decke um mindestens ' + nf(Math.ceil((enc.TP + 0.2) * 10) / 10, 1) + ' dB senken und neu exportieren.'
       : over > 0.05 ? ' Durch die ' + (ogg ? 'OGG' : 'MP3') + '-Kodierung liegt der True Peak ' + nf(over, 1) + ' dB über der Limiter-Decke. Das ist bei verlustbehafteten Formaten normal und übersteuert nicht, solange er unter 0 dBTP bleibt.'

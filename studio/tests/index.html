@@ -461,12 +461,40 @@ async function aiKeyStorage() {
   res.push(['Statuszeile: Dateinamen und Fehlertexte werden nur als Text gezeigt (kein HTML)', !st.querySelector('img') && st.textContent.includes('<img') && window.__xss === 0, st.children.length + ' Elemente']);
   status('Läuft <b>x</b>', 'busy'); res.push(['Statuszeile: Lade-Kreisel bleibt, Text bleibt Text', st.firstChild.className === 'busy' && !st.querySelector('b') && st.textContent === 'Läuft <b>x</b>', st.innerHTML.slice(0, 60)]); status('Fertig.', 'ok', 10);
   return res;
+},
+async function language() { // Texte werden ohne Zahlen verglichen, laufende Messungen können Zahlen ändern
+  const res = [], q = s => document.querySelector(s), keepP = JSON.stringify(P), gm = q('#gmOut').value, nn = s => s.replace(/[\d.,−+-]+/g, '#');
+  I18N.set('de'); await sleep(50); const deTitle = document.title, snap = [];
+  { const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) snap.push([n, n.data]); }
+  I18N.set('en'); await sleep(50);
+  const changed = snap.filter(([n, d]) => n.isConnected && nn(n.data) !== nn(d));
+  res.push(['Sprache: Englisch – Knöpfe, Reiter, Tooltips und Platzhalter übersetzt', q('#btnOpen').textContent === 'Open song' && q('[data-tab=check]').textContent.includes('Song check') && q('#btnUndo').title === 'Undo (Ctrl+Z)' && /^e\.g\. drum/.test(q('#aiWish').placeholder) && document.documentElement.lang === 'en',
+    q('#btnOpen').textContent + ' · ' + q('[data-tab=check]').textContent.trim() + ' · ' + q('#btnUndo').title + ' · ' + changed.length + ' Texte übersetzt']);
+  status('Lautheit eingestellt: −14,0 LUFS (Ziel −14)', 'ok'); await sleep(50);
+  res.push(['Sprache: zusammengesetzte Meldung mit Zahlen wird übersetzt (Dezimalpunkt)', q('#status').textContent.trim() === 'Loudness set: −14.0 LUFS (target −14)', q('#status').textContent.trim()]);
+  const c = document.createElement('canvas').getContext('2d'); c.font = '12px sans-serif';
+  const wEn = c.measureText('Höhen').width; I18N.set('de'); const wRef = c.measureText('Highs').width; I18N.set('en');
+  res.push(['Sprache: Canvas-Beschriftungen werden übersetzt', Math.abs(wEn - wRef) < 0.01, 'gemessen wie „Highs“']);
+  const nameB = q('#trackName b'), keepName = nameB && nameB.textContent; if (nameB) nameB.textContent = 'Floodline – Entwurf 03.wav'; await sleep(50);
+  const inName = nameB ? nameB.textContent : '', inMsg = I18N.tr('Lade „Floodline – Entwurf 03.wav“ …'); if (nameB) nameB.textContent = keepName; await sleep(50);
+  res.push(['Sprache: Inhalte (Eingaben, JSON-Feld, Song- und Dateinamen) bleiben unverändert', q('#gmOut').value === gm && inName === 'Floodline – Entwurf 03.wav' && inMsg === 'Loading “Floodline – Entwurf 03.wav” …', inName + ' · ' + inMsg]);
+  for (let i = 0; i < 100 && !S.orig; i++) await sleep(100);
+  let prompt = ''; try { prompt = buildPrompt(1, '', -14, null); } catch (e) { prompt = String(e); }
+  res.push(['Sprache: KI antwortet bei englischer Oberfläche auf Englisch', /write "summary" and "steps" in English/.test(prompt), prompt.slice(-90)]);
+  let stored = null; try { stored = localStorage.getItem('dsms-lang'); } catch (e) {}
+  res.push(['Sprache: Wahl wird auf dem Gerät gemerkt', stored === 'en', String(stored)]);
+  I18N.set('de'); await sleep(50);
+  const bad = changed.filter(([n, d]) => n.isConnected && nn(n.data) !== nn(d));
+  res.push(['Sprache: zurück auf Deutsch stellt jeden übersetzten Text wieder her', changed.length > 200 && !bad.length && document.title === deTitle && document.documentElement.lang === 'de', changed.length + ' Texte, abweichend: ' + bad.length + (bad.length ? ' z. B. ' + JSON.stringify(bad[0][1].slice(0, 60)) + ' → ' + JSON.stringify(bad[0][0].data.slice(0, 60)) : '')]);
+  res.push(['Sprache: Einstellungen und Klang unberührt', JSON.stringify(P) === keepP, 'Einstellungen identisch']);
+  return res;
 }
 ];
 
 async function runAll() {
   document.getElementById('run').disabled = true; out.innerHTML = ''; sum.textContent = 'Lade App …';
-  const frame = document.getElementById('app'); frame.src = '../index.html?test=' + Date.now();
+  try { localStorage.setItem('dsms-lang', 'de'); } catch (e) {} // Tests prüfen deutsche Texte; Englisch wird im Test „Sprache“ geprüft
+  const frame = document.getElementById('app'); frame.src = '../web/index.html?test=' + Date.now();
   await new Promise(r => frame.onload = r); const W = frame.contentWindow;
   for (let i = 0; i < 300; i++) { try { if (W.eval('typeof S !== "undefined" && S.orig && S.master && !S.measuring')) break; } catch (e) {} await new Promise(r => setTimeout(r, 200)); }
   let pass = 0, fail = 0; const all = [];

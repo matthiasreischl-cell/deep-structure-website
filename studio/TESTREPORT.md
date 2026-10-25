@@ -476,3 +476,123 @@ Programmstand: Deep Structure Mastering Studio 1.12.0 (`web/index.html`, `deskto
 Bewusst nicht automatisch getestet: die Ordnerauswahl am PC (File System Access API braucht eine Nutzeraktion; getestet über einen gleichwertigen Ordner-Ersatz) und das KI-Überarbeiten (braucht eine Verbindung zu Claude; der Weg nutzt das vorhandene, bereits getestete KI-Mastering mit den Kommentaren als Wunsch).
 
 Gesamt: 81 von 81 DSP-Tests, 129 von 129 Browser-Tests, PC-Fassung, Neustart-Test, Album-Werkzeug-Test.
+
+## 26. Nachtrag: MCP-Server 1.0
+
+Test über das echte Protokoll (`mcp/test.mjs`: startet den Server wie Claude Desktop oder Gemini CLI über stdio). Testsignale: Album mit 2 Songs (−19,3 und −29,4 LUFS), Ordner mit 13 Songs, Ordner außerhalb der Freigabe.
+
+| Prüfung | Ergebnis |
+|---|---|
+| initialize (2025-06-18 und 2024-11-05), ping, unbekannte Methode | angenommen / angenommen / −32601 |
+| Werkzeugliste | 8 Werkzeuge, kein Löschen, keine Freigabe |
+| Zugriff außerhalb (absoluter Pfad, `..`, Systemordner, Verknüpfung nach außen) | alle abgelehnt |
+| 13 Songs / unbekannte Konfiguration | abgelehnt mit verständlicher Meldung |
+| analyze_album (relativer Pfad) | Messung und Album-Ziele (−11,5 / −16,5 LUFS) |
+| master_album, zweiter Auftrag gleichzeitig | startet sofort / abgelehnt |
+| Ergebnis | −11,5 und −16,5 LUFS genau getroffen, True Peak −1,1 / −2,4 dBTP, WAV und OGG, Einstellungsdateien mit Clean-Stufe, Bericht |
+| Netzwerk der Studio-Seite | 1 Versuch (Schriften) blockiert, nichts durchgelassen |
+| Originale | Prüfsumme unverändert, im Albumordner nichts Neues |
+| remaster_songs Song 2 mit Anpassung (Ziel −16, Luft −1) | nur Song 2 neu (−16 LUFS), Song 1 aus dem ersten Lauf |
+| stdout | nur Protokoll-Nachrichten |
+| PC-Ordnerstruktur (`MCP/` im Studio-Ordner) | Studio gefunden, alle Prüfungen bestanden |
+
+Nicht automatisch getestet: die Windows-Einrichtung (`install.ps1`, hier keine PowerShell verfügbar) und der Betrieb in Claude Desktop und Gemini CLI selbst. Das wird beim Einrichten auf dem PC geprüft (die Einrichtung endet mit einer Kurzprüfung).
+
+## 27. Prüfbericht: Einrichtung des MCP-Servers auf dem Windows-PC (25.10.2026)
+
+Rechner „Reverto“, Windows 11 (NT 10.0.26200, x64), Windows PowerShell 5.1. Ausgangslage: Studio 1.12.0 im Ordner `C:\App Entwicklung\Audio tool\DeepStructure_Mastering_Studio`, Node.js **nicht** installiert, Claude Desktop und Gemini CLI ohne MCP-Server.
+
+**Ablauf:** MCP-Dateien in `…\DeepStructure_Mastering_Studio\MCP\` kopiert, „Installieren (Musik-Ordner).cmd“ per Doppelklick gestartet (ohne Rückfragen, Freigabe nur `C:\Users\matth\Music`). Danach `Pruefen.cmd` (neu, `mcp/pruefung.mjs`). Protokolle: `MCP\Einrichtung.log`, `MCP\Pruefung.log`.
+
+### Einrichtung (install.ps1), 17:13–17:19
+
+| Schritt | Ergebnis |
+|---|---|
+| 1/5 Node.js | fehlte → per winget installiert: Node.js LTS 24.22.1 (Prüfsumme des Installers bestätigt, Windows-Administratorabfrage vom Nutzer bestätigt) |
+| 2/5 Pakete | `added 21 packages in 3m` (playwright-core 1.64.1, ffmpeg-static 5.3.0); Edge gefunden; Studio gefunden |
+| 3/5 Musikordner | `C:\Users\matth\Music` freigegeben (`config.json`) |
+| 4/5 Eintragen | Claude Desktop: `%APPDATA%\Claude\claude_desktop_config.json`; Gemini CLI: `%USERPROFILE%\.gemini\settings.json` (trust = false, Zeitlimit 10 min) |
+| 5/5 Kurzprüfung | bestanden (Exit-Code 0, sonst bricht das Skript ab); die Ausgabe fehlte im Protokoll → behoben (`| Out-Host`) |
+
+Dauer gesamt etwa 6 Minuten, davon 3 Minuten Paket-Download.
+
+### Prüfung nach der Einrichtung (pruefung.mjs, 17:27): 22 von 22 bestanden
+
+| Bereich | Prüfung | Ergebnis |
+|---|---|---|
+| Umgebung | Node.js ≥ 18, playwright-core, ffmpeg-static, Edge, Studio-Datei, Musikordner | 24.22.1 · 1.64.1 · 5.3.0 · `C:\Program Files (x86)\Microsoft\Edge\…\msedge.exe` · Studio 1.12.0 · `C:\Users\matth\Music` |
+| Einträge | Claude Desktop: gültiges JSON ohne BOM, Eintrag zeigt auf vorhandenes `node.exe` und `MCP\server.mjs` | OK (keine weiteren MCP-Server in der Datei) |
+| | Gemini CLI: wie oben, dazu trust = false und Zeitlimit ≥ 10 min | OK |
+| Protokoll | initialize (2025-06-18), Server 1.0.0 | OK |
+| | Werkzeugliste: genau 8, keines zum Löschen, Freigeben, Veröffentlichen oder Hochladen | OK |
+| | studio_info: Studio, FFmpeg, Browser, Ordner | alles gefunden |
+| | list_albums | 5 Ordner mit Audiodateien (3–6 Songs) |
+| Schutz | Systemordner `C:\WINDOWS` | abgelehnt |
+| | Ausbruch mit `..` (→ `C:\Users`) | abgelehnt |
+| | Mastering im Temp-Ordner (außerhalb der Freigabe) | abgelehnt |
+| | ungültige Songnummer (99) | abgelehnt („1–3“) |
+| | unbekanntes Werkzeug `delete_album` | abgelehnt |
+| | kein Auftrag gestartet, nichts in den Musikordnern geschrieben | OK |
+| | stdout nur Protokoll (keine Fremdzeilen) | OK |
+| Probe-Mastering | 2 künstliche Songs im Temp-Ordner, Edge ohne Fenster, WAV 24 + OGG | Ziel −12 → **−12,1 LUFS**, TP −1,0 dBTP · Ziel −16 → **−16,0 LUFS**, TP −2,3 dBTP · 49 s (20 s + 14 s pro 6-s-Song plus Start) |
+| | Netzwerk der Studio-Seite | 1 Versuch (Google-Schriften) blockiert, nichts durchgelassen |
+| | Temp-Ordner danach gelöscht | OK |
+
+### Bewertung
+
+- Die Einrichtung läuft auf einem Windows-PC ohne Node.js vollständig per Doppelklick durch; einzige Nutzeraktion war die Administratorabfrage der Node.js-Installation.
+- Mastering-Ergebnis identisch zu den Container- und CI-Tests (§ 26): gleiche Messwerte auf 0,1 LU, gleiche True-Peak-Werte.
+- Die Rechenzeit am Laptop ist etwa 3–4× so lang wie im Testcontainer; für echte Songs (3–4 min) sind 1–2 Minuten pro Song realistisch, wie in der Werkzeugbeschreibung angegeben. Am echten Album noch zu bestätigen.
+- Gefundene und behobene Mängel: Ausgabe der Kurzprüfung fehlte in `Einrichtung.log` (jetzt `| Out-Host`). Neu: `Pruefen.cmd` / `pruefung.mjs` zum jederzeitigen Nachprüfen (verändert nichts).
+
+### Hinweise und offene Punkte
+
+- **Freigegeben ist nur `Musik`.** Darin liegen derzeit ein Hörspiel und Serato-Beispielordner, aber keine Deep-Structure-Alben. Liegen die Alben woanders (z. B. auf Laufwerk D:), `Installieren.cmd` erneut starten und diese Ordner zusätzlich wählen – oder die Alben in `Musik` verschieben.
+- **Noch nicht im echten Client getestet:** Claude Desktop muss ganz beendet (auch im Infobereich) und neu gestartet werden; danach erscheint „deep-structure-mastering“ unter „Suchen und Werkzeuge“. Gemini CLI ist auf dem PC noch zu installieren bzw. zu starten (`gemini`, dann `/mcp`); der Eintrag ist bereits vorhanden.
+- Rückgängig machen: Eintrag `deep-structure-mastering` in beiden Einstellungsdateien löschen; vor dem Eintragen existierende Dateien wurden als `*.vor-deep-structure.bak` gesichert.
+
+## 28. Nachtrag 1.13.0: Oberfläche auf Englisch, Anleitung Deutsch und Englisch
+
+**Umfang:** neue Module `src/15_lang_en.js` (Wörterbuch, 1087 Einträge, 7 Muster) und `src/16_i18n.js` (Übersetzungsschicht, Umschalter). Geändert an bestehenden Modulen nur, was die Sprache braucht: Anleitung-Knopf wählt `Guide.pdf` (09_art), KI-Prompt bittet bei Englisch um englische Antworten (08_check), dazu ein Fehlerschutz beim Album-Knopf „Überarbeitungsauftrag kopieren“ (14_album).
+
+### Browser-Tests (tests/index.html, Chromium): 137 von 137 bestanden
+
+Die bisherigen 128 Tests laufen jetzt fest auf Deutsch (der Test setzt die Sprache vorher), neu ist der Block „Sprache“:
+
+| Prüfung | Ergebnis |
+|---|---|
+| Englisch: Knöpfe, Reiter, Tooltips, Platzhalter, `lang`-Attribut | „Open song“, „Song check“, „Undo (Ctrl+Z)“, „e.g. drum & bass …“; 483 sichtbare Texte übersetzt |
+| Zusammengesetzte Meldung mit Zahlen | „Lautheit eingestellt: −14,0 LUFS (Ziel −14)“ → „Loudness set: −14.0 LUFS (target −14)“ |
+| Canvas-Beschriftung | „Höhen“ wird gemessen und gezeichnet wie „Highs“ |
+| Inhalte bleiben | JSON-Feld der Spiel-Daten unverändert; Songname „Floodline – Entwurf 03.wav“ im Namenfeld und in einer Meldung unverändert |
+| KI-Prompt | enthält bei Englisch die Bitte um englische Zusammenfassung |
+| Wahl gemerkt | `localStorage` `dsms-lang` = `en` |
+| Zurück auf Deutsch | alle 483 übersetzten Texte exakt wiederhergestellt, Titel und `lang` wieder deutsch |
+| Einstellungen | nach mehrfachem Umschalten identisch (Klang unberührt) |
+
+Dazu bestanden: DSP-Tests (`tests/dsp.test.mjs`, 81 von 81), PC-Fassung über `file://` ohne Warnungen.
+
+### Abdeckung im Ablauf (eigener Scan mit Chromium, Oberfläche Englisch)
+
+Alle 12 Reiter geöffnet, in jedem alle sichtbaren Knöpfe einmal gedrückt (Song-Check-Vorschläge, Clean Song, Limiter-Ziel, Drums suchen/probehören/anwenden, Bereichs-Werkzeuge, Hör-Vergleich, Spiel-Daten …), Album mit 2 Songs angelegt, berechnet, geprüft, freigegeben, kommentiert, zur Überarbeitung markiert, dazu Export-, Feedback- und Mein-Stil-Fenster. Jeder angezeigte Text wurde mitgeschrieben und auf deutsche Reste geprüft.
+
+| Ergebnis | |
+|---|---|
+| Deutsche Reste in Oberfläche und Meldungen | 0 (übrig nur der eigene Kommentartext „zu scharf“, eine Nutzereingabe) |
+| Englische Reste nach Rückschalten auf Deutsch | 0 |
+| Seitenfehler | 0 |
+
+Während der Entwicklung gefundene und behobene Fälle: aus Teilen zusammengesetzte Sätze („Mehr Bass als …“, „Der Master ist mit … lauter als das Ziel“, „Steht … dB über …“), Bindestrich-Begriffe aus Listen („Stereo-Flattern“, „KI-Artefakt“), Namen in „…“ (werden nicht mehr übersetzt), Zahlen in „…“ („Erste „1“ bei“).
+
+### Bewusst nicht übersetzt
+
+Song-, Album- und Dateinamen, Nutzereingaben, das JSON der Spiel-Daten (Abschnittsnamen ohne eigenen Namen behalten die deutsche Vorgabe, z. B. „Aufbau“), kopierte Texte für Chat, Codex und Godot, Mastering-Protokoll und Feedback-Mail-Vorlage.
+
+### Anleitung
+
+`Anleitung.pdf` und `Guide.pdf`, je 32 Seiten, Version 1.13.0: neue Kapitel „Mein Stil“ und „Album“, Sprachumschalter, alle 25 Bilder neu aus 1.13.0 (jeweils in der passenden Sprache, Song „3. DEIN ABER“). Seitenzahlen im Inhaltsverzeichnis aus dem fertigen PDF ermittelt. Sichtprüfung aller Seiten.
+
+### Offen
+
+- Echte Geräte (Android-Handy, Windows-PC) mit englischer Oberfläche noch nicht von Hand geprüft; der Tester meldet über „Feedback“.
+- Die Übersetzung ist ein Wörterbuch: Neue deutsche Texte brauchen einen Eintrag in `src/15_lang_en.js`, sonst erscheinen sie auf Deutsch.

@@ -132,6 +132,16 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 - **Lernen:** Freigabe schreibt genau ein positives Beispiel pro Song (`album:<Projekt>:<Song>:v<n>`, Bewertung `ok`), frühere positive Beispiele desselben Songs werden zu Entwürfen. „Überarbeiten“ schreibt die aktuelle Version als `schlecht`. `styleSuggest` und die gelernten Gewichte verwenden ausschließlich Beispiele mit Bewertung `ok`.
 - **Export:** nur Songs mit Status `frei`, deren letzte Entscheidung die Freigabe der aktuellen Version ist; die Einstellungen werden vor dem Export gegen die freigegebene Version verglichen. Ausgabe über die vorhandene Export-Funktion (gleiche Formate und Messung), am PC per Ordnerauswahl (File System Access API), sonst als Downloads.
 
+## Sprache (Deutsch / English)
+
+- **Aufbau:** Die App bleibt auf Deutsch geschrieben. Eine eigene Schicht (`src/16_i18n.js`) übersetzt nur, was sichtbar wird; Rechnen, Messen, Dateien, gespeicherte Daten und Spiel-Daten bleiben unverändert. Das Wörterbuch steht in `src/15_lang_en.js` (Deutsch → Englisch, rund 1100 Einträge, dazu wenige Muster für Texte mit Zahlen oder Namen in der Mitte).
+- **Ablauf:** Ein `MutationObserver` übersetzt Texte und die Attribute `title`, `aria-label`, `placeholder`, `alt`, auch wenn sie später eingefügt oder geändert werden. Canvas-Beschriftungen laufen über `fillText`, `strokeText` und `measureText`. Zuerst wird der ganze Text gesucht; sonst werden bekannte Teile als ganze Wörter ersetzt (längste zuerst), danach Dezimalkomma → Punkt und „…“ → “…”.
+- **Unverändert bleiben:** Inhalte von `textarea`, `pre`, `code` und Eingabefeldern, Song-, Album- und Dateinamen (Namenfelder werden nur bei einem exakt bekannten Begriff übersetzt; Namen in „…“ in Meldungen bleiben stehen) sowie Texte, die für Chat, Codex und Godot kopiert werden.
+- **Umschalten:** Knopf `EN`/`DE` in der Kopfzeile, ohne Neuladen. Zu jedem übersetzten Text wird das Original gemerkt, zurück auf Deutsch stellt es exakt wieder her. Die Wahl liegt in `localStorage` (`dsms-lang`); ohne Wahl entscheidet die Browsersprache.
+- **KI-Mastering:** Bei englischer Oberfläche bittet der Prompt die KI, Zusammenfassung und Schritte auf Englisch zu schreiben.
+- **Anleitung:** `Anleitung.pdf` (Deutsch) und `Guide.pdf` (Englisch); der Knopf lädt die zur Sprache passende. Quellen und Bildskript in `docs/anleitung/`.
+- **Neue Texte:** Beim Hinzufügen deutscher Texte den Eintrag in `src/15_lang_en.js` ergänzen. Der Browser-Test „Sprache“ und der Scan in `docs/TESTREPORT.md` § 28 zeigen fehlende Übersetzungen.
+
 ## KI-Mastering und Datenschutz
 
 - **Claude-Version** (Artifact in claude.ai): Sie nutzt das Claude-Konto des Nutzers. Hier wird kein Schlüssel benötigt.

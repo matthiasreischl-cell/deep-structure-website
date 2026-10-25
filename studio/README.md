@@ -11,6 +11,7 @@ Installierbare Web-App (PWA) unter `deepstructure.world/studio/`: Audio-Editor, 
 | `vorbis-encoder.js` | OGG-Vorbis-Encoder, wird nur beim OGG-Export nachgeladen (Lizenzen im Dateikopf) |
 | `lame.min.js` | MP3-Encoder [LAME](https://lame.sourceforge.io) als JavaScript ([lamejs](https://github.com/zhuker/lamejs), LGPL), unverändert, wird nur beim MP3-Export nachgeladen |
 | `Anleitung.pdf` | Bebilderte Anleitung für Tester und Nutzer, über den Knopf „Anleitung“ erreichbar |
+| `Guide.pdf` | Dieselbe Anleitung auf Englisch, über den Knopf „Guide“ bei englischer Oberfläche |
 | `manifest.webmanifest`, `icon-*.png`, `favicon.png`, `apple-touch-icon.png` | Installation als App |
 | `tests/` | Automatisierte Tests (siehe `tests/README.md`) |
 | `TESTREPORT.md` | Ergebnisse der letzten Prüfung inklusive FFmpeg-Gegenmessung |

@@ -462,6 +462,33 @@ async function aiKeyStorage() {
   status('Läuft <b>x</b>', 'busy'); res.push(['Statuszeile: Lade-Kreisel bleibt, Text bleibt Text', st.firstChild.className === 'busy' && !st.querySelector('b') && st.textContent === 'Läuft <b>x</b>', st.innerHTML.slice(0, 60)]); status('Fertig.', 'ok', 10);
   return res;
 },
+async function dehissUI() { // Stimm-Entzischer: Anwenden, Ersetzen, Vorher/Nachher, Entferntes anhören, Rückgängig
+  const res = [], sr = 44100, n = sr * 8, L = new Float32Array(n), R = new Float32Array(n); let sd = 11; const rnd = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 - 0.5; };
+  let hp = 0; for (let i = 0; i < n; i++) { const t = i / sr, e = (t % 3) < 2 && t > 0.5 ? Math.min(1, (t % 3) * 20, (2 - t % 3) * 20) : 0; let v = 0; for (let h = 1; h <= 50 && h * 220 < 14000; h++) v += Math.sin(2 * Math.PI * h * 220 * t) / Math.pow(h, 1.1);
+    const x = rnd(), hi = x - hp; hp = 0.2 * hp + 0.8 * x; const c = 0.12 * e * v + 0.01 * e * hi, w = 0.03 * rnd(); L[i] = c + w + 0.05 * Math.sin(2 * Math.PI * 55 * t); R[i] = c - w + 0.05 * Math.sin(2 * Math.PI * 55 * t); }
+  const keep = S.track; await loadTrack({ sr, L, R, name: 'Entzischer-Test', demo: true }); await sleep(300);
+  const sideOf = t => { let m = 0; for (let i = 0; i < t.L.length; i++) m = Math.max(m, Math.abs((t.L[i] - t.R[i]) - (L[i] - R[i]))); return m; };
+  const wait = async v0 => { for (let i = 0; i < 600 && (S.ver === v0 || DH.busy); i++) await sleep(100); await sleep(500); };
+  DH.strength = 30; const u0 = S.undo.length; let v0 = S.ver; $('#dhApply').click(); await wait(v0);
+  const lab = S.undo.length ? S.undo[S.undo.length - 1].label : '';
+  res.push(['Stimm-Entzischer: Anwenden verändert den Song, ein Rückgängig-Schritt, Seite unverändert', S.undo.length === u0 + 1 && /^Stimme entzischt \(30 %\)/.test(lab) && sideOf(S.track) < 1e-6, lab + ' · Seite ' + sideOf(S.track).toExponential(1)]);
+  res.push(['Stimm-Entzischer: Bericht mit erkanntem Gesang, Vorher/Nachher und „Entferntes anhören“ freigeschaltet', /Gesang erkannt/.test($('#dhReport').textContent) && !$('#dhAB').disabled && !$('#dhDiff').disabled, $('#dhReport').textContent.slice(0, 90)]);
+  $('#dhAB').click(); await sleep(100); const abOn = S.abuf === DH.beforeBuf && $('#dhAB').getAttribute('aria-pressed') === 'true';
+  $('#dhAB').click(); await sleep(100); const abOff = S.abuf !== DH.beforeBuf && $('#dhAB').getAttribute('aria-pressed') === 'false';
+  res.push(['Stimm-Entzischer: Vorher/Nachher tauscht nur den Abspiel-Puffer', abOn && abOff && S.undo.length === u0 + 1, abOn + ' / ' + abOff]);
+  S.cursor = 0.8; $('#dhDiff').click(); await sleep(400); const pv = !!S.cleanPv; cleanStopPv();
+  res.push(['Stimm-Entzischer: „Entferntes anhören“ spielt den Unterschied', pv, pv ? 'spielt' : 'nichts']);
+  const d1 = (() => { let m = 0; for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(S.track.L[i] - L[i])); return m; })();
+  DH.strength = 60; v0 = S.ver; $('#dhApply').click(); await wait(v0);
+  const lab2 = S.undo[S.undo.length - 1].label, d2 = (() => { let m = 0; for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(S.track.L[i] - L[i])); return m; })(), base = S.undo[S.undo.length - 1].L.every((v, i) => v === L[i]);
+  res.push(['Stimm-Entzischer: erneutes Anwenden ersetzt die vorige Entzischung (nicht doppelt)', S.undo.length === u0 + 1 && /60 %/.test(lab2) && base && d2 > d1, lab2 + ' · Änderung ' + (20 * Math.log10(d1)).toFixed(1) + ' → ' + (20 * Math.log10(d2)).toFixed(1) + ' dBFS']);
+  I18N.set('en'); await sleep(80); const en = $('#dhBox h3').textContent + ' | ' + $('#dhReport').textContent; I18N.set('de'); await sleep(50);
+  res.push(['Stimm-Entzischer: Oberfläche auf Englisch', /Voice: smooth the hiss/.test(en) && /Singing detected:/.test(en) && /of the audible time/.test(en) && !/[äöüß]/.test(en), en.slice(0, 160)]);
+  undo(); await sleep(600);
+  const same = S.track.L.length === n && S.track.L.every((v, i) => v === L[i]);
+  res.push(['Stimm-Entzischer: nach Rückgängig Originalzustand, Vorher/Nachher gesperrt', same && $('#dhAB').disabled && $('#dhDiff').disabled, same ? 'Original' : 'abweichend']);
+  if (keep) await loadTrack(keep); return res;
+},
 async function language() { // Texte werden ohne Zahlen verglichen, laufende Messungen können Zahlen ändern
   const res = [], q = s => document.querySelector(s), keepP = JSON.stringify(P), gm = q('#gmOut').value, nn = s => s.replace(/[\d.,−+-]+/g, '#');
   I18N.set('de'); await sleep(50); const deTitle = document.title, snap = [];

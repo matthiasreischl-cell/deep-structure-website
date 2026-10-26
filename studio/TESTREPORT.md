@@ -608,3 +608,56 @@ Anlass: Rückmeldung aus dem Chat „Mastering“: Bass-Mono stand dort fest auf
 | Chat-Werkzeug (`tests/album-test.sh`): Song-Anpassung `bass_mono_hz: 70` | Einstellungsdatei mit 70 Hz, übrige Prüfungen unverändert bestanden |
 | Ungültige Werte (20 Hz, Text) im Chat-Werkzeug und im MCP-Server | abgelehnt |
 | MCP-Testreihe (`mcp/test.mjs`) | alle bestanden |
+
+## 30. Nachtrag 1.14.0: Stimm-Entzischer, Clean „leicht“ schonender (MCP-Server 1.2.0)
+
+Anlass: KI-Stimmen (Suno) mit feinem Zischen/Rauschen im Hintergrund; Clean „leicht“ war bei „Snow White“ schon zu viel (Stimme metallisch, ein Musikton bei 933 Hz als Störton entfernt).
+
+**Stimm-Entzischer** (`vocalDehiss` im DSP-Kern, Karte im Song-Check unter Clean Song). Künstlicher Song: Stimme 220 Hz mit 50 Obertönen, Zischen 5–10 kHz nur beim Singen (2 s singen, 1 s Pause), breites Pad, Hi-Hats, Bass.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Gesang erkannt (wahr etwa 63 % der hörbaren Zeit) | 68 % |
+| Stärke 25 %: Rauschen zwischen den Obertönen / Obertöne selbst | −1,7 dB / −0,2 dB |
+| Stärke 50 % | −3,2 dB / −0,4 dB |
+| Stärke 100 % | −5,9 dB / −0,6 dB |
+| Mit Vibrato (±1 %, 5,5 Hz), 25 % / 100 % | Täler −1,2 / −4,0 dB, Obertöne −0,8 / −2,6 dB |
+| Schwankung der Täler über die Zeit (Maß für „metallisches“ Musical Noise), vorher → 25 % / 100 % | 1,01 → 1,05 / 1,27 |
+| Seite (L−R) nach dem Entzischen | Abweichung höchstens 3·10⁻⁸ (Rundung) |
+| Pausen (nicht gesungen) | bitgenau unverändert |
+| Unter 4 kHz | Änderung −153 dB |
+| Stärke 0 / nur Instrumente ohne Stimme | bitgenau unverändert / keine Änderung |
+| Auswahl 3–5 s | außerhalb bitgenau unverändert |
+| Einzelner Sinuston in Rauschen (kein Gesang) | 0,5 s von 20 s als Gesang gewertet (vorher ohne Teilton-Prüfung deutlich mehr), Wirkung dort nur im Band 5–10 kHz |
+
+Echter Suno-Song „3. DEIN ABER“ (3:28, 48 kHz):
+
+| Prüfung | Ergebnis |
+|---|---|
+| Gesang erkannt | 42–43 % der hörbaren Zeit (etwa 1:27 min); Intro ohne Gesang unverändert |
+| Hör-Vergleich (Original gegen entzischt) 25 % / 50 % / 100 % | 4,96 / 4,93 / 4,89 (kaum hörbar verändert) |
+| Größte Änderung im Signal 25 % / 100 % | −34 dBFS / −25 dBFS |
+| Seite | Abweichung höchstens 3·10⁻⁸ |
+| Rechenzeit (Node, ganzer Song) | etwa 7 s |
+
+Bedienung (Browser-Test): Anwenden = ein Rückgängig-Schritt, Bericht mit Gesangsdauer, Vorher/Nachher tauscht nur den Abspiel-Puffer, „Entferntes anhören“ spielt den Unterschied, erneutes Anwenden ersetzt die vorige Entzischung (Rückgängig-Stapel bleibt bei einem Schritt), nach Strg+Z Originalzustand, Oberfläche auf Englisch übersetzt.
+
+**Clean Song**
+
+| Prüfung | Ergebnis |
+|---|---|
+| Stehender Ton bei 933 Hz in Rauschen | wird gefunden, aber nicht mehr als „sicher“ vorgeschlagen (kein Häkchen, von „leicht“/„mittel“/„stark“ nicht entfernt) |
+| Stehender Ton bei 3455 Hz | weiterhin „sicher“ |
+| Rauschteppich mit `carpetMid: 0` (Stufe „leicht“) | Mitte unverändert (Abweichung 2·10⁻⁷), Seite abgesenkt |
+
+**Chat-Werkzeug und MCP:** `stimme_entzischen` (0–100 %, auch pro Song) in `tests/album-test.sh` (Song-Anpassung 25 %, im Bericht vermerkt) und `mcp/test.mjs` (150 % und Text werden abgelehnt).
+
+| Testreihe | Ergebnis |
+|---|---|
+| DSP (`tests/dsp.test.mjs`) | 89 bestanden |
+| Browser (`tests/run-browser-tests.py`) | 144 bestanden, PC-Fassung bestanden |
+| Album-Werkzeug (`tests/album-test.sh`) | bestanden |
+| MCP-Server (`mcp/test.mjs`) | 66 bestanden |
+| Bass-Mono (`mcp/bassmono-test.mjs`) | bestanden |
+
+Grenzen: Die Gesangserkennung ist eine Schätzung. Ein Solo-Instrument mit vielen Obertönen in der Mitte (z. B. ein Lead-Synth) kann als Gesang gelten; die Wirkung bleibt dann auf 5–10 kHz in der Mitte begrenzt und ist bei 25 % kaum hörbar. Ob die Stimme „runder“ klingt, entscheidet das Ohr: Vorher/Nachher nutzen und leise anfangen.

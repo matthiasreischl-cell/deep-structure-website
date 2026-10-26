@@ -14,7 +14,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const htmlPath = process.argv[2] || path.join(here, '..', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const grab = name => { const m = html.match(new RegExp('const ' + name + ' = String\\.raw`([\\s\\S]*?)`;')); if (!m) throw new Error(name + ' nicht gefunden'); return m[1]; };
-const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES, cleanScan, cleanSong, hearCompare};')();
+const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES, cleanScan, cleanSong, hearCompare, vocalDehiss};')();
 
 let pass = 0, fail = 0; const rows = [];
 function check(name, ok, detail) { rows.push([ok ? 'PASS' : 'FAIL', name, detail]); ok ? pass++ : fail++; }
@@ -240,6 +240,40 @@ for (const [ratio, want] of [[2, -15], [4, -17.5]]) { const x = sine(48000, 3, 1
   check('Clean Song: Musik abseits der Störtöne unverändert (±0,1 dB)', band.every(v => Math.abs(v) < 0.1), band.map(v => v.toFixed(3)).join(' / ') + ' dB');
   const z = D.cleanSong(L, R, sr, { lines: [], carpet: 0 }); let md = 0; for (let i = 0; i < n; i++) md = Math.max(md, Math.abs(z.L[i] - L[i]));
   check('Clean Song: nichts ausgewählt = bitgenau unverändert', md === 0, String(md));
+}
+{ // Clean „leicht“-Schutz: tiefe stehende Töne (Musik, z. B. 933 Hz) gelten nie als „sicher“; Teppich nur in der Seite möglich
+  const sr = 48000, x = pink(sr, 12, 0.2, 23), n = x.L.length, nz = noise(sr, 12, 0.03, 9); for (let i = 0; i < n; i++) { x.L[i] += nz.L[i]; x.R[i] += nz.R[i]; } const L = x.L.slice(), R = x.R.slice();
+  for (let i = 0; i < n; i++) { const t = i / sr, a = 0.06 * Math.sin(2 * Math.PI * 933 * t) + 0.06 * Math.sin(2 * Math.PI * 3455 * t); L[i] += a; R[i] += a; }
+  const sc = D.cleanScan(L, R, sr), lo = sc.lines.find(l => Math.abs(l.f - 933) < 6), hi = sc.lines.find(l => Math.abs(l.f - 3455) < 6);
+  check('Clean: stehender Ton unter 2 kHz (933 Hz) wird gefunden, aber nicht als sicher vorgeschlagen', !!lo && !lo.sure && !!hi && hi.sure, sc.lines.map(l => Math.round(l.f) + ' Hz' + (l.sure ? ' sicher' : '')).join(', '));
+  const c = D.cleanScan(x.L, x.R, sr), o = D.cleanSong(x.L, x.R, sr, { lines: [], carpet: 0.8, carpetMid: 0, profM: c.profM, profS: c.profS, profN: c.N, bandLo: 5000, bandHi: 16000 });
+  let dm = 0, ds = 0; for (let i = 0; i < n; i++) { dm = Math.max(dm, Math.abs((o.L[i] + o.R[i]) - (x.L[i] + x.R[i])) / 2); ds = Math.max(ds, Math.abs((o.L[i] - o.R[i]) - (x.L[i] - x.R[i])) / 2); }
+  check('Clean: Rauschteppich mit carpetMid 0 lässt die Mitte (Stimme) unverändert, nur die Seite wird abgesenkt', dm < 1e-5 && ds > 1e-3, 'Mitte ' + dm.toExponential(1) + ', Seite ' + ds.toExponential(1));
+}
+{ // Stimm-Entzischer: nur Mitte, nur 5–10 kHz, nur beim Singen; Obertöne bleiben, Täler werden leiser
+  const sr = 44100, n = sr * 12, r0 = rng(7), mk = (lo, hi) => { const out = new Float32Array(n), B = 4096; for (let o = 0; o < n; o += B) { const re = new Float64Array(B), im = new Float64Array(B); for (let i = 0; i < B; i++) re[i] = r0(); D.fft(re, im); for (let k = 0; k < B; k++) { const f = Math.min(k, B - k) * sr / B; if (f < lo || f > hi) { re[k] = 0; im[k] = 0; } } for (let k = 0; k < B; k++) im[k] = -im[k]; D.fft(re, im); for (let i = 0; i < B && o + i < n; i++) out[o + i] = re[i] / B; } let p = 0; for (const v of out) p += v * v; const g = 1 / Math.sqrt(p / n); return out.map(v => v * g); };
+  const sing = t => (t % 3) < 2 && t > 0.5, env = t => sing(t) ? Math.min(1, (t % 3) * 20, (2 - t % 3) * 20) : 0, hiss = mk(5000, 10000), h1 = mk(6000, 14000), h2 = mk(6000, 14000);
+  const mix = voc => { const L = new Float32Array(n), R = new Float32Array(n); for (let i = 0; i < n; i++) { const t = i / sr, e = voc ? env(t) : 0; let v = 0; for (let h = 1; h <= 50 && h * 220 < 14000; h++) v += Math.sin(2 * Math.PI * h * 220 * t) / Math.pow(h, 1.1);
+      const hat = Math.exp(-((t * 4) % 1) * 30) * 0.02, bass = 0.1 * Math.sin(2 * Math.PI * 55 * t), c = 0.12 * e * v + 0.006 * e * hiss[i] + bass;
+      L[i] = c + 0.05 * (Math.sin(2 * Math.PI * 330 * t) + Math.sin(2 * Math.PI * 392 * t + 1)) + hat * h1[i]; R[i] = c + 0.05 * (Math.sin(2 * Math.PI * 330 * t + 0.7) + Math.sin(2 * Math.PI * 494 * t)) + hat * h2[i]; } return { L, R }; };
+  const x = mix(true), N = 4096, w = new Float64Array(N).map((_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / N)), bz = sr / N;
+  const spec = (X, o) => { const re = new Float64Array(N), im = new Float64Array(N); for (let i = 0; i < N; i++) re[i] = X[o + i] * w[i]; D.fft(re, im); return k => re[k] * re[k] + im[k] * im[k]; };
+  const ev = y => { const Mi = x.L.map((v, i) => (v + x.R[i]) / 2), Mo = y.L.map((v, i) => (v + y.R[i]) / 2), Md = Mo.map((v, i) => v - Mi[i]); let vI = 0, vO = 0, hI = 0, hO = 0, lI = 0, lD = 0, side = 0, pause = 0;
+    for (let i = 0; i < n; i++) { side = Math.max(side, Math.abs((y.L[i] - y.R[i]) - (x.L[i] - x.R[i]))); const t = i / sr; if (!sing(t) && t % 3 > 2.2 && t % 3 < 2.8) pause = Math.max(pause, Math.abs(Md[i])); }
+    for (let o = 0; o + N < n; o += 1024) { const t = (o + N / 2) / sr; if (!sing(t) || t % 3 < 0.3 || t % 3 > 1.7) continue; const pi = spec(Mi, o), po = spec(Mo, o), pd = spec(Md, o);
+      for (let h = 23; h <= 45; h++) { const kh = Math.round(h * 220 / bz), kv = Math.round((h + 0.5) * 220 / bz); hI += pi(kh); hO += po(kh); vI += pi(kv); vO += po(kv); }
+      for (let k = 10; k < Math.round(4000 / bz); k++) { lI += pi(k); lD += pd(k); } }
+    return { valley: 10 * Math.log10(vO / vI), harm: 10 * Math.log10(hO / hI), low: 10 * Math.log10(lD / lI + 1e-30), side, pause }; };
+  const y1 = D.vocalDehiss(x.L, x.R, sr, { strength: 1 }), e1 = ev(y1), y25 = D.vocalDehiss(x.L, x.R, sr, { strength: 0.25 }), e25 = ev(y25);
+  check('Stimm-Entzischer: Gesang erkannt (wahr ~63 % der hörbaren Zeit)', y1.report.active > 0.5 && y1.report.active < 0.85, Math.round(y1.report.active * 100) + ' %');
+  check('Stimm-Entzischer 100 %: Rauschen zwischen den Obertönen > 3 dB leiser, Obertöne < 1,5 dB', e1.valley < -3 && e1.harm > -1.5, 'Täler ' + e1.valley.toFixed(1) + ' dB, Obertöne ' + e1.harm.toFixed(1) + ' dB');
+  check('Stimm-Entzischer 25 %: sehr zurückhaltend (Täler −0,8 … −3 dB, Obertöne < 0,5 dB)', e25.valley < -0.8 && e25.valley > -3 && e25.harm > -0.5, 'Täler ' + e25.valley.toFixed(1) + ' dB, Obertöne ' + e25.harm.toFixed(1) + ' dB');
+  check('Stimm-Entzischer: Seite unverändert, Pausen unverändert, unter 4 kHz unverändert', e1.side < 1e-6 && e1.pause === 0 && e1.low < -100, 'Seite ' + e1.side.toExponential(1) + ', Pausen ' + e1.pause + ', unter 4 kHz ' + e1.low.toFixed(0) + ' dB');
+  const z = D.vocalDehiss(x.L, x.R, sr, { strength: 0 }); let z0 = 0; for (let i = 0; i < n; i++) z0 = Math.max(z0, Math.abs(z.L[i] - x.L[i]), Math.abs(z.R[i] - x.R[i]));
+  const inst = mix(false), yi = D.vocalDehiss(inst.L, inst.R, sr, { strength: 1 }); let di = 0; for (let i = 0; i < n; i++) di = Math.max(di, Math.abs(yi.L[i] - inst.L[i]));
+  check('Stimm-Entzischer: Stärke 0 = bitgenau, ohne Gesang (nur Instrumente) keine Änderung', z0 === 0 && di === 0 && !yi.report.activeSec, 'Stärke 0: ' + z0 + ', Instrumente: ' + di);
+  const yr = D.vocalDehiss(x.L, x.R, sr, { strength: 1, regions: [[3, 5]] }); let out = 0, inn = 0; for (let i = 0; i < n; i++) { const t = i / sr, d = Math.abs(yr.L[i] - x.L[i]); if (t < 2.85 || t > 5.15) out = Math.max(out, d); else inn = Math.max(inn, d); }
+  check('Stimm-Entzischer: Auswahl wird eingehalten (außerhalb 3–5 s unverändert)', out === 0 && inn > 1e-4, 'außen ' + out + ', innen ' + inn.toExponential(1));
 }
 { // Hör-Vergleich (Näherung an PEAQ/ViSQOL)
   const sr = 48000, x = pink(sr, 12, 0.25, 31), n = x.L.length;

@@ -596,3 +596,15 @@ Song-, Album- und Dateinamen, Nutzereingaben, das JSON der Spiel-Daten (Abschnit
 
 - Echte Geräte (Android-Handy, Windows-PC) mit englischer Oberfläche noch nicht von Hand geprüft; der Tester meldet über „Feedback“.
 - Die Übersetzung ist ein Wörterbuch: Neue deutsche Texte brauchen einen Eintrag in `src/15_lang_en.js`, sonst erscheinen sie auf Deutsch.
+
+## 29. Nachtrag 1.13.1: Bass-Mono-Grenze im Chat-Werkzeug und MCP einstellbar
+
+Anlass: Rückmeldung aus dem Chat „Mastering“: Bass-Mono stand dort fest auf 120 Hz und nahm einem Song die gewollte Bass-Breite; ohne Bass-Mono blieb der Bass instabil. Die App selbst hatte den Regler schon (Stereo → „Mono unter“), das Chat-Werkzeug und der MCP-Server nicht.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Künstlicher Song: Mitte 50 Hz, nur Seite 95 Hz; Seite 95 Hz gegenüber Mitte 50 Hz nach dem Mastering | ohne Bass-Mono −6,0 dB · Bass-Mono 120 Hz −17,0 dB · `bass_mono_hz: 70` −8,3 dB |
+| Einstellungsdatei bei `bass_mono_hz: 70` | Bass-Mono an, Grenze 70 Hz |
+| Chat-Werkzeug (`tests/album-test.sh`): Song-Anpassung `bass_mono_hz: 70` | Einstellungsdatei mit 70 Hz, übrige Prüfungen unverändert bestanden |
+| Ungültige Werte (20 Hz, Text) im Chat-Werkzeug und im MCP-Server | abgelehnt |
+| MCP-Testreihe (`mcp/test.mjs`) | alle bestanden |

@@ -74,16 +74,19 @@ function ringGeometry(ri, ro, h) { // Ringband mit weich gerundetem Querschnitt,
   for (let i = 0; i <= N; i++) { const a = i / N * Math.PI * 2; pts.push(new THREE.Vector2(rc + w * se(Math.cos(a)), (h / 2) * se(Math.sin(a)))); }
   const geo = new THREE.LatheGeometry(pts, 192); geo.rotateX(Math.PI / 2); geo.computeVertexNormals(); return geo;
 }
-const RINGS = [[240, 224, 0.0], [214, 199, -0.12], [190, 176, -0.24], [167, 153, -0.36]];
-const ringZ = [], ringMeshes = [];
-RINGS.forEach(([ro, ri, z]) => { const m = new THREE.Mesh(ringGeometry(ri * PX, ro * PX, 0.17), ringMat); m.position.z = z; logo.add(m); ringZ.push(z); ringMeshes.push(m); });
-/* Gyroskop: jeder Ring schwingt um seine eigene Achse, außen weiter als innen.
-   Zeigt man aufs Logo, richten sie sich zum klaren Zeichen aus; beim Eintreten drehen sie hoch. */
-const GYRO = [
-  { axis: 0.35, amp: 0.55, speed: 0.31, phase: 0.0 },
-  { axis: 1.95, amp: 0.46, speed: 0.43, phase: 1.7 },
-  { axis: 3.25, amp: 0.36, speed: 0.37, phase: 3.1 },
-  { axis: 4.70, amp: 0.22, speed: 0.52, phase: 4.4 }
+/* Alle Ringe haben ihren Mittelpunkt im Kern (beim Dreieck) und drehen sich waagrecht
+   um die senkrechte Achse durch das Dreieck, wie eine Armillarsphäre. Weil sie gemeinsam
+   zentriert sind, liegt jeder Ring auf seiner eigenen Kugel und berührt keinen anderen. */
+const CORE_Z = -0.42;
+const RINGS = [[240, 224, CORE_Z], [214, 199, CORE_Z], [190, 176, CORE_Z], [167, 153, CORE_Z]];
+const ringMeshes = [];
+RINGS.forEach(([ro, ri, z]) => { const m = new THREE.Mesh(ringGeometry(ri * PX, ro * PX, 0.17), ringMat); m.position.z = z; logo.add(m); ringMeshes.push(m); });
+// außen langsam, innen schneller, abwechselnde Richtung (rad/s)
+const SPIN = [
+  { speed: 0.38, angle: 0.0 },
+  { speed: -0.52, angle: 0.9 },
+  { speed: 0.68, angle: 1.9 },
+  { speed: -0.86, angle: 2.6 }
 ];
 
 const rIn = 151 * PX, discZ = -0.5;
@@ -134,8 +137,8 @@ function glow(x, y, z, sx, sy, op, color = 0xbfeaff) {
   s.position.set(x, y, z); s.scale.set(sx, sy, 1); logo.add(s); return s;
 }
 const halo = glow(0, 0.25, -0.9, 7.2, 7.2, 0.10, 0x4fa9cf);
-const beam = glow(0, R * 0.98, 0.15, 0.32, 2.4, 0.55);
-const topSpot = glow(0, R * 0.98, 0.18, 1.3, 0.55, 0.75);
+const beam = glow(0, R * 0.98, CORE_Z + 0.15, 0.32, 2.4, 0.55);
+const topSpot = glow(0, R * 0.98, CORE_Z + 0.18, 1.3, 0.55, 0.75);
 const ringSpots = RINGS.slice(1).map(([ro, ri, z]) => glow(0, (ro + ri) / 2 * PX, z + 0.1, 0.55, 0.16, 0.55));
 const flare = glow(0, chordY + 0.01, discZ + 0.22, 2.9, 0.16, 0.85, 0xdff6ff);
 const flareCore = glow(0, chordY + 0.01, discZ + 0.24, 0.65, 0.65, 0.9, 0xffffff);
@@ -302,6 +305,7 @@ button.addEventListener('click', () => {
 
 /* ---------- Animation ---------- */
 let rx = 0, ry = 0, prox = 0, align = 0, frameId = 0, last = performance.now();
+const FACE = -0.13; // Logo leicht zur Kamera drehen, damit es nicht nach hinten gekippt wirkt
 function frame(now) {
   frameId = 0;
   if (document.hidden || document.body.classList.contains('entered')) return;
@@ -327,20 +331,27 @@ function frame(now) {
   const idlePitch = reduced ? 0 : Math.sin(t * 0.77 + 1) * 0.035;
   rx += ((ny * 0.30 * prox + idlePitch) - rx) * Math.min(1, dt * 2.6);
   ry += ((nx * 0.42 * prox + (reduced ? 0 : Math.sin(t * 0.41) * 0.05)) - ry) * Math.min(1, dt * 2.6);
-  tilt.rotation.set(rx, ry, 0);
+  tilt.rotation.set(rx + FACE, ry, 0);
   tilt.position.set(0, 0, 0);
 
-  // Ringe: Gyroskop-Schwingung, beim Zeigen ausgerichtet, beim Eintreten hochgedreht
-  align += ((prox > 0.55 ? 1 : 0) - align) * Math.min(1, dt * 2.2);
-  const spin = dive.active ? Math.pow(clamp(dt0 / 1.6, 0, 1), 2) * 7 : 0;
+  // Ringe drehen sich waagrecht ums Dreieck. Zeigt man aufs Logo, laufen sie aus und
+  // stellen sich nach vorn (ein Ring sieht nach einer halben Drehung wieder gleich aus).
+  // Beim Eintreten drehen sie hoch.
+  align += ((prox > 0.55 && !dive.active ? 1 : 0) - align) * Math.min(1, dt * 2.2);
+  const boost = dive.active ? 1 + Math.pow(clamp(dt0 / 1.4, 0, 1), 2) * 9 : 1;
+  let facing = 0;
   ringMeshes.forEach((m, i) => {
-    const g = GYRO[i];
-    if (reduced) { m.rotation.set(0, 0, 0); return; }
-    if (dive.active) g.spun = (g.spun || 0) + spin * (1 - i * 0.12) * dt;
-    const a = g.amp * (1 - align * 0.92) * Math.sin(t * g.speed + g.phase) + (g.spun || 0);
-    m.rotation.set(Math.cos(g.axis) * a, Math.sin(g.axis) * a, 0);
+    const g = SPIN[i];
+    if (reduced) { m.rotation.set(0, 0, 0); facing += 1; return; }
+    g.angle += g.speed * boost * (1 - align) * dt;
+    if (align > 0.01) {
+      const home = Math.round(g.angle / Math.PI) * Math.PI;
+      g.angle += (home - g.angle) * Math.min(1, dt * 3.2) * align;
+    }
+    m.rotation.set(0, g.angle, 0);
+    facing += Math.abs(Math.cos(g.angle));
   });
-  const settled = 1 - (1 - align) * 0.55;
+  const settled = 0.35 + 0.65 * facing / ringMeshes.length;
 
   // Licht und Wasserkontakt
   const shine = 1 + prox * 0.35 + body.flash * 0.8;
@@ -363,6 +374,6 @@ function frame(now) {
 function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
 function easeInOut(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
 addEventListener('visibilitychange', () => { if (!document.hidden && !frameId && !document.body.classList.contains('entered')) { last = performance.now(); frameId = requestAnimationFrame(frame); } });
-addEventListener('hashchange', () => { if (location.hash !== '#inside') { dive.active = false; GYRO.forEach(g => { g.spun = 0; }); } if (location.hash !== '#inside' && !frameId) { last = performance.now(); frameId = requestAnimationFrame(frame); } });
+addEventListener('hashchange', () => { if (location.hash !== '#inside') { dive.active = false; } if (location.hash !== '#inside' && !frameId) { last = performance.now(); frameId = requestAnimationFrame(frame); } });
 frameId = requestAnimationFrame(frame);
 window.__dsLanding3D = { addRipple, fit };

@@ -137,7 +137,6 @@ function openShop() {
   const visual = el('div', 'shop-detail-visual');
   visual.append(shopSign());
   const copy = el('div', 'shop-detail-copy');
-  copy.append(el('p', 'detail-kicker', 'Deep Structure Collective'));
   copy.append(el('h2', '', 'Webshop'));
   copy.append(el('p', 'detail-intro', 'Entdecke die Produkte von Deep Structure im eigenen Webshop.'));
   copy.append(externalLink('Zum Webshop', shop.url, 'world-link world-link--primary'));
@@ -215,7 +214,6 @@ function openVinyl() {
   image.width = 908;
   image.height = 900;
   const copy = el('div', 'vinyl-detail-copy');
-  copy.append(el('p', 'detail-kicker', 'Vinyl / Veröffentlicht'));
   copy.append(el('h2', '', release.title));
   copy.append(el('p', 'detail-intro', release.caption));
   const facts = el('ul', 'vinyl-facts');
@@ -228,7 +226,6 @@ function openVinyl() {
 
 function openProgrammes() {
   const detail = el('article', 'programmes-detail');
-  detail.append(el('p', 'detail-kicker', 'Programme / Anwendungen / Spiele'));
   detail.append(el('h2', '', 'Apps & Spiele'));
   detail.append(el('p', 'detail-intro', 'Ein eigener Raum für interaktive Ideen von Deep Structure.'));
   const pitch = el('section', 'games-pitch');
@@ -254,7 +251,7 @@ function openProgrammes() {
   pitch.append(video, playVideo);
   detail.append(pitch);
   const game = el('section', 'programme-project');
-  game.append(el('p', 'project-status', 'Spiel / In Entwicklung'));
+  game.append(el('p', 'project-status', 'Spiel · in Entwicklung'));
   game.append(el('h3', '', 'The World I Let In'));
   game.append(el('p', '', 'Ein Wahrnehmungsspiel, das dich in die Welt um dich herum führt. Die erste Erfahrung kannst du hier ausprobieren.'));
   const launch = el('button', 'world-link world-link--primary', 'Wahrnehmungsspiel öffnen');
@@ -272,6 +269,7 @@ function syncRadioState(message = '') {
 
   if (radioControlButton) {
     radioControlButton.textContent = playing ? 'STOP' : 'PLAY';
+    radioControlButton.classList.toggle('is-playing', playing);
     radioControlButton.setAttribute('aria-label', playing ? 'Deep Structure Radio stoppen' : 'Deep Structure Radio abspielen');
   }
 
@@ -352,18 +350,15 @@ function openRadio() {
 
   const visual = el('div', 'radio-detail-visual radio-detail-visual--comic');
   visual.append(radioIllustration('comic-radio-detail-image'));
-  const live = el('span', 'comic-radio-live', 'DEEP STRUCTURE / LIVE RADIO');
-  visual.append(live);
 
   const copy = el('div', 'radio-detail-copy');
-  copy.append(el('p', 'detail-kicker', '24 / 7 Transmission'));
   copy.append(el('h2', '', radio.title));
   copy.append(el('p', 'detail-intro', radio.caption));
 
   const now = el('div', 'radio-now-playing');
   radioNowText = el('strong', '', lastRadioTitle);
   radioNowText.setAttribute('aria-live', 'polite');
-  now.append(el('span', 'radio-now-label', 'JETZT IM RADIO'), radioNowText);
+  now.append(el('span', 'radio-now-label', 'Jetzt im Radio'), radioNowText);
   copy.append(now);
 
   radioStatusText = el('p', 'radio-stream-status');
@@ -377,7 +372,9 @@ function openRadio() {
   privacyLink.target = '_blank';
   privacyLink.rel = 'noopener noreferrer';
   privacyNotice.append(privacyLink);
-  copy.append(privacyNotice, radioControlButton, radioStatusText);
+  const controls = el('div', 'radio-transport');
+  controls.append(radioControlButton, radioStatusText);
+  copy.append(privacyNotice, controls);
   const volumeLabel = el('label', 'radio-volume', 'Lautstärke');
   const volume = el('input');
   volume.type = 'range';
@@ -397,7 +394,7 @@ function openRadio() {
   channels.filter(channel => channel.url !== '#').forEach(channel => {
     platforms.append(externalLink(channel.label, channel.url));
   });
-  copy.append(el('p', 'detail-kicker', 'Mehr Musik von Deep Structure'), platforms);
+  copy.append(el('h3', 'radio-more-title', 'Mehr Musik von Deep Structure'), platforms);
 
   detail.append(visual, copy);
   openPanel(detail);

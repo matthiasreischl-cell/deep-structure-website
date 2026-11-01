@@ -1,0 +1,279 @@
+/* Design polish for the Deep Structure world (loaded last).
+   Keeps the world concept; unifies type, colour, controls and motion.
+   Tokens live in fonts.css. */
+
+body { font-family: var(--font-text); }
+.world { color: var(--ink); caret-color: var(--gold); }
+
+/* ---------- Header, nav, footer ---------- */
+.world-header h1 { color: var(--ink); }
+.world-header h1 span { font-size: 11px; letter-spacing: .3em; color: var(--ink-soft); margin-top: 9px; }
+
+.world-header .world-index button {
+  font-family: var(--font-text);
+  font-size: 13px;
+  letter-spacing: .03em;
+  color: var(--ink-soft);
+  transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease, transform 120ms var(--ease-out);
+}
+.world-header .world-index button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.world-header .world-index .shop-nav-link { color: var(--ink); border-color: var(--gold-deep); }
+.world-header .world-index button:active { transform: scale(.97); }
+
+.world-footer { color: var(--ink-faint); font-size: 12px; }
+.world-footer a, .landing-legal a { color: var(--ink-soft); transition: color 160ms ease; }
+.world-footer a:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  .world-footer a:hover, .landing-legal a:hover { color: var(--ink); }
+}
+
+/* ---------- Objects in the world ---------- */
+.world-object-label strong {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 23px;
+  letter-spacing: .01em;
+  text-transform: none;
+  color: var(--ink);
+}
+.world-object-label span { font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+.world-object:focus-visible { outline: 2px solid var(--gold); outline-offset: 14px; }
+
+/* Press feedback on everything you can touch in the world. */
+.comic-radio-image, .shop-sign, .programme-terminal { transition: transform 200ms var(--ease-out), border-color 200ms ease, background-color 200ms ease; }
+.world-object:active .comic-radio-image,
+.world-object:active .shop-sign,
+.world-object:active .programme-terminal { transform: scale(.97); }
+.world-object--programmes:hover .programme-screen,
+.world-object--programmes:focus-visible .programme-screen { border-color: var(--gold); }
+.programme-screen { transition: border-color 200ms ease; }
+
+/* The webshop sign keeps its engraved look, now in the real display face. */
+.shop-sign { border-color: var(--gold-deep); }
+.shop-sign-brand { font-size: 10px; letter-spacing: .26em; color: var(--ink-soft); }
+.shop-sign-title { font-family: var(--font-display); font-weight: 600; font-size: 31px; letter-spacing: .08em; color: var(--ink); }
+.shop-sign-arrow { font-size: 10px; color: var(--gold); }
+
+/* Arrival: the world's objects rise out of the dark one after another.
+   Uses `translate`, so the parallax `transform` on the same element keeps working. */
+@keyframes ds-surface {
+  from { opacity: 0; translate: 0 22px; filter: blur(6px); }
+  to { opacity: 1; translate: 0 0; filter: blur(0); }
+}
+.world.is-ready .world-object { animation: ds-surface 900ms var(--ease-out) backwards; }
+.world.is-ready .world-object[data-world-id="radio"] { animation-delay: 120ms; }
+.world.is-ready .world-object[data-world-id="forest"] { animation-delay: 220ms; }
+.world.is-ready .world-object[data-world-id="programmes"] { animation-delay: 300ms; }
+.world.is-ready .world-object[data-world-id="shop"] { animation-delay: 400ms; }
+.world.is-ready .world-header, .world.is-ready .world-footer { animation: ds-fade 700ms ease-out backwards; }
+@keyframes ds-fade { from { opacity: 0; } }
+
+/* ---------- Detail panels ---------- */
+.world-panel { background: rgba(3, 3, 2, .82); transition: opacity 220ms ease-out, visibility 220ms; }
+.world-panel.is-open { transition-duration: 280ms; }
+
+.world-panel-card {
+  width: min(960px, 94vw);
+  max-height: min(820px, 90vh);
+  max-height: min(820px, 90dvh);
+  background: var(--ground);
+  border-color: var(--line);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, .7), 0 8px 24px rgba(0, 0, 0, .45);
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-deep) transparent;
+  opacity: 0;
+  transform: translateY(14px) scale(.985);
+  transition: opacity 160ms ease-out, transform 160ms ease-out;
+}
+.world-panel.is-open .world-panel-card {
+  opacity: 1;
+  transform: none;
+  transition: opacity 320ms var(--ease-out), transform 420ms var(--ease-out);
+}
+.world-panel-card::-webkit-scrollbar { width: 8px; }
+.world-panel-card::-webkit-scrollbar-thumb { background: var(--gold-deep); border: 2px solid var(--ground); }
+.world-panel-card::-webkit-scrollbar-track { background: transparent; }
+
+.world-panel-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  right: 14px;
+  top: 14px;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: rgba(11, 10, 8, .78);
+  color: var(--ink);
+  transition: border-color 160ms ease, background-color 160ms ease, transform 120ms var(--ease-out);
+}
+.world-panel-close svg { width: 16px; height: 16px; }
+.world-panel-close:active { transform: scale(.94); }
+.world-panel-close:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) {
+  .world-panel-close:hover { border-color: var(--gold); background: var(--surface-raised); }
+}
+
+/* Panel type: one display face for headings, Inter for reading. */
+.world-panel h2,
+.radio-detail-copy h2,
+.vinyl-detail-copy h2,
+.programmes-detail h2,
+.shop-detail-copy h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2.3rem, 4.2vw, 3.5rem);
+  line-height: 1.02;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.world-panel h3,
+.games-pitch h3,
+.programme-project h3,
+.radio-more-title {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.detail-intro {
+  margin: 20px 0 28px;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 46ch;
+  text-wrap: pretty;
+}
+
+/* Actions: the one thing to do in each panel is solid gold; everything else is a quiet link. */
+.world-link {
+  color: var(--ink-soft);
+  font-size: 13px;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 5px;
+  transition: color 160ms ease, text-decoration-color 160ms ease;
+}
+.world-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) {
+  .world-link:hover { color: var(--ink); text-decoration-color: var(--gold); }
+}
+
+.world-link--primary,
+.radio-play-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  margin: 8px 18px 8px 0;
+  padding: 0 24px;
+  border: 1px solid var(--gold);
+  background: var(--gold);
+  color: #17120a;
+  font-family: var(--font-text);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .01em;
+  text-decoration: none;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, transform 120ms var(--ease-out);
+}
+.world-link--primary:active,
+.radio-play-button:active { transform: scale(.97); }
+.world-link--primary:focus-visible,
+.radio-play-button:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; background: var(--gold-bright); border-color: var(--gold-bright); }
+@media (hover: hover) and (pointer: fine) {
+  .world-link--primary:hover,
+  .radio-play-button:hover { background: var(--gold-bright); border-color: var(--gold-bright); color: #17120a; }
+}
+
+/* ---------- Radio ---------- */
+.radio-detail { grid-template-columns: minmax(280px, 42%) 1fr; min-height: 0; }
+.radio-detail-visual--comic { padding: 40px 32px; background: radial-gradient(ellipse at 50% 55%, #241f16, var(--ground) 68%); }
+.radio-detail-copy { padding: clamp(40px, 5vw, 64px) clamp(28px, 4.5vw, 56px); }
+.radio-now-playing { margin: 0 0 24px; padding: 14px 0 14px 18px; border-left: 1px solid var(--line-strong); }
+.radio-now-label { margin-bottom: 6px; font-size: 13px; letter-spacing: 0; color: var(--gold); }
+.radio-now-playing strong { font-size: 17px; font-weight: 500; color: var(--ink); }
+
+.radio-transport { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; margin: 4px 0 8px; }
+.radio-play-button { min-width: 148px; margin: 0; letter-spacing: .22em; }
+.radio-play-button.is-playing { background: transparent; color: var(--ink); border-color: var(--gold); }
+@media (hover: hover) and (pointer: fine) {
+  .radio-play-button.is-playing:hover { background: var(--surface-raised); color: var(--ink); border-color: var(--gold-bright); }
+}
+.radio-stream-status { margin: 0; font-size: 13px; letter-spacing: 0; color: var(--ink-soft); }
+.radio-volume { margin: 18px 0 6px; font-size: 13px; color: var(--ink-soft); }
+.radio-volume input { accent-color: var(--gold); width: 180px; }
+.radio-privacy-note { margin: 0 0 18px; font-size: 12.5px; color: var(--ink-faint); max-width: 52ch; }
+.radio-privacy-note a { color: var(--ink-soft); }
+a.radio-endpoint-note { margin-top: 14px; font-size: 13px; color: var(--ink-soft); opacity: 1; text-decoration-color: var(--line-strong); text-underline-offset: 5px; }
+.radio-detail-copy .radio-more-title { margin-top: 40px; font-size: 22px; }
+.music-platforms { gap: 2px 20px; }
+.music-platforms .world-link { margin: 6px 0; }
+
+/* ---------- Vinyl ---------- */
+.vinyl-detail { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: stretch; }
+.vinyl-cover { height: 100%; object-fit: cover; }
+.vinyl-detail-copy { padding: clamp(40px, 5vw, 64px) clamp(28px, 4.5vw, 52px); align-self: center; }
+.vinyl-facts { margin: 0 0 30px; padding-left: 18px; color: var(--ink-soft); font-size: 14px; line-height: 1.9; }
+.vinyl-facts li::marker { color: var(--gold); }
+
+/* ---------- Apps & Spiele ---------- */
+.programmes-detail { padding: clamp(40px, 5.5vw, 68px) clamp(24px, 5.5vw, 68px); }
+.programmes-detail > .detail-intro { margin-bottom: 8px; }
+.games-pitch { margin-top: 40px; }
+.games-pitch-video { border-color: var(--line); }
+.programme-project { margin-top: 44px; padding: 32px 0 34px; border-top-color: var(--line); border-bottom-color: var(--line); }
+.programme-project .project-status { margin: 0 0 8px; font-size: 13px; letter-spacing: 0; text-transform: none; color: var(--gold); }
+.programme-project p, .programmes-note { font-size: 15px; line-height: 1.7; color: var(--ink-soft); max-width: 58ch; }
+.programmes-note { color: var(--ink-faint); }
+
+/* ---------- Webshop ---------- */
+.shop-detail { grid-template-columns: 44% 1fr; }
+.shop-detail-visual {
+  min-height: 420px;
+  background:
+    linear-gradient(rgba(11, 10, 8, .55), rgba(11, 10, 8, .72)),
+    url("./assets/deep-structure-radio-background.png") 50% 40% / cover no-repeat var(--surface);
+}
+.shop-detail-visual .shop-sign { max-width: 300px; padding: 26px 24px 20px; }
+.shop-detail-visual .shop-sign-title { font-size: 36px; }
+.shop-detail-copy { padding: clamp(44px, 5vw, 64px) clamp(28px, 4.5vw, 52px); align-self: center; }
+.shop-detail-note { margin: 36px 0 2px; font-size: 14px; color: var(--ink-faint); }
+
+/* ---------- Phone ---------- */
+@media (max-width: 760px) {
+  .world-header h1 span { font-size: 10.5px; }
+  .world-object-label strong { font-size: 22px; }
+  .world-panel-card { width: 100%; max-height: 94vh; max-height: 94dvh; }
+  .radio-detail, .vinyl-detail, .shop-detail { grid-template-columns: 1fr; }
+  .world-panel h2,
+  .radio-detail-copy h2,
+  .vinyl-detail-copy h2,
+  .programmes-detail h2,
+  .shop-detail-copy h2 { font-size: clamp(2.1rem, 9vw, 2.6rem); }
+  .detail-intro { font-size: 16px; }
+  .radio-detail-visual--comic { min-height: 0; padding: 56px 24px 20px; }
+  .radio-detail-copy, .vinyl-detail-copy, .shop-detail-copy { padding: 26px 22px 36px; }
+  .programmes-detail { padding: 64px 22px 36px; }
+  .vinyl-cover { max-width: none; height: auto; }
+  .shop-detail-visual { min-height: 260px; }
+  .world-link--primary { width: 100%; margin-right: 0; }
+  .radio-transport { gap: 10px 16px; }
+}
+
+/* ---------- Reduced motion: keep the fades, drop the travel ---------- */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes ds-surface { from { opacity: 0; } to { opacity: 1; } }
+  .world-panel-card, .world-panel.is-open .world-panel-card { transform: none; }
+  .world-object:active .comic-radio-image,
+  .world-object:active .shop-sign,
+  .world-object:active .programme-terminal,
+  .world-link--primary:active,
+  .radio-play-button:active,
+  .world-panel-close:active { transform: none; }
+}

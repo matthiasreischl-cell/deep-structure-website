@@ -75,8 +75,16 @@ function ringGeometry(ri, ro, h) { // Ringband mit weich gerundetem Querschnitt,
   const geo = new THREE.LatheGeometry(pts, 192); geo.rotateX(Math.PI / 2); geo.computeVertexNormals(); return geo;
 }
 const RINGS = [[240, 224, 0.0], [214, 199, -0.12], [190, 176, -0.24], [167, 153, -0.36]];
-const ringZ = [];
-RINGS.forEach(([ro, ri, z]) => { const m = new THREE.Mesh(ringGeometry(ri * PX, ro * PX, 0.17), ringMat); m.position.z = z; logo.add(m); ringZ.push(z); });
+const ringZ = [], ringMeshes = [];
+RINGS.forEach(([ro, ri, z]) => { const m = new THREE.Mesh(ringGeometry(ri * PX, ro * PX, 0.17), ringMat); m.position.z = z; logo.add(m); ringZ.push(z); ringMeshes.push(m); });
+/* Gyroskop: jeder Ring schwingt um seine eigene Achse, außen weiter als innen.
+   Zeigt man aufs Logo, richten sie sich zum klaren Zeichen aus; beim Eintreten drehen sie hoch. */
+const GYRO = [
+  { axis: 0.35, amp: 0.55, speed: 0.31, phase: 0.0 },
+  { axis: 1.95, amp: 0.46, speed: 0.43, phase: 1.7 },
+  { axis: 3.25, amp: 0.36, speed: 0.37, phase: 3.1 },
+  { axis: 4.70, amp: 0.22, speed: 0.52, phase: 4.4 }
+];
 
 const rIn = 151 * PX, discZ = -0.5;
 const wall = new THREE.Mesh(new THREE.CylinderGeometry(rIn, rIn, 0.16, 160, 1, true), darkMat);
@@ -276,23 +284,39 @@ addEventListener('pointerdown', e => {
   if (w && !ptr.onLogo) addRipple(w.x, w.z, 1.2);
 }, { passive: true });
 
-/* Klick aufs Logo: es taucht kurz ein, große Welle, mehr Licht */
+/* Klick aufs Logo: die Ringe drehen hoch, das Logo taucht ins Wasser,
+   und die Wellen laufen hinter "The World you get in." aus. */
 const body = { y: 0, v: 0, flash: 0 };
-button.addEventListener('click', () => { body.v -= 0.9; body.flash = 1; addRipple(0, 0.2, 2.2); setTimeout(() => addRipple(0, 0.2, 1.4), 380); });
+const dive = { active: false, start: 0 };
+button.addEventListener('click', () => {
+  body.flash = 1;
+  addRipple(0, 0.2, 2.2);
+  if (reduced) return;
+  dive.active = true; dive.start = clock.t;
+  // Schriftzug und CSS-Welle dorthin setzen, wo das Logo ins Wasser taucht
+  const spot = new THREE.Vector3(0, 0, 0.2).project(camera);
+  document.documentElement.style.setProperty('--ds-dive-y', ((1 - spot.y) / 2 * innerHeight).toFixed(0) + 'px');
+  [[0.55, 2.6], [0.95, 2.0], [1.45, 1.6], [2.0, 1.2]].forEach(([at, strength]) =>
+    setTimeout(() => addRipple(0, 0.2, strength), at * 1000));
+});
 
 /* ---------- Animation ---------- */
-let rx = 0, ry = 0, prox = 0, frameId = 0, last = performance.now();
+let rx = 0, ry = 0, prox = 0, align = 0, frameId = 0, last = performance.now();
 function frame(now) {
   frameId = 0;
   if (document.hidden || document.body.classList.contains('entered')) return;
   const dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = Math.max(last, now); clock.t += reduced ? 0 : dt;
   const t = clock.t;
 
-  // Schwimmen: Feder + Wellengang
-  const target = reduced ? 0 : Math.sin(t * 0.8) * 0.045 + Math.sin(t * 1.37 + 1.1) * 0.02;
+  // Schweben: Feder + Wellengang (etwas mehr Hub, damit es sichtbar über dem Wasser lebt)
+  const target = reduced ? 0 : Math.sin(t * 0.8) * 0.085 + Math.sin(t * 1.37 + 1.1) * 0.03;
   body.v += (-(body.y - target) * 9 - body.v * 2.6) * dt; body.y += body.v * dt;
   body.flash *= Math.exp(-dt * 1.6);
-  logo.position.y = baseY + body.y;
+  // Eintauchen: kurz anheben, dann ruhig durch die Oberfläche sinken (das Wasser verdeckt es)
+  const dt0 = dive.active ? t - dive.start : 0;
+  const lift = dive.active ? Math.sin(Math.min(1, dt0 / 0.45) * Math.PI) * 0.18 : 0;
+  const sink = dive.active ? easeInOut(clamp((dt0 - 0.3) / 1.5, 0, 1)) * (R * 2.6) : 0;
+  logo.position.y = baseY + body.y + lift - sink;
   logo.rotation.z = reduced ? 0 : Math.sin(t * 0.63) * 0.022 + Math.sin(t * 1.11) * 0.008;
 
   // Neigung zur Maus (auf Touch nur Schwimmen)
@@ -306,16 +330,30 @@ function frame(now) {
   tilt.rotation.set(rx, ry, 0);
   tilt.position.set(0, 0, 0);
 
+  // Ringe: Gyroskop-Schwingung, beim Zeigen ausgerichtet, beim Eintreten hochgedreht
+  align += ((prox > 0.55 ? 1 : 0) - align) * Math.min(1, dt * 2.2);
+  const spin = dive.active ? Math.pow(clamp(dt0 / 1.6, 0, 1), 2) * 7 : 0;
+  ringMeshes.forEach((m, i) => {
+    const g = GYRO[i];
+    if (reduced) { m.rotation.set(0, 0, 0); return; }
+    if (dive.active) g.spun = (g.spun || 0) + spin * (1 - i * 0.12) * dt;
+    const a = g.amp * (1 - align * 0.92) * Math.sin(t * g.speed + g.phase) + (g.spun || 0);
+    m.rotation.set(Math.cos(g.axis) * a, Math.sin(g.axis) * a, 0);
+  });
+  const settled = 1 - (1 - align) * 0.55;
+
   // Licht und Wasserkontakt
   const shine = 1 + prox * 0.35 + body.flash * 0.8;
   beam.material.opacity = 0.5 * shine; topSpot.material.opacity = 0.7 * shine; flare.material.opacity = 0.8 * shine; flareCore.material.opacity = 0.85 * shine;
   halo.material.opacity = 0.09 + prox * 0.05 + body.flash * 0.12;
   bowlMat.emissiveIntensity = 0.7 + prox * 0.2 + body.flash * 0.6;
-  ringSpots.forEach((s, i) => s.material.opacity = 0.45 * shine * (1 - i * 0.12));
+  ringSpots.forEach((s, i) => s.material.opacity = 0.45 * shine * settled * (1 - i * 0.12));
   waterUniforms.uTime.value = t;
   waterUniforms.uContact.value = 0.35 + Math.min(1.5, Math.abs(body.v) * 6) + prox * 0.4;
-  waterUniforms.uGlow.value = 1 + prox * 0.5 + body.flash;
-  waterUniforms.uLightPos.value.set(0, logo.position.y + 1.3, 1.5);
+  // Nach dem Eintauchen leuchtet es von unten weiter, das Licht bleibt über der Oberfläche
+  const underGlow = dive.active ? clamp((dt0 - 0.6) / 0.8, 0, 1) * 1.6 : 0;
+  waterUniforms.uGlow.value = 1 + prox * 0.5 + body.flash + underGlow;
+  waterUniforms.uLightPos.value.set(0, Math.max(logo.position.y, baseY) + 1.3, 1.5);
 
   scene.updateMatrixWorld();
   renderReflection();
@@ -323,7 +361,8 @@ function frame(now) {
   if (!reduced) frameId = requestAnimationFrame(frame);
 }
 function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+function easeInOut(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
 addEventListener('visibilitychange', () => { if (!document.hidden && !frameId && !document.body.classList.contains('entered')) { last = performance.now(); frameId = requestAnimationFrame(frame); } });
-addEventListener('hashchange', () => { if (location.hash !== '#inside' && !frameId) { last = performance.now(); frameId = requestAnimationFrame(frame); } });
+addEventListener('hashchange', () => { if (location.hash !== '#inside') { dive.active = false; GYRO.forEach(g => { g.spun = 0; }); } if (location.hash !== '#inside' && !frameId) { last = performance.now(); frameId = requestAnimationFrame(frame); } });
 frameId = requestAnimationFrame(frame);
 window.__dsLanding3D = { addRipple, fit };

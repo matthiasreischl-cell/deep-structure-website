@@ -661,3 +661,75 @@ Bedienung (Browser-Test): Anwenden = ein Rückgängig-Schritt, Bericht mit Gesan
 | Bass-Mono (`mcp/bassmono-test.mjs`) | bestanden |
 
 Grenzen: Die Gesangserkennung ist eine Schätzung. Ein Solo-Instrument mit vielen Obertönen in der Mitte (z. B. ein Lead-Synth) kann als Gesang gelten; die Wirkung bleibt dann auf 5–10 kHz in der Mitte begrenzt und ist bei 25 % kaum hörbar. Ob die Stimme „runder“ klingt, entscheidet das Ohr: Vorher/Nachher nutzen und leise anfangen.
+
+## 31. Nachtrag 1.15.0: MIDI Control, Sicherheitsprüfung Website (28.10.2026)
+
+**MIDI Control** – Browser-Test „midiControl“ mit nachgebautem Web-MIDI-Gerät (Name „Numark Testgerät“). Kein echter Controller verfügbar.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Zugriff verweigert (NotAllowedError) | Status „Zugriff verweigert“, Hinweis zum Erlauben, Studio läuft weiter |
+| Browser ohne Web MIDI | „nicht verfügbar“ |
+| eingeschaltet ohne Gerät | Hinweis „Kein MIDI-Gerät gefunden“ (inkl. Serato-Hinweis) |
+| Controller erkannt | Name, Hersteller, „verbunden“; nur Eingang angemeldet |
+| MIDI-Learn | Drehregler → absolut, Jogwheel (1/127) → relativ, Pad (Note) → Taste, Crossfader, Abhörpegel, Frequenz |
+| Soft-Takeover | Regler bei 0 (Wert in der Mitte): keine Änderung; nach Abholen 0…127 = −15…+15 dB; nach Mausänderung erneutes Abholen |
+| EQ-Bank | Low auf Band 1 umgestellt: Band 1 reagiert, Band 2 unverändert |
+| Frequenz | logarithmisch: CC 64 → 650 Hz, CC 127 → 20 kHz |
+| Grenzen | alle 50 stetigen Funktionen an beiden Enden und in der Mitte gültig; SysEx, Clock, Active Sensing, Program Change, unvollständige Bytes ignoriert; Einstellungen danach gültig (`validateSettings`) |
+| Relativer Encoder | 300 Schritte hoch / 2000 runter: Limiter-Drive bleibt bei +24 / −6 dB |
+| Jogwheel schnell | 900 Nachrichten beim Abspielen: 3 Neustarts der Wiedergabe, Position plausibel vorgerückt, Wiedergabe läuft |
+| Gerät abgezogen / wieder eingesteckt | „getrennt“, Wiedergabe läuft weiter / automatisch wieder angemeldet, Regler wirken |
+| Maus + Tastatur + MIDI | Eingabefeld, Taste M und Pad A/B nacheinander wirksam |
+| Crossfader | 50 % → „Crossfade 50 % Master“, Original hörbar beigemischt; Klick auf Master beendet ihn |
+| Export mit Crossfader 50 % und Abhörpegel −30 dB | bitgenau gleich dem Export ohne (WAV 24 Bit, 4 233 644 Bytes) |
+| Profil nach Neustart | aus dem Gerätespeicher geladen, 7 Zuordnungen |
+| Import eines manipulierten Profils | unbekannte Funktion „constructor“, Kanal 99, Code-Felder verworfen; Name ohne `<>` |
+
+**Web MIDI unter `file://`:** In der Testumgebung (Chromium 141, Linux ohne MIDI-Hardware) lehnt Chromium `requestMIDIAccess` sowohl unter `file://` als auch unter `http://localhost` ab, auch mit erteilter Berechtigung. `isSecureContext` ist unter `file://` wahr. Das Ergebnis ist hier nicht aussagekräftig; der Test unter Edge am Windows-PC ist **offen**.
+
+**Regression ohne MIDI** – echter Song „3. DEIN ABER“, Export WAV 24 Bit über die App, unabhängig gemessen mit FFmpeg (`ebur128`):
+
+| Fassung | Preset „Streaming klar“ | Preset „Laut & druckvoll“ | Preset „Neutral“ |
+|---|---|---|---|
+| 1.14.0 | −17,7 LUFS, −1,0 dBFS Spitze, LRA 6,3 | −19,3 LUFS, −4,3 dBFS, LRA 5,0 | |
+| 1.15.0, MIDI aus | −17,7 / −1,0 / 6,3 | −19,3 / −4,3 / 5,0 | bitgleich zu 1.14.0 |
+| 1.15.0, MIDI an, Crossfader 30 %, Abhörpegel −20 dB | −17,7 / −1,0 / 6,3 | −19,3 / −4,3 / 5,0 | |
+
+Mit Kompressor ist der Export schon in 1.14.0 von Lauf zu Lauf nicht bitgleich (höchstens 32 LSB bei 24 Bit, etwa −108 dBFS; zwei Läufe derselben Fassung unterscheiden sich gleich stark, ein Lauf von 1.14.0 war sogar bitgleich mit einem Lauf von 1.15.0 mit MIDI). Ohne Kompressor (Neutral) sind alle Fassungen bitgleich.
+
+**Sicherheit**
+
+| Prüfung | Ergebnis |
+|---|---|
+| CSP Website-Fassung: `fetch` und `<script>` zu fremdem Server | blockiert (`connect-src`, `script-src-elem`) |
+| CSP: Export MP3/OGG/WAV, Wiedergabe mit AudioWorklet | keine Verstöße |
+| Abschalt-Service-Worker (Branch `studio-produktseite`) | Besucher mit Studio-Cache 1.14.0: nach dem nächsten Besuch 0 Service Worker, 0 Caches, Produktseite ohne Skript |
+| Produktseite | keine Skripte, kein Service Worker, kein waagrechtes Scrollen bei 390 px |
+| `tools/beta-accesscheck.sh` | offene Adresse → abgelehnt; Umleitung zu `*.cloudflareaccess.com` → bestätigt; unbekannte Adresse → abgelehnt |
+| Geheimnisse in der Historie beider Repositories | keine gefunden |
+| MCP-Server (`mcp/test.mjs`) | 66 bestanden |
+| `npm audit --omit=dev --audit-level=high` (CI) | keine hohen oder kritischen Lücken |
+
+| Testreihe | Ergebnis |
+|---|---|
+| DSP (`tests/dsp.test.mjs`) | 89 bestanden |
+| Browser (`tests/run-browser-tests.py`) | 167 bestanden (neu: 21 MIDI, 2 CSP), PC-Fassung bestanden |
+| Album-Werkzeug | bestanden |
+| MCP-Server | 66 bestanden |
+| Bass-Mono | bestanden |
+
+**Offen:** Test mit dem echten Numark-Controller am Windows-PC (Modell noch nicht ermittelt), Web MIDI unter `file://` in Edge, Einrichtung und Abnahme der geschützten Beta (braucht das Cloudflare-Konto des Betreibers).
+
+## 32. Nachtrag 1.16.0: Zwei Spuren (Master und Original) (30.10.2026)
+
+| Prüfung | Ergebnis |
+|---|---|
+| Messung mit Hüllkurve (`tests/dsp.test.mjs`) | Lautheit und True Peak identisch zur Messung ohne Hüllkurve; Hüllkurve entspricht Min/Max nach dem Limiter (Abweichung < 10⁻⁷) |
+| Hüllkurve im Studio (Browser-Test) | gleiche Länge wie der Song, Spitze −8,0 dBFS unter der Decke −1 dB |
+| Quellen der Spuren | oben Master aus der Messung, unten die unveränderte geladene Datei |
+| Klick in die untere / obere Spur | Abhören wechselt auf Original / Master |
+| Nach einer Einstellungsänderung | Master-Spur zeigt „wird aktualisiert“ bis zur neuen Messung |
+| Echter Song „3. DEIN ABER“ (Preset „Laut & druckvoll“), Desktop 1500 px und Handy 390 px | beide Spuren lesbar, Hüllkurve 9 964 800 Samples = Songlänge, Klick unten → Original, oben → Master, keine Fehler |
+| Browser-Tests gesamt | 171 bestanden, PC-Fassung bestanden |
+| DSP-Tests | 90 bestanden |

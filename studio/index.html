@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; worker-src 'self' blob: data:; connect-src 'self' https://api.anthropic.com blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; media-src 'self' blob: data:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#0D0F13">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -127,7 +129,7 @@ button.toggle[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
 .editor{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 #overview{display:block;width:100%;height:34px;cursor:pointer;touch-action:none;border-bottom:1px solid var(--line)}
 .wavewrap{position:relative}
-#wave{display:block;width:100%;height:220px;cursor:text;touch-action:none}
+#wave{display:block;width:100%;height:290px;cursor:text;touch-action:none}
 .drophint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(13,15,19,.82);border:2px dashed var(--accent);color:var(--accent);font:600 18px var(--f-display);letter-spacing:.12em;text-transform:uppercase;pointer-events:none}
 .edbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 10px;border-top:1px solid var(--line)}
 .selinfo{font:500 12px var(--f-mono);color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
@@ -216,6 +218,15 @@ table.metrics td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 .modal{position:fixed;inset:0;background:rgba(5,6,8,.72);display:flex;align-items:center;justify-content:center;z-index:30;padding:16px}
 .modal .box{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(560px,100%);max-height:calc(100% - 20px);overflow:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
 .modal .box h2{font-size:20px}
+.midibtn{display:inline-flex;align-items:center;gap:6px}.midibtn:not(.live) .midiact{opacity:.35}
+.midiact{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2a3440;box-shadow:inset 0 0 0 1px var(--line);flex:none}.midiact.on{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.modal .box.midibox{width:min(780px,100%)}.midihead h2{margin:2px 0 0}.midistat{align-items:center;gap:8px}.midistat b[data-state=on]{color:var(--ok)}.midistat b[data-state=denied]{color:var(--hot)}
+.midisec{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:10px}.midisec h3{margin:0;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+.mididevs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}.mididevs li{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.mididevs .pill[data-on="1"]{color:var(--ok)}.mididevs .pill[data-on="0"]{color:var(--hot)}
+.midisec .row{flex-wrap:wrap;gap:8px;align-items:center}.midisec select{min-width:0;max-width:100%}#midiTarget{flex:1 1 260px}#midiProf{flex:1 1 160px}#midiProfName{flex:1 1 160px;min-width:0}
+.midibank label{display:inline-flex;align-items:center;gap:4px}
+.miditable{overflow-x:auto}.miditable table{width:100%;border-collapse:collapse;font-size:13px}.miditable th{text-align:left;font-weight:600;color:var(--muted);padding:4px 6px}.miditable td{padding:4px 6px;border-top:1px solid var(--line);vertical-align:middle}.miditable td:first-child{min-width:170px;font-size:11px}.miditable td:nth-child(2){min-width:150px}.miditable select{font-size:12px}
+.midilog{max-height:150px;overflow:auto;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:6px 8px;white-space:pre;color:var(--muted)}
 .opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .assist.mystyle[data-n]:not([data-n="0"])::after{content:attr(data-n);margin-left:6px;font:600 11px var(--f-mono);opacity:.75}
 .stylesug{background:var(--field);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
@@ -289,7 +300,7 @@ a.btn{text-decoration:none}
   .meters .lufs,.meters .mtitle{grid-column:1/-1}
 }
 @media (max-width:640px){
-  #wave{height:170px}
+  #wave{height:230px}
   .grid2,.grid3,.opts{grid-template-columns:minmax(0,1fr)}
   .bands{grid-template-columns:repeat(2,minmax(0,1fr))}
   .meters{grid-template-columns:minmax(0,1fr)}
@@ -335,7 +346,7 @@ a.btn{text-decoration:none}
 <div class="app" id="app">
   <div class="backdrop" aria-hidden="true"></div>
   <header class="top">
-    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.14.0</span></small></div></div>
+    <div class="brand"><img class="emblem" src="data:image/webp;base64,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" alt="" width="42" height="42"><div><b>DEEP STRUCTURE</b><small>Mastering Studio <span class="ver">1.16.0</span></small></div></div>
     <div class="filebox">
       <button class="primary" id="btnOpen" title="Audiodatei öffnen (WAV, MP3, FLAC, M4A)">Song öffnen</button>
       <input type="file" id="fileIn" accept="audio/*,.wav,.mp3,.flac,.m4a,.aac,.ogg" hidden>
@@ -351,6 +362,7 @@ a.btn{text-decoration:none}
       <button id="btnLoadSet" title="Gesicherte Einstellungen laden">Laden</button>
       <input type="file" id="setIn" accept=".json,application/json" hidden>
       <button class="ghost" id="btnGuide" title="Anleitung als PDF herunterladen: alle Funktionen und die Bedienung, Schritt für Schritt mit Bildern">Anleitung</button>
+      <button class="ghost midibtn" id="btnMidi" title="Einstellungen → MIDI-Controller: DJ- oder MIDI-Controller anschließen und Regler belegen"><span class="midiact" aria-hidden="true"></span>MIDI</button>
       <button class="ghost" id="btnFeedback" title="Rückmeldung an Deep Structure schicken">Feedback</button>
       <button class="primary" id="btnExport">Exportieren</button>
     </div>
@@ -791,6 +803,28 @@ a.btn{text-decoration:none}
     </div>
   </div>
 
+  <div class="modal" id="midiModal" hidden>
+    <div class="box midibox" role="dialog" aria-modal="true" aria-labelledby="midiTitle">
+      <div class="midihead"><span class="eyebrow">Einstellungen</span><h2 id="midiTitle">MIDI-Controller</h2></div>
+      <div class="row midistat"><span class="midiact" aria-hidden="true"></span><span>Status:</span> <b id="midiState" data-state="off">aus</b><span class="spacer"></span><button class="primary" id="midiOn">MIDI einschalten</button></div>
+      <p class="hint" id="midiHint"></p>
+      <div class="midisec"><h3>Geräte</h3><ul class="mididevs" id="midiDevs"></ul></div>
+      <div class="midisec"><h3>Profil</h3>
+        <div class="row"><select id="midiProf" aria-label="Controller-Profil" data-noi18n></select><input type="text" id="midiProfName" placeholder="Name für neues Profil" aria-label="Name für neues Profil" maxlength="60"><button id="midiProfNew">Neu</button><button id="midiProfCopy">Kopie</button></div>
+        <div class="row"><button id="midiExport" title="Profil als Datei sichern, z. B. für einen anderen Rechner">Exportieren</button><button id="midiImport" title="Profil aus einer Datei laden">Importieren</button><button class="ghost" id="midiProfReset" title="Alle Zuordnungen dieses Profils löschen">Zurücksetzen</button><button class="ghost" id="midiProfDel">Profil löschen</button><input type="file" id="midiIn" accept=".json,application/json" hidden></div>
+      </div>
+      <div class="midisec"><h3>MIDI-Learn</h3>
+        <div class="row"><select id="midiTarget" aria-label="Studio-Funktion"></select><button class="primary" id="midiLearn" disabled>MIDI-Learn</button></div>
+        <p class="hint" id="midiLearnInfo" aria-live="polite"></p>
+        <div class="row midibank"><span class="small">EQ-Bank für drei EQ-Drehregler:</span>
+          <label class="small">Low <select id="midiBank_low" aria-label="EQ-Bank Low"></select></label><label class="small">Mid <select id="midiBank_mid" aria-label="EQ-Bank Mid"></select></label><label class="small">High <select id="midiBank_high" aria-label="EQ-Bank High"></select></label></div>
+      </div>
+      <div class="midisec"><h3>Zuordnungen</h3><div class="miditable"><table><thead><tr><th>Steuerung</th><th>Studio-Funktion</th><th>Art</th><th></th><th></th></tr></thead><tbody id="midiMaps"></tbody></table></div></div>
+      <div class="midisec"><h3>Monitor</h3><div class="midilog mono small" id="midiLog" aria-live="off"></div></div>
+      <p class="hint">Der Crossfader und der Abhörpegel wirken nur auf das, was du hörst, nie auf den Export. Absolute Regler übernehmen erst, wenn sie den aktuellen Wert erreichen (kein Sprung). Maus und Tastatur funktionieren weiter wie gewohnt.</p>
+      <div class="row" style="justify-content:flex-end"><button id="midiClose">Schließen</button></div>
+    </div>
+  </div>
   <div class="modal" id="styleModal" hidden>
     <div class="box" role="dialog" aria-modal="true" aria-labelledby="styleTitle">
       <h2 id="styleTitle">Mein Stil</h2>
@@ -1814,6 +1848,10 @@ function handle(d){
   res.dur=L.length/sr; res.sr=sr;
   if(o.encode){ res.wav=encodeWav(L,R,sr,o.encode); tr.push(res.wav); }
   if(o.returnAudio){ res.L=L; res.R=R; tr.push(L.buffer,R.buffer); }
+  // Hüllkurve für die Master-Spur der Wellenform: Minimum/Maximum je o.peaks Samples (beide Kanäle), nach dem Limiter
+  if(o.peaks){ var pbk=Math.max(16,o.peaks|0),nbk=Math.ceil(L.length/pbk),pmn=new Float32Array(nbk),pmx=new Float32Array(nbk),bk,lo2,hi2,e2;
+    for(bk=0;bk<nbk;bk++){ lo2=1; hi2=-1; e2=Math.min(L.length,(bk+1)*pbk); for(i=bk*pbk;i<e2;i++){ var l2=L[i],r2=R[i]; if(l2<lo2)lo2=l2; if(l2>hi2)hi2=l2; if(r2<lo2)lo2=r2; if(r2>hi2)hi2=r2; } pmn[bk]=lo2; pmx[bk]=hi2; }
+    res.peaks={mn:pmn,mx:pmx,n:L.length,pb:pbk}; tr.push(pmn.buffer,pmx.buffer); }
   return {result:res,transfer:tr};
 }
 `;
@@ -2113,14 +2151,15 @@ async function setupGraph() {
 /* Die Audio-Module kamen verspätet: Abhörkette mit AudioWorklet neu aufbauen (vorher lief der stotteranfälligere Ersatz) */
 function upgradeGraph(ctx) {
   const was = S.playing ? curPos() : null; stopPlayback(true);
-  try { S.out.disconnect(); S.sink.disconnect(); } catch (e) {}
+  try { S.out.disconnect(); S.sink.disconnect(); if (S.vol) S.vol.disconnect(); } catch (e) {}
   S.workletOK = true; buildGraph(ctx); S.abuf = null;
   if (was != null) play(was);
 }
 function buildGraph(ctx) {
   S.chain = buildChain(ctx, P, { realtime: true, worklet: S.workletOK });
   const G = () => ctx.createGain();
-  S.out = G(); S.out.connect(ctx.destination);
+  /* Abhörpegel (S.vol, z. B. vom MIDI-Fader) liegt ganz am Ende der Abhörkette. Export und Messung laufen über eigene Offline-Ketten und sind davon nie betroffen. */
+  S.out = G(); S.vol = G(); S.vol.gain.value = S.monVolDb != null && S.monVolDb > -60 ? db2g(S.monVolDb) : (S.monVolDb != null ? 0 : 1); S.out.connect(S.vol); S.vol.connect(ctx.destination);
   S.srcIn = G(); S.refIn = G(); S.wet = G(); S.dry = G(); S.refG = G(); S.mWet = G(); S.mDry = G(); S.mRef = G();
   const mbus = G(), sink = G(); sink.gain.value = 0; sink.connect(ctx.destination); S.sink = sink;
   /* „Original“ = die geladene Datei, auch nach Bearbeitungen (Drum-Reparatur, Glätter, Fades …), solange die Länge gleich ist.
@@ -2154,13 +2193,16 @@ function applyMonitor(instant) {
   if (!S.ctx || !S.wet) return;
   const t = S.ctx.currentTime, m = S.mode;
   const set = (g, v) => { if (instant) g.gain.value = v; else g.gain.setTargetAtTime(v, t, 0.012); };
-  set(S.wet, m === 'master' ? levelFor('master') : 0); set(S.dry, m === 'orig' ? levelFor('orig') : 0); set(S.refG, m === 'ref' ? levelFor('ref') : 0);
-  set(S.mWet, m === 'master' ? 1 : 0); set(S.mDry, m === 'orig' ? 1 : 0); set(S.mRef, m === 'ref' ? 1 : 0);
-  const lab = $('#monLabel'); lab.textContent = { master: 'Master', orig: !origEdited() ? 'Original' : origAligned() ? 'Original-Datei' : 'Ohne Mastering', ref: 'Referenz' }[m];
+  /* Crossfader (MIDI): stufenlos Original ↔ Master, leistungsgleich (cos/sin), Pegelangleich bleibt erhalten. Nur Abhören. */
+  const xf = S.xfade != null && m !== 'ref' ? clamp(S.xfade, 0, 1) : null, wM = xf == null ? (m === 'master' ? 1 : 0) : Math.sin(xf * Math.PI / 2), wO = xf == null ? (m === 'orig' ? 1 : 0) : Math.cos(xf * Math.PI / 2);
+  set(S.wet, wM * levelFor('master')); set(S.dry, wO * levelFor('orig')); set(S.refG, m === 'ref' ? levelFor('ref') : 0);
+  set(S.mWet, wM); set(S.mDry, wO); set(S.mRef, m === 'ref' ? 1 : 0);
+  const lab = $('#monLabel'); lab.textContent = xf != null && xf > 0.001 && xf < 0.999 ? 'Crossfade ' + Math.round(xf * 100) + ' % Master' : { master: 'Master', orig: !origEdited() ? 'Original' : origAligned() ? 'Original-Datei' : 'Ohne Mastering', ref: 'Referenz' }[xf == null ? m : xf >= 0.999 ? 'master' : 'orig'];
   lab.title = m === 'orig' && origEdited() ? (origAligned() ? 'Die geladene Datei ohne deine Bearbeitungen und ohne Mastering' : 'Nach Schnitten läuft die Datei nicht mehr zeitgleich mit. Zu hören ist der geschnittene Stand ohne Mastering.') : ''; lab.className = 'monlabel ' + (m === 'master' ? '' : m);
   $$('.seg [data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m ? 'true' : 'false'));
+  if (typeof requestWaveDraw === 'function') requestWaveDraw();
 }
-function setMode(m) { if (m === 'ref' && !S.ref) { status('Zuerst im Reiter „Referenz“ einen Referenz-Track laden.'); showTab('ref'); return; } S.mode = m; applyMonitor(); resetLive(); }
+function setMode(m) { if (m === 'ref' && !S.ref) { status('Zuerst im Reiter „Referenz“ einen Referenz-Track laden.'); showTab('ref'); return; } S.mode = m; S.xfade = null; applyMonitor(); resetLive(); }
 
 function trackToBuffer(t) { const b = S.ctx.createBuffer(2, t.L.length, t.sr); b.copyToChannel(t.L, 0); b.copyToChannel(t.R, 1); return b; }
 function origEdited() { return !!(S.file && S.track && S.file.L !== S.track.L); }
@@ -2384,48 +2426,89 @@ const RULER = 20;
 function t2x(t, w) { const { a, b } = S.view; return (t - a) / (b - a) * w; }
 function x2t(x, w) { const { a, b } = S.view; return a + x / w * (b - a); }
 function niceStep(span, px) { const steps = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120]; for (const s of steps) if (s / span * px >= 74) return s; return 300; }
+/* Zwei Spuren: oben MASTER (Klang nach der ganzen Mastering-Kette, aus der letzten Messung), unten ORIGINAL (die geladene
+   Datei, bleibt immer gleich). Gemeinsame Zeitachse, Auswahl und Cursor. Die gerade hörbare Spur ist hervorgehoben;
+   ein Klick in eine Spur schaltet das Abhören auf sie um (wie die Knöpfe Master/Original bzw. M und O). */
+let waveRaf = 0;
+function requestWaveDraw() { if (waveRaf || !S.track) return; waveRaf = requestAnimationFrame(() => { waveRaf = 0; drawWave(); }); }
+function filePeaks() {
+  const f = S.file; if (!f) return null;
+  if (S.filePeaks && S.filePeaks.src === f.L) return S.filePeaks;
+  const n = f.L.length, nb = Math.ceil(n / PB), mn = new Float32Array(nb), mx = new Float32Array(nb);
+  for (let b = 0; b < nb; b++) { let lo = 1, hi = -1; const e = Math.min(n, (b + 1) * PB);
+    for (let i = b * PB; i < e; i++) { const l = f.L[i], r = f.R[i]; if (l < lo) lo = l; if (l > hi) hi = l; if (r < lo) lo = r; if (r > hi) hi = r; } mn[b] = lo; mx[b] = hi; }
+  return (S.filePeaks = { src: f.L, mn, mx });
+}
+/* Quellen der beiden Spuren. Master: Hüllkurve der letzten Messung, solange die Länge passt (sonst die Bearbeitung ohne Mastering). */
+function waveSources() {
+  const n = S.track.L.length, m = S.master, mp = m && m.peaks && m.peaks.n === n && m.peaks.pb === PB ? m.peaks : null;
+  const master = mp ? { peaks: mp, label: 'Master', note: m.stale || S.measuring ? 'wird aktualisiert …' : null, I: m.I }
+    : { peaks: S.peaks, L: S.track.L, R: S.track.R, label: 'Master', note: 'wird berechnet …', I: null };
+  let orig;
+  if (origAligned()) { const fp = filePeaks(); orig = { peaks: fp, L: S.file.L, R: S.file.R, label: 'Original', I: S.file.meas ? S.file.meas.I : null }; }
+  else orig = { peaks: S.peaks, L: S.track.L, R: S.track.R, label: origEdited() ? 'Ohne Mastering' : 'Original', I: S.orig ? S.orig.I : null };
+  return { master, orig };
+}
+function laneMinMax(src, s0, s1) {
+  const pk = src.peaks, n = pk.mn.length * PB; s0 = Math.max(0, s0); s1 = Math.min(s1, n);
+  let lo = 0, hi = 0, first = true;
+  if (!src.L || s1 - s0 > PB * 2) { const b0 = Math.floor(s0 / PB), b1 = Math.max(b0 + 1, Math.floor(s1 / PB));
+    for (let b = b0; b < b1 && b < pk.mn.length; b++) { const x = pk.mn[b], y = pk.mx[b]; if (first) { lo = x; hi = y; first = false; } else { if (x < lo) lo = x; if (y > hi) hi = y; } } }
+  else for (let i = s0; i < s1; i++) { const l = src.L[i], r = src.R[i], x = Math.min(l, r), y = Math.max(l, r); if (first) { lo = x; hi = y; first = false; } else { if (x < lo) lo = x; if (y > hi) hi = y; } }
+  return [lo, hi];
+}
+/* Anteil, mit dem jede Spur gerade zu hören ist (Crossfader eingeschlossen) */
+function laneWeights() {
+  if (S.mode === 'ref') return { master: 0, orig: 0 };
+  if (S.xfade != null) return { master: Math.sin(S.xfade * Math.PI / 2), orig: Math.cos(S.xfade * Math.PI / 2) };
+  return { master: S.mode === 'master' ? 1 : 0, orig: S.mode === 'orig' ? 1 : 0 };
+}
+const LANE_GAP = 4;
+function waveLanes(h) { const H = h - RULER - LANE_GAP, h1 = Math.floor(H / 2); return [{ kind: 'master', y: RULER, h: h1 }, { kind: 'orig', y: RULER + h1 + LANE_GAP, h: H - h1 }]; }
 function drawWave() {
   const cv = $('#wave'), { g, w, h } = fitCanvas(cv);
   g.fillStyle = '#060B0F'; g.fillRect(0, 0, w, h);
   g.fillStyle = '#09121A'; g.fillRect(0, 0, w, RULER);
   if (!S.track) return;
-  const { a, b } = S.view, span = b - a, sr = S.track.sr, H = h - RULER, mid = RULER + H / 2;
+  const { a, b } = S.view, span = b - a, sr = S.track.sr, H = h - RULER;
   // Raster + Zeitachse
   const st = niceStep(span, w); g.font = '500 10px JetBrains Mono, monospace'; g.textBaseline = 'middle';
   for (let t = Math.ceil(a / st) * st; t <= b; t += st) { const x = Math.round(t2x(t, w)) + 0.5;
     g.fillStyle = '#1b212a'; g.fillRect(x, RULER, 1, H); g.fillStyle = '#3b4350'; g.fillRect(x, RULER - 6, 1, 6);
     g.fillStyle = '#8E949E'; g.fillText(fmtTime(t, st < 0.01 ? 3 : st < 1 ? 2 : 0), x + 4, RULER / 2); }
   g.fillStyle = '#2A313C'; g.fillRect(0, RULER - 1, w, 1);
-  // −6 dB-Linien
-  g.fillStyle = '#171d25'; g.fillRect(0, Math.round(mid - H / 4), w, 1); g.fillRect(0, Math.round(mid + H / 4), w, 1);
-  // Auswahl
+  // Auswahl (über beide Spuren)
   if (S.sel) { const x0 = t2x(S.sel.a, w), x1 = t2x(S.sel.b, w);
     g.fillStyle = 'rgba(217,164,65,.13)'; g.fillRect(x0, RULER, x1 - x0, H);
     g.fillStyle = '#D9A441'; g.fillRect(Math.round(x0), RULER, 1, H); g.fillRect(Math.round(x1), RULER, 1, H);
     g.fillRect(x0, RULER - 3, x1 - x0, 3); }
   drawArtMarks(g, w, t => t2x(t, w), RULER, 4); drawGameMarks(g, w, t => t2x(t, w), RULER, 4); drawDrumMarks(g, w, t => t2x(t, w), RULER, 4); drawAlbumMarks(g, w, t => t2x(t, w), RULER, 4);
-  // Wellenform
-  const spp = span * sr / w;
-  if (spp < 2) {
-    const s0 = Math.max(0, Math.floor(a * sr) - 1), s1 = Math.min(S.track.L.length, Math.ceil(b * sr) + 1);
-    [[S.track.L, '#7FA6BF'], [S.track.R, 'rgba(127,166,191,.55)']].forEach(([ch, col]) => {
-      g.strokeStyle = col; g.lineWidth = 1.2; g.beginPath();
-      for (let i = s0; i < s1; i++) { const x = t2x(i / sr, w), y = mid - ch[i] * H / 2 * 0.96; i === s0 ? g.moveTo(x, y) : g.lineTo(x, y); }
-      g.stroke();
-      if (spp < 0.25) { g.fillStyle = col; for (let i = s0; i < s1; i++) { const x = t2x(i / sr, w), y = mid - ch[i] * H / 2 * 0.96; g.fillRect(x - 1.5, y - 1.5, 3, 3); } }
-    });
-  } else {
-    const selA = S.sel ? t2x(S.sel.a, w) : -1, selB = S.sel ? t2x(S.sel.b, w) : -1;
-    for (let x = 0; x < w; x++) {
-      const s0 = Math.floor((a + x / w * span) * sr), s1 = Math.floor((a + (x + 1) / w * span) * sr);
-      if (s1 <= 0 || s0 >= S.track.L.length) continue;
-      const [lo, hi] = rangeMinMax(s0, Math.max(s1, s0 + 1));
-      const y0 = mid - hi * H / 2 * 0.96, y1 = mid - lo * H / 2 * 0.96;
-      g.fillStyle = (x >= selA && x <= selB) ? '#F1E3C4' : '#7FA6BF';
-      g.fillRect(x, y0, 1, Math.max(1, y1 - y0));
+  const src = waveSources(), wt = laneWeights(), spp = span * sr / w, selA = S.sel ? t2x(S.sel.a, w) : -1, selB = S.sel ? t2x(S.sel.b, w) : -1;
+  waveLanes(h).forEach(ln => {
+    const s = src[ln.kind], on = wt[ln.kind], mid = ln.y + ln.h / 2, amp = ln.h / 2 * 0.94, col = ln.kind === 'master' ? '127,166,191' : '150,140,124';
+    const alpha = s.note && ln.kind === 'master' ? 0.4 : 0.35 + 0.65 * on;
+    if (on > 0.5) { g.fillStyle = ln.kind === 'master' ? 'rgba(154,223,255,.05)' : 'rgba(217,196,150,.05)'; g.fillRect(0, ln.y, w, ln.h); }
+    g.fillStyle = '#171d25'; g.fillRect(0, Math.round(mid - ln.h / 4), w, 1); g.fillRect(0, Math.round(mid + ln.h / 4), w, 1);
+    if (ln.kind === 'orig') { g.fillStyle = '#1E2731'; g.fillRect(0, ln.y - LANE_GAP, w, LANE_GAP); }
+    if (spp < 2 && s.L) {
+      const s0 = Math.max(0, Math.floor(a * sr) - 1), s1 = Math.min(s.L.length, Math.ceil(b * sr) + 1);
+      [[s.L, alpha], [s.R, alpha * 0.55]].forEach(([ch, al]) => { g.strokeStyle = 'rgba(' + col + ',' + al + ')'; g.lineWidth = 1.2; g.beginPath();
+        for (let i = s0; i < s1; i++) { const x = t2x(i / sr, w), y = mid - ch[i] * amp; i === s0 ? g.moveTo(x, y) : g.lineTo(x, y); } g.stroke(); });
+    } else {
+      for (let x = 0; x < w; x++) {
+        const s0 = Math.floor((a + x / w * span) * sr), s1 = Math.floor((a + (x + 1) / w * span) * sr);
+        if (s1 <= 0 || s0 >= S.track.L.length) continue;
+        const [lo, hi] = laneMinMax(s, s0, Math.max(s1, s0 + 1)), y0 = mid - Math.min(1, hi) * amp, y1 = mid - Math.max(-1, lo) * amp;
+        g.fillStyle = (x >= selA && x <= selB) ? 'rgba(241,227,196,' + alpha + ')' : 'rgba(' + col + ',' + alpha + ')';
+        g.fillRect(x, y0, 1, Math.max(1, y1 - y0)); }
     }
-  }
-  g.fillStyle = '#2b3440'; g.fillRect(0, Math.round(mid), w, 1);
+    g.fillStyle = '#2b3440'; g.fillRect(0, Math.round(mid), w, 1);
+    // Beschriftung der Spur
+    const lab = (on > 0.5 ? '▶ ' : '') + s.label.toUpperCase() + (s.I != null && isFinite(s.I) ? '  ' + nf(s.I, 1) + ' LUFS' : '') + (s.note ? '  · ' + s.note : '');
+    g.font = '600 10px JetBrains Mono, monospace'; g.textBaseline = 'top';
+    const tw = g.measureText(lab).width; g.fillStyle = 'rgba(6,11,15,.78)'; g.fillRect(4, ln.y + 3, tw + 10, 15);
+    g.fillStyle = on > 0.5 ? (ln.kind === 'master' ? '#9ADFFF' : '#E3CFA3') : '#8E949E'; g.fillText(lab, 9, ln.y + 6);
+  });
   // Cursor + Abspielkopf
   const cx = t2x(S.cursor, w);
   if (cx >= 0 && cx <= w) { g.fillStyle = 'rgba(232,228,218,.55)'; for (let y = RULER; y < h; y += 6) g.fillRect(Math.round(cx), y, 1, 3); }
@@ -2504,7 +2587,7 @@ function updateEditButtons() {
     if (pinch) { if (ptrs.size < 2) pinch = null; drag = null; return; }
     if (drag) { const p = pos(e), t = clamp(x2t(p.x, p.w), 0, duration());
       if (drag.kind === 'ruler') seek(t);
-      else if (drag.kind === 'new' && !drag.moved) { S.sel = null; seek(t); }
+      else if (drag.kind === 'new' && !drag.moved) { S.sel = null; seek(t); const ln = waveLanes(cv.clientHeight).find(l => p.y >= l.y && p.y < l.y + l.h + LANE_GAP); if (ln && ln.kind !== S.mode) setMode(ln.kind); }
       else if (S.sel && S.sel.b - S.sel.a < 0.003) S.sel = null;
       else if (S.sel && !S.playing) { S.cursor = S.sel.a; }
       if (S.playing && S.loop) play(curPos());
@@ -3390,7 +3473,7 @@ function feedbackText() {
   const lines = ['Feedback zum Deep Structure Mastering Studio', '', 'Bewertung: ' + (FB.stars ? '★'.repeat(FB.stars) + '☆'.repeat(5 - FB.stars) + ' (' + FB.stars + '/5)' : 'keine'),
     'Name: ' + ($('#fbName').value.trim() || '–'), 'Musik: ' + ($('#fbGenre').value.trim() || '–'), '', 'Was gefällt:', $('#fbGood').value.trim() || '–', '', 'Was stört / fehlt / unklar:', $('#fbBad').value.trim() || '–'];
   if ($('#fbTech').checked) {
-    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.14.0 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal') + ' · Audio-Modul: ' + (S.workletOK ? 'AudioWorklet' : 'Ersatz'));
+    lines.push('', '--- Technische Daten (automatisch) ---', 'Gerät: ' + navigator.userAgent, 'Version: 1.16.0 · ' + (window.claude ? 'Claude' : location.hostname || 'lokal') + ' · Audio-Modul: ' + (S.workletOK ? 'AudioWorklet' : 'Ersatz'));
     if (S.track && !S.track.demo) lines.push('Song: ' + S.track.name + ' · ' + (S.track.sr / 1000) + ' kHz · ' + fmtTime(duration(), 0));
     if (CHECK) lines.push('Song-Check: ' + CHECK.score + '/100 · ' + CHECK.findings.map(f => f.title).join(' | '));
     if (S.arts) lines.push('Artefakte: ' + S.arts.regions.length + ' Stellen, ' + S.arts.clicks.length + ' Knackser, Höhen bis ' + (S.arts.cutoff || '?') + ' Hz');
@@ -4708,6 +4791,417 @@ function drawAlbumMarks(g, w, map, y, h) {
   setInterval(() => { if (curTab() === 'album' && ALB.open) { const d = $('#albDirty'); if (d) d.hidden = !albDirty(); } }, 1000);
   albLoadList().then(async () => { const last = recall('albumLast'); if (last && ALB.list.some(p => p.id === last)) await albSelect(last); albRender(); });
 })();
+/* ============================ MIDI Control: Hardware-Regler (DJ-Controller, MIDI-Controller) ============================
+   Aufbau (getrennt, damit jeder Teil für sich prüfbar ist):
+   1. Geräte      – Web MIDI: Zugriff nur nach Klick, ohne SysEx; nur Eingänge, an Geräte wird nie etwas gesendet.
+   2. Nachrichten – roh → {Gerät, Kanal, Typ, Nummer, Wert}; CC, Note On/Off, Pitch Bend, 14-Bit-CC; Rest wird ignoriert.
+   3. Zuordnung   – Profile mit Zuordnungen (Gerät + Nachricht → Studio-Funktion), MIDI-Learn, Soft-Takeover, relative Encoder.
+   4. Steuerung   – feste Liste erlaubter Studio-Funktionen (MIDI_TARGETS). Jede schreibt in P bzw. ruft die vorhandenen
+                    Bedienfunktionen (play, pause, seek, setMode …). Änderungen werden pro Bildschirmbild gesammelt und
+                    einmal über onParam() übernommen – derselbe Weg wie Maus und Tastatur.
+   5. Oberfläche  – Dialog „Einstellungen → MIDI-Controller“.
+   Ohne MIDI (nicht eingeschaltet, kein Gerät, Browser ohne Web MIDI) verändert dieses Modul nichts am Klang. */
+
+/* ---------- 4. Studio-Funktionen ---------- */
+const MIDI_BANK_DEF = { low: 1, mid: 3, high: 6 }; // Standard-EQ-Bank: Bass-Shelf (Band 2), Mitten (Band 4), Höhen-Shelf (Band 7), 0-basiert
+const MIDI_LIM = { maxMaps: 512, maxProfiles: 40, maxName: 60 };
+const midiNum = (v, a, b, d) => (typeof v === 'number' && Number.isFinite(v)) ? clamp(v, a, b) : d;
+const MIDI_TARGETS = (() => {
+  const T = [], add = t => { T.push(t); return t; };
+  const gp = path => { let o = P; for (const k of path) o = o[k]; return o; };
+  // stetiger Parameter in P: Pfad, Grenzen (wie die Regler der Oberfläche), logarithmisch für Frequenzen
+  const cont = (id, group, label, path, min, max, o = {}) => add({ id, group, label, kind: 'cont', min, max, log: !!o.log, step: o.step || 0, param: true,
+    get: () => gp(path.slice(0, -1))[path[path.length - 1]], set: v => { gp(path.slice(0, -1))[path[path.length - 1]] = v; }, fmt: o.fmt || (v => nf(v, 1)), on: o.on });
+  const flag = (id, group, label, get, set, o = {}) => add({ id, group, label, kind: 'toggle', param: o.param !== false, get, set });
+  const trig = (id, group, label, run) => add({ id, group, label, kind: 'trig', run });
+  const fdb = v => sf(v, 1) + ' dB', fhz = v => fmtHz(v) + 'Hz', fms = v => Math.round(v) + ' ms', fpc = v => Math.round(v) + ' %';
+  // Transport
+  trig('play', 'Transport', 'Wiedergabe starten', () => { if (!S.playing) play(); });
+  trig('pause', 'Transport', 'Wiedergabe pausieren', () => pause());
+  trig('playpause', 'Transport', 'Play / Pause umschalten', () => togglePlay());
+  trig('stop', 'Transport', 'Stopp (zurück zum Startpunkt)', () => stopToStart());
+  trig('fwd', 'Transport', '5 Sekunden vor', () => midiSeekBy(5));
+  trig('back', 'Transport', '5 Sekunden zurück', () => midiSeekBy(-5));
+  add({ id: 'jog', group: 'Transport', label: 'Jogwheel: im Song bewegen', kind: 'jog' });
+  trig('cueSet', 'Transport', 'Cue-Marke setzen (aktuelle Stelle)', () => { MIDI.cue = curPos(); status('Cue-Marke bei ' + fmtTime(MIDI.cue, 2) + '.', 'ok', 2500); });
+  trig('cueGo', 'Transport', 'Zur Cue-Marke springen', () => { const t = MIDI.cue != null ? MIDI.cue : S.playStart; midiSeekTo(t); });
+  trig('loop', 'Transport', 'Schleife ein/aus', () => $('#btnLoop').click());
+  // Abhören (nur Monitoring, nie der Export)
+  trig('modeMaster', 'Abhören', 'Master hören', () => setMode('master'));
+  trig('modeOrig', 'Abhören', 'Original hören', () => setMode('orig'));
+  trig('ab', 'Abhören', 'A/B: Original ↔ Master', () => setMode(S.mode === 'master' ? 'orig' : 'master'));
+  trig('modeRef', 'Abhören', 'Referenz hören', () => setMode('ref'));
+  flag('match', 'Abhören', 'Pegelgleich ein/aus', () => S.match, v => { S.match = v; $('#chkMatch').checked = v; applyMonitor(); }, { param: false });
+  add({ id: 'xfade', group: 'Abhören', label: 'Crossfader Original ↔ Master', kind: 'cont', min: 0, max: 100, monitor: true,
+    get: () => S.xfade == null ? (S.mode === 'orig' ? 0 : 100) : S.xfade * 100, set: v => { S.xfade = clamp(v, 0, 100) / 100; if (S.mode === 'ref') S.mode = 'master'; applyMonitor(); }, fmt: v => Math.round(v) + ' % Master' });
+  add({ id: 'monVol', group: 'Abhören', label: 'Abhörpegel', kind: 'cont', min: -60, max: 0, monitor: true,
+    get: () => S.monVolDb, set: v => midiSetVol(v), fmt: v => v <= -60 ? 'stumm' : nf(v, 1) + ' dB' });
+  // Equalizer
+  flag('eqOn', 'Equalizer', 'Equalizer ein/aus (Bypass)', () => P.eq.on, v => { P.eq.on = v; });
+  ['low', 'mid', 'high'].forEach((k, j) => add({ id: 'eqBank_' + k, group: 'Equalizer', label: 'EQ-Bank ' + ['Low', 'Mid', 'High'][j] + ': Pegel', kind: 'cont', min: -15, max: 15, step: 0.1, param: true, bank: k,
+    get: () => P.eq.bands[MIDI.bankBand(k)].g, set: v => { P.eq.bands[MIDI.bankBand(k)].g = v; }, fmt: fdb }));
+  add({ id: 'eqSel_g', group: 'Equalizer', label: 'Gewähltes Band: Pegel', kind: 'cont', min: -15, max: 15, step: 0.1, param: true, get: () => P.eq.bands[S.selBand].g, set: v => { P.eq.bands[S.selBand].g = v; }, fmt: fdb });
+  add({ id: 'eqSel_f', group: 'Equalizer', label: 'Gewähltes Band: Frequenz', kind: 'cont', min: 20, max: 20000, log: true, param: true, get: () => P.eq.bands[S.selBand].f, set: v => { P.eq.bands[S.selBand].f = Math.round(v); }, fmt: fhz });
+  add({ id: 'eqSel_q', group: 'Equalizer', label: 'Gewähltes Band: Q (Bandbreite)', kind: 'cont', min: 0.1, max: 10, log: true, param: true, get: () => P.eq.bands[S.selBand].q, set: v => { P.eq.bands[S.selBand].q = Math.round(v * 100) / 100; }, fmt: v => 'Q ' + v.toFixed(2) });
+  trig('eqSelNext', 'Equalizer', 'Nächstes Band wählen', () => { S.selBand = (S.selBand + 1) % 8; refreshBands(); drawEqSoon(); status('EQ-Band ' + (S.selBand + 1) + ' gewählt.', '', 1500); });
+  trig('eqSelPrev', 'Equalizer', 'Vorheriges Band wählen', () => { S.selBand = (S.selBand + 7) % 8; refreshBands(); drawEqSoon(); status('EQ-Band ' + (S.selBand + 1) + ' gewählt.', '', 1500); });
+  for (let i = 0; i < 8; i++) {
+    const g = 'EQ-Band ' + (i + 1);
+    cont('eq' + i + '_g', g, 'Band ' + (i + 1) + ': Pegel', ['eq', 'bands', i, 'g'], -15, 15, { step: 0.1, fmt: fdb });
+    cont('eq' + i + '_f', g, 'Band ' + (i + 1) + ': Frequenz', ['eq', 'bands', i, 'f'], 20, 20000, { log: true, fmt: fhz });
+    cont('eq' + i + '_q', g, 'Band ' + (i + 1) + ': Q (Bandbreite)', ['eq', 'bands', i, 'q'], 0.1, 10, { log: true, fmt: v => 'Q ' + v.toFixed(2) });
+    flag('eq' + i + '_on', g, 'Band ' + (i + 1) + ' ein/aus', () => P.eq.bands[i].on, v => { P.eq.bands[i].on = v; });
+  }
+  // Dynamik
+  flag('compOn', 'Dynamik', 'Kompressor ein/aus (Bypass)', () => P.comp.on, v => { P.comp.on = v; });
+  ['Bass', 'Mitten', 'Höhen'].forEach((n, i) => {
+    const g = 'Dynamik ' + n;
+    cont('c' + i + '_th', g, n + ': Schwelle (Threshold)', ['comp', 'bands', i, 'th'], -48, 0, { step: 0.5, fmt: v => nf(v, 1) + ' dB' });
+    cont('c' + i + '_ratio', g, n + ': Ratio', ['comp', 'bands', i, 'ratio'], 1, 8, { step: 0.1, fmt: v => v.toFixed(1) + ':1' });
+    cont('c' + i + '_att', g, n + ': Attack', ['comp', 'bands', i, 'att'], 1, 150, { step: 1, log: true, fmt: fms });
+    cont('c' + i + '_rel', g, n + ': Release', ['comp', 'bands', i, 'rel'], 20, 1000, { step: 5, log: true, fmt: fms });
+    cont('c' + i + '_gain', g, n + ': Pegel (Make-up)', ['comp', 'bands', i, 'gain'], -6, 6, { step: 0.1, fmt: fdb });
+  });
+  // Sättigung, Stereo, Limiter
+  flag('satOn', 'Sättigung', 'Sättigung ein/aus', () => P.sat.on, v => { P.sat.on = v; });
+  cont('satDrive', 'Sättigung', 'Sättigung: Drive', ['sat', 'drive'], 0, 100, { step: 1, fmt: fpc });
+  cont('satMix', 'Sättigung', 'Sättigung: Mischung', ['sat', 'mix'], 0, 100, { step: 1, fmt: fpc });
+  flag('stOn', 'Stereo', 'Stereo-Modul ein/aus', () => P.stereo.on, v => { P.stereo.on = v; });
+  cont('stWidth', 'Stereo', 'Stereobreite', ['stereo', 'width'], 0, 200, { step: 1, fmt: fpc });
+  flag('stBassMono', 'Stereo', 'Bass-Mono ein/aus', () => P.stereo.bassMono, v => { P.stereo.bassMono = v; });
+  cont('stMonoF', 'Stereo', 'Bass-Mono: Grenze', ['stereo', 'monoFreq'], 40, 300, { log: true, fmt: fhz });
+  flag('limOn', 'Limiter', 'Limiter ein/aus', () => P.lim.on, v => { P.lim.on = v; });
+  cont('limDrive', 'Limiter', 'Limiter: Drive', ['lim', 'drive'], -6, 24, { step: 0.1, fmt: fdb });
+  cont('limCeil', 'Limiter', 'Limiter: Decke', ['lim', 'ceiling'], -6, 0, { step: 0.1, fmt: v => nf(v, 1) + ' dB' });
+  cont('limRel', 'Limiter', 'Limiter: Release', ['lim', 'release'], 10, 600, { step: 5, log: true, fmt: fms });
+  // Mastering
+  add({ id: 'target', group: 'Mastering', label: 'Lautheitsziel (LUFS)', kind: 'cont', min: -30, max: -5, step: 1, ui: true,
+    get: () => +$('#targetSel').value, set: v => { setTargetValue(Math.round(v)); $('#targetSel').dispatchEvent(new Event('change')); }, fmt: v => Math.round(v) + ' LUFS' });
+  trig('toTarget', 'Mastering', 'Auf Lautheitsziel bringen', () => $('#btnToTarget').click());
+  trig('assist', 'Mastering', 'Assistent (Startpunkt vorschlagen)', () => $('#btnAssist').click());
+  Object.entries(PRESETS).forEach(([k, v]) => trig('preset_' + k, 'Presets', 'Preset: ' + v.name, () => { const s = $('#presetSel'); s.value = k; s.dispatchEvent(new Event('change')); s.value = ''; }));
+  return T;
+})();
+const MIDI_T = Object.assign(Object.create(null), Object.fromEntries(MIDI_TARGETS.map(t => [t.id, t]))); // ohne Prototyp: „constructor“ o. Ä. ist keine Funktion
+/* Umrechnung Hardware (0…1) ↔ Parameter; logarithmisch für Frequenz, Q und Zeiten, gerastert auf die Schrittweite der Regler */
+function midiFromNorm(t, n) {
+  n = clamp(n, 0, 1); let v = t.log ? t.min * Math.pow(t.max / t.min, n) : t.min + (t.max - t.min) * n;
+  if (t.step) v = Math.round(v / t.step) * t.step; v = clamp(v, t.min, t.max);
+  return Number.isFinite(v) ? Math.round(v * 1e6) / 1e6 : t.min;
+}
+function midiToNorm(t, v) { v = Number(v); if (!Number.isFinite(v)) return 0; v = clamp(v, t.min, t.max); return t.log ? Math.log(v / t.min) / Math.log(t.max / t.min) : (v - t.min) / (t.max - t.min); }
+
+/* Abhörpegel: eigener Verstärker hinter der ganzen Abhörkette (S.vol, siehe buildGraph); betrifft nie den Export */
+function midiSetVol(db) { db = clamp(Number.isFinite(db) ? db : 0, -60, 0); S.monVolDb = db; if (S.vol && S.ctx) S.vol.gain.setTargetAtTime(db <= -60 ? 0 : db2g(db), S.ctx.currentTime, 0.02); store('midiVol', db); }
+/* Springen ohne Knacksen: kurz ausblenden, neu starten, einblenden. Beim Jogwheel höchstens alle 120 ms ein Neustart. */
+function midiSeekTo(t) {
+  t = clamp(Number.isFinite(t) ? t : 0, 0, duration());
+  if (!S.playing || !S.ctx || !S.out) { seek(t); if (typeof drawAll === 'function') drawAll(); return; }
+  const g = S.out.gain, now = S.ctx.currentTime; g.cancelScheduledValues(now); g.setTargetAtTime(0, now, 0.003);
+  setTimeout(() => { if (S.playing) play(t); else seek(t); const n2 = S.ctx.currentTime; g.cancelScheduledValues(n2); g.setValueAtTime(0, n2); g.setTargetAtTime(1, n2 + 0.04, 0.006); }, 15);
+}
+function midiSeekBy(d) { midiSeekTo(curPos() + d); }
+
+/* ---------- 2. Nachrichten ---------- */
+/* Rohdaten → Ereignis. Nur Kanal-Nachrichten; System-, SysEx-, Clock- und Active-Sensing-Bytes werden ignoriert. */
+function midiParse(data) {
+  if (!data || data.length < 2) return null; const st = data[0];
+  if (!(st >= 0x80 && st <= 0xEF)) return null;
+  const ty = st & 0xF0, ch = st & 0x0F, d1 = data[1] & 0x7F, d2 = data.length > 2 ? data[2] & 0x7F : 0;
+  if (ty === 0xB0) return { type: 'cc', ch, num: d1, val: d2 };
+  if (ty === 0x90) return d2 > 0 ? { type: 'note', ch, num: d1, val: d2, on: true } : { type: 'note', ch, num: d1, val: 0, on: false };
+  if (ty === 0x80) return { type: 'note', ch, num: d1, val: 0, on: false };
+  if (ty === 0xE0) return { type: 'pb', ch, num: 0, val: (d2 << 7) | d1 };
+  return null; // Program Change, Aftertouch: nicht belegt
+}
+/* relative Encoder: Wert → Schritte (+ rechts, − links) */
+function midiRelDelta(mode, v) {
+  if (mode === 'rel2c') return v === 0 ? 0 : v < 64 ? v : v - 128;          // 1…63 = +, 65…127 = −(128−v)  (z. B. Numark-Jogwheels)
+  if (mode === 'relbin') return v - 64;                                      // 64 = 0, 65 = +1, 63 = −1
+  if (mode === 'relsign') return (v & 64) ? -(v & 63) : (v & 63);            // Bit 6 = Vorzeichen
+  return 0;
+}
+const MIDI_MODES = { abs: 'Absolut (Fader, Drehregler)', rel2c: 'Relativ (1 / 127)', relbin: 'Relativ (64 ± n)', relsign: 'Relativ (Vorzeichen-Bit)', btn: 'Taste' };
+
+/* ---------- 3. Zuordnung, Profile ---------- */
+const MIDI = {
+  state: 'off', access: null, inputs: new Map(), useDev: {}, learn: null, cue: null, log: [], lastAct: 0, pend: new Map(), pendJog: 0, jogT: 0, raf: 0,
+  profiles: {}, active: 'Standard', pickup: {}, lastSet: {}, hiMsb: {}, btnState: {},
+  prof() { return this.profiles[this.active]; },
+  bankBand(k) { const b = this.prof() && this.prof().bank; const i = b && Number.isInteger(b[k]) ? b[k] : MIDI_BANK_DEF[k]; return clamp(i, 0, 7); },
+};
+S.xfade = null; S.monVolDb = (() => { const v = recall('midiVol'); return typeof v === 'number' && Number.isFinite(v) ? clamp(v, -60, 0) : 0; })();
+function midiEmptyProfile(name) { return { name, bank: { ...MIDI_BANK_DEF }, maps: [] }; }
+/* Profil prüfen: nur bekannte Funktionen, Zahlen in ihren Grenzen, kurze Texte. Unbekanntes wird verworfen, nie ausgeführt. */
+function midiValidProfile(p, name) {
+  if (!p || typeof p !== 'object' || Array.isArray(p)) throw new Error('Profil ist kein Objekt');
+  const str = (v, d) => typeof v === 'string' ? v.replace(/[\u0000-\u001f<>]/g, '').slice(0, MIDI_LIM.maxName) : d;
+  const out = midiEmptyProfile(str(name != null ? name : p.name, 'Profil') || 'Profil');
+  if (p.bank && typeof p.bank === 'object') ['low', 'mid', 'high'].forEach(k => { const v = p.bank[k]; if (Number.isInteger(v) && v >= 0 && v <= 7) out.bank[k] = v; });
+  if (p.maps !== undefined && !Array.isArray(p.maps)) throw new Error('Zuordnungen fehlen');
+  (p.maps || []).slice(0, MIDI_LIM.maxMaps).forEach(m => {
+    if (!m || typeof m !== 'object' || !MIDI_T[m.target]) return;
+    if (!['cc', 'note', 'pb'].includes(m.type) || !Number.isInteger(m.ch) || m.ch < 0 || m.ch > 15 || !Number.isInteger(m.num) || m.num < 0 || m.num > 127) return;
+    const mode = Object.prototype.hasOwnProperty.call(MIDI_MODES, m.mode) ? m.mode : 'abs';
+    out.maps.push({ dev: str(m.dev, ''), type: m.type, ch: m.ch, num: m.num, mode, hi: m.hi === true && m.type === 'cc' && m.num < 32, inv: m.inv === true, target: m.target });
+  });
+  return out;
+}
+function midiSave() { const o = {}; Object.entries(MIDI.profiles).slice(0, MIDI_LIM.maxProfiles).forEach(([k, v]) => { o[k] = v; }); store('midiProfiles', { active: MIDI.active, profiles: o, useDev: MIDI.useDev }); }
+function midiLoad() {
+  const s = recall('midiProfiles'); MIDI.profiles = {}; MIDI.useDev = {}; MIDI.active = 'Standard';
+  try { if (s && s.profiles && typeof s.profiles === 'object') Object.entries(s.profiles).slice(0, MIDI_LIM.maxProfiles).forEach(([k, v]) => { try { const p = midiValidProfile(v, k); MIDI.profiles[p.name] = p; } catch (e) {} });
+    if (s && s.useDev && typeof s.useDev === 'object') Object.entries(s.useDev).forEach(([k, v]) => { if (typeof v === 'boolean') MIDI.useDev[String(k).slice(0, 120)] = v; });
+    if (s && typeof s.active === 'string' && MIDI.profiles[s.active]) MIDI.active = s.active; } catch (e) {}
+  if (!Object.keys(MIDI.profiles).length) MIDI.profiles.Standard = midiEmptyProfile('Standard');
+  if (!MIDI.profiles[MIDI.active]) MIDI.active = Object.keys(MIDI.profiles)[0];
+}
+midiLoad();
+const midiKey = (m, dev) => (dev || '') + '|' + m.type + '|' + m.ch + '|' + m.num;
+function midiFind(dev, ev) { const P0 = MIDI.prof(); return P0 ? P0.maps.filter(m => m.type === ev.type && m.ch === ev.ch && m.num === ev.num && (!m.dev || m.dev === dev)) : []; }
+
+/* ---------- 1. Geräte ---------- */
+function midiSupported() { return typeof navigator !== 'undefined' && typeof navigator.requestMIDIAccess === 'function'; }
+async function midiEnable(fromUser) {
+  if (MIDI.access) { midiScan(); return true; }
+  if (!midiSupported()) { MIDI.state = 'unsupported'; midiRender(); return false; }
+  MIDI.state = 'asking'; midiRender();
+  try { const acc = await navigator.requestMIDIAccess({ sysex: false }); midiAttach(acc); store('midiOn', true); return true; }
+  catch (e) { MIDI.state = 'denied'; MIDI.err = (e && e.name) || 'Fehler'; if (fromUser) store('midiOn', false); midiRender(); return false; }
+}
+/* Zugriff übernehmen (echtes MIDIAccess oder im Test ein nachgebautes Objekt mit derselben Form) */
+function midiAttach(acc) {
+  MIDI.access = acc; MIDI.state = 'on';
+  acc.onstatechange = () => midiScan();
+  midiScan();
+}
+function midiDisable() {
+  MIDI.inputs.forEach(inp => { try { inp.onmidimessage = null; } catch (e) {} });
+  MIDI.inputs.clear(); if (MIDI.access) MIDI.access.onstatechange = null; MIDI.access = null; MIDI.state = 'off'; MIDI.learn = null; store('midiOn', false); midiRender();
+}
+/* Eingänge (neu) verbinden: nach Ein-/Ausstecken liefert Web MIDI denselben Port wieder, er wird automatisch angemeldet. */
+function midiScan() {
+  if (!MIDI.access) return; const seen = new Set();
+  MIDI.access.inputs.forEach(inp => {
+    seen.add(inp.id); const use = MIDI.useDev[inp.name] !== false, live = inp.state !== 'disconnected';
+    if (use && live) { if (inp.onmidimessage !== midiOnMsg) inp.onmidimessage = midiOnMsg; }
+    else if (inp.onmidimessage === midiOnMsg) inp.onmidimessage = null;
+    MIDI.inputs.set(inp.id, inp);
+  });
+  [...MIDI.inputs.keys()].forEach(id => { if (!seen.has(id)) MIDI.inputs.delete(id); });
+  midiRender();
+}
+function midiOnMsg(e) {
+  const inp = e.currentTarget || e.target || {}, dev = String(inp.name || 'MIDI').slice(0, 120), ev = midiParse(e.data);
+  MIDI.lastAct = performance.now(); midiLog(dev, e.data, ev); if (!ev) return;
+  // 14-Bit-CC: MSB (0–31) merken, LSB (32–63) verfeinert den letzten MSB-Wert
+  if (ev.type === 'cc' && ev.num >= 32 && ev.num < 64) { const k = dev + '|' + ev.ch + '|' + (ev.num - 32), msb = MIDI.hiMsb[k];
+    if (msb != null && midiFind(dev, { type: 'cc', ch: ev.ch, num: ev.num - 32 }).some(m => m.hi)) { midiHandle(dev, { type: 'cc', ch: ev.ch, num: ev.num - 32, val: msb, lsb: ev.val, hi: true }); return; } }
+  if (ev.type === 'cc' && ev.num < 32) MIDI.hiMsb[dev + '|' + ev.ch + '|' + ev.num] = ev.val;
+  if (MIDI.learn) { midiLearnFeed(dev, ev); return; }
+  midiHandle(dev, ev);
+}
+function midiHandle(dev, ev) { midiFind(dev, ev).forEach(m => midiApply(m, ev)); }
+/* Eine Nachricht auf eine Funktion anwenden */
+function midiApply(m, ev) {
+  const t = MIDI_T[m.target]; if (!t) return;
+  const key = midiKey(m, m.dev), mode = m.mode;
+  // Tasten: Note On, oder CC/Pitch über der Mitte; ausgelöst nur beim Drücken (Flanke)
+  const pressed = ev.type === 'note' ? ev.on : ev.val >= 64;
+  if (t.kind === 'trig' || t.kind === 'toggle' || mode === 'btn') {
+    // Flanke: Note On, oder CC/Pitch Bend steigt über die Mitte. Sendet ein Gerät nur „127“ ohne „0“, zählt es nach 250 ms wieder als neuer Druck.
+    const now = performance.now(), was = MIDI.btnState[key] || { p: false, t: 0 }; MIDI.btnState[key] = { p: pressed, t: pressed ? now : was.t };
+    if (!pressed || (ev.type !== 'note' && was.p && now - was.t < 250)) return;
+    if (t.kind === 'trig') { try { t.run(); } catch (e) { console.warn('MIDI', t.id, e); } return; }
+    if (t.kind === 'toggle') { midiQueue(t, !t.get()); return; }
+    if (t.kind === 'cont') { const cur = midiToNorm(t, t.get()); midiQueue(t, midiFromNorm(t, cur > 0.5 ? 0 : 1)); return; } // Taste auf stetigem Regler: Anfang ↔ Ende
+    return;
+  }
+  if (t.kind === 'jog') { const d = mode === 'abs' ? 0 : midiRelDelta(mode, ev.val) * (m.inv ? -1 : 1); if (d) midiJog(d); return; }
+  if (t.kind !== 'cont') return;
+  if (mode === 'abs') {
+    let n = ev.type === 'pb' ? ev.val / 16383 : ev.hi ? ((ev.val << 7) | ev.lsb) / 16383 : ev.val / 127; if (m.inv) n = 1 - n;
+    // Soft-Takeover: ein absoluter Regler übernimmt erst, wenn er den aktuellen Wert erreicht oder überquert – keine Sprünge
+    // Wurde der Wert inzwischen woanders geändert (Maus, Preset, Assistent, anderes Band gewählt), muss der Regler ihn erst wieder „abholen“.
+    const cur = midiToNorm(t, midiCurVal(t)), pk = MIDI.pickup[key], last = MIDI.lastSet[t.id];
+    const elsewhere = last == null || (!MIDI.pend.has(t.id) && Math.abs(midiToNorm(t, t.get()) - midiToNorm(t, last)) > 1e-6);
+    if (!pk || !pk.live || elsewhere) {
+      const prev = pk ? pk.n : null, near = Math.abs(n - cur) <= 0.025, crossed = prev != null && (prev - cur) * (n - cur) <= 0;
+      if (!(near || crossed)) { MIDI.pickup[key] = { n, live: false }; midiPickupHint(t, n, cur); return; }
+    }
+    MIDI.pickup[key] = { n, live: true }; midiQueue(t, midiFromNorm(t, n));
+    return;
+  }
+  // relativer Encoder: Schritt = 1/200 des Bereichs je Rasterpunkt (bei Frequenzen logarithmisch)
+  const d = midiRelDelta(mode, ev.val) * (m.inv ? -1 : 1); if (!d) return;
+  const n = midiToNorm(t, midiCurVal(t)) + d / 200; midiQueue(t, midiFromNorm(t, n));
+}
+const midiCurVal = t => MIDI.pend.has(t.id) ? MIDI.pend.get(t.id) : t.get();
+let midiHintT = 0;
+function midiPickupHint(t, n, cur) { const now = performance.now(); if (now - midiHintT < 600) return; midiHintT = now;
+  status('MIDI: ' + t.label + ' – Regler ' + (n < cur ? 'nach oben' : 'nach unten') + ' bis zum aktuellen Wert (' + t.fmt(midiFromNorm(t, cur)) + ') bewegen, dann übernimmt er.', '', 2200); }
+/* Änderungen sammeln und einmal pro Bild übernehmen (begrenzte Rate, keine Arbeit pro Einzelnachricht) */
+function midiQueue(t, v) { if (typeof v === 'number' && !Number.isFinite(v)) return; MIDI.pend.set(t.id, v); midiSchedule(); }
+function midiSchedule() { if (MIDI.raf) return; const run = () => { MIDI.raf = 0; midiFlush(); };
+  MIDI.raf = (typeof requestAnimationFrame === 'function' && document.visibilityState !== 'hidden') ? requestAnimationFrame(run) : setTimeout(run, 16); }
+function midiFlush() {
+  let param = false, ui = false;
+  MIDI.pend.forEach((v, id) => { const t = MIDI_T[id]; if (!t) return;
+    try { t.set(v); MIDI.lastSet[id] = t.get(); if (t.param) param = true; else ui = true; } catch (e) { console.warn('MIDI', id, e); } });
+  MIDI.pend.clear();
+  if (param) { CTLS.forEach(c => c.refresh()); refreshBands(); onParam(); }
+  else if (ui) updateDots();
+  if (MIDI.pendJog) midiJogFlush();
+  midiRenderMaps(true);
+}
+/* Jogwheel: angehalten → nur Cursor bewegen (sofort, kein Ton); beim Abspielen gesammelt, höchstens alle 120 ms neu ansetzen */
+function midiJog(d) {
+  const sec = clamp(d, -40, 40) * (S.playing ? 0.05 : 0.02);
+  if (!S.playing) { S.cursor = clamp(S.cursor + sec, 0, duration()); updateTransport(); if (typeof drawAll === 'function') drawAll(); return; }
+  MIDI.pendJog += sec; midiSchedule();
+}
+function midiJogFlush() { const now = performance.now(); if (now - MIDI.jogT < 120) { midiSchedule(); return; }
+  const d = MIDI.pendJog; MIDI.pendJog = 0; MIDI.jogT = now; midiSeekTo(curPos() + d); }
+
+/* MIDI-Learn: Funktion wählen → Lernen → Regler bewegen. Erkennt absolute Regler, relative Encoder und Tasten selbst. */
+function midiLearnStart(targetId) {
+  const t = MIDI_T[targetId]; if (!t) return;
+  if (!MIDI.access) { status('Bitte zuerst MIDI einschalten.', 'warn'); return; }
+  MIDI.learn = { target: targetId, seen: [], t0: 0 }; midiRender();
+}
+function midiLearnFeed(dev, ev) {
+  const L = MIDI.learn; if (!L) return;
+  if (ev.type === 'note' && !ev.on) return;
+  const first = L.seen[0]; if (first && (first.dev !== dev || first.ev.type !== ev.type || first.ev.ch !== ev.ch || first.ev.num !== ev.num)) return; // nur die erste Steuerung zählt
+  L.seen.push({ dev, ev }); if (!L.t0) L.t0 = performance.now();
+  if (ev.type === 'note' || L.seen.length >= 6) midiLearnFinish(); else { clearTimeout(L.timer); L.timer = setTimeout(midiLearnFinish, 450); }
+}
+function midiLearnGuess(t, seen) {
+  const ev = seen[0].ev, vals = seen.map(s => s.ev.val);
+  if (ev.type === 'note') return 'btn';
+  if (ev.type === 'pb') return t.kind === 'trig' || t.kind === 'toggle' ? 'btn' : 'abs';
+  if (t.kind === 'trig' || t.kind === 'toggle') return 'btn';
+  const relLike = vals.every(v => v > 0 && (v <= 15 || v >= 113)), binLike = vals.every(v => Math.abs(v - 64) <= 8 && v !== 64), btnLike = vals.every(v => v === 0 || v === 127);
+  if (t.kind === 'jog') return binLike ? 'relbin' : 'rel2c';
+  if (relLike && vals.length >= 2 && new Set(vals).size <= 2) return 'rel2c'; // Encoder wiederholen denselben Wert (1 oder 127); ein Fader zählt hoch
+  if (binLike && vals.length >= 2 && new Set(vals).size <= 2) return 'relbin'; // 63/65 wiederholt; ein Regler in der Mitte ändert sich stetig
+  if (btnLike && vals.length <= 2) return 'btn';
+  return 'abs';
+}
+function midiLearnFinish() {
+  const L = MIDI.learn; if (!L || !L.seen.length) return; clearTimeout(L.timer); MIDI.learn = null;
+  const t = MIDI_T[L.target], s0 = L.seen[0], mode = midiLearnGuess(t, L.seen), P0 = MIDI.prof();
+  const m = { dev: s0.dev, type: s0.ev.type, ch: s0.ev.ch, num: s0.ev.num, mode, hi: false, inv: false, target: t.id };
+  // eine Steuerung bedient genau eine Funktion: alte Zuordnung dieser Steuerung ersetzen
+  P0.maps = P0.maps.filter(x => !(x.dev === m.dev && x.type === m.type && x.ch === m.ch && x.num === m.num));
+  if (P0.maps.length >= MIDI_LIM.maxMaps) { status('Höchstens ' + MIDI_LIM.maxMaps + ' Zuordnungen pro Profil.', 'warn'); return; }
+  P0.maps.push(m); delete MIDI.pickup[midiKey(m, m.dev)]; midiSave(); midiRender();
+  status('MIDI-Learn: ' + midiCtlName(m) + ' steuert jetzt „' + t.label + '“ (' + MIDI_MODES[mode] + ').', 'ok', 4000);
+}
+function midiCtlName(m, noDev) { return (m.type === 'cc' ? 'CC ' + m.num : m.type === 'note' ? 'Note ' + m.num : 'Pitch Bend') + ' · Kanal ' + (m.ch + 1) + (m.dev && !noDev ? ' · ' + m.dev : ''); }
+/* Gerätenamen und Profilnamen sind Namen, keine Texte: sie werden nie übersetzt */
+function midiDevSpan(name) { const sp = document.createElement('span'); sp.setAttribute('data-noi18n', ''); sp.textContent = name; return sp; }
+const midiTr = t => (typeof I18N !== 'undefined' && I18N.t) ? I18N.t(t) : t;
+/* Nachrichtenmonitor: die letzten 40 Nachrichten (Rohbytes), Anzeige höchstens zehnmal pro Sekunde */
+function midiLog(dev, data, ev) {
+  const hex = Array.from(data || []).slice(0, 3).map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+  MIDI.log.unshift({ dev, hex, ev }); if (MIDI.log.length > 40) MIDI.log.length = 40; midiRenderLogSoon();
+}
+
+/* ---------- 5. Oberfläche ---------- */
+let midiLogT = 0, midiMapsT = 0;
+function midiRenderLogSoon() { if (midiLogT) return; midiLogT = setTimeout(() => { midiLogT = 0; midiRenderLog(); }, 100); }
+function midiRenderLog() {
+  const box = $('#midiLog'); if (!box || $('#midiModal').hidden) return; box.textContent = '';
+  if (!MIDI.log.length) { box.textContent = 'Noch keine Nachricht. Bewege einen Regler am Controller.'; return; }
+  MIDI.log.forEach(r => { const d = document.createElement('div'), e = r.ev;
+    d.textContent = r.hex.padEnd(9) + '  ' + (e ? (e.type === 'cc' ? 'CC ' + e.num + ' = ' + e.val : e.type === 'note' ? 'Note ' + e.num + (e.on ? ' gedrückt (' + e.val + ')' : ' losgelassen') : 'Pitch Bend ' + e.val) + ' · Kanal ' + (e.ch + 1) : 'ignoriert') + ' · ';
+    d.appendChild(midiDevSpan(r.dev)); box.appendChild(d); });
+}
+function midiStateText() {
+  return { off: 'aus', asking: 'Zugriff wird angefragt …', on: 'eingeschaltet', denied: 'Zugriff verweigert', unsupported: 'nicht verfügbar' }[MIDI.state] || MIDI.state;
+}
+function midiRender() {
+  const m = $('#midiModal'); if (!m) return;
+  $('#midiState').textContent = midiStateText(); $('#midiState').dataset.state = MIDI.state;
+  $('#midiOn').textContent = MIDI.access ? 'MIDI ausschalten' : 'MIDI einschalten';
+  const hint = $('#midiHint');
+  hint.textContent = MIDI.state === 'unsupported' ? 'Dieser Browser bietet kein Web MIDI. Nutze Microsoft Edge oder Google Chrome am PC. Maus und Tastatur funktionieren wie gewohnt.'
+    : MIDI.state === 'denied' ? 'Der Browser hat den Zugriff auf MIDI-Geräte nicht erlaubt (' + (MIDI.err || '') + '). Erlauben kannst du ihn über das Schloss- bzw. Seiten-Symbol links in der Adressleiste („MIDI-Geräte“), dann noch einmal einschalten.'
+    : MIDI.state === 'on' && !MIDI.inputs.size ? 'Kein MIDI-Gerät gefunden. Controller per USB anschließen. Läuft gleichzeitig ein DJ-Programm (z. B. Serato), kann es das Gerät unter Windows für sich belegen: dann das Programm schließen.'
+    : MIDI.state === 'on' ? 'Bewege einen Regler: Er erscheint unten im Monitor. Belegen mit MIDI-Learn.' : 'Das Studio fragt den Zugriff erst nach dem Einschalten an. Es empfängt nur Steuerdaten, sendet nichts an Geräte und nutzt kein SysEx.';
+  const dl = $('#midiDevs'); dl.textContent = '';
+  if (MIDI.access) MIDI.inputs.forEach(inp => { const li = document.createElement('li'), name = String(inp.name || 'MIDI').slice(0, 120);
+    li.innerHTML = '<label class="chk"><input type="checkbox"> <b></b></label><span class="muted small"></span><span class="pill"></span>';
+    li.querySelector('b').setAttribute('data-noi18n', ''); li.querySelector('b').textContent = name; li.querySelector('.muted').textContent = (inp.manufacturer || 'Hersteller unbekannt').slice(0, 80);
+    const live = inp.state !== 'disconnected', pill = li.querySelector('.pill'); pill.textContent = live ? 'verbunden' : 'getrennt'; pill.dataset.on = live ? '1' : '0';
+    const cb = li.querySelector('input'); cb.checked = MIDI.useDev[name] !== false; cb.addEventListener('change', () => { MIDI.useDev[name] = cb.checked; midiSave(); midiScan(); });
+    dl.appendChild(li); });
+  if (MIDI.access && !MIDI.inputs.size) { const li = document.createElement('li'); li.className = 'muted'; li.textContent = 'Kein Gerät angeschlossen.'; dl.appendChild(li); }
+  // Profile
+  const ps = $('#midiProf'); ps.textContent = ''; Object.keys(MIDI.profiles).forEach(k => ps.add(new Option(k, k))); ps.value = MIDI.active;
+  // EQ-Bank
+  ['low', 'mid', 'high'].forEach(k => { const s = $('#midiBank_' + k); if (s.options.length !== 8) { s.textContent = ''; for (let i = 0; i < 8; i++) s.add(new Option('Band ' + (i + 1), String(i))); } s.value = String(MIDI.bankBand(k)); });
+  // Learn
+  const L = MIDI.learn; $('#midiLearn').textContent = L ? 'Abbrechen' : 'MIDI-Learn'; $('#midiLearn').classList.toggle('primary', !L); $('#midiLearn').disabled = !MIDI.access;
+  $('#midiLearnInfo').textContent = L ? 'Bewege jetzt den Regler oder drücke die Taste für „' + MIDI_T[L.target].label + '“ …' : '';
+  midiRenderMaps(); midiRenderLog();
+}
+function midiRenderMaps(lazy) {
+  if (lazy) { if (midiMapsT || $('#midiModal').hidden) return; midiMapsT = setTimeout(() => { midiMapsT = 0; midiRenderMapVals(); }, 120); return; }
+  const tb = $('#midiMaps'); if (!tb) return; tb.textContent = ''; const P0 = MIDI.prof();
+  if (!P0.maps.length) { const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="5" class="muted">Noch keine Zuordnung. Funktion wählen, „MIDI-Learn“ drücken, Regler bewegen.</td>'; tb.appendChild(tr); return; }
+  P0.maps.forEach((m, i) => { const t = MIDI_T[m.target], tr = document.createElement('tr');
+    tr.innerHTML = '<td class="mono small"></td><td></td><td><select aria-label="Art der Steuerung"></select></td><td><label class="chk small"><input type="checkbox"> umkehren</label></td><td><button class="ghost" aria-label="Zuordnung löschen">Löschen</button></td>';
+    tr.children[0].textContent = midiCtlName(m, true); if (m.dev) { tr.children[0].append(' · '); tr.children[0].appendChild(midiDevSpan(m.dev)); } tr.children[1].innerHTML = '<span></span> <span class="mono small muted" data-mval></span>'; tr.children[1].firstChild.textContent = t.label; tr.dataset.i = i;
+    const sel = tr.querySelector('select'); Object.entries(MIDI_MODES).forEach(([k, v]) => sel.add(new Option(v, k))); sel.value = m.mode;
+    sel.addEventListener('change', () => { m.mode = sel.value; delete MIDI.pickup[midiKey(m, m.dev)]; midiSave(); });
+    const inv = tr.querySelector('input'); inv.checked = m.inv; inv.addEventListener('change', () => { m.inv = inv.checked; midiSave(); });
+    tr.querySelector('button').addEventListener('click', () => { P0.maps.splice(i, 1); midiSave(); midiRenderMaps(); });
+    tb.appendChild(tr); });
+  midiRenderMapVals();
+}
+function midiRenderMapVals() { const P0 = MIDI.prof(); $$('#midiMaps tr[data-i]').forEach(tr => { const m = P0.maps[+tr.dataset.i], t = m && MIDI_T[m.target], el = tr.querySelector('[data-mval]'); if (!t || !el) return;
+  el.textContent = t.kind === 'cont' ? '(' + t.fmt(t.get()) + ')' : t.kind === 'toggle' ? '(' + (t.get() ? 'ein' : 'aus') + ')' : ''; }); }
+(function midiUi() {
+  // Funktionsliste nach Gruppen
+  const sel = $('#midiTarget'); let grp = null, og = null;
+  MIDI_TARGETS.forEach(t => { if (t.group !== grp) { og = document.createElement('optgroup'); og.label = t.group; sel.appendChild(og); grp = t.group; } og.appendChild(new Option(t.label, t.id)); });
+  $('#btnMidi').addEventListener('click', () => { $('#midiModal').hidden = false; midiRender(); });
+  $('#midiClose').addEventListener('click', () => { $('#midiModal').hidden = true; if (MIDI.learn) { MIDI.learn = null; } });
+  $('#midiModal').addEventListener('click', e => { if (e.target.id === 'midiModal') $('#midiModal').hidden = true; });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#midiModal').hidden) { $('#midiModal').hidden = true; MIDI.learn = null; } });
+  $('#midiOn').addEventListener('click', () => { if (MIDI.access) midiDisable(); else midiEnable(true); });
+  $('#midiLearn').addEventListener('click', () => { if (MIDI.learn) { MIDI.learn = null; midiRender(); } else midiLearnStart($('#midiTarget').value); });
+  ['low', 'mid', 'high'].forEach(k => $('#midiBank_' + k).addEventListener('change', e => { MIDI.prof().bank[k] = clamp(parseInt(e.target.value, 10) || 0, 0, 7); MIDI.pickup = {}; midiSave(); midiRenderMaps(); }));
+  $('#midiProf').addEventListener('change', e => { if (MIDI.profiles[e.target.value]) { MIDI.active = e.target.value; MIDI.pickup = {}; midiSave(); midiRender(); } });
+  const askName = d => { const f = $('#midiProfName'), n = String(f.value || d || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, MIDI_LIM.maxName); f.value = '';
+    if (!n) return null; if (MIDI.profiles[n]) { status('Ein Profil „' + n + '“ gibt es schon.', 'warn'); return null; } return n; };
+  $('#midiProfNew').addEventListener('click', () => { if (Object.keys(MIDI.profiles).length >= MIDI_LIM.maxProfiles) { status('Höchstens ' + MIDI_LIM.maxProfiles + ' Profile.', 'warn'); return; }
+    const first = [...MIDI.inputs.values()][0], n = askName(first ? String(first.name).slice(0, MIDI_LIM.maxName) : 'Mein Controller'); if (!n) return;
+    MIDI.profiles[n] = midiEmptyProfile(n); MIDI.active = n; midiSave(); midiRender(); });
+  $('#midiProfCopy').addEventListener('click', () => { const n = askName(MIDI.active + ' (Kopie)'); if (!n) return; MIDI.profiles[n] = midiValidProfile(clone(MIDI.prof()), n); MIDI.active = n; midiSave(); midiRender(); });
+  $('#midiProfReset').addEventListener('click', () => { if (!window.confirm(midiTr('Alle Zuordnungen im Profil „' + MIDI.active + '“ löschen und die EQ-Bank auf Standard setzen?'))) return;
+    MIDI.profiles[MIDI.active] = midiEmptyProfile(MIDI.active); MIDI.pickup = {}; midiSave(); midiRender(); });
+  $('#midiProfDel').addEventListener('click', () => { if (Object.keys(MIDI.profiles).length < 2) { status('Das letzte Profil bleibt. Mit „Zurücksetzen“ leeren.', 'warn'); return; }
+    if (!window.confirm(midiTr('Profil „' + MIDI.active + '“ löschen?'))) return; delete MIDI.profiles[MIDI.active]; MIDI.active = Object.keys(MIDI.profiles)[0]; midiSave(); midiRender(); });
+  $('#midiExport').addEventListener('click', () => { const p = MIDI.prof(), data = JSON.stringify({ format: 'deepstructure.midi', version: 1, name: p.name, bank: p.bank, maps: p.maps }, null, 2);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([data], { type: 'application/json' })); a.download = 'MIDI-Profil ' + p.name.replace(/[\\/:*?"<>|]/g, '_') + '.json'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); });
+  $('#midiImport').addEventListener('click', () => $('#midiIn').click());
+  $('#midiIn').addEventListener('change', async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+    try { if (f.size > 512 * 1024) throw new Error('Datei zu groß'); const o = JSON.parse(await f.text()); if (!o || o.format !== 'deepstructure.midi') throw new Error('kein MIDI-Profil des Studios');
+      let n = midiValidProfile(o).name; while (MIDI.profiles[n]) n = n.replace(/( \(\d+\))?$/, m => ' (' + ((parseInt((m.match(/\d+/) || [1])[0], 10) || 1) + 1) + ')');
+      if (Object.keys(MIDI.profiles).length >= MIDI_LIM.maxProfiles) throw new Error('höchstens ' + MIDI_LIM.maxProfiles + ' Profile');
+      const p = midiValidProfile(o, n), dropped = (Array.isArray(o.maps) ? o.maps.length : 0) - p.maps.length;
+      MIDI.profiles[n] = p; MIDI.active = n; midiSave(); midiRender(); status('MIDI-Profil „' + n + '“ geladen (' + p.maps.length + ' Zuordnungen' + (dropped > 0 ? ', ' + dropped + ' ungültige verworfen' : '') + ').', 'ok', 5000); }
+    catch (err) { status('Dieses MIDI-Profil konnte nicht geladen werden (' + err.message + '). Es wurde nichts verändert.', 'err', 7000); } });
+  // Aktivitätsanzeige (Kopfzeile und Dialog), höchstens zehnmal pro Sekunde
+  setInterval(() => { const on = MIDI.access && performance.now() - MIDI.lastAct < 180; $$('.midiact').forEach(el => el.classList.toggle('on', !!on)); $('#btnMidi').classList.toggle('live', !!MIDI.access); }, 100);
+  // Beim Start nur wieder verbinden, wenn MIDI vorher eingeschaltet war UND der Browser den Zugriff schon erlaubt hat (keine ungefragte Abfrage)
+  if (recall('midiOn') && midiSupported() && navigator.permissions && navigator.permissions.query) {
+    navigator.permissions.query({ name: 'midi', sysex: false }).then(r => { if (r.state === 'granted') midiEnable(false); }).catch(() => {});
+  }
+})();
 /* English UI texts: German original → English. One entry per line. Texts made of several parts are translated part by part,
    so a key can be a fragment (e.g. "LUFS über den ganzen Song …"). Keys are matched as whole words. */
 const I18N_EN = {
@@ -5829,6 +6323,205 @@ const I18N_EN = {
   "Du hörst nur, was der Entzischer weggenommen hat (": "You only hear what the de-hisser took away (",
   "dB lauter gemacht), 8 Sekunden ab dem Cursor. Es sollte nach leisem Rauschen klingen. Hörst du deutlich Stimme oder Wörter, Stärke zurücknehmen.": "dB louder), 8 seconds from the cursor. It should sound like quiet noise. If you clearly hear voice or words, turn the strength down.",
   "(nur Seite)": "(side only)",
+  // MIDI Control (1.15.0)
+  "Wiedergabe starten": "Start playback",
+  "Wiedergabe pausieren": "Pause playback",
+  "Play / Pause umschalten": "Toggle play / pause",
+  "Stopp (zurück zum Startpunkt)": "Stop (back to start point)",
+  "5 Sekunden vor": "5 seconds forward",
+  "5 Sekunden zurück": "5 seconds back",
+  "Jogwheel: im Song bewegen": "Jog wheel: move through the song",
+  "Cue-Marke setzen (aktuelle Stelle)": "Set cue mark (current position)",
+  "Zur Cue-Marke springen": "Jump to cue mark",
+  "Schleife ein/aus": "Loop on/off",
+  "Master hören": "Hear master",
+  "Original hören": "Hear original",
+  "A/B: Original ↔ Master": "A/B: original ↔ master",
+  "Referenz hören": "Hear reference",
+  "Pegelgleich ein/aus": "Level match on/off",
+  "Crossfader Original ↔ Master": "Crossfader original ↔ master",
+  "Abhörpegel": "Monitor level",
+  "Equalizer ein/aus (Bypass)": "Equalizer on/off (bypass)",
+  "EQ-Bank Low: Pegel": "EQ bank Low: level",
+  "EQ-Bank Mid: Pegel": "EQ bank Mid: level",
+  "EQ-Bank High: Pegel": "EQ bank High: level",
+  "Gewähltes Band: Pegel": "Selected band: level",
+  "Gewähltes Band: Frequenz": "Selected band: frequency",
+  "Gewähltes Band: Q (Bandbreite)": "Selected band: Q (bandwidth)",
+  "Nächstes Band wählen": "Select next band",
+  "Vorheriges Band wählen": "Select previous band",
+  "Kompressor ein/aus (Bypass)": "Compressor on/off (bypass)",
+  "Sättigung ein/aus": "Saturation on/off",
+  "Sättigung: Drive": "Saturation: drive",
+  "Sättigung: Mischung": "Saturation: mix",
+  "Stereo-Modul ein/aus": "Stereo module on/off",
+  "Stereobreite": "Stereo width",
+  "Bass-Mono ein/aus": "Bass mono on/off",
+  "Bass-Mono: Grenze": "Bass mono: limit",
+  "Limiter ein/aus": "Limiter on/off",
+  "Limiter: Drive": "Limiter: drive",
+  "Limiter: Decke": "Limiter: ceiling",
+  "Limiter: Release": "Limiter: release",
+  "Lautheitsziel (LUFS)": "Loudness target (LUFS)",
+  "Auf Lautheitsziel bringen": "Bring to loudness target",
+  "Assistent (Startpunkt vorschlagen)": "Assistant (suggest a starting point)",
+  "Mastering": "Mastering",
+  "Presets": "Presets",
+  "Preset:": "Preset:",
+  "EQ-Band 1": "EQ band 1",
+  "Band 1: Pegel": "Band 1: level",
+  "Band 1: Frequenz": "Band 1: frequency",
+  "Band 1: Q (Bandbreite)": "Band 1: Q (bandwidth)",
+  "Band 1 ein/aus": "Band 1 on/off",
+  "EQ-Band 2": "EQ band 2",
+  "Band 2: Pegel": "Band 2: level",
+  "Band 2: Frequenz": "Band 2: frequency",
+  "Band 2: Q (Bandbreite)": "Band 2: Q (bandwidth)",
+  "Band 2 ein/aus": "Band 2 on/off",
+  "EQ-Band 3": "EQ band 3",
+  "Band 3: Pegel": "Band 3: level",
+  "Band 3: Frequenz": "Band 3: frequency",
+  "Band 3: Q (Bandbreite)": "Band 3: Q (bandwidth)",
+  "Band 3 ein/aus": "Band 3 on/off",
+  "EQ-Band 4": "EQ band 4",
+  "Band 4: Pegel": "Band 4: level",
+  "Band 4: Frequenz": "Band 4: frequency",
+  "Band 4: Q (Bandbreite)": "Band 4: Q (bandwidth)",
+  "Band 4 ein/aus": "Band 4 on/off",
+  "EQ-Band 5": "EQ band 5",
+  "Band 5: Pegel": "Band 5: level",
+  "Band 5: Frequenz": "Band 5: frequency",
+  "Band 5: Q (Bandbreite)": "Band 5: Q (bandwidth)",
+  "Band 5 ein/aus": "Band 5 on/off",
+  "EQ-Band 6": "EQ band 6",
+  "Band 6: Pegel": "Band 6: level",
+  "Band 6: Frequenz": "Band 6: frequency",
+  "Band 6: Q (Bandbreite)": "Band 6: Q (bandwidth)",
+  "Band 6 ein/aus": "Band 6 on/off",
+  "EQ-Band 7": "EQ band 7",
+  "Band 7: Pegel": "Band 7: level",
+  "Band 7: Frequenz": "Band 7: frequency",
+  "Band 7: Q (Bandbreite)": "Band 7: Q (bandwidth)",
+  "Band 7 ein/aus": "Band 7 on/off",
+  "EQ-Band 8": "EQ band 8",
+  "Band 8: Pegel": "Band 8: level",
+  "Band 8: Frequenz": "Band 8: frequency",
+  "Band 8: Q (Bandbreite)": "Band 8: Q (bandwidth)",
+  "Band 8 ein/aus": "Band 8 on/off",
+  "Dynamik Bass": "Dynamics Bass",
+  "Bass: Schwelle (Threshold)": "Bass: threshold",
+  "Bass: Ratio": "Bass: ratio",
+  "Bass: Attack": "Bass: attack",
+  "Bass: Release": "Bass: release",
+  "Bass: Pegel (Make-up)": "Bass: level (make-up)",
+  "Dynamik Mitten": "Dynamics Mids",
+  "Mitten: Schwelle (Threshold)": "Mids: threshold",
+  "Mitten: Ratio": "Mids: ratio",
+  "Mitten: Attack": "Mids: attack",
+  "Mitten: Release": "Mids: release",
+  "Mitten: Pegel (Make-up)": "Mids: level (make-up)",
+  "Dynamik Höhen": "Dynamics Highs",
+  "Höhen: Schwelle (Threshold)": "Highs: threshold",
+  "Höhen: Ratio": "Highs: ratio",
+  "Höhen: Attack": "Highs: attack",
+  "Höhen: Release": "Highs: release",
+  "Höhen: Pegel (Make-up)": "Highs: level (make-up)",
+  "Absolut (Fader, Drehregler)": "Absolute (fader, knob)",
+  "Relativ (1 / 127)": "Relative (1 / 127)",
+  "Relativ (64 ± n)": "Relative (64 ± n)",
+  "Relativ (Vorzeichen-Bit)": "Relative (sign bit)",
+  "Taste": "Button",
+  "Einstellungen → MIDI-Controller: DJ- oder MIDI-Controller anschließen und Regler belegen": "Settings → MIDI controller: connect a DJ or MIDI controller and assign its controls",
+  "MIDI-Controller": "MIDI controller",
+  "Status:": "Status:",
+  "MIDI einschalten": "Turn on MIDI",
+  "MIDI ausschalten": "Turn off MIDI",
+  "Geräte": "Devices",
+  "Profil": "Profile",
+  "Controller-Profil": "Controller profile",
+  "Name für neues Profil": "Name for new profile",
+  "Neu": "New",
+  "Kopie": "Copy",
+  "Profil als Datei sichern, z. B. für einen anderen Rechner": "Save the profile as a file, e.g. for another computer",
+  "Importieren": "Import",
+  "Profil aus einer Datei laden": "Load a profile from a file",
+  "Zurücksetzen": "Reset",
+  "Alle Zuordnungen dieses Profils löschen": "Delete all assignments in this profile",
+  "Profil löschen": "Delete profile",
+  "MIDI-Learn": "MIDI learn",
+  "Studio-Funktion": "Studio function",
+  "EQ-Bank für drei EQ-Drehregler:": "EQ bank for three EQ knobs:",
+  "EQ-Bank Low": "EQ bank Low",
+  "EQ-Bank Mid": "EQ bank Mid",
+  "EQ-Bank High": "EQ bank High",
+  "Zuordnungen": "Assignments",
+  "Steuerung": "Control",
+  "Art": "Type",
+  "Monitor": "Monitor",
+  "Der Crossfader und der Abhörpegel wirken nur auf das, was du hörst, nie auf den Export. Absolute Regler übernehmen erst, wenn sie den aktuellen Wert erreichen (kein Sprung). Maus und Tastatur funktionieren weiter wie gewohnt.": "The crossfader and the monitor level only affect what you hear, never the export. Absolute controls only take over once they reach the current value (no jump). Mouse and keyboard keep working as usual.",
+  "Zugriff wird angefragt …": "Requesting access …",
+  "eingeschaltet": "on",
+  "Zugriff verweigert": "access denied",
+  "nicht verfügbar": "not available",
+  "Dieser Browser bietet kein Web MIDI. Nutze Microsoft Edge oder Google Chrome am PC. Maus und Tastatur funktionieren wie gewohnt.": "This browser does not offer Web MIDI. Use Microsoft Edge or Google Chrome on a PC. Mouse and keyboard work as usual.",
+  "Der Browser hat den Zugriff auf MIDI-Geräte nicht erlaubt (": "The browser did not allow access to MIDI devices (",
+  "). Erlauben kannst du ihn über das Schloss- bzw. Seiten-Symbol links in der Adressleiste („MIDI-Geräte“), dann noch einmal einschalten.": "). You can allow it via the lock or page icon on the left of the address bar (“MIDI devices”), then turn it on again.",
+  "Kein MIDI-Gerät gefunden. Controller per USB anschließen. Läuft gleichzeitig ein DJ-Programm (z. B. Serato), kann es das Gerät unter Windows für sich belegen: dann das Programm schließen.": "No MIDI device found. Connect the controller via USB. If a DJ program (e.g. Serato) is running at the same time, it can keep the device to itself on Windows: then close that program.",
+  "Bewege einen Regler: Er erscheint unten im Monitor. Belegen mit MIDI-Learn.": "Move a control: it appears in the monitor below. Assign it with MIDI learn.",
+  "Das Studio fragt den Zugriff erst nach dem Einschalten an. Es empfängt nur Steuerdaten, sendet nichts an Geräte und nutzt kein SysEx.": "The studio only asks for access after you turn it on. It only receives control data, sends nothing to devices and does not use SysEx.",
+  "Hersteller unbekannt": "Manufacturer unknown",
+  "verbunden": "connected",
+  "getrennt": "disconnected",
+  "Kein Gerät angeschlossen.": "No device connected.",
+  "Abbrechen": "Cancel",
+  "Bewege jetzt den Regler oder drücke die Taste für „": "Now move the control or press the button for “",
+  "Noch keine Zuordnung. Funktion wählen, „MIDI-Learn“ drücken, Regler bewegen.": "No assignment yet. Choose a function, press “MIDI learn”, move a control.",
+  "Art der Steuerung": "Type of control",
+  "umkehren": "invert",
+  "Zuordnung löschen": "Delete assignment",
+  "Noch keine Nachricht. Bewege einen Regler am Controller.": "No message yet. Move a control on the controller.",
+  "Kanal": "Channel",
+  "gedrückt (": "pressed (",
+  "losgelassen": "released",
+  "ignoriert": "ignored",
+  "Cue-Marke bei": "Cue mark at",
+  "gewählt.": "selected.",
+  "MIDI:": "MIDI:",
+  "– Regler nach oben bis zum aktuellen Wert (": "– move the control up to the current value (",
+  "– Regler nach unten bis zum aktuellen Wert (": "– move the control down to the current value (",
+  ") bewegen, dann übernimmt er.": "), then it takes over.",
+  "Bitte zuerst MIDI einschalten.": "Please turn on MIDI first.",
+  "Zuordnungen pro Profil.": "assignments per profile.",
+  "Höchstens": "At most",
+  "MIDI-Learn:": "MIDI learn:",
+  "steuert jetzt": "now controls",
+  "Ein Profil „": "A profile “",
+  "“ gibt es schon.": "” already exists.",
+  "Profile.": "profiles.",
+  "Mein Controller": "My controller",
+  "(Kopie)": "(copy)",
+  "Alle Zuordnungen im Profil „": "Delete all assignments in profile “",
+  "“ löschen und die EQ-Bank auf Standard setzen?": "” and reset the EQ bank to default?",
+  "Das letzte Profil bleibt. Mit „Zurücksetzen“ leeren.": "The last profile stays. Empty it with “Reset”.",
+  "Profil „": "Profile “",
+  "“ löschen?": "”: delete?",
+  "MIDI-Profil „": "MIDI profile “",
+  "“ geladen (": "” loaded (",
+  "ungültige verworfen": "invalid ones discarded",
+  "Dieses MIDI-Profil konnte nicht geladen werden (": "This MIDI profile could not be loaded (",
+  "Datei zu groß": "file too large",
+  "kein MIDI-Profil des Studios": "not a MIDI profile of the studio",
+  "höchstens": "at most",
+  "Profile": "profiles",
+  "Crossfade": "Crossfade",
+  "% Master": "% master",
+  "stumm": "muted",
+  // Zwei Spuren (1.16.0)
+  "wird aktualisiert …": "updating …",
+  "wird berechnet …": "calculating …",
+  "MASTER": "MASTER",
+  "ORIGINAL": "ORIGINAL",
+  "OHNE MASTERING": "WITHOUT MASTERING"
 };
 /* Muster für Texte mit Zahlen oder Namen in der Mitte ($1, $2 … = Teile aus dem Original) */
 const I18N_EN_RE = [
@@ -5891,7 +6584,7 @@ const I18N = (() => {
   api.t = t;
 
   /* ---- Dokument ---- */
-  const ATTRS = ['title', 'aria-label', 'placeholder', 'alt'];
+  const ATTRS = ['title', 'aria-label', 'placeholder', 'alt', 'label']; // label: Gruppen in Auswahllisten (optgroup)
   const SKIP = new Set(['SCRIPT', 'STYLE', 'TEXTAREA', 'PRE', 'CODE']); // Inhalt dieser Elemente bleibt, wie er ist (Eingaben, JSON, Code); Tooltips und Platzhalter werden übersetzt
   const TX = new WeakMap(), AT = new WeakMap();
   const skipEl = (el, attr) => { for (let e = el; e && e.nodeType === 1; e = e.parentElement) { if ((!attr || e !== el) && SKIP.has(e.tagName) || e.isContentEditable || e.hasAttribute('data-noi18n')) return true; } return false; };
@@ -5989,7 +6682,7 @@ async function analyzeOrig() {
   } catch (e) { console.error(e); status('Messung fehlgeschlagen: ' + e.message, 'err'); }
 }
 let measT = 0;
-function scheduleMeasure(ms = 1800) { if (!S.track) return; clearTimeout(measT); measT = setTimeout(measureMaster, ms); if (S.master) S.master.stale = true; updateSongKv(); }
+function scheduleMeasure(ms = 1800) { if (!S.track) return; clearTimeout(measT); measT = setTimeout(measureMaster, ms); if (S.master) S.master.stale = true; updateSongKv(); requestWaveDraw(); }
 /* Auf Handys und schwachen Geräten: das Nachmessen (rendert den ganzen Song) nicht während der Wiedergabe starten,
    sonst konkurriert es mit der Echtzeit-Audioausgabe um die Rechenzeit und es knackst. Es läuft nach dem Anhalten. */
 const LOW_POWER = (navigator.maxTouchPoints > 0 && /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)) || (navigator.hardwareConcurrency || 8) <= 4;
@@ -5999,8 +6692,8 @@ async function measureMaster() {
   S.measuring = true; updateSongKv();
   try {
     const pv = S.pver, ver = S.ver, pre = await getPre(), lp = limParams();
-    const r = await DSP({ cmd: 'analyze', sr: pre.sr, L: pre.L.slice(), R: pre.R.slice(), lim: lp, opts: { tp: true, spectrum: true } });
-    if (ver === S.ver && pv === S.pver) { r.lim = lp; S.master = r; applyMonitor(); renderAnalysis(); drawSpec(); } else S.measurePending = true;
+    const r = await DSP({ cmd: 'analyze', sr: pre.sr, L: pre.L.slice(), R: pre.R.slice(), lim: lp, opts: { tp: true, spectrum: true, peaks: PB } });
+    if (ver === S.ver && pv === S.pver) { r.lim = lp; r.ver = ver; S.master = r; applyMonitor(); renderAnalysis(); drawSpec(); requestWaveDraw(); } else S.measurePending = true;
   } catch (e) { console.error(e); }
   finally { S.measuring = false; if (S.measurePending) { S.measurePending = false; scheduleMeasure(200); } updateSongKv(); }
 }

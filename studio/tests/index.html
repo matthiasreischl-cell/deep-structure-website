@@ -489,6 +489,53 @@ async function dehissUI() { // Stimm-Entzischer: Anwenden, Ersetzen, Vorher/Nach
   res.push(['Stimm-Entzischer: nach Rückgängig Originalzustand, Vorher/Nachher gesperrt', same && $('#dhAB').disabled && $('#dhDiff').disabled, same ? 'Original' : 'abweichend']);
   if (keep) await loadTrack(keep); return res;
 },
+async function carpetUI() { // Rauschteppich (Gesang/Beat): Anwenden, Ersetzen, Vorher/Nachher, Entferntes anhören, Englisch, Rückgängig
+  const res = [], sr = 44100, n = sr * 20, L = new Float32Array(n), R = new Float32Array(n); let sd = 5; const rnd = () => { sd = (sd * 1664525 + 1013904223) >>> 0; return sd / 4294967296 - 0.5; };
+  const sing = t => (t > 6 && t < 13) || (t > 15 && t < 19);
+  let a1 = 0, a2 = 0, b1 = 0, b2 = 0; for (let i = 0; i < n; i++) { const t = i / sr, s = sing(t) ? 1 : 0, ph = (t % 0.5) / 0.5, env = s * Math.min(1, ph * 20, (1 - ph) * 20); let v = 0; for (let h = 1; h * 220 < 7000; h++) v += Math.sin(2 * Math.PI * h * 220 * t) / Math.pow(h, 1.1);
+    const x = rnd(), d1 = x - a1; a1 = x; const d2 = d1 - a2; a2 = d1; const y = rnd(), e1 = y - b1; b1 = y; const e2 = e1 - b2; b2 = e1; // zweimal differenziert: Rauschen mit Schwerpunkt in den Höhen
+    const hat = Math.exp(-((t * 8) % 1) * 40) * 0.03, c = 0.12 * env * v + 0.1 * Math.sin(2 * Math.PI * 55 * t) + s * 0.0012 * d2;
+    L[i] = c + 0.05 * Math.sin(2 * Math.PI * 330 * t) + hat * e2; R[i] = c + 0.05 * Math.sin(2 * Math.PI * 392 * t + 1) - hat * e2; }
+  const keep = S.track; await loadTrack({ sr, L, R, name: 'Teppich-Test', demo: true }); await sleep(300);
+  const sideOf = t => { let m = 0; for (let i = 0; i < t.L.length; i++) m = Math.max(m, Math.abs((t.L[i] - t.R[i]) - (L[i] - R[i]))); return m; };
+  const outside = t => { let m = 0; for (let i = 0; i < 5 * sr; i++) m = Math.max(m, Math.abs(t.L[i] - L[i])); return m; };
+  const wait = async v0 => { for (let i = 0; i < 900 && (S.ver === v0 || VC.busy); i++) await sleep(100); await sleep(500); };
+  VC.strength = 40; const u0 = S.undo.length; let v0 = S.ver; $('#vcApply').click(); await wait(v0);
+  const lab = S.undo.length ? S.undo[S.undo.length - 1].label : '';
+  res.push(['Rauschteppich: Anwenden verändert den Song, ein Rückgängig-Schritt, Seite und Stellen ohne Gesang unverändert', S.undo.length === u0 + 1 && /^Rauschteppich abgesenkt \(40 %\)/.test(lab) && sideOf(S.track) < 1e-6 && outside(S.track) < 1e-6, lab + ' · Seite ' + sideOf(S.track).toExponential(1) + ' · ohne Gesang ' + outside(S.track).toExponential(1)]);
+  res.push(['Rauschteppich: Bericht mit Abschnitten, Vorher/Nachher und „Entferntes anhören“ freigeschaltet', /Rauschteppich gefunden/.test($('#vcReport').textContent) && /abgesenkt/.test($('#vcReport').textContent) && !$('#vcAB').disabled && !$('#vcDiff').disabled, $('#vcReport').textContent.slice(0, 110)]);
+  $('#vcAB').click(); await sleep(100); const abOn = S.abuf === VC.beforeBuf && $('#vcAB').getAttribute('aria-pressed') === 'true';
+  $('#vcAB').click(); await sleep(100); const abOff = S.abuf !== VC.beforeBuf && $('#vcAB').getAttribute('aria-pressed') === 'false';
+  res.push(['Rauschteppich: Vorher/Nachher tauscht nur den Abspiel-Puffer', abOn && abOff && S.undo.length === u0 + 1, abOn + ' / ' + abOff]);
+  S.cursor = 7; $('#vcDiff').click(); await sleep(400); const pv = !!S.cleanPv; cleanStopPv();
+  res.push(['Rauschteppich: „Entferntes anhören“ spielt den Unterschied', pv, pv ? 'spielt' : 'nichts']);
+  const d1 = (() => { let m = 0; for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(S.track.L[i] - L[i])); return m; })();
+  VC.strength = 90; v0 = S.ver; $('#vcApply').click(); await wait(v0);
+  const lab2 = S.undo[S.undo.length - 1].label, d2 = (() => { let m = 0; for (let i = 0; i < n; i++) m = Math.max(m, Math.abs(S.track.L[i] - L[i])); return m; })(), base = S.undo[S.undo.length - 1].L.every((v, i) => v === L[i]);
+  res.push(['Rauschteppich: erneutes Anwenden ersetzt die vorige Absenkung (nicht doppelt)', S.undo.length === u0 + 1 && /90 %/.test(lab2) && base && d2 > d1, lab2 + ' · Änderung ' + (20 * Math.log10(d1)).toFixed(1) + ' → ' + (20 * Math.log10(d2)).toFixed(1) + ' dBFS']);
+  I18N.set('en'); await sleep(80); const en = $('#vcBox h3').textContent + ' | ' + $('#vcReport').textContent; I18N.set('de'); await sleep(50);
+  res.push(['Rauschteppich: Oberfläche auf Englisch', /Remove noise carpet/.test(en) && /Noise carpet found:/.test(en) && /above the parts without singing/.test(en) && !/[äöüß]/.test(en), en.slice(0, 200)]);
+  undo(); await sleep(600);
+  const same = S.track.L.length === n && S.track.L.every((v, i) => v === L[i]);
+  res.push(['Rauschteppich: nach Rückgängig Originalzustand, Vorher/Nachher gesperrt', same && $('#vcAB').disabled && $('#vcDiff').disabled, same ? 'Original' : 'abweichend']);
+  if (keep) await loadTrack(keep); return res;
+},
+async function listenToggleUI() { // „Anhören“ als Schalter: zweiter Klick hält an
+  const res = [], keepArts = S.arts; if (!S.track) return [['Anhören-Schalter: kein Song geladen', false, '']];
+  stopPlayback(); cleanStopPv(); const d = duration();
+  S.arts = { regions: [{ type: 'shimmer', a: Math.min(1, d / 4), b: Math.min(2, d / 2), score: 6 }], clicks: [], cutoff: 0 }; renderArtifacts();
+  const btn = $('#artList li button'); btn.click(); for (let i = 0; i < 40 && !S.playing; i++) await sleep(50); await sleep(200);
+  const on = S.playing && btn.textContent === 'Stopp' && btn.getAttribute('aria-pressed') === 'true';
+  btn.click(); await sleep(250); const off = !S.playing && btn.textContent === 'Anhören';
+  res.push(['Anhören-Schalter (KI-Artefakte): erster Klick spielt, zweiter Klick hält an', on && off, (on ? 'spielt' : 'spielt nicht') + ' / ' + (off ? 'angehalten' : 'läuft weiter')]);
+  btn.click(); for (let i = 0; i < 40 && !S.playing; i++) await sleep(50); await sleep(200); pause(); await sleep(1600);
+  res.push(['Anhören-Schalter: Stopp oben setzt den Knopf zurück', !S.playing && btn.textContent === 'Anhören' && btn.getAttribute('aria-pressed') === 'false', btn.textContent]);
+  await ensureCtx(S.track.sr); const b2 = document.createElement('button'); b2.textContent = 'Entferntes anhören'; document.body.appendChild(b2);
+  const buf = S.ctx.createBuffer(2, S.track.sr * 4, S.track.sr); b2.onclick = e => listenToggle(e.currentTarget, async () => cleanPlayBuf(buf));
+  b2.click(); await sleep(200); const pvOn = !!S.cleanPv && b2.textContent === 'Stopp'; b2.click(); await sleep(200); const pvOff = !S.cleanPv && b2.textContent === 'Entferntes anhören'; b2.remove();
+  res.push(['Anhören-Schalter (Vorhörprobe): zweiter Klick beendet die Probe', pvOn && pvOff, pvOn + ' / ' + pvOff]);
+  S.arts = keepArts; renderArtifacts(); S.loop = false; $('#btnLoop').setAttribute('aria-pressed', 'false'); S.sel = null; drawAll(); return res; // Schleife und Auswahl von „Anhören“ zurücksetzen
+},
 async function midiControl() { // MIDI Control mit nachgebautem Web-MIDI-Gerät (kein echter Controller nötig)
   const res = [], keepP = clone(P), keepProf = JSON.stringify(recall('midiProfiles')), keepMon = [S.mode, S.match, S.monVolDb], keepReq = navigator.requestMIDIAccess, w = ms => new Promise(r => setTimeout(r, ms));
   const mkIn = (id, name) => ({ id, name, manufacturer: 'Numark', state: 'connected', onmidimessage: null });

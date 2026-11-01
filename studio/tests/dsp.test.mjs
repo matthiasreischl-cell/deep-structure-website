@@ -275,6 +275,12 @@ for (const [ratio, want] of [[2, -15], [4, -17.5]]) { const x = sine(48000, 3, 1
   const yr = D.vocalDehiss(x.L, x.R, sr, { strength: 1, regions: [[3, 5]] }); let out = 0, inn = 0; for (let i = 0; i < n; i++) { const t = i / sr, d = Math.abs(yr.L[i] - x.L[i]); if (t < 2.85 || t > 5.15) out = Math.max(out, d); else inn = Math.max(inn, d); }
   check('Stimm-Entzischer: Auswahl wird eingehalten (außerhalb 3–5 s unverändert)', out === 0 && inn > 1e-4, 'außen ' + out + ', innen ' + inn.toExponential(1));
 }
+{ // Messung mit Hüllkurve (zwei Spuren): gleiche Messwerte wie ohne, Hüllkurve korrekt
+  const x = pink(48000, 6, 0.3, 41), lim = { on: true, drive: 6, ceiling: -1, release: 80, isp: true };
+  const a = D.handle({ cmd: 'analyze', L: x.L.slice(), R: x.R.slice(), sr: 48000, lim, opts: { tp: true } }).result, b = D.handle({ cmd: 'analyze', L: x.L.slice(), R: x.R.slice(), sr: 48000, lim, opts: { tp: true, peaks: 256 } }).result;
+  const y = { L: x.L.slice(), R: x.R.slice() }; D.applyLim(y.L, y.R, 48000, lim); let ok = true; for (const k of [0, 17, b.peaks.mx.length - 1]) { let lo = 1, hi = -1; for (let i = k * 256; i < Math.min(y.L.length, (k + 1) * 256); i++) { lo = Math.min(lo, y.L[i], y.R[i]); hi = Math.max(hi, y.L[i], y.R[i]); } if (Math.abs(lo - b.peaks.mn[k]) > 1e-7 || Math.abs(hi - b.peaks.mx[k]) > 1e-7) ok = false; }
+  check('Messung mit Hüllkurve: Messwerte unverändert, Hüllkurve = Min/Max nach dem Limiter', a.I === b.I && a.TP === b.TP && b.peaks.n === x.L.length && b.peaks.mx.length === Math.ceil(x.L.length / 256) && ok, 'I ' + b.I.toFixed(3) + ' LUFS, ' + b.peaks.mx.length + ' Blöcke');
+}
 { // Hör-Vergleich (Näherung an PEAQ/ViSQOL)
   const sr = 48000, x = pink(sr, 12, 0.25, 31), n = x.L.length;
   const same = D.hearCompare(x.L, x.R, x.L.slice(), x.R.slice(), sr, {});

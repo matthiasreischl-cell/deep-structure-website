@@ -11,10 +11,10 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const htmlPath = process.argv[2] || path.join(here, '..', 'index.html');
+const htmlPath = process.argv[2] || path.join(here, '..', 'web', 'index.html');
 const html = fs.readFileSync(htmlPath, 'utf8');
 const grab = name => { const m = html.match(new RegExp('const ' + name + ' = String\\.raw`([\\s\\S]*?)`;')); if (!m) throw new Error(name + ' nicht gefunden'); return m[1]; };
-const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES, cleanScan, cleanSong, hearCompare, vocalDehiss};')();
+const D = new Function(grab('LIM_SRC') + grab('ANA_SRC') + 'return {DSComp, handle, loudness, truePeak, applyLim, spectrum, encodeWav, smoothHF, artifacts, DSLimiter, gameData, drumDetect, drumRepair, fft, synthKick, synthSnare, toneMatch, KICKS, SNARES, cleanScan, cleanSong, hearCompare, vocalDehiss, vocalCarpet};')();
 
 let pass = 0, fail = 0; const rows = [];
 function check(name, ok, detail) { rows.push([ok ? 'PASS' : 'FAIL', name, detail]); ok ? pass++ : fail++; }
@@ -274,6 +274,34 @@ for (const [ratio, want] of [[2, -15], [4, -17.5]]) { const x = sine(48000, 3, 1
   check('Stimm-Entzischer: Stärke 0 = bitgenau, ohne Gesang (nur Instrumente) keine Änderung', z0 === 0 && di === 0 && !yi.report.activeSec, 'Stärke 0: ' + z0 + ', Instrumente: ' + di);
   const yr = D.vocalDehiss(x.L, x.R, sr, { strength: 1, regions: [[3, 5]] }); let out = 0, inn = 0; for (let i = 0; i < n; i++) { const t = i / sr, d = Math.abs(yr.L[i] - x.L[i]); if (t < 2.85 || t > 5.15) out = Math.max(out, d); else inn = Math.max(inn, d); }
   check('Stimm-Entzischer: Auswahl wird eingehalten (außerhalb 3–5 s unverändert)', out === 0 && inn > 1e-4, 'außen ' + out + ', innen ' + inn.toExponential(1));
+}
+{ // Rauschteppich (Gesang/Beat): nur Mitte, nur 8–16 kHz, nur in Gesangsabschnitten; Hi-Hats und Obertöne bleiben
+  const sr = 44100, T = 30, n = sr * T, r0 = rng(11), mk = (lo, hi) => { const out = new Float32Array(n), B = 4096; for (let o = 0; o < n; o += B) { const re = new Float64Array(B), im = new Float64Array(B); for (let i = 0; i < B; i++) re[i] = r0(); D.fft(re, im); for (let k = 0; k < B; k++) { const f = Math.min(k, B - k) * sr / B; if (f < lo || f > hi) { re[k] = 0; im[k] = 0; } } for (let k = 0; k < B; k++) im[k] = -im[k]; D.fft(re, im); for (let i = 0; i < B && o + i < n; i++) out[o + i] = re[i] / B; } let p = 0; for (const v of out) p += v * v; const g = 1 / Math.sqrt(p / n); return out.map(v => v * g); };
+  const sing = t => (t > 8 && t < 20) || (t > 22 && t < 28), hatT = t => (t * 8) % 1, h1 = mk(6000, 16000), h2 = mk(6000, 16000), cp = mk(8000, 16000), OT = [42, 50, 58]; // Obertöne 9,2 / 11 / 12,8 kHz
+  const mix = carpet => { const L = new Float32Array(n), R = new Float32Array(n); for (let i = 0; i < n; i++) { const t = i / sr, s = sing(t) ? 1 : 0, ph = (t % 0.5) / 0.5; let v = 0; for (let h = 1; h * 220 < 7000; h++) v += Math.sin(2 * Math.PI * h * 220 * t) / Math.pow(h, 1.1); for (const h of OT) v += 0.02 * Math.sin(2 * Math.PI * h * 220 * t);
+      const env = s * Math.min(1, ph * 20, (1 - ph) * 20), hat = Math.exp(-hatT(t) * 40) * 0.03, c = 0.12 * env * v + 0.1 * Math.sin(2 * Math.PI * 55 * t) + carpet * s * cp[i] + 0.0003 * cp[(i + 7919) % n];
+      L[i] = c + 0.05 * Math.sin(2 * Math.PI * 330 * t) + hat * h1[i]; R[i] = c + 0.05 * Math.sin(2 * Math.PI * 392 * t + 1) + hat * h2[i]; } return { L, R }; };
+  const x = mix(0.002), N2 = 2048, w2 = new Float64Array(N2).map((_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / N2)), bz2 = sr / N2, w5 = new Float64Array(512).map((_, i) => 0.5 - 0.5 * Math.cos(2 * Math.PI * i / 512)), bz5 = sr / 512;
+  const sp = (X, o, NN, ww) => { const re = new Float64Array(NN), im = new Float64Array(NN); for (let i = 0; i < NN; i++) re[i] = X[o + i] * ww[i]; D.fft(re, im); return k => re[k] * re[k] + im[k] * im[k]; };
+  const ev = y => { const Mi = x.L.map((v, i) => (v + x.R[i]) / 2), Mo = y.L.map((v, i) => (v + y.R[i]) / 2); let vI = 0, vO = 0, hI = 0, hO = 0, kI = 0, kO = 0, side = 0, outside = 0;
+    for (let i = 0; i < n; i++) { side = Math.max(side, Math.abs((y.L[i] - y.R[i]) - (x.L[i] - x.R[i]))); const t = i / sr; if (t < 7.3 || (t > 20.6 && t < 21.4)) outside = Math.max(outside, Math.abs(y.L[i] - x.L[i]), Math.abs(y.R[i] - x.R[i])); }
+    for (let c = 0; c < T * 8; c++) { const tc = (c + 0.65) / 8; if (!sing(tc) || tc % 0.5 < 0.08 || tc % 0.5 > 0.42) continue; const o = Math.round(tc * sr) - N2 / 2, pi = sp(Mi, o, N2, w2), po = sp(Mo, o, N2, w2); // Lücke zwischen zwei Hi-Hats
+      for (const h of OT) { const kh = Math.round(h * 220 / bz2); hI += pi(kh); hO += po(kh); }
+      for (let k = Math.round(8800 / bz2); k < Math.round(15200 / bz2); k++) { if (OT.some(h => Math.abs(k - h * 220 / bz2) < 8)) continue; vI += pi(k); vO += po(k); } }
+    for (let c = 0; c < T * 8; c++) { const th = c / 8 + 0.004; if (!sing(th) || th % 0.5 < 0.08 || th % 0.5 > 0.42) continue; const o = Math.round(th * sr) - 256, pi = sp(Mi, o, 512, w5), po = sp(Mo, o, 512, w5); // Hi-Hat-Schlag
+      for (let k = Math.round(9000 / bz5); k < Math.round(15000 / bz5); k++) { kI += pi(k); kO += po(k); } }
+    return { carpet: 10 * Math.log10(vO / vI), ot: 10 * Math.log10(hO / hI), hat: 10 * Math.log10(kO / kI), side, outside }; };
+  const y4 = D.vocalCarpet(x.L, x.R, sr, { strength: 0.4 }), e4 = ev(y4), y1 = D.vocalCarpet(x.L, x.R, sr, { strength: 1 }), e1 = ev(y1), rp = y4.report;
+  check('Rauschteppich: gefunden in beiden Gesangsabschnitten (8–20 s, 22–28 s), Überschuss über den Stellen ohne Gesang', rp.sections.length === 2 && Math.abs(rp.sections[0][0] - 8) < 1 && Math.abs(rp.sections[1][1] - 28) < 1 && rp.excessDb > 10 && rp.hasRef, JSON.stringify(rp.sections) + ', ' + rp.excessDb + ' dB');
+  check('Rauschteppich 40 %: Teppich in den Lücken > 3 dB leiser, Obertöne und Hi-Hats < 0,3 dB', e4.carpet < -3 && e4.ot > -0.3 && e4.hat > -0.3, 'Teppich ' + e4.carpet.toFixed(1) + ' dB, Obertöne ' + e4.ot.toFixed(2) + ' dB, Hi-Hats ' + e4.hat.toFixed(2) + ' dB');
+  check('Rauschteppich 100 %: stärker als 40 %, Obertöne und Hi-Hats < 0,5 dB', e1.carpet < e4.carpet - 0.5 && e1.ot > -0.5 && e1.hat > -0.5, 'Teppich ' + e1.carpet.toFixed(1) + ' dB, Obertöne ' + e1.ot.toFixed(2) + ' dB, Hi-Hats ' + e1.hat.toFixed(2) + ' dB');
+  let lowD = 0; { const re = new Float64Array(8192), im = new Float64Array(8192), o = Math.round(12 * sr); for (let i = 0; i < 8192; i++) re[i] = (y1.L[o + i] + y1.R[o + i] - x.L[o + i] - x.R[o + i]) / 2; D.fft(re, im); let a = 0, b = 0; for (let k = 1; k < 4096; k++) { const f = k * sr / 8192, p = re[k] * re[k] + im[k] * im[k]; if (f < 7000) a += p; else b += p; } lowD = 10 * Math.log10(a / (b + 1e-30) + 1e-30); }
+  check('Rauschteppich: Seite bitgenau, Stellen ohne Gesang unverändert, Änderung unter 7 kHz mind. 40 dB schwächer als im Band', e1.side < 1e-6 && e1.outside < 1e-9 && lowD < -40, 'Seite ' + e1.side.toExponential(1) + ', ohne Gesang ' + e1.outside + ', unter 7 kHz ' + lowD.toFixed(0) + ' dB');
+  const z = mix(0), yz = D.vocalCarpet(z.L, z.R, sr, { strength: 1 }); let dz = 0; for (let i = 0; i < n; i++) dz = Math.max(dz, Math.abs(yz.L[i] - z.L[i]));
+  const y0 = D.vocalCarpet(x.L, x.R, sr, { strength: 0 }); let d0 = 0; for (let i = 0; i < n; i++) d0 = Math.max(d0, Math.abs(y0.L[i] - x.L[i]));
+  check('Rauschteppich: ohne Teppich (gleicher Song) keine Änderung, Stärke 0 bitgenau', dz === 0 && !yz.report.carpetSec && d0 === 0, 'ohne Teppich ' + dz + ', Stärke 0 ' + d0);
+  const yr = D.vocalCarpet(x.L, x.R, sr, { strength: 1, regions: [[10, 13]] }); let out = 0, inn = 0; for (let i = 0; i < n; i++) { const t = i / sr, d = Math.abs(yr.L[i] - x.L[i]); if (t < 9.9 || t > 13.1) out = Math.max(out, d); else inn = Math.max(inn, d); }
+  check('Rauschteppich: Auswahl wird eingehalten (außerhalb 10–13 s unverändert)', out < 1e-9 && inn > 1e-4, 'außen ' + out + ', innen ' + inn.toExponential(1));
 }
 { // Messung mit Hüllkurve (zwei Spuren): gleiche Messwerte wie ohne, Hüllkurve korrekt
   const x = pink(48000, 6, 0.3, 41), lim = { on: true, drive: 6, ceiling: -1, release: 80, isp: true };

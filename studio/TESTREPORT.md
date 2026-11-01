@@ -733,3 +733,53 @@ Mit Kompressor ist der Export schon in 1.14.0 von Lauf zu Lauf nicht bitgleich (
 | Echter Song „3. DEIN ABER“ (Preset „Laut & druckvoll“), Desktop 1500 px und Handy 390 px | beide Spuren lesbar, Hüllkurve 9 964 800 Samples = Songlänge, Klick unten → Original, oben → Master, keine Fehler |
 | Browser-Tests gesamt | 171 bestanden, PC-Fassung bestanden |
 | DSP-Tests | 90 bestanden |
+
+## 33. Nachtrag 1.17.0: Rauschteppich entfernen (Gesang/Beat), MCP-Server 1.3.0 (01.11.2026)
+
+Testsongs vom Album „Kein Aber“ (WAV 48 kHz, 16 Bit, vom USB-Stick, nur gelesen): „Ich bin nicht immer der Gute“ (Teppich ab 0:40) und „Verantwortung tut weh“ (ab 1:00). Messung der Mitte bei 8–16 kHz mit 5-ms-Fenstern (256 Samples), je 2 s: Lücken = leisestes Fünftel der Fenster, Schläge = lautestes Zwanzigstel.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Teppich gefunden („Verantwortung tut weh“) | 2:00 min in 12 Abschnitten, Grundpegel in den Lücken 38,9 dB über den Stellen ohne Gesang (Bezug aus Stellen ohne Gesang); Abschnitt 0:57–1:16 enthalten |
+| Teppich gefunden („Ich bin nicht immer der Gute“) | ab 0:40,5, 1:43 min, 15,2 dB über den Stellen ohne Gesang |
+| Lücken zwischen den Schlägen 0:58–1:14, Stärke 40 % / 100 % | −3 bis −6 dB / −4 bis −8,5 dB |
+| Lücken 0:40–0:52 („Gute“), 40 % | −2 bis −7 dB |
+| Schläge (Hi-Hats) in denselben Abschnitten | ±0,1 dB |
+| Stellen ohne Gesang (0:52–0:56, 1:16–1:18 bzw. 0:30–0:40) | unverändert (±0,0 dB) |
+| Seite | bitgleich (größte Abweichung 3·10⁻⁸, Rundung der Gleitkommazahl) |
+| Hör-Vergleich Original ↔ bearbeitet (Näherung PEAQ/ViSQOL) | „Gute“ 4,91 (40 %) / 4,88 (100 %), „Verantwortung“ 4,89 / 4,85 |
+| Rechenzeit ganzer Song (Node, ein Kern) | 7–10 s |
+| Stimm-Entzischer nach Umbau der Gesangserkennung | bitgleiche Ausgabe an beiden Songs (SHA-256 vor/nach) |
+| DSP-Tests | 96 bestanden (6 neu: Fundstellen, 40 %, 100 %, Seite/Band, ohne Teppich/Stärke 0, Auswahl) |
+| Browser-Tests | 178 bestanden (7 neu: Anwenden, Bericht, Vorher/Nachher, Entferntes anhören, Ersetzen, Englisch, Rückgängig), PC-Fassung bestanden |
+| Album-Werkzeug / MCP-Server | bestanden (`rauschteppich` pro Song, zwei neue Ablehnungen im MCP-Test) |
+
+### Hinweise
+- Der Teppich in den Lücken lässt sich mit kurzen Fenstern nur teilweise vom Ausklang der Hi-Hats trennen; deshalb bleibt ein Rest. Stärker als −30 dB wird nie abgesenkt.
+- Hörprobe durch den Nutzer steht aus (besonders: „Pumpen“ bei hoher Stärke, Obertöne einer hellen Stimme).
+
+## 34. Nachtrag 1.17.1: „Anhören“ als Schalter (01.11.2026)
+
+| Prüfung | Ergebnis |
+|---|---|
+| KI-Artefakte: „Anhören“ ein zweites Mal | Wiedergabe angehalten, Knopf wieder „Anhören“ |
+| Stopp oben während „Anhören“ | Knopf springt von selbst zurück |
+| Vorhörprobe („Entferntes anhören“): zweiter Klick | Probe beendet |
+| Browser-Tests gesamt | 181 bestanden (3 neu), PC-Fassung bestanden |
+
+## 35. Nachtrag 1.18.0: eigener App-Master als Basis (`basis: datei:`), MCP-Server 1.4.0 (01.11.2026)
+
+Testsong „Kein Aber – 1. Du weißt es“ (48 kHz, 16 Bit). App-Master in der PC-Fassung von Hand gebaut nach den Messwerten des Nutzers (Low Cut 80 Hz, Glocke 260 Hz +3,2 dB, Kerben 786/862/938 Hz, High Cut 11,5 kHz, Breite 92 %, Bass-Mono 110 Hz, Kompressor aus, Ziel −12 LUFS, „Drive auf Ziel“), Einstellungen gesichert, als WAV 24 Bit exportiert. Die Einstellungsdatei des Nutzers lag nicht vor (nicht gesichert).
+
+| Prüfung | Ergebnis |
+|---|---|
+| Chat-Werkzeug: `basis: datei:…`, Klang neutral, `ziel_aus_datei`, `ceiling: datei`, `notches: datei`, Clean aus, Rauschteppich 0 | Lautheit −12,10 / −12,10 LUFS, True Peak −1,00 / −1,00 dBTP, Spektrum 11 Bänder Δ 0,00 dB, Nulltest bitgleich (Rest 0) |
+| MCP-Engine, gleiche Konfiguration | bitgleich |
+| Album-Ziel −14 LUFS, `notches: beide`, Rauschteppich 70 %, `klang` luft +1 / bass −1 | Low Cut und High Cut unverändert, Klangwünsche in den Shelf-Bändern 9 kHz und 90 Hz, Drive +4,0 → +1,6 dB, −14,0 LUFS; Abweichungen im Bericht vollständig |
+| `notches: neu` ohne / mit `clean_toene_unter_2k` | keine Kerbe / 850 Hz (der einzige gefundene Ton, 11 dB, 68 % des Songs) |
+| Album-Werkzeug-Test (künstliche Songs) | Nulltest Datei-Basis bitgleich; neue Kerbe bei einem 850-Hz-Störton, Klangwunsch und Decke als Abweichung; Bericht nennt Kerben und Abweichungen |
+| MCP-Test | Plan mit Ziel und Decke aus der Datei; abgelehnt: Datei außerhalb der Freigabe, mit „..“, fehlend, ohne .json, `ceiling: datei` / `ziel_aus_datei` ohne Datei-Basis, unbekannte `notches`, Text statt true/false; alle Prüfungen bestanden |
+| Browser-Tests | 181 bestanden, PC-Fassung bestanden |
+
+### Offen
+- Nulltest mit der echten Einstellungsdatei des Nutzers gegen seinen exportierten Master, sobald die Datei gesichert ist.

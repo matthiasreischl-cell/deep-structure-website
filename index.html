@@ -93,7 +93,7 @@
       try { const c = document.createElement('canvas'); const g = c.getContext('webgl2'); if (g) { const x = g.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); return true; } } catch (e) {}
       return false;
     })();
-    import('./music.js?v=1').catch(error => console.warn('Hintergrundmusik nicht verfügbar:', error));
+    import('./music.js?v=2').catch(error => console.warn('Hintergrundmusik nicht verfügbar:', error));
     await import('./app.js?v=11');
     if (location.hash === '#inside') {
       document.body.classList.add('entered');

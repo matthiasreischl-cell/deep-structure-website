@@ -13,7 +13,7 @@ const TRACKS = [
   { title: 'Neubeginn', src: './assets/music/neubeginn.mp3' },
   { title: 'Life', src: './assets/music/life.mp3' }
 ];
-const LEVEL = 0.42;
+const LEVEL = 0.38; // bewusst leise, rund 10 % unter dem ersten Wert
 const FADE_IN = 2.2;
 const FADE_OUT = 0.9;
 const STORE_KEY = 'ds-music';

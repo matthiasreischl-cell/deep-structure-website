@@ -7,6 +7,18 @@
   <meta name="referrer" content="no-referrer" />
   <meta name="description" content="Deep Structure Internetradio — dunkle Geschichten und Drum & Bass. Entdecke veröffentlichte Vinyl, Apps und Spiele." />
   <title>Deep Structure — Internetradio, Vinyl, Apps &amp; Spiele, Webshop</title>
+  <link rel="canonical" href="https://deepstructure.world/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Deep Structure" />
+  <meta property="og:locale" content="de_AT" />
+  <meta property="og:url" content="https://deepstructure.world/" />
+  <meta property="og:title" content="Deep Structure — Internetradio, Drum &amp; Bass und eigene Welten" />
+  <meta property="og:description" content="Dunkle Geschichten und Drum &amp; Bass. Radio hören, Vinyl entdecken, Apps und Spiele von Deep Structure." />
+  <meta property="og:image" content="https://deepstructure.world/assets/og-deep-structure.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="Das Deep-Structure-Logo mit Ringen und Dreieck schwebt über dunklem Wasser" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" href="./favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png" />
@@ -19,14 +31,14 @@
   <link rel="stylesheet" href="radio.css?v=1" />
   <link rel="stylesheet" href="channels.css?v=3" />
   <link rel="stylesheet" href="perception-game.css?v=2" />
-  <link rel="stylesheet" href="story-world.css?v=6" />
+  <link rel="stylesheet" href="story-world.css?v=7" />
   <link rel="stylesheet" href="cursor.css?v=1" />
   <link rel="stylesheet" href="landing-3d.css?v=4" />
-  <link rel="stylesheet" href="polish.css?v=3" />
-  <link rel="stylesheet" href="speaker.css?v=2" />
+  <link rel="stylesheet" href="polish.css?v=4" />
+  <link rel="stylesheet" href="speaker.css?v=3" />
   <link rel="stylesheet" href="projects.css?v=1" />
-  <link rel="stylesheet" href="music.css?v=2" />
-  <link rel="stylesheet" href="shop.css?v=2" />
+  <link rel="stylesheet" href="music.css?v=3" />
+  <link rel="stylesheet" href="shop.css?v=3" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
@@ -48,8 +60,8 @@
     <p class="transition-copy">The World you get in.</p>
   </div>
 
-  <div class="inside" id="inside" aria-hidden="true">
-    <section class="world" id="world" aria-label="Deep Structure World">
+  <div class="inside" id="inside" aria-hidden="true" inert>
+    <section class="world" id="world" aria-label="Deep Structure World" tabindex="-1">
       <div class="world-haze" aria-hidden="true"></div>
       <div class="world-scene" id="worldScene">
         <div class="world-core" aria-hidden="true"></div>
@@ -96,11 +108,13 @@
       try { const c = document.createElement('canvas'); const g = c.getContext('webgl2'); if (g) { const x = g.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); return true; } } catch (e) {}
       return false;
     })();
-    import('./music.js?v=2').catch(error => console.warn('Hintergrundmusik nicht verfügbar:', error));
-    await import('./app.js?v=11');
+    import('./music.js?v=3').catch(error => console.warn('Hintergrundmusik nicht verfügbar:', error));
+    await import('./app.js?v=12');
     if (location.hash === '#inside') {
       document.body.classList.add('entered');
       document.getElementById('inside').setAttribute('aria-hidden', 'false');
+      document.getElementById('inside').inert = false;
+      document.getElementById('landing').inert = true;
     } else if (window.__DS_LANDING3D) {
       try {
         await import('./landing-3d.js?v=5');
@@ -115,7 +129,7 @@
     } else {
       await import('./symbol-v2.js?v=6');
     }
-    await import('./world.js?v=17');
+    await import('./world.js?v=18');
     await import('./perception-game.js?v=3');
   </script>
 </body>

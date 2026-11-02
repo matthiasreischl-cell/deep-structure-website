@@ -10,9 +10,11 @@ export const vinylReleases = [{
   purchaseUrl: 'https://elasticstage.com/deep-structure/releases/the-forest-does-not-forget-album'
 }];
 
+// open: false zeigt „Im Aufbau“. Sobald der Shopify-Shop ohne Passwort erreichbar ist, auf true stellen.
 export const shop = {
   title: 'Deep Structure Webshop',
-  url: 'https://yhzrzs-j1.myshopify.com/'
+  url: 'https://yhzrzs-j1.myshopify.com/',
+  open: false
 };
 
 export const channels = [

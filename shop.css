@@ -125,6 +125,60 @@
 }
 
 /* In der Welt */
+/* Schild „Im Aufbau“, solange der Shop noch geschlossen ist */
+.vitrine-tag {
+  position: absolute;
+  right: -1.4em;
+  top: -1.5em;
+  padding: .45em 1em .5em;
+  font-family: var(--font-text, Inter, sans-serif);
+  font-size: 1.15em;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #1a140c;
+  background: linear-gradient(180deg, #e7cf98, #c9a86a);
+  border-radius: .25em;
+  box-shadow: 0 .4em 1em rgba(0, 0, 0, .55);
+  transform: rotate(6deg);
+}
+.vitrine-tag::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -.9em;
+  width: 1px;
+  height: .9em;
+  background: rgba(231, 207, 152, .6);
+}
+
+.shop-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--gold-bright, #dcbd80);
+}
+.shop-status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold, #c9a86a);
+  box-shadow: 0 0 0 0 rgba(201, 168, 106, .5);
+  animation: shop-pulse 2.4s ease-out infinite;
+}
+@keyframes shop-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(201, 168, 106, .5); }
+  70%, 100% { box-shadow: 0 0 0 9px rgba(201, 168, 106, 0); }
+}
+.shop-detail-note--now { margin-top: 4px; margin-bottom: 14px; color: var(--ink-soft, #c4b394); }
+.shop-detail--soon .shop-categories { opacity: .86; }
+
 .world-object--vitrine { --shop-size: clamp(6.3px, min(.68vw, .98vh), 8.8px); width: auto; }
 .world-object--vitrine .world-object-label { top: calc(100% + .9em); }
 .world-object--vitrine .vitrine-glass { transition: border-color 200ms ease; }
@@ -165,11 +219,16 @@
 @media (max-width: 760px) {
   .world-object--vitrine { --shop-size: 7px; }
   .shop-detail-visual .vitrine { --shop-size: 7.6px; }
+  .shop-detail-visual { display: grid; place-items: center; min-height: 0; padding: 84px 24px 40px; }
+  .vitrine-tag { right: -.6em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vitrine-item, .vitrine-name, .vitrine-sweep { animation: none; }
+  .vitrine-item, .vitrine-name, .vitrine-sweep, .shop-status::before { animation: none; }
   .vitrine-bay > .vitrine-item:first-of-type,
   .vitrine-bay > .vitrine-name:first-of-type { opacity: 1; }
   .world-object--vitrine:active .vitrine { transform: none; }
 }
+
+/* Im Fenster liegt die Vitrine über dem Bild: dunkleres Glas, damit die Produkte lesbar bleiben */
+.shop-detail-visual .vitrine-glass { background: rgba(8, 7, 5, .74); }

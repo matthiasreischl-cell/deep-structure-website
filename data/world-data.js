@@ -72,3 +72,70 @@ export const radio = {
   nowPlayingFallback: 'Deep Structure — Geschichten in ihrer Reihenfolge',
   tunerMark: 'DS'
 };
+
+// Das Bild in der Mitte der Vinyl in der Welt (steht für alle Platten).
+export const vinylShelf = {
+  label: './assets/albums/deep-space-label.webp',
+  caption: 'Deep Structure auf Platte'
+};
+
+// Apps & Spiele: das Teaser-Video oben und die Projekte darunter.
+export const projectsTeaser = {
+  title: 'Clash of the Universe · Teaser',
+  src: './assets/games/clash-shadow-teaser.mp4',
+  poster: './assets/projects/clash-title.webp'
+};
+
+export const projects = [
+  {
+    id: 'clash',
+    title: 'Clash of the Universe',
+    status: 'Spiel · in Entwicklung',
+    text: 'Sci-Fi-Tower-Defense fürs Handy, gezeichnet im Comic-Stil. Ein Spiel, zwei Seiten der Galaxie: Halte die Basis gegen die anrückenden Maschinen von Shadow of the Universe.',
+    images: [
+      { src: './assets/projects/clash-title.webp', alt: 'Titelbild Clash of the Universe und Shadow of the Universe' },
+      { src: './assets/projects/clash-helden.webp', alt: 'Die vier Helden: Kommandant, Technikerin, Schwerer und Aufklärerin' },
+      { src: './assets/projects/clash-anlagen.webp', alt: 'Anlagen und Fahrzeuge der Basis' }
+    ]
+  },
+  {
+    id: 'monsterjaeger',
+    title: 'Monsterjäger',
+    status: 'Spiel · in Entwicklung',
+    text: 'Dunkles Fantasy-Spiel um einen Jäger, verflucht, aber immer noch Mensch. Mit Schwert und Armbrust unterwegs auf der alten Landstraße.',
+    images: [
+      { src: './assets/projects/monsterjaeger-spiel.webp', alt: 'Spielszene: der Monsterjäger kämpft auf der alten Landstraße gegen Untote' },
+      { src: './assets/projects/monsterjaeger-held.webp', alt: 'Figurenblatt des Monsterjägers mit Ausrüstung und Farbpalette' }
+    ]
+  },
+  {
+    id: 'studio',
+    title: 'Deep Structure Mastering Studio',
+    status: 'App · im Browser nutzbar',
+    text: 'Mastering direkt im Browser: Song-Check, Equalizer, Kompressor, Limiter und Export als WAV, MP3 oder OGG. Alles läuft auf deinem Gerät, deine Audiodateien verlassen es nicht.',
+    link: { label: 'Studio öffnen', href: './studio/' },
+    images: [
+      { src: './assets/projects/studio.webp', alt: 'Oberfläche des Deep Structure Mastering Studio' }
+    ]
+  },
+  {
+    id: 'trading',
+    title: 'Private AI Trading Bot',
+    status: 'App · privat, in Entwicklung',
+    text: 'Eine eigene Desktop-App, in der mehrere KI-Agenten Märkte beobachten und Risiken prüfen. Sie läuft lokal, und jeder Trade braucht eine Freigabe von Hand.',
+    images: [
+      { src: './assets/projects/trading-bot.webp', alt: 'Übersicht der Trading-App mit Kursverlauf und Agenten' }
+    ]
+  }
+];
+
+// Bilder, die auf den Karten in der Welt durchlaufen.
+export const projectDeck = [
+  './assets/projects/thumb-clash-title.webp',
+  './assets/projects/thumb-monsterjaeger-held.webp',
+  './assets/projects/thumb-clash-helden.webp',
+  './assets/projects/thumb-studio.webp',
+  './assets/projects/thumb-monsterjaeger-spiel.webp',
+  './assets/projects/thumb-clash-anlagen.webp',
+  './assets/projects/thumb-trading-bot.webp'
+];

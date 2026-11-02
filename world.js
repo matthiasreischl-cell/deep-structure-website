@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio } from './data/world-data.js?v=5';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=6';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -11,8 +11,8 @@ const header = document.querySelector('.world-header');
 const footer = document.querySelector('.world-footer');
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 const mobileQuery = matchMedia('(max-width: 760px)');
-const desktopLayout = { forest: [21, 47, 25], radio: [50, 39, 65], programmes: [79, 47, 20], shop: [50, 80, 10] };
-const mobileLayout = { radio: [50, 22, 0], forest: [50, 44, 0], programmes: [50, 65, 0], shop: [50, 85, 0] };
+const desktopLayout = { vinyl: [21, 47, 25], radio: [50, 39, 65], programmes: [79, 47, 20], shop: [50, 80, 10] };
+const mobileLayout = { radio: [50, 22, 0], vinyl: [50, 44, 0], programmes: [50, 65, 0], shop: [50, 85, 0] };
 const interactiveObjects = [];
 let active = false;
 let pointerNX = 0;
@@ -59,32 +59,45 @@ function externalLink(title, url, className = 'world-link') {
   return link;
 }
 
-function createVinyl(release) {
+function createVinyl() {
   const button = el('button', 'world-object world-object--vinyl');
   button.type = 'button';
-  button.dataset.worldId = release.id;
+  button.dataset.worldId = 'vinyl';
   button.dataset.depth = '.48';
   button.dataset.phase = '0';
-  button.setAttribute('aria-label', 'Vinyl: ' + release.title);
-  button.style.setProperty('--cover', 'url("' + release.labelImage + '")');
+  button.setAttribute('aria-label', 'Vinyl von Deep Structure öffnen');
+  button.style.setProperty('--cover', 'url("' + vinylShelf.label + '")');
   const disc = el('span', 'vinyl-disc');
   disc.append(el('span', 'vinyl-label'));
-  button.append(disc, label('Vinyl', release.title));
+  button.append(disc, label('Vinyl', vinylShelf.caption));
   button.addEventListener('click', openVinyl);
   return button;
 }
 
 function createProgrammes() {
-  const button = el('button', 'world-object world-object--programmes');
+  const button = el('button', 'world-object world-object--deck');
   button.type = 'button';
   button.dataset.worldId = 'programmes';
   button.dataset.depth = '.4';
   button.dataset.phase = '4.2';
   button.setAttribute('aria-label', 'Apps & Spiele öffnen');
-  const terminal = el('span', 'programme-terminal');
-  terminal.setAttribute('aria-hidden', 'true');
-  terminal.append(el('span', 'programme-screen', '> _'), el('span', 'programme-stand'));
-  button.append(terminal, label('Apps & Spiele', 'Ideen, die erlebbar werden.'));
+  const deck = el('span', 'project-deck');
+  deck.setAttribute('aria-hidden', 'true');
+  const back = el('span', 'project-card project-card--back');
+  back.style.setProperty('--card', 'url("' + projectDeck[2] + '")');
+  const middle = el('span', 'project-card project-card--middle');
+  middle.style.setProperty('--card', 'url("' + projectDeck[1] + '")');
+  const front = el('span', 'project-card project-card--front');
+  // Vorne laufen alle Projektbilder nacheinander durch (reines CSS, weich überblendet).
+  projectDeck.forEach((src, index) => {
+    const face = el('span', 'project-card-face');
+    face.style.backgroundImage = 'url("' + src + '")';
+    face.style.animationDelay = (index * 3.2 - projectDeck.length * 3.2) + 's';
+    front.append(face);
+  });
+  front.style.setProperty('--deck-cycle', (projectDeck.length * 3.2) + 's');
+  deck.append(back, middle, front);
+  button.append(deck, label('Apps & Spiele', 'Clash · Monsterjäger · Studio'));
   button.addEventListener('click', openProgrammes);
   return button;
 }
@@ -194,7 +207,7 @@ function openShop() {
 
 function renderWorld() {
   const fragment = document.createDocumentFragment();
-  vinylReleases.filter(release => release.published).forEach(release => fragment.append(createVinyl(release)));
+  fragment.append(createVinyl());
   fragment.append(createRadio(), createProgrammes(), createShop());
   objectsLayer.replaceChildren(fragment);
   interactiveObjects.push(...objectsLayer.querySelectorAll('.world-object'));
@@ -267,41 +280,118 @@ function openVinyl() {
   openPanel(detail);
 }
 
-function openProgrammes() {
-  const detail = el('article', 'programmes-detail');
-  detail.append(el('h2', '', 'Apps & Spiele'));
-  detail.append(el('p', 'detail-intro', 'Ein eigener Raum für interaktive Ideen von Deep Structure.'));
-  const pitch = el('section', 'games-pitch');
-  pitch.append(el('h3', '', 'Deep Structure Games'));
+function playableVideo(src, poster, label, buttonText) {
+  const wrap = el('div', 'project-video');
   const video = el('video', 'games-pitch-video');
   video.controls = true;
   video.playsInline = true;
   video.preload = 'metadata';
   video.tabIndex = 0;
-  video.setAttribute('aria-label', 'Pitch-Video für Deep Structure Games');
+  if (poster) video.poster = poster;
+  video.setAttribute('aria-label', label);
   const source = el('source');
-  source.src = './assets/games/deep-structure-games-pitch.mp4';
+  source.src = src;
   source.type = 'video/mp4';
-  video.append(source, externalLink('Pitch-Video öffnen', source.src));
-  const playVideo = el('button', 'world-link world-link--primary', 'Pitch-Video abspielen');
-  playVideo.type = 'button';
-  playVideo.addEventListener('click', async () => {
+  video.append(source, externalLink('Video öffnen', src));
+  const play = el('button', 'world-link world-link--primary', buttonText);
+  play.type = 'button';
+  play.addEventListener('click', async () => {
     stopRadio();
-    try { await video.play(); } catch { playVideo.textContent = 'Video erneut starten'; }
+    try { await video.play(); } catch { play.textContent = 'Video erneut starten'; }
   });
-  video.addEventListener('play', () => { playVideo.hidden = true; video.focus({ preventScroll: true }); });
-  video.addEventListener('ended', () => { playVideo.hidden = false; });
-  pitch.append(video, playVideo);
-  detail.append(pitch);
+  video.addEventListener('play', () => {
+    stopRadio();
+    panelCard.querySelectorAll('video').forEach(other => { if (other !== video) other.pause(); });
+    play.hidden = true;
+  });
+  video.addEventListener('ended', () => { play.hidden = false; });
+  wrap.append(video, play);
+  return wrap;
+}
+
+function projectViewer(project) {
+  const viewer = el('div', 'project-viewer');
+  const mainLink = el('a', 'project-main');
+  mainLink.href = project.images[0].src;
+  mainLink.target = '_blank';
+  mainLink.rel = 'noopener';
+  const main = el('img');
+  main.src = project.images[0].src;
+  main.alt = project.images[0].alt;
+  main.loading = 'lazy';
+  main.decoding = 'async';
+  mainLink.append(main);
+  mainLink.setAttribute('aria-label', project.images[0].alt + ' – groß öffnen');
+  viewer.append(mainLink);
+  if (project.images.length > 1) {
+    const strip = el('div', 'project-thumbs');
+    project.images.forEach((image, index) => {
+      const thumb = el('button', 'project-thumb');
+      thumb.type = 'button';
+      thumb.setAttribute('aria-label', 'Bild zeigen: ' + image.alt);
+      thumb.setAttribute('aria-pressed', String(index === 0));
+      const pic = el('img');
+      pic.src = image.src;
+      pic.alt = '';
+      pic.loading = 'lazy';
+      thumb.append(pic);
+      thumb.addEventListener('click', () => {
+        strip.querySelectorAll('.project-thumb').forEach(node => node.setAttribute('aria-pressed', String(node === thumb)));
+        main.classList.add('is-swapping');
+        setTimeout(() => {
+          main.src = image.src;
+          main.alt = image.alt;
+          mainLink.href = image.src;
+          mainLink.setAttribute('aria-label', image.alt + ' – groß öffnen');
+          main.classList.remove('is-swapping');
+        }, 140);
+      });
+      strip.append(thumb);
+    });
+    viewer.append(strip);
+  }
+  return viewer;
+}
+
+function openProgrammes() {
+  const detail = el('article', 'programmes-detail');
+  detail.append(el('h2', '', 'Apps & Spiele'));
+  detail.append(el('p', 'detail-intro', 'Woran Deep Structure gerade arbeitet: Spiele, Apps und Werkzeuge, alle selbst entwickelt.'));
+
+  const teaser = el('section', 'games-pitch project-teaser');
+  teaser.append(el('h3', '', projectsTeaser.title));
+  teaser.append(playableVideo(projectsTeaser.src, projectsTeaser.poster, 'Teaser zu Clash of the Universe', 'Teaser abspielen'));
+  detail.append(teaser);
+
+  projects.forEach((project, index) => {
+    const section = el('section', 'project-row' + (index % 2 ? ' project-row--flip' : ''));
+    const copy = el('div', 'project-copy');
+    copy.append(el('p', 'project-status', project.status), el('h3', '', project.title), el('p', '', project.text));
+    if (project.link) {
+      const link = el('a', 'world-link world-link--primary', project.link.label + ' ↗');
+      link.href = project.link.href;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      copy.append(link);
+    }
+    section.append(projectViewer(project), copy);
+    detail.append(section);
+  });
+
   const game = el('section', 'programme-project');
-  game.append(el('p', 'project-status', 'Spiel · in Entwicklung'));
+  game.append(el('p', 'project-status', 'Spiel · zum Ausprobieren'));
   game.append(el('h3', '', 'The World I Let In'));
   game.append(el('p', '', 'Ein Wahrnehmungsspiel, das dich in die Welt um dich herum führt. Die erste Erfahrung kannst du hier ausprobieren.'));
   const launch = el('button', 'world-link world-link--primary', 'Wahrnehmungsspiel öffnen');
   launch.type = 'button';
   launch.addEventListener('click', () => window.dispatchEvent(new Event('deepstructure:perception-game')));
   game.append(launch);
-  detail.append(game, el('p', 'programmes-note', 'Weitere Anwendungen und Spiele folgen.'));
+  detail.append(game);
+
+  const pitch = el('section', 'games-pitch');
+  pitch.append(el('h3', '', 'Deep Structure Games'));
+  pitch.append(playableVideo('./assets/games/deep-structure-games-pitch.mp4', '', 'Pitch-Video für Deep Structure Games', 'Pitch-Video abspielen'));
+  detail.append(pitch, el('p', 'programmes-note', 'Weitere Anwendungen und Spiele folgen.'));
   openPanel(detail);
 }
 

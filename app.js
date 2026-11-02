@@ -106,8 +106,13 @@ function enter() {
     document.body.classList.add('entered');
     transition.setAttribute('aria-hidden', 'true');
     inside.setAttribute('aria-hidden', 'false');
+    inside.inert = false;
+    const landingEl = document.getElementById('landing');
+    if (landingEl) landingEl.inert = true;
     location.hash = 'inside';
     window.dispatchEvent(new CustomEvent('deepstructure:entered'));
+    // Tastatur und Screenreader landen in der sichtbaren Welt, nicht mehr auf dem Logo.
+    requestAnimationFrame(() => document.getElementById('world')?.focus({ preventScroll: true }));
   }, reducedMotion ? 100 : 3100);
 }
 

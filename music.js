@@ -125,6 +125,7 @@ async function startAudible() {
     return;
   }
   audible = true;
+  setMedia();
   ramp(LEVEL, FADE_IN);
   syncButton();
 }
@@ -144,10 +145,26 @@ audio.addEventListener('ended', () => {
     audio.play().then(() => { ramp(LEVEL, 0.4); showCaption(TRACKS[index].title); }).catch(() => {});
   }
 });
+let failures = 0;
+audio.addEventListener('playing', () => { failures = 0; });
 audio.addEventListener('error', () => {
-  // Datei fehlt oder Netzwerkfehler: zum nächsten Stück, aber nicht endlos.
-  if (!wanted) return;
+  // Datei fehlt oder Netzwerkfehler: nächstes Stück starten, aber höchstens einmal rundherum.
+  if (!wanted || !audio.getAttribute('src')) return;
+  failures += 1;
+  if (failures >= TRACKS.length) {
+    failures = 0;
+    wanted = false;
+    audible = false;
+    audio.removeAttribute('src');
+    ramp(0, 0.1);
+    syncButton();
+    showCaption('Musik gerade nicht erreichbar', 3600);
+    return;
+  }
   load(index + 1);
+  if (!blockers.size) {
+    audio.play().then(() => { audible = true; ramp(LEVEL, 0.6); syncButton(); }).catch(() => {});
+  }
 });
 
 function turnOn() {
@@ -167,11 +184,21 @@ function turnOff() {
 
 button.addEventListener('click', () => (wanted ? turnOff() : turnOn()));
 
+// Medientasten gelten der Quelle, die gerade läuft: bei laufendem Radio stoppt Pause das Radio.
+const radioOn = () => document.body.classList.contains('radio-playing');
 if ('mediaSession' in navigator) {
   try {
-    navigator.mediaSession.setActionHandler('play', turnOn);
-    navigator.mediaSession.setActionHandler('pause', turnOff);
+    navigator.mediaSession.setActionHandler('play', () => { if (!radioOn()) turnOn(); });
+    navigator.mediaSession.setActionHandler('pause', () => {
+      if (radioOn()) dispatchEvent(new CustomEvent('deepstructure:radio-stop'));
+      else turnOff();
+    });
+    navigator.mediaSession.setActionHandler('stop', () => {
+      if (radioOn()) dispatchEvent(new CustomEvent('deepstructure:radio-stop'));
+      else turnOff();
+    });
     navigator.mediaSession.setActionHandler('nexttrack', () => {
+      if (radioOn()) return;
       load(index + 1);
       if (wanted) { audio.play().catch(() => {}); showCaption(TRACKS[index].title); }
     });

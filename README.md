@@ -1,87 +1,58 @@
-# Deep Structure — Interactive World Prototype
+# Deep Structure — Website
 
-Experimental entrance and first interior world for the Deep Structure website.
+Website von Deep Structure auf [deepstructure.world](https://deepstructure.world/) (GitHub Pages).
+Reines HTML, CSS und JavaScript als ES-Module, ohne Build-Schritt.
 
-## Entrance
+## Ablauf
 
-- Full-screen dark liquid/WebGL surface
-- Persistent object-centered displacement and ripple field
-- Pointer-reactive water ripples
-- Custom compass cursor on desktop
-- Procedurally reconstructed Three.js Deep Structure symbol
-- Metallic 3D lighting, depth, idle float and cursor-driven tilt
-- Separate HTML/CSS `DEEP STRUCTURE` wordmark
-- Click/tap transition with **“The World you get in.”**
-- Responsive behavior for desktop and touch devices
-- Reduced-motion fallback
+1. **Startseite:** Das Deep-Structure-Logo schwebt in 3D über dunklem Wasser. Die Ringe drehen sich
+   waagrecht um das Dreieck (wie eine Armillarsphäre). Beim Klick taucht das Logo ein, und die Wellen
+   laufen hinter „The World you get in.“ aus.
+2. **Welt:** Nach dem Eintreten (Adresse `#inside`) stehen vier Objekte im Wald:
+   - **Musik:** Bassbox mit Signalring, öffnet das Deep Structure Radio (Live-Stream über Asura Hosting).
+   - **Vinyl:** Platte mit Deep-Space-Label; elasticStage-Link zur veröffentlichten Vinyl.
+   - **Apps & Spiele:** Kartenstapel; öffnet Teaser-Video, Clash of the Universe, Monsterjäger,
+     Mastering Studio (`/studio/`) und den Private AI Trading Bot.
+   - **Webshop:** Vitrine mit wechselnden Produkten. Solange `shop.open` in `data/world-data.js`
+     auf `false` steht, zeigt sie „Im Aufbau“ und verweist auf die Vinyl.
+3. **Hintergrundmusik:** Lautsprecher-Knopf unten rechts. Vier Klavierstücke im Loop, leise.
+   Pausiert, solange Radio oder ein Video läuft.
 
-## Deep Structure World V1
+Neu laden beginnt immer wieder bei der Startseite. Direkt in die Welt geht es nur bei der Rückkehr
+von Impressum oder Datenschutz innerhalb von 30 Minuten.
 
-After the entrance transition, the visitor enters a dark spatial navigation scene rather than a conventional menu.
+## Wichtige Dateien
 
-Current world objects:
+- `index.html`: Startseite, Übergang und Welt-Grundgerüst; Meta- und Vorschau-Angaben (Open Graph)
+- `landing-3d.js` / `landing-3d.css`: 3D-Startseite (Three.js, WebGL2). Ohne WebGL2 übernehmen
+  `symbol-v2.js` und der Wasser-Shader in `app.js`.
+- `app.js`: Wasser-Shader und Eintritt; setzt `#inside` und löst `deepstructure:entered` aus
+- `world.js`: Objekte, Navigation, Fenster (Radio, Vinyl, Apps & Spiele, Webshop), Radio-Steuerung
+- `data/world-data.js`: Inhalte und Links (Vinyl, Shop, Kanäle, Radio, Projekte)
+- `music.js` / `music.css`: Hintergrundmusik, Medientasten, Anzeige „On Air · Stop“ für das Radio
+- `fonts.css`: selbst gehostete Schriften (Cormorant Garamond, Inter; OFL-Lizenzen in `assets/fonts/`)
+  und Farb-/Bewegungs-Tokens
+- `polish.css`: Schrift, Farben, Fenster und Knöpfe der Welt (wird nach den Grund-Stylesheets geladen)
+- `speaker.css`, `projects.css`, `shop.css`: Bassbox, Kartenstapel und Projekt-Ansicht, Vitrine
+- `styles.css`, `world.css`, `radio.css`, `story-world.css`: Grundlayout von Startseite und Welt
+- `studio/`: Deep Structure Mastering Studio (eigene Web-App)
+- `impressum.html`, `datenschutz.html`, `legal.css`: Rechtliches
+- `manifest.webmanifest`, `favicon.ico`, `assets/icons/`: App-Symbol für Startbildschirm und Browser
+- `robots.txt`, `sitemap.xml`: für Suchmaschinen
 
-- 5 floating vinyl records — entrances to album worlds
-  - Das Theater der Wirklichkeit
-  - Kintsugi
-  - Faust – The Deep Structure Deception
-  - It Works
-  - Die roten Schuhe
-- 1 suspended archival photo — entrance to Memories
-- 1 floating door — entrance to Channels
-- subtle pointer parallax and object float
-- restrained hover responses
-- minimal `INDEX` fallback navigation
-- first-level detail overlays for albums, Memories and Channels
-- mobile layout and reduced-motion handling
+Three.js liegt lokal unter `assets/vendor/three/`; es werden keine Skripte von fremden Servern geladen.
 
-Album covers are used only as compact vinyl-label/detail references, not as flat billboards in the main world.
-
-## Channels
-
-The Channels view is prepared for:
-
-- SoundCloud
-- Spotify
-- Amazon Music
-- YouTube
-- YouTube Music
-- Apple Music / iTunes
-- TikTok
-- Bandcamp
-
-URLs are currently placeholders in `data/world-data.js`. Real external URLs will open in a new tab once entered.
-
-## Runtime dependency
-
-The prototype imports Three.js as an ES module from unpkg. No framework or build process is required for the current GitHub Pages version.
-
-## Main files
-
-- `landing-3d.js` / `landing-3d.css` — 3D-Startseite: Logo schwebt über Wasser mit echter Spiegelung und Wellen (Three.js, WebGL2). Die Ringe drehen sich waagrecht um das Dreieck (wie eine Armillarsphäre) und stellen sich nach vorn, wenn man aufs Logo zeigt; beim Klick drehen sie hoch, das Logo taucht ein und die Wellen laufen hinter „The World you get in.“ aus. Ohne WebGL2 wird automatisch `symbol-v2.js` + Wasser-Shader aus `app.js` genutzt.
-
-- `index.html` — entrance shell, transition and World V1 host markup
-- `fonts.css` — selbst gehostete Schriften (Cormorant Garamond, Inter; OFL-Lizenzen in `assets/fonts/`) und Farb-/Bewegungs-Tokens
-- `polish.css` — Design-Feinschliff der Welt: Schrift, Farben, Panels, Knöpfe, Ankunfts-Animation (wird zuletzt geladen)
-- `styles.css` — entrance composition, symbol stage and compass
-- `app.js` — WebGL water shader and entrance interaction
-- `symbol-v2.js` — corrected procedural 3D Deep Structure symbol
-- `world.css` — interior world, vinyl/photo/door objects and detail panels
-- `world.js` — World V1 rendering, navigation, parallax and overlays
-- `data/world-data.js` — albums, memories and channel configuration
-- `data/assets/*.js` — compact embedded WebP references supplied for this prototype
-- `CODEX_TASK.md` — design/technical specification for further Codex work
-
-## Local preview
-
-Preview through a small local web server:
+## Lokale Vorschau
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Then open `http://localhost:8080`.
+Dann `http://localhost:8080` öffnen.
 
-## Event hand-off
+## Shop freischalten
 
-The entrance transition dispatches `deepstructure:entered` and sets the URL hash to `#inside`. `world.js` listens for that event and activates the interior scene.
+Sobald der Shopify-Shop ohne Passwort erreichbar ist:
+
+1. In `data/world-data.js` `open: true` setzen.
+2. In `impressum.html` den auskommentierten Link zum Kontaktformular wieder einblenden.

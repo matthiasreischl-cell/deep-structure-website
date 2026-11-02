@@ -189,7 +189,7 @@ body.radio-playing .ds-speaker-woofer { animation: ds-thump .345s cubic-bezier(.
 body.radio-playing .ds-speaker-lamp { background: #e0563f; box-shadow: 0 0 .6em #e0563f; }
 
 /* In der Welt */
-.world-object--speaker { --speaker-size: clamp(6.5px, min(.72vw, 1.04vh), 9.3px); z-index: 7; }
+.world-object--speaker { --speaker-size: clamp(5.85px, min(.65vw, .94vh), 8.4px); z-index: 7; }
 .world-object--speaker .world-object-label { top: calc(100% + 1.4em); }
 .world-object--speaker:hover .ds-speaker-front,
 .world-object--speaker:focus-visible .ds-speaker-front { border-color: var(--sp-gold); }
@@ -203,12 +203,13 @@ body.radio-playing .ds-speaker-lamp { background: #e0563f; box-shadow: 0 0 .6em 
   padding: 44px 24px 52px;
   background: radial-gradient(ellipse at 50% 55%, #241f16, var(--ground, #0b0a08) 68%);
 }
-.radio-detail-visual--speaker .ds-speaker { --speaker-size: clamp(8px, 1.05vw, 11px); }
+.radio-detail-visual--speaker .ds-speaker { --speaker-size: clamp(7.2px, .95vw, 9.9px); }
 
 @media (max-width: 760px) {
-  .world-object--speaker { --speaker-size: 7.1px; }
-  .radio-detail-visual--speaker { padding: 56px 24px 36px; }
-  .radio-detail-visual--speaker .ds-speaker { --speaker-size: 8px; }
+  .world-object--speaker { --speaker-size: 6.4px; }
+  /* Am Handy kompakt, damit PLAY ohne Scrollen sichtbar ist. */
+  .radio-detail-visual--speaker { padding: 52px 24px 0; }
+  .radio-detail-visual--speaker .ds-speaker { --speaker-size: 5.6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

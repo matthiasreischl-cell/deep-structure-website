@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=6';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=7';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -172,12 +172,12 @@ function createRadio() {
 // Webshop als Ladentheke: drei beleuchtete Fächer, in denen die Produkte durchwechseln.
 const GOLD = '#c9a86a';
 const SHOP_ITEMS = {
-  shirt: ['T-Shirts', `<path d="M30 22 L42 16 Q50 25 58 16 L70 22 L86 34 L78 48 L70 44 L70 86 Q50 90 30 86 L30 44 L22 48 L14 34 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M42 16 Q50 27 58 16" fill="none" stroke="#5c4a30" stroke-width="1.4"/>`, [50, 54]],
+  shirt: ['T-Shirts', `<path d="M30 22 L42 16 Q50 25 58 16 L70 22 L86 34 L78 48 L70 44 L70 86 Q50 90 30 86 L30 44 L22 48 L14 34 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M42 16 Q50 27 58 16" fill="none" stroke="#5c4a30" stroke-width="1.4"/><image href="./assets/shop/shirt-the-world-i-let-in.webp" x="35" y="30" width="30" height="30"/>`, null],
   hoodie: ['Hoodies', `<path d="M36 22 Q50 8 64 22 L80 30 L90 74 L80 76 L72 48 L72 88 Q50 92 28 88 L28 48 L20 76 L10 74 L20 30 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M40 24 Q50 36 60 24" fill="none" stroke="#5c4a30" stroke-width="1.4"/><path d="M38 70 L62 70 L58 82 L42 82 Z" fill="none" stroke="#3d3122" stroke-width="1.2"/><path d="M46 30 L45 42 M54 30 L55 42" stroke="${GOLD}" stroke-width="1" opacity=".7"/>`, [50, 56]],
   mug: ['Tassen', `<path d="M26 28 L66 28 L64 80 Q46 86 28 80 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M66 38 Q84 38 82 54 Q80 68 64 66" fill="none" stroke="#5c4a30" stroke-width="5" stroke-linecap="round"/><ellipse cx="46" cy="28" rx="20" ry="4" fill="#0b0a08" stroke="#5c4a30" stroke-width="1"/>`, [46, 54]],
   phone: ['Handyhüllen', `<rect x="31" y="10" width="38" height="80" rx="8" fill="#17140f" stroke="#5c4a30" stroke-width="1.2"/><rect x="36" y="15" width="12" height="16" rx="3" fill="#0b0a08" stroke="#3d3122"/><circle cx="42" cy="20" r="2.4" fill="#2c3b38"/><circle cx="42" cy="27" r="2.4" fill="#2c3b38"/>`, [50, 58]],
   vinyl: ['Vinyl', `<circle cx="50" cy="50" r="38" fill="#0a0a0b" stroke="#2a2620" stroke-width="1"/><circle cx="50" cy="50" r="31" fill="none" stroke="#1c1c1f" stroke-width="1"/><circle cx="50" cy="50" r="25" fill="none" stroke="#1c1c1f" stroke-width="1"/><clipPath id="vit-label"><circle cx="50" cy="50" r="14"/></clipPath><image href="./assets/albums/deep-space-label.webp" x="36" y="36" width="28" height="28" clip-path="url(#vit-label)"/><circle cx="50" cy="50" r="1.6" fill="#d9d4c8"/>`, null],
-  download: ['Musik-Downloads', `<clipPath id="vit-cover"><rect x="26" y="12" width="48" height="48" rx="2"/></clipPath><image href="./assets/albums/the-forest-does-not-forget.jpg" x="26" y="12" width="48" height="48" clip-path="url(#vit-cover)" preserveAspectRatio="xMidYMid slice"/><rect x="26" y="12" width="48" height="48" rx="2" fill="none" stroke="#5c4a30"/><path d="M50 66 L50 84 M42 77 L50 85 L58 77" fill="none" stroke="${GOLD}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`, null],
+  download: ['Musik-Downloads', `<clipPath id="vit-cover"><rect x="26" y="12" width="48" height="48" rx="2"/></clipPath><image href="./assets/albums/theater-der-wirklichkeit.webp" x="26" y="12" width="48" height="48" clip-path="url(#vit-cover)" preserveAspectRatio="xMidYMid slice"/><rect x="26" y="12" width="48" height="48" rx="2" fill="none" stroke="#5c4a30"/><path d="M50 66 L50 84 M42 77 L50 85 L58 77" fill="none" stroke="${GOLD}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`, null],
   game: ['Spiele', `<path d="M22 40 Q24 30 34 30 L66 30 Q76 30 78 40 L84 66 Q86 76 76 76 Q70 76 64 66 L36 66 Q30 76 24 76 Q14 76 16 66 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M32 44 L32 56 M26 50 L38 50" stroke="${GOLD}" stroke-width="2.2" stroke-linecap="round"/><circle cx="64" cy="46" r="2.8" fill="${GOLD}"/><circle cx="70" cy="52" r="2.8" fill="#5fd3c4"/>`, null],
   software: ['Programme', `<rect x="12" y="20" width="76" height="58" rx="4" fill="#0d0f13" stroke="#5c4a30" stroke-width="1.2"/><path d="M12 30 L88 30" stroke="#3d3122"/><circle cx="19" cy="25" r="1.6" fill="${GOLD}"/><circle cx="25" cy="25" r="1.6" fill="#5c4a30"/><path d="M18 56 L24 50 L28 60 L33 44 L38 64 L43 48 L48 58 L53 40 L58 62 L63 50 L68 56 L73 46 L78 58 L82 54" fill="none" stroke="#7fc4dc" stroke-width="1.4" stroke-linejoin="round"/>`, null]
 };
@@ -211,6 +211,7 @@ function shopVitrine() {
   const base = el('span', 'vitrine-base');
   base.append(el('span', 'vitrine-brand', 'DEEP STRUCTURE'));
   vitrine.append(el('span', 'vitrine-shadow'), glass, base);
+  if (!shop.open) vitrine.append(el('span', 'vitrine-tag', 'Im Aufbau'));
   return vitrine;
 }
 
@@ -221,18 +222,21 @@ function createShop() {
   button.dataset.depth = '.3';
   button.dataset.phase = '3.6';
   button.setAttribute('aria-label', 'Deep Structure Webshop öffnen');
-  button.append(shopVitrine(), label('Webshop', 'Merch, Musik, Spiele & Programme'));
+  button.append(shopVitrine(), label('Webshop', shop.open ? 'Merch, Musik, Spiele & Programme' : 'Im Aufbau · Merch, Musik & mehr'));
   button.addEventListener('click', openShop);
   return button;
 }
 
 function openShop() {
-  const detail = el('article', 'shop-detail');
+  const detail = el('article', 'shop-detail' + (shop.open ? '' : ' shop-detail--soon'));
   const visual = el('div', 'shop-detail-visual');
   visual.append(shopVitrine());
   const copy = el('div', 'shop-detail-copy');
+  if (!shop.open) copy.append(el('p', 'shop-status', 'Im Aufbau · öffnet bald'));
   copy.append(el('h2', '', 'Webshop'));
-  copy.append(el('p', 'detail-intro', 'Alles von Deep Structure an einem Ort. Hier kommt nach und nach alles zusammen:'));
+  copy.append(el('p', 'detail-intro', shop.open
+    ? 'Alles von Deep Structure an einem Ort. Hier kommt nach und nach alles zusammen:'
+    : 'Der Shop wird gerade eingerichtet. Hier kommt bald alles von Deep Structure zusammen:'));
   const list = el('ul', 'shop-categories');
   [
     ['Kleidung', 'T-Shirts und Hoodies'],
@@ -245,8 +249,15 @@ function openShop() {
     item.append(el('strong', '', title), el('span', '', text));
     list.append(item);
   });
-  copy.append(list, externalLink('Zum Webshop', shop.url, 'world-link world-link--primary'));
-  copy.append(el('p', 'shop-detail-note', 'Die Schallplatten gibt es auch direkt bei elasticStage.'));
+  copy.append(list);
+  const record = vinylReleases.find(release => release.published && release.purchaseUrl);
+  if (shop.open) {
+    copy.append(externalLink('Zum Webshop', shop.url, 'world-link world-link--primary'));
+    copy.append(el('p', 'shop-detail-note', 'Die Schallplatten gibt es auch direkt bei elasticStage.'));
+  } else if (record) {
+    copy.append(el('p', 'shop-detail-note shop-detail-note--now', 'Schon jetzt erhältlich: die Vinyl bei elasticStage.'));
+    copy.append(externalLink('Vinyl kaufen', record.purchaseUrl, 'world-link world-link--primary'));
+  }
   const vinyl = el('button', 'world-link', 'Zu den Platten');
   vinyl.type = 'button';
   vinyl.addEventListener('click', openVinyl);
@@ -445,10 +456,44 @@ function openProgrammes() {
   openPanel(detail);
 }
 
+// Sperrbildschirm, Headset- und Medientasten bedienen das Radio, solange es läuft.
+// Die Knöpfe selbst registriert music.js; bei laufendem Radio schickt es „deepstructure:radio-stop“.
+let radioMediaActive = false;
+function setRadioMedia(playing) {
+  if (!('mediaSession' in navigator)) return;
+  try {
+    if (playing) {
+      if (window.MediaMetadata) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: lastRadioTitle,
+          artist: 'Deep Structure Radio',
+          album: 'Live-Stream',
+          artwork: [{ src: './assets/icons/icon-512.png', sizes: '512x512', type: 'image/png' }]
+        });
+      }
+      navigator.mediaSession.playbackState = 'playing';
+    } else if (radioMediaActive) {
+      navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = 'none';
+    }
+  } catch (e) {}
+  radioMediaActive = playing;
+}
+addEventListener('deepstructure:radio-stop', () => stopRadio());
+
+// Kleine Anzeige außerhalb des Fensters: das Radio läuft, mit STOP.
+const radioOnAir = el('button', 'radio-live-pill');
+radioOnAir.type = 'button';
+radioOnAir.setAttribute('aria-label', 'Deep Structure Radio stoppen');
+radioOnAir.innerHTML = '<span class="radio-live-pill-dot" aria-hidden="true"></span><span class="radio-live-pill-text">On Air</span><span class="radio-live-pill-stop" aria-hidden="true"></span><span class="radio-live-pill-label">Stop</span>';
+radioOnAir.addEventListener('click', () => stopRadio());
+document.body.append(radioOnAir);
+
 function syncRadioState(message = '') {
   const playing = !radioAudio.paused && Boolean(radioAudio.src);
   radioObject?.classList.toggle('is-playing', playing);
   document.body.classList.toggle('radio-playing', playing);
+  if (playing !== radioMediaActive) setRadioMedia(playing);
 
   if (radioControlButton) {
     radioControlButton.textContent = playing ? 'STOP' : 'PLAY';
@@ -477,6 +522,7 @@ async function refreshRadioMetadata() {
     const data = await response.json();
     lastRadioTitle = data.now_playing?.song?.title || radio.nowPlayingFallback;
     if (radioEnabled && radioNowText?.isConnected) radioNowText.textContent = lastRadioTitle;
+    if (radioMediaActive) setRadioMedia(true);
   } catch {
     // A metadata outage must never interrupt the audio stream.
   } finally {
@@ -557,7 +603,8 @@ function openRadio() {
   privacyNotice.append(privacyLink);
   const controls = el('div', 'radio-transport');
   controls.append(radioControlButton, radioStatusText);
-  copy.append(privacyNotice, controls);
+  // PLAY steht direkt unter der Titelanzeige, der Hinweis gleich darunter – noch vor dem Start lesbar.
+  copy.append(controls, privacyNotice);
   const volumeLabel = el('label', 'radio-volume', 'Lautstärke');
   const volume = el('input');
   volume.type = 'range';

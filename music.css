@@ -81,3 +81,39 @@ body:not(.entering) .music-control { transition: opacity 600ms ease; }
   .music-control.is-audible .music-bars i { animation: none; transform: scaleY(.7); }
   .music-caption { transition: opacity 200ms ease; translate: 0 0; }
 }
+
+/* Radio läuft: kleine Anzeige mit STOP außerhalb des Radiofensters (Knopf kommt aus world.js) */
+.radio-live-pill {
+  position: fixed;
+  z-index: 60;
+  left: max(5vw, env(safe-area-inset-left, 0px));
+  bottom: 64px;
+  display: none;
+  align-items: center;
+  gap: 9px;
+  height: 40px;
+  padding: 0 16px 0 14px;
+  border: 1px solid rgba(224, 86, 63, .55);
+  border-radius: 999px;
+  background: rgba(8, 8, 6, .82);
+  color: #ecdfc6;
+  font-family: var(--font-text, Inter, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  transition: border-color 160ms ease, transform 120ms cubic-bezier(.23, 1, .32, 1);
+}
+body.entered.radio-playing:not(:has(.world-panel.is-open)) .radio-live-pill { display: inline-flex; }
+.radio-live-pill:active { transform: scale(.96); }
+.radio-live-pill:focus-visible { outline: 2px solid #c9a86a; outline-offset: 3px; }
+@media (hover: hover) and (pointer: fine) { .radio-live-pill:hover { border-color: #e0563f; } }
+.radio-live-pill-dot { width: 8px; height: 8px; border-radius: 50%; background: #e0563f; box-shadow: 0 0 8px #e0563f; animation: live-pill-blink 1.6s ease-in-out infinite; }
+@keyframes live-pill-blink { 50% { opacity: .35; } }
+.radio-live-pill-stop { width: 9px; height: 9px; margin-left: 6px; border-radius: 1.5px; background: currentColor; }
+.radio-live-pill-label { color: #c4b394; }
+body.radio-playing .music-caption { opacity: 0; }
+@media (max-width: 760px) {
+  .radio-live-pill { left: max(16px, env(safe-area-inset-left, 0px)); bottom: max(18px, calc(env(safe-area-inset-bottom, 0px) + 10px)); }
+}
+@media (prefers-reduced-motion: reduce) { .radio-live-pill-dot { animation: none; } }

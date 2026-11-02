@@ -1,8 +1,13 @@
 /* A quiet literary backdrop shared with the public radio page. */
+/* Die Waldgrafik wird erst beim Eintreten geladen, nicht schon auf dem Logo-Bildschirm. */
 .world {
-  background: linear-gradient(rgba(4, 4, 5, .38), rgba(4, 4, 5, .38)),
-    url('./assets/deep-structure-radio-background.png') center / cover no-repeat #050505;
+  background: #050505;
   color: #e4d6bc;
+}
+body.entering .world,
+body.entered .world {
+  background: linear-gradient(rgba(4, 4, 5, .38), rgba(4, 4, 5, .38)),
+    url('./assets/deep-structure-radio-background.webp') center / cover no-repeat #050505;
 }
 .world::before { opacity: .08; transition: none; }
 .world::after { opacity: .18; }

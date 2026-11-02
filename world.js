@@ -11,7 +11,7 @@ const header = document.querySelector('.world-header');
 const footer = document.querySelector('.world-footer');
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 const mobileQuery = matchMedia('(max-width: 760px)');
-const desktopLayout = { forest: [21, 47, 25], radio: [50, 42, 65], programmes: [79, 47, 20], shop: [50, 77, 10] };
+const desktopLayout = { forest: [21, 47, 25], radio: [50, 39, 65], programmes: [79, 47, 20], shop: [50, 80, 10] };
 const mobileLayout = { radio: [50, 22, 0], forest: [50, 44, 0], programmes: [50, 65, 0], shop: [50, 85, 0] };
 const interactiveObjects = [];
 let active = false;
@@ -89,24 +89,67 @@ function createProgrammes() {
   return button;
 }
 
-function radioIllustration(className) {
-  const image = el('img', className);
-  image.src = './assets/radio/deep-structure-comic-radio.png';
-  image.alt = '';
-  image.width = 1536;
-  image.height = 1024;
-  image.decoding = 'async';
-  return image;
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs) {
+  const node = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+  return node;
+}
+
+// Das Radio als Bassbox: der Lautsprecher ist das Deep-Structure-Zeichen mit kreisenden Lichtstreifen.
+function speakerIllustration() {
+  const speaker = el('span', 'ds-speaker');
+  speaker.setAttribute('aria-hidden', 'true');
+  const body = el('span', 'ds-speaker-body');
+  const front = el('span', 'ds-speaker-front');
+
+  const display = el('span', 'ds-speaker-display');
+  const tag = el('span', 'ds-speaker-tag');
+  tag.append(el('span', 'ds-speaker-lamp'), el('span', '', 'DS RADIO'));
+  const eq = el('span', 'ds-speaker-eq');
+  for (let i = 0; i < 12; i++) {
+    const bar = el('i');
+    bar.style.animationDelay = (-((i * 0.37) % 2.4)).toFixed(2) + 's';
+    eq.append(bar);
+  }
+  display.append(tag, eq);
+
+  const woofer = el('span', 'ds-speaker-woofer');
+  woofer.append(el('span', 'ds-speaker-ring'), el('span', 'ds-speaker-ring'));
+  const bars = el('span', 'ds-speaker-bars');
+  const count = 56;
+  for (let i = 0; i < count; i++) {
+    const holder = el('span');
+    holder.style.transform = `rotate(${(i / count * 360).toFixed(2)}deg) translateY(-3.6em)`;
+    const light = el('i');
+    light.style.animationDelay = (-((i * 0.53) % 2.6)).toFixed(2) + 's';
+    light.style.animationDuration = (1.8 + ((i * 7) % 5) * 0.32).toFixed(2) + 's';
+    holder.append(light);
+    bars.append(holder);
+  }
+  const mark = svgEl('svg', { class: 'ds-speaker-mark', viewBox: '-100 -100 200 200', focusable: 'false' });
+  mark.append(
+    svgEl('circle', { cx: '0', cy: '0', r: '70', fill: '#050606', stroke: '#c9a86a', 'stroke-width': '2' }),
+    svgEl('path', { d: 'M -65 26 A 70 70 0 0 0 65 26 Z', fill: '#2f8f86', opacity: '.9' }),
+    svgEl('path', { d: 'M -65 26 L 65 26', stroke: '#e6fffb', 'stroke-width': '1.5' }),
+    svgEl('polygon', { points: '0,-58 -46,22 46,22', fill: '#000', stroke: '#c9a86a', 'stroke-width': '2.5', 'stroke-linejoin': 'round' })
+  );
+  woofer.append(bars, mark);
+
+  front.append(display, el('span', 'ds-speaker-tweeter'), woofer);
+  body.append(el('span', 'ds-speaker-side'), front);
+  speaker.append(el('span', 'ds-speaker-shadow'), body);
+  return speaker;
 }
 
 function createRadio() {
-  const button = el('button', 'world-object world-object--radio world-object--comic-radio');
+  const button = el('button', 'world-object world-object--speaker');
   button.type = 'button';
   button.dataset.worldId = 'radio';
   button.dataset.depth = '.65';
   button.dataset.phase = '2.25';
   button.setAttribute('aria-label', 'Musik: Deep Structure Radio öffnen');
-  button.append(radioIllustration('comic-radio-image'), label('Musik', 'Deep Structure Radio · Live hören'));
+  button.append(speakerIllustration(), label('Musik', 'Deep Structure Radio · Live hören'));
   button.addEventListener('click', openRadio);
   radioObject = button;
   syncRadioState();
@@ -348,8 +391,8 @@ function toggleRadio() {
 function openRadio() {
   const detail = el('article', 'radio-detail');
 
-  const visual = el('div', 'radio-detail-visual radio-detail-visual--comic');
-  visual.append(radioIllustration('comic-radio-detail-image'));
+  const visual = el('div', 'radio-detail-visual radio-detail-visual--speaker');
+  visual.append(speakerIllustration());
 
   const copy = el('div', 'radio-detail-copy');
   copy.append(el('h2', '', radio.title));

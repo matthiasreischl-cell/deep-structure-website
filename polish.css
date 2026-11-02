@@ -27,6 +27,10 @@ body { font-family: var(--font-text); }
   .world-footer a:hover, .landing-legal a:hover { color: var(--ink); }
 }
 
+.world-home { color: inherit; text-decoration: none; display: inline-block; transition: color 160ms ease; }
+.world-home:focus-visible { outline: 2px solid var(--gold); outline-offset: 6px; }
+@media (hover: hover) and (pointer: fine) { .world-home:hover { color: var(--gold-bright); } }
+
 /* ---------- Objects in the world ---------- */
 .world-object-label strong {
   font-family: var(--font-display);

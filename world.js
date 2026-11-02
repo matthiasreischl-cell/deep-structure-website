@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio } from './data/world-data.js?v=5';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=6';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -11,8 +11,8 @@ const header = document.querySelector('.world-header');
 const footer = document.querySelector('.world-footer');
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 const mobileQuery = matchMedia('(max-width: 760px)');
-const desktopLayout = { forest: [21, 47, 25], radio: [50, 42, 65], programmes: [79, 47, 20], shop: [50, 77, 10] };
-const mobileLayout = { radio: [50, 22, 0], forest: [50, 44, 0], programmes: [50, 65, 0], shop: [50, 85, 0] };
+const desktopLayout = { vinyl: [21, 47, 25], radio: [50, 39, 65], programmes: [79, 47, 20], shop: [50, 80, 10] };
+const mobileLayout = { radio: [50, 22, 0], vinyl: [50, 44, 0], programmes: [50, 65, 0], shop: [50, 85, 0] };
 const interactiveObjects = [];
 let active = false;
 let pointerNX = 0;
@@ -59,54 +59,110 @@ function externalLink(title, url, className = 'world-link') {
   return link;
 }
 
-function createVinyl(release) {
+function createVinyl() {
   const button = el('button', 'world-object world-object--vinyl');
   button.type = 'button';
-  button.dataset.worldId = release.id;
+  button.dataset.worldId = 'vinyl';
   button.dataset.depth = '.48';
   button.dataset.phase = '0';
-  button.setAttribute('aria-label', 'Vinyl: ' + release.title);
-  button.style.setProperty('--cover', 'url("' + release.labelImage + '")');
+  button.setAttribute('aria-label', 'Vinyl von Deep Structure öffnen');
+  button.style.setProperty('--cover', 'url("' + vinylShelf.label + '")');
   const disc = el('span', 'vinyl-disc');
   disc.append(el('span', 'vinyl-label'));
-  button.append(disc, label('Vinyl', release.title));
+  button.append(disc, label('Vinyl', vinylShelf.caption));
   button.addEventListener('click', openVinyl);
   return button;
 }
 
 function createProgrammes() {
-  const button = el('button', 'world-object world-object--programmes');
+  const button = el('button', 'world-object world-object--deck');
   button.type = 'button';
   button.dataset.worldId = 'programmes';
   button.dataset.depth = '.4';
   button.dataset.phase = '4.2';
   button.setAttribute('aria-label', 'Apps & Spiele öffnen');
-  const terminal = el('span', 'programme-terminal');
-  terminal.setAttribute('aria-hidden', 'true');
-  terminal.append(el('span', 'programme-screen', '> _'), el('span', 'programme-stand'));
-  button.append(terminal, label('Apps & Spiele', 'Ideen, die erlebbar werden.'));
+  const deck = el('span', 'project-deck');
+  deck.setAttribute('aria-hidden', 'true');
+  const back = el('span', 'project-card project-card--back');
+  back.style.setProperty('--card', 'url("' + projectDeck[2] + '")');
+  const middle = el('span', 'project-card project-card--middle');
+  middle.style.setProperty('--card', 'url("' + projectDeck[1] + '")');
+  const front = el('span', 'project-card project-card--front');
+  // Vorne laufen alle Projektbilder nacheinander durch (reines CSS, weich überblendet).
+  projectDeck.forEach((src, index) => {
+    const face = el('span', 'project-card-face');
+    face.style.backgroundImage = 'url("' + src + '")';
+    face.style.animationDelay = (index * 3.2 - projectDeck.length * 3.2) + 's';
+    front.append(face);
+  });
+  front.style.setProperty('--deck-cycle', (projectDeck.length * 3.2) + 's');
+  deck.append(back, middle, front);
+  button.append(deck, label('Apps & Spiele', 'Clash · Monsterjäger · Studio'));
   button.addEventListener('click', openProgrammes);
   return button;
 }
 
-function radioIllustration(className) {
-  const image = el('img', className);
-  image.src = './assets/radio/deep-structure-comic-radio.png';
-  image.alt = '';
-  image.width = 1536;
-  image.height = 1024;
-  image.decoding = 'async';
-  return image;
+const SVG_NS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs) {
+  const node = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+  return node;
+}
+
+// Das Radio als Bassbox: der Lautsprecher ist das Deep-Structure-Zeichen mit kreisenden Lichtstreifen.
+function speakerIllustration() {
+  const speaker = el('span', 'ds-speaker');
+  speaker.setAttribute('aria-hidden', 'true');
+  const body = el('span', 'ds-speaker-body');
+  const front = el('span', 'ds-speaker-front');
+
+  const display = el('span', 'ds-speaker-display');
+  const tag = el('span', 'ds-speaker-tag');
+  tag.append(el('span', 'ds-speaker-lamp'), el('span', '', 'DS RADIO'));
+  const eq = el('span', 'ds-speaker-eq');
+  for (let i = 0; i < 12; i++) {
+    const bar = el('i');
+    bar.style.animationDelay = (-((i * 0.37) % 2.4)).toFixed(2) + 's';
+    eq.append(bar);
+  }
+  display.append(tag, eq);
+
+  const woofer = el('span', 'ds-speaker-woofer');
+  woofer.append(el('span', 'ds-speaker-ring'), el('span', 'ds-speaker-ring'));
+  const bars = el('span', 'ds-speaker-bars');
+  const count = 56;
+  for (let i = 0; i < count; i++) {
+    const holder = el('span');
+    holder.style.transform = `rotate(${(i / count * 360).toFixed(2)}deg) translateY(-3.6em)`;
+    const light = el('i');
+    light.style.animationDelay = (-((i * 0.53) % 2.6)).toFixed(2) + 's';
+    light.style.animationDuration = (1.8 + ((i * 7) % 5) * 0.32).toFixed(2) + 's';
+    holder.append(light);
+    bars.append(holder);
+  }
+  const mark = svgEl('svg', { class: 'ds-speaker-mark', viewBox: '-100 -100 200 200', focusable: 'false' });
+  mark.append(
+    svgEl('circle', { cx: '0', cy: '0', r: '70', fill: '#050606', stroke: '#c9a86a', 'stroke-width': '2' }),
+    svgEl('path', { d: 'M -65 26 A 70 70 0 0 0 65 26 Z', fill: '#2f8f86', opacity: '.9' }),
+    svgEl('path', { d: 'M -65 26 L 65 26', stroke: '#e6fffb', 'stroke-width': '1.5' }),
+    svgEl('polygon', { points: '0,-58 -46,22 46,22', fill: '#000', stroke: '#c9a86a', 'stroke-width': '2.5', 'stroke-linejoin': 'round' })
+  );
+  woofer.append(bars, mark);
+
+  front.append(display, el('span', 'ds-speaker-tweeter'), woofer);
+  body.append(el('span', 'ds-speaker-side'), front);
+  speaker.append(el('span', 'ds-speaker-shadow'), body);
+  return speaker;
 }
 
 function createRadio() {
-  const button = el('button', 'world-object world-object--radio world-object--comic-radio');
+  const button = el('button', 'world-object world-object--speaker');
   button.type = 'button';
   button.dataset.worldId = 'radio';
   button.dataset.depth = '.65';
   button.dataset.phase = '2.25';
   button.setAttribute('aria-label', 'Musik: Deep Structure Radio öffnen');
-  button.append(radioIllustration('comic-radio-image'), label('Musik', 'Deep Structure Radio · Live hören'));
+  button.append(speakerIllustration(), label('Musik', 'Deep Structure Radio · Live hören'));
   button.addEventListener('click', openRadio);
   radioObject = button;
   syncRadioState();
@@ -151,7 +207,7 @@ function openShop() {
 
 function renderWorld() {
   const fragment = document.createDocumentFragment();
-  vinylReleases.filter(release => release.published).forEach(release => fragment.append(createVinyl(release)));
+  fragment.append(createVinyl());
   fragment.append(createRadio(), createProgrammes(), createShop());
   objectsLayer.replaceChildren(fragment);
   interactiveObjects.push(...objectsLayer.querySelectorAll('.world-object'));
@@ -224,41 +280,118 @@ function openVinyl() {
   openPanel(detail);
 }
 
-function openProgrammes() {
-  const detail = el('article', 'programmes-detail');
-  detail.append(el('h2', '', 'Apps & Spiele'));
-  detail.append(el('p', 'detail-intro', 'Ein eigener Raum für interaktive Ideen von Deep Structure.'));
-  const pitch = el('section', 'games-pitch');
-  pitch.append(el('h3', '', 'Deep Structure Games'));
+function playableVideo(src, poster, label, buttonText) {
+  const wrap = el('div', 'project-video');
   const video = el('video', 'games-pitch-video');
   video.controls = true;
   video.playsInline = true;
   video.preload = 'metadata';
   video.tabIndex = 0;
-  video.setAttribute('aria-label', 'Pitch-Video für Deep Structure Games');
+  if (poster) video.poster = poster;
+  video.setAttribute('aria-label', label);
   const source = el('source');
-  source.src = './assets/games/deep-structure-games-pitch.mp4';
+  source.src = src;
   source.type = 'video/mp4';
-  video.append(source, externalLink('Pitch-Video öffnen', source.src));
-  const playVideo = el('button', 'world-link world-link--primary', 'Pitch-Video abspielen');
-  playVideo.type = 'button';
-  playVideo.addEventListener('click', async () => {
+  video.append(source, externalLink('Video öffnen', src));
+  const play = el('button', 'world-link world-link--primary', buttonText);
+  play.type = 'button';
+  play.addEventListener('click', async () => {
     stopRadio();
-    try { await video.play(); } catch { playVideo.textContent = 'Video erneut starten'; }
+    try { await video.play(); } catch { play.textContent = 'Video erneut starten'; }
   });
-  video.addEventListener('play', () => { playVideo.hidden = true; video.focus({ preventScroll: true }); });
-  video.addEventListener('ended', () => { playVideo.hidden = false; });
-  pitch.append(video, playVideo);
-  detail.append(pitch);
+  video.addEventListener('play', () => {
+    stopRadio();
+    panelCard.querySelectorAll('video').forEach(other => { if (other !== video) other.pause(); });
+    play.hidden = true;
+  });
+  video.addEventListener('ended', () => { play.hidden = false; });
+  wrap.append(video, play);
+  return wrap;
+}
+
+function projectViewer(project) {
+  const viewer = el('div', 'project-viewer');
+  const mainLink = el('a', 'project-main');
+  mainLink.href = project.images[0].src;
+  mainLink.target = '_blank';
+  mainLink.rel = 'noopener';
+  const main = el('img');
+  main.src = project.images[0].src;
+  main.alt = project.images[0].alt;
+  main.loading = 'lazy';
+  main.decoding = 'async';
+  mainLink.append(main);
+  mainLink.setAttribute('aria-label', project.images[0].alt + ' – groß öffnen');
+  viewer.append(mainLink);
+  if (project.images.length > 1) {
+    const strip = el('div', 'project-thumbs');
+    project.images.forEach((image, index) => {
+      const thumb = el('button', 'project-thumb');
+      thumb.type = 'button';
+      thumb.setAttribute('aria-label', 'Bild zeigen: ' + image.alt);
+      thumb.setAttribute('aria-pressed', String(index === 0));
+      const pic = el('img');
+      pic.src = image.src;
+      pic.alt = '';
+      pic.loading = 'lazy';
+      thumb.append(pic);
+      thumb.addEventListener('click', () => {
+        strip.querySelectorAll('.project-thumb').forEach(node => node.setAttribute('aria-pressed', String(node === thumb)));
+        main.classList.add('is-swapping');
+        setTimeout(() => {
+          main.src = image.src;
+          main.alt = image.alt;
+          mainLink.href = image.src;
+          mainLink.setAttribute('aria-label', image.alt + ' – groß öffnen');
+          main.classList.remove('is-swapping');
+        }, 140);
+      });
+      strip.append(thumb);
+    });
+    viewer.append(strip);
+  }
+  return viewer;
+}
+
+function openProgrammes() {
+  const detail = el('article', 'programmes-detail');
+  detail.append(el('h2', '', 'Apps & Spiele'));
+  detail.append(el('p', 'detail-intro', 'Woran Deep Structure gerade arbeitet: Spiele, Apps und Werkzeuge, alle selbst entwickelt.'));
+
+  const teaser = el('section', 'games-pitch project-teaser');
+  teaser.append(el('h3', '', projectsTeaser.title));
+  teaser.append(playableVideo(projectsTeaser.src, projectsTeaser.poster, 'Teaser zu Clash of the Universe', 'Teaser abspielen'));
+  detail.append(teaser);
+
+  projects.forEach((project, index) => {
+    const section = el('section', 'project-row' + (index % 2 ? ' project-row--flip' : ''));
+    const copy = el('div', 'project-copy');
+    copy.append(el('p', 'project-status', project.status), el('h3', '', project.title), el('p', '', project.text));
+    if (project.link) {
+      const link = el('a', 'world-link world-link--primary', project.link.label + ' ↗');
+      link.href = project.link.href;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      copy.append(link);
+    }
+    section.append(projectViewer(project), copy);
+    detail.append(section);
+  });
+
   const game = el('section', 'programme-project');
-  game.append(el('p', 'project-status', 'Spiel · in Entwicklung'));
+  game.append(el('p', 'project-status', 'Spiel · zum Ausprobieren'));
   game.append(el('h3', '', 'The World I Let In'));
   game.append(el('p', '', 'Ein Wahrnehmungsspiel, das dich in die Welt um dich herum führt. Die erste Erfahrung kannst du hier ausprobieren.'));
   const launch = el('button', 'world-link world-link--primary', 'Wahrnehmungsspiel öffnen');
   launch.type = 'button';
   launch.addEventListener('click', () => window.dispatchEvent(new Event('deepstructure:perception-game')));
   game.append(launch);
-  detail.append(game, el('p', 'programmes-note', 'Weitere Anwendungen und Spiele folgen.'));
+  detail.append(game);
+
+  const pitch = el('section', 'games-pitch');
+  pitch.append(el('h3', '', 'Deep Structure Games'));
+  pitch.append(playableVideo('./assets/games/deep-structure-games-pitch.mp4', '', 'Pitch-Video für Deep Structure Games', 'Pitch-Video abspielen'));
+  detail.append(pitch, el('p', 'programmes-note', 'Weitere Anwendungen und Spiele folgen.'));
   openPanel(detail);
 }
 
@@ -348,8 +481,8 @@ function toggleRadio() {
 function openRadio() {
   const detail = el('article', 'radio-detail');
 
-  const visual = el('div', 'radio-detail-visual radio-detail-visual--comic');
-  visual.append(radioIllustration('comic-radio-detail-image'));
+  const visual = el('div', 'radio-detail-visual radio-detail-visual--speaker');
+  visual.append(speakerIllustration());
 
   const copy = el('div', 'radio-detail-copy');
   copy.append(el('h2', '', radio.title));

@@ -66,7 +66,7 @@ body { font-family: var(--font-text); }
 }
 .world.is-ready .world-object { animation: ds-surface 900ms var(--ease-out) backwards; }
 .world.is-ready .world-object[data-world-id="radio"] { animation-delay: 120ms; }
-.world.is-ready .world-object[data-world-id="forest"] { animation-delay: 220ms; }
+.world.is-ready .world-object[data-world-id="vinyl"] { animation-delay: 220ms; }
 .world.is-ready .world-object[data-world-id="programmes"] { animation-delay: 300ms; }
 .world.is-ready .world-object[data-world-id="shop"] { animation-delay: 400ms; }
 .world.is-ready .world-header, .world.is-ready .world-footer { animation: ds-fade 700ms ease-out backwards; }

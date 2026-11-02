@@ -1,0 +1,218 @@
+/* Deep Structure Radio als Bassbox: Soundsystem-Gehäuse, dessen Lautsprecher das
+   Signalring-Zeichen ist. Alle Maße in em, damit die Box mit --speaker-size skaliert.
+   Ruhig: die Lichtstreifen flackern leise und drehen sich langsam.
+   Läuft das Radio (.is-playing / body.radio-playing): Streifen springen, die Box pumpt mit 174 BPM. */
+
+.ds-speaker {
+  --sp-gold: #c9a86a;
+  --sp-gold-deep: #8a6c41;
+  --sp-teal: #5fd3c4;
+  position: relative;
+  display: block;
+  width: 23em;
+  height: 35em;
+  font-size: var(--speaker-size, 10px);
+  perspective: 90em;
+}
+
+.ds-speaker-shadow {
+  position: absolute;
+  left: 4%;
+  right: -10%;
+  bottom: -1.6em;
+  height: 3em;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, .75), transparent 70%);
+}
+
+.ds-speaker-body {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateY(-14deg);
+}
+
+.ds-speaker-side {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 6.2em;
+  height: 100%;
+  transform-origin: 0 50%;
+  transform: rotateY(78deg);
+  background: linear-gradient(90deg, #120f0b, #070605);
+  border: 1px solid #3d3122;
+}
+
+.ds-speaker-front {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.7em;
+  padding-top: 2.1em;
+  box-sizing: border-box;
+  border-radius: .6em;
+  background: linear-gradient(170deg, #1d1812, #0e0c09 60%, #15110c);
+  border: 1px solid var(--sp-gold-deep);
+  box-shadow: inset 0 0 0 .6em #0b0907, inset 0 0 0 .7em #3d3122, 0 2.6em 4.4em rgba(0, 0, 0, .7);
+  transition: border-color 200ms ease;
+}
+
+.ds-speaker-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 17.6em;
+  height: 3.7em;
+  padding: 0 1em;
+  box-sizing: border-box;
+  border-radius: .4em;
+  background: #040706;
+  box-shadow: inset 0 0 0 1px #2c3b38;
+}
+
+.ds-speaker-tag {
+  display: flex;
+  align-items: center;
+  gap: .6em;
+  font-family: var(--font-text, Inter, sans-serif);
+  font-size: .9em;
+  font-weight: 600;
+  letter-spacing: .14em;
+  color: #8fe3d8;
+}
+
+.ds-speaker-lamp {
+  width: .6em;
+  height: .6em;
+  border-radius: 50%;
+  background: #6b2a20;
+  transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+
+.ds-speaker-eq { display: flex; align-items: flex-end; gap: .2em; height: 1.6em; }
+.ds-speaker-eq i {
+  display: block;
+  width: .3em;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--sp-teal);
+  transform-origin: 50% 100%;
+  transform: scaleY(.25);
+  animation: ds-eq-idle 2.4s ease-in-out infinite alternate;
+}
+
+.ds-speaker-tweeter {
+  width: 5.2em;
+  height: 5.2em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 42% 38%, #e7cf98, #6e5634 60%, #1a1610 64%, #0b0a08);
+  box-shadow: 0 0 0 .3em var(--sp-gold-deep);
+}
+
+/* Der Lautsprecher: Ringe wie im Logo, Lichtstreifen im Kreis, das Zeichen in der Mitte */
+.ds-speaker-woofer {
+  position: relative;
+  width: 17.6em;
+  height: 17.6em;
+  border-radius: 50%;
+  background: radial-gradient(circle at 46% 40%, #1d1a15, #0a0907 62%, #050504);
+  box-shadow: 0 0 0 .45em #b8955a, 0 0 0 .65em #3d3122, 0 1em 2.4em rgba(0, 0, 0, .7);
+}
+.ds-speaker-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(201, 168, 106, .7);
+}
+.ds-speaker-ring:nth-child(1) { inset: .9em; }
+.ds-speaker-ring:nth-child(2) { inset: 1.8em; border-color: rgba(201, 168, 106, .45); border-width: 1px; }
+
+.ds-speaker-bars {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  animation: ds-turn 48s linear infinite;
+}
+.ds-speaker-bars span {
+  position: absolute;
+  left: -.14em;
+  bottom: 0;
+  width: .28em;
+  height: 2.4em;
+  transform-origin: 50% 100%;
+}
+.ds-speaker-bars i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--sp-teal);
+  box-shadow: 0 0 .7em rgba(95, 211, 196, .55);
+  transform-origin: 50% 100%;
+  animation: ds-flicker 2.6s ease-in-out infinite alternate;
+}
+
+.ds-speaker-mark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8em;
+  height: 8em;
+  margin: -4em 0 0 -4em;
+}
+
+@keyframes ds-turn { to { transform: rotate(360deg); } }
+@keyframes ds-flicker {
+  0% { transform: scaleY(.18); opacity: .35; }
+  45% { transform: scaleY(.42); opacity: .9; }
+  60% { transform: scaleY(.3); opacity: .55; }
+  100% { transform: scaleY(.55); opacity: 1; }
+}
+@keyframes ds-eq-idle { 0% { transform: scaleY(.15); } 100% { transform: scaleY(.5); } }
+@keyframes ds-eq-live { 0% { transform: scaleY(.2); } 100% { transform: scaleY(1); } }
+@keyframes ds-thump { 0% { transform: scale(1.035); } 100% { transform: scale(1); } }
+
+/* Läuft das Radio: mehr Energie */
+.is-playing .ds-speaker-bars i,
+body.radio-playing .ds-speaker-bars i { animation-name: ds-eq-live; animation-duration: .7s; }
+.is-playing .ds-speaker-bars,
+body.radio-playing .ds-speaker-bars { animation-duration: 18s; }
+.is-playing .ds-speaker-eq i,
+body.radio-playing .ds-speaker-eq i { animation-name: ds-eq-live; animation-duration: .6s; }
+.is-playing .ds-speaker-woofer,
+body.radio-playing .ds-speaker-woofer { animation: ds-thump .345s cubic-bezier(.23, 1, .32, 1) infinite; }
+.is-playing .ds-speaker-lamp,
+body.radio-playing .ds-speaker-lamp { background: #e0563f; box-shadow: 0 0 .6em #e0563f; }
+
+/* In der Welt */
+.world-object--speaker { --speaker-size: clamp(6.5px, min(.72vw, 1.04vh), 9.3px); z-index: 7; }
+.world-object--speaker .world-object-label { top: calc(100% + 1.4em); }
+.world-object--speaker:hover .ds-speaker-front,
+.world-object--speaker:focus-visible .ds-speaker-front { border-color: var(--sp-gold); }
+.world-object--speaker .ds-speaker-body { transition: transform 260ms var(--ease-out, ease-out); }
+.world-object--speaker:active .ds-speaker-body { transform: rotateY(-14deg) scale(.97); }
+
+/* Im Radio-Fenster */
+.radio-detail-visual--speaker {
+  display: grid;
+  place-items: center;
+  padding: 44px 24px 52px;
+  background: radial-gradient(ellipse at 50% 55%, #241f16, var(--ground, #0b0a08) 68%);
+}
+.radio-detail-visual--speaker .ds-speaker { --speaker-size: clamp(8px, 1.05vw, 11px); }
+
+@media (max-width: 760px) {
+  .world-object--speaker { --speaker-size: 7.1px; }
+  .radio-detail-visual--speaker { padding: 56px 24px 36px; }
+  .radio-detail-visual--speaker .ds-speaker { --speaker-size: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ds-speaker-bars, .ds-speaker-bars i, .ds-speaker-eq i, .ds-speaker-woofer { animation: none !important; }
+  .ds-speaker-bars i { transform: scaleY(.45); }
+  .world-object--speaker:active .ds-speaker-body { transform: rotateY(-14deg); }
+}

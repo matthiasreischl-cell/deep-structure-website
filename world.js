@@ -169,21 +169,59 @@ function createRadio() {
   return button;
 }
 
-function shopSign() {
-  const sign = el('span', 'shop-sign');
-  sign.setAttribute('aria-hidden', 'true');
-  sign.append(el('span', 'shop-sign-brand', 'DEEP STRUCTURE'), el('span', 'shop-sign-title', 'WEBSHOP'), el('span', 'shop-sign-arrow', 'ENTDECKEN ↗'));
-  return sign;
+// Webshop als Ladentheke: drei beleuchtete Fächer, in denen die Produkte durchwechseln.
+const GOLD = '#c9a86a';
+const SHOP_ITEMS = {
+  shirt: ['T-Shirts', `<path d="M30 22 L42 16 Q50 25 58 16 L70 22 L86 34 L78 48 L70 44 L70 86 Q50 90 30 86 L30 44 L22 48 L14 34 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M42 16 Q50 27 58 16" fill="none" stroke="#5c4a30" stroke-width="1.4"/>`, [50, 54]],
+  hoodie: ['Hoodies', `<path d="M36 22 Q50 8 64 22 L80 30 L90 74 L80 76 L72 48 L72 88 Q50 92 28 88 L28 48 L20 76 L10 74 L20 30 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M40 24 Q50 36 60 24" fill="none" stroke="#5c4a30" stroke-width="1.4"/><path d="M38 70 L62 70 L58 82 L42 82 Z" fill="none" stroke="#3d3122" stroke-width="1.2"/><path d="M46 30 L45 42 M54 30 L55 42" stroke="${GOLD}" stroke-width="1" opacity=".7"/>`, [50, 56]],
+  mug: ['Tassen', `<path d="M26 28 L66 28 L64 80 Q46 86 28 80 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M66 38 Q84 38 82 54 Q80 68 64 66" fill="none" stroke="#5c4a30" stroke-width="5" stroke-linecap="round"/><ellipse cx="46" cy="28" rx="20" ry="4" fill="#0b0a08" stroke="#5c4a30" stroke-width="1"/>`, [46, 54]],
+  phone: ['Handyhüllen', `<rect x="31" y="10" width="38" height="80" rx="8" fill="#17140f" stroke="#5c4a30" stroke-width="1.2"/><rect x="36" y="15" width="12" height="16" rx="3" fill="#0b0a08" stroke="#3d3122"/><circle cx="42" cy="20" r="2.4" fill="#2c3b38"/><circle cx="42" cy="27" r="2.4" fill="#2c3b38"/>`, [50, 58]],
+  vinyl: ['Vinyl', `<circle cx="50" cy="50" r="38" fill="#0a0a0b" stroke="#2a2620" stroke-width="1"/><circle cx="50" cy="50" r="31" fill="none" stroke="#1c1c1f" stroke-width="1"/><circle cx="50" cy="50" r="25" fill="none" stroke="#1c1c1f" stroke-width="1"/><clipPath id="vit-label"><circle cx="50" cy="50" r="14"/></clipPath><image href="./assets/albums/deep-space-label.webp" x="36" y="36" width="28" height="28" clip-path="url(#vit-label)"/><circle cx="50" cy="50" r="1.6" fill="#d9d4c8"/>`, null],
+  download: ['Musik-Downloads', `<clipPath id="vit-cover"><rect x="26" y="12" width="48" height="48" rx="2"/></clipPath><image href="./assets/albums/the-forest-does-not-forget.jpg" x="26" y="12" width="48" height="48" clip-path="url(#vit-cover)" preserveAspectRatio="xMidYMid slice"/><rect x="26" y="12" width="48" height="48" rx="2" fill="none" stroke="#5c4a30"/><path d="M50 66 L50 84 M42 77 L50 85 L58 77" fill="none" stroke="${GOLD}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>`, null],
+  game: ['Spiele', `<path d="M22 40 Q24 30 34 30 L66 30 Q76 30 78 40 L84 66 Q86 76 76 76 Q70 76 64 66 L36 66 Q30 76 24 76 Q14 76 16 66 Z" fill="#17140f" stroke="#5c4a30" stroke-width="1.2" stroke-linejoin="round"/><path d="M32 44 L32 56 M26 50 L38 50" stroke="${GOLD}" stroke-width="2.2" stroke-linecap="round"/><circle cx="64" cy="46" r="2.8" fill="${GOLD}"/><circle cx="70" cy="52" r="2.8" fill="#5fd3c4"/>`, null],
+  software: ['Programme', `<rect x="12" y="20" width="76" height="58" rx="4" fill="#0d0f13" stroke="#5c4a30" stroke-width="1.2"/><path d="M12 30 L88 30" stroke="#3d3122"/><circle cx="19" cy="25" r="1.6" fill="${GOLD}"/><circle cx="25" cy="25" r="1.6" fill="#5c4a30"/><path d="M18 56 L24 50 L28 60 L33 44 L38 64 L43 48 L48 58 L53 40 L58 62 L63 50 L68 56 L73 46 L78 58 L82 54" fill="none" stroke="#7fc4dc" stroke-width="1.4" stroke-linejoin="round"/>`, null]
+};
+const SHOP_SLOTS = [['shirt', 'hoodie', 'mug'], ['vinyl', 'download'], ['game', 'software', 'phone']];
+
+function shopMark(x, y) {
+  return `<g transform="translate(${x} ${y})"><circle r="9" fill="none" stroke="${GOLD}" stroke-width="1.3"/><circle r="6.5" fill="none" stroke="${GOLD}" stroke-width=".8" opacity=".8"/><polygon points="0,-5 -4.4,2.6 4.4,2.6" fill="none" stroke="${GOLD}" stroke-width="1.1" stroke-linejoin="round"/></g>`;
+}
+
+function shopVitrine() {
+  const vitrine = el('span', 'vitrine');
+  vitrine.setAttribute('aria-hidden', 'true');
+  const glass = el('span', 'vitrine-glass');
+  const cycle = 9.6;
+  SHOP_SLOTS.forEach((slot, slotIndex) => {
+    const bay = el('span', 'vitrine-bay');
+    const offset = slotIndex * 1.6;
+    slot.forEach((key, i) => {
+      const [name, art, mark] = SHOP_ITEMS[key];
+      const delay = (i * cycle / slot.length - cycle - offset).toFixed(2) + 's';
+      const item = el('span', 'vitrine-item vitrine-item--' + slot.length);
+      item.style.animationDelay = delay;
+      item.innerHTML = `<svg viewBox="0 0 100 100" focusable="false">${art}${mark ? shopMark(mark[0], mark[1]) : ''}</svg>`;
+      const label = el('span', 'vitrine-name vitrine-item--' + slot.length, name);
+      label.style.animationDelay = delay;
+      bay.append(item, label);
+    });
+    glass.append(bay);
+  });
+  glass.append(el('span', 'vitrine-sweep'));
+  const base = el('span', 'vitrine-base');
+  base.append(el('span', 'vitrine-brand', 'DEEP STRUCTURE'));
+  vitrine.append(el('span', 'vitrine-shadow'), glass, base);
+  return vitrine;
 }
 
 function createShop() {
-  const button = el('button', 'world-object world-object--shop');
+  const button = el('button', 'world-object world-object--shop world-object--vitrine');
   button.type = 'button';
   button.dataset.worldId = 'shop';
   button.dataset.depth = '.3';
   button.dataset.phase = '3.6';
   button.setAttribute('aria-label', 'Deep Structure Webshop öffnen');
-  button.append(shopSign());
+  button.append(shopVitrine(), label('Webshop', 'Merch, Musik, Spiele & Programme'));
   button.addEventListener('click', openShop);
   return button;
 }
@@ -191,13 +229,25 @@ function createShop() {
 function openShop() {
   const detail = el('article', 'shop-detail');
   const visual = el('div', 'shop-detail-visual');
-  visual.append(shopSign());
+  visual.append(shopVitrine());
   const copy = el('div', 'shop-detail-copy');
   copy.append(el('h2', '', 'Webshop'));
-  copy.append(el('p', 'detail-intro', 'Entdecke die Produkte von Deep Structure im eigenen Webshop.'));
-  copy.append(externalLink('Zum Webshop', shop.url, 'world-link world-link--primary'));
-  copy.append(el('p', 'shop-detail-note', 'Du suchst die Schallplatte?'));
-  const vinyl = el('button', 'world-link', 'The Forest Does Not Forget ansehen');
+  copy.append(el('p', 'detail-intro', 'Alles von Deep Structure an einem Ort. Hier kommt nach und nach alles zusammen:'));
+  const list = el('ul', 'shop-categories');
+  [
+    ['Kleidung', 'T-Shirts und Hoodies'],
+    ['Tassen & Handyhüllen', 'mit dem Deep-Structure-Zeichen'],
+    ['Musik zum Download', 'ganze Alben als eigenes Download-Paket'],
+    ['Spiele & Programme', 'zum Herunterladen'],
+    ['Vinyl', 'Schallplatten mit Booklet']
+  ].forEach(([title, text]) => {
+    const item = el('li');
+    item.append(el('strong', '', title), el('span', '', text));
+    list.append(item);
+  });
+  copy.append(list, externalLink('Zum Webshop', shop.url, 'world-link world-link--primary'));
+  copy.append(el('p', 'shop-detail-note', 'Die Schallplatten gibt es auch direkt bei elasticStage.'));
+  const vinyl = el('button', 'world-link', 'Zu den Platten');
   vinyl.type = 'button';
   vinyl.addEventListener('click', openVinyl);
   copy.append(vinyl);

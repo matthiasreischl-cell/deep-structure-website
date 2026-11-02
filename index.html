@@ -25,7 +25,8 @@
   <link rel="stylesheet" href="polish.css?v=3" />
   <link rel="stylesheet" href="speaker.css?v=2" />
   <link rel="stylesheet" href="projects.css?v=1" />
-  <link rel="stylesheet" href="music.css?v=1" />
+  <link rel="stylesheet" href="music.css?v=2" />
+  <link rel="stylesheet" href="shop.css?v=2" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
@@ -74,13 +75,15 @@
   </div>
 
   <script type="module">
-    // Die Startseite kommt bei jedem neuen Besuch zuerst. Direkt in die Welt geht es nur,
-    // wenn man gerade erst drin war (Neu laden, Zurück von Impressum/Datenschutz).
+    // Die Startseite kommt bei jedem neuen Besuch und bei jedem Neuladen zuerst. Direkt in
+    // die Welt geht es nur, wenn man gerade erst drin war und von Impressum/Datenschutz zurückkommt.
     // Ohne das öffnete das Handy die gemerkte Adresse #inside und übersprang das Logo.
     const RECENT_MS = 30 * 60 * 1000;
     const readSeen = () => { try { return Number(localStorage.getItem('ds-inside-at')) || 0; } catch (e) { return 0; } };
     const markSeen = () => { try { localStorage.setItem('ds-inside-at', String(Date.now())); } catch (e) {} };
-    if (location.hash === '#inside' && Date.now() - readSeen() > RECENT_MS) {
+    // Neu laden (auch am Handy) beginnt immer beim Logo im Wasser.
+    const navType = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0] || {}).type;
+    if (location.hash === '#inside' && (navType === 'reload' || Date.now() - readSeen() > RECENT_MS)) {
       history.replaceState(null, '', location.pathname + location.search);
     }
     addEventListener('deepstructure:entered', markSeen);
@@ -112,7 +115,7 @@
     } else {
       await import('./symbol-v2.js?v=6');
     }
-    await import('./world.js?v=16');
+    await import('./world.js?v=17');
     await import('./perception-game.js?v=3');
   </script>
 </body>

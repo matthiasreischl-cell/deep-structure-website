@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="story-world.css?v=6" />
   <link rel="stylesheet" href="cursor.css?v=1" />
   <link rel="stylesheet" href="landing-3d.css?v=4" />
-  <link rel="stylesheet" href="polish.css?v=1" />
+  <link rel="stylesheet" href="polish.css?v=2" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
@@ -49,7 +49,7 @@
       </div>
 
       <header class="world-header">
-        <h1>DEEP STRUCTURE <span>INTERNETRADIO</span></h1>
+        <h1><a class="world-home" href="./" title="Zur Startseite mit dem Logo">DEEP STRUCTURE <span>INTERNETRADIO</span></a></h1>
         <nav class="world-index" id="worldIndex" aria-label="Bereiche"></nav>
       </header>
       <footer class="world-footer">
@@ -67,6 +67,20 @@
   </div>
 
   <script type="module">
+    // Die Startseite kommt bei jedem neuen Besuch zuerst. Direkt in die Welt geht es nur,
+    // wenn man gerade erst drin war (Neu laden, Zurück von Impressum/Datenschutz).
+    // Ohne das öffnete das Handy die gemerkte Adresse #inside und übersprang das Logo.
+    const RECENT_MS = 30 * 60 * 1000;
+    const readSeen = () => { try { return Number(localStorage.getItem('ds-inside-at')) || 0; } catch (e) { return 0; } };
+    const markSeen = () => { try { localStorage.setItem('ds-inside-at', String(Date.now())); } catch (e) {} };
+    if (location.hash === '#inside' && Date.now() - readSeen() > RECENT_MS) {
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+    addEventListener('deepstructure:entered', markSeen);
+    addEventListener('pagehide', () => { if (location.hash === '#inside') markSeen(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && location.hash === '#inside') markSeen(); });
+    if (location.hash === '#inside') markSeen();
+
     // 3D-Startseite (Logo schwimmt auf Wasser), wenn das Gerät WebGL2 kann; sonst die bisherige Variante.
     window.__DS_LANDING3D = location.hash !== '#inside' && (() => {
       try { const c = document.createElement('canvas'); const g = c.getContext('webgl2'); if (g) { const x = g.getExtension('WEBGL_lose_context'); if (x) x.loseContext(); return true; } } catch (e) {}

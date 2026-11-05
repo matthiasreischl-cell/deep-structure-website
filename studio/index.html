@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; media-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#03060A">
 <title>Deep Structure Mastering Studio – in Entwicklung</title>
@@ -45,6 +45,16 @@ ul.plain{margin:0;padding-left:20px;color:#C3D1DB}
 .cta.alt{background:transparent;color:var(--ice);border:1px solid var(--ice)}
 .note{color:var(--muted);font-size:14px;max-width:70ch;margin:14px 0 0}
 footer{padding:26px 0 40px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}footer a{color:var(--muted)}
+.ab{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.track{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:8px}
+.track b{font:600 17px var(--f-d);letter-spacing:.06em;text-transform:uppercase;color:var(--ice)}.track small{color:var(--muted);font-size:13px}
+audio{width:100%;height:40px;color-scheme:dark}
+.vinyl{display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:24px;align-items:start}
+.vinyl img{width:100%;height:auto;display:block;border-radius:10px;border:1px solid var(--line)}
+.vinyl ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.vinyl li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:6px}
+.vinyl li span{font:600 16px var(--f-d);letter-spacing:.08em;text-transform:uppercase}.vinyl li span em{font-style:normal;color:var(--muted);font-weight:600;margin-left:8px;letter-spacing:.04em}
+@media (max-width:760px){.vinyl{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -62,6 +72,34 @@ footer{padding:26px 0 40px;color:var(--muted);font-size:13px;border-top:1px soli
     <p class="lead">Ein Mastering-Studio, das im Browser auf deinem eigenen Gerät läuft: Es prüft deinen Song, repariert typische Schwächen von KI-Musik und bringt ihn mit einer vollständigen Mastering-Kette auf Veröffentlichungsniveau. Deine Audiodateien verlassen dabei dein Gerät nicht.</p>
     <figure><img src="studio-ansicht.webp" alt="Ansicht des Studios: Wellenform, Song-Check mit Bewertung, Pegelanzeigen" width="1376" height="800"><figcaption>Song-Check mit Hinweisen, Wellenform-Editor und Pegelanzeigen (Ansicht aus einer früheren Entwicklungsversion).</figcaption></figure>
   </div>
+
+  <section id="hoerbeispiele">
+    <h2>Hörbeispiele</h2>
+    <p class="lead" style="font-size:16px">Gemastert mit dem Deep Structure Mastering Studio. Zum Anhören einfach auf Abspielen klicken.</p>
+    <div class="ab" style="margin-top:14px">
+      <div class="track"><b>Doomsday · Vorher</b><small>Original-Export, ohne Mastering</small><audio controls controlslist="nodownload" preload="none" src="media/doomsday-original.mp3"></audio></div>
+      <div class="track"><b>Doomsday · Nachher</b><small>Master aus dem Studio</small><audio controls controlslist="nodownload" preload="none" src="media/doomsday-master.mp3"></audio></div>
+    </div>
+    <p class="note">Der Master ist bewusst lauter als das Original (etwa −11 statt −15 LUFS). Lauter klingt zunächst oft „besser“; für einen fairen Klangvergleich die Lautstärke beim Umschalten angleichen.</p>
+  </section>
+
+  <section id="deep-space">
+    <span class="eyebrow">Demnächst auf Vinyl</span>
+    <h2 style="margin-top:6px">Deep Structure – Deep Space</h2>
+    <div class="vinyl">
+      <img src="media/deep-space-cover.webp" alt="Cover „Deep Space“: ein leuchtender Wirbel aus Sternenstaub und Gesteinsbrocken in Türkis, Violett und Gold" width="1000" height="1000" loading="lazy">
+      <div>
+        <p class="lead" style="font-size:16px;margin-bottom:14px">Vier Tracks, rund 20 Minuten, gemastert mit dem Studio – bald als Schallplatte. Hier kannst du schon reinhören.</p>
+        <ol>
+          <li><span>1 · Deep Space One<em>4:30</em></span><audio controls controlslist="nodownload" preload="none" src="media/deep-space-one.mp3"></audio></li>
+          <li><span>2 · Deep Space Two<em>4:19</em></span><audio controls controlslist="nodownload" preload="none" src="media/deep-space-two.mp3"></audio></li>
+          <li><span>3 · Deep Space Three<em>5:29</em></span><audio controls controlslist="nodownload" preload="none" src="media/deep-space-three.mp3"></audio></li>
+          <li><span>4 · Deep Space Four<em>5:30</em></span><audio controls controlslist="nodownload" preload="none" src="media/deep-space-four.mp3"></audio></li>
+        </ol>
+        <p class="note">Hörproben als MP3 (320 kbit/s). Die Vinyl-Ausgabe wird angekündigt, sobald sie bestellbar ist – wer sich unten für Updates einträgt, erfährt es zuerst.</p>
+      </div>
+    </div>
+  </section>
 
   <section id="anmelden">
     <h2>Dabei sein</h2>

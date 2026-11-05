@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#010305" />
   <meta name="referrer" content="no-referrer" />
+  <!-- Sicherheitsgurt (Content-Security-Policy): nur eigene Dateien; fremd erlaubt sind nur der Radio-Stream und dessen Titelanzeige (asurahosting). Neue fremde Dienste (z. B. Webshop-Einbindung) hier ergänzen. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: https://a10.asurahosting.com:9170; connect-src 'self' https://a10.asurahosting.com; worker-src 'self' blob:; manifest-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests" />
   <meta name="description" content="Deep Structure Internetradio — dunkle Geschichten und Drum & Bass. Entdecke veröffentlichte Vinyl, Apps und Spiele." />
   <title>Deep Structure — Internetradio, Vinyl, Apps &amp; Spiele, Webshop</title>
   <link rel="canonical" href="https://deepstructure.world/" />

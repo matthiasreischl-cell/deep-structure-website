@@ -1,7 +1,7 @@
 /* Deep Structure Mastering Studio – Offline-Cache. Version bei jedem Update erhöhen. */
 // Eigener Namensraum je Installationsort (Scope): andere Apps auf derselben Domain (z. B. das Radio) bleiben unberührt.
 const PREFIX = 'ds-studio:' + self.registration.scope + ':';
-const VERSION = PREFIX + 'v1.18.0';
+const VERSION = PREFIX + 'v1.18.1';
 // Ältere Studio-Versionen (bis 1.6.1) hießen 'ds-studio-v…' ohne Namensraum. Sie gehörten nur zu diesem Studio und werden aufgeräumt.
 const isOwnOld = k => k !== VERSION && (k.startsWith(PREFIX) || /^ds-studio-v\d/.test(k));
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png', './favicon.png'];
@@ -19,8 +19,7 @@ self.addEventListener('activate', e => { e.waitUntil((async () => {
 self.addEventListener('fetch', e => {
   const req = e.request; if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  const isFont = /fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
-  if (url.origin !== location.origin && !isFont) return;
+  if (url.origin !== location.origin) return; // fremde Server nie (Schriften sind seit 1.18.1 in der Seite eingebettet)
   // Die App-Seite selbst: immer zuerst frisch aus dem Netz (Updates sofort), offline aus dem eigenen Cache.
   const isPage = req.mode === 'navigate' || (url.origin === location.origin && (url.pathname.endsWith('/') || url.pathname.endsWith('.html')));
   if (isPage) {
@@ -29,7 +28,7 @@ self.addEventListener('fetch', e => {
       .catch(() => caches.open(VERSION).then(async c => (await c.match(req, { ignoreSearch: true })) || c.match('./index.html'))));
     return;
   }
-  // Symbole, Schriften, Encoder: aus dem Cache (auch offline), im Hintergrund aktualisieren.
+  // Symbole, Encoder: aus dem Cache (auch offline), im Hintergrund aktualisieren.
   e.respondWith(caches.open(VERSION).then(async c => {
     const hit = await c.match(req, { ignoreSearch: url.origin === location.origin });
     const net = fetch(req).then(r => { if (r && (r.ok || r.type === 'opaque')) c.put(req, r.clone()); return r; }).catch(() => hit);

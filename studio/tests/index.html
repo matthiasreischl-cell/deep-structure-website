@@ -636,7 +636,18 @@ async function securityCsp() { // Website-Fassung: Content-Security-Policy verhi
   document.removeEventListener('securitypolicyviolation', on);
   const c = meta.content;
   res.push(['Sicherheit: CSP blockiert Anfragen und Skripte von fremden Servern', blocked && seen.some(v => /connect-src/.test(v)) && seen.some(v => /script-src/.test(v)), seen.join(' | ').slice(0, 140)]);
-  res.push(['Sicherheit: CSP erlaubt nur eigene Inhalte, Google Fonts und api.anthropic.com; keine Plugins, Formulare, fremde Basis-URL', /connect-src 'self' https:\/\/api\.anthropic\.com blob: data:;/.test(c) && /object-src 'none'/.test(c) && /form-action 'none'/.test(c) && /base-uri 'none'/.test(c) && !/\*/.test(c), c.length + ' Zeichen']);
+  res.push(['Sicherheit: CSP erlaubt nur eigene Inhalte, eingebettete Schriften und api.anthropic.com; keine fremden Schriften, Plugins, Formulare, fremde Basis-URL', /connect-src 'self' https:\/\/api\.anthropic\.com blob: data:;/.test(c) && /font-src data:;/.test(c) && !/googleapis|gstatic/.test(c) && /object-src 'none'/.test(c) && /form-action 'none'/.test(c) && /base-uri 'none'/.test(c) && !/\*/.test(c), c.length + ' Zeichen']);
+  return res;
+},
+async function schriftenLokal() { // Datenschutz: keine Schriften (und sonst nichts) von Google oder anderen fremden Servern
+  const res = [], doc = (window.__appDoc || document), fams = ['400 12px Michroma', '600 12px "Barlow Condensed"', '700 12px "Barlow Condensed"', '400 12px "IBM Plex Sans"', '600 12px "IBM Plex Sans"', '400 12px "JetBrains Mono"', '600 12px "JetBrains Mono"'];
+  await Promise.all(fams.map(f => document.fonts.load(f).catch(() => null)));
+  const ok = fams.filter(f => document.fonts.check(f)), faces = [...document.fonts].filter(f => f.status === 'loaded').map(f => f.family.replace(/"/g, '') + ' ' + f.weight);
+  const ext = [...document.querySelectorAll('link[href],script[src],img[src]')].map(e => e.href || e.src).filter(u => /^https?:/.test(u) && new URL(u).origin !== location.origin);
+  const req = performance.getEntriesByType('resource').map(e => e.name).filter(u => /^https?:/.test(u) && new URL(u).origin !== location.origin && new URL(u).hostname !== 'example.org'); // example.org: absichtlich blockierte Probe-Anfragen aus dem CSP-Test
+  const css = [...document.styleSheets].flatMap(sh => { try { return [...sh.cssRules].map(r => r.cssText); } catch (e) { return ['(fremdes Stylesheet) ' + sh.href]; } }).filter(t => /url\(\s*["']?https?:/.test(t) || /^\(fremdes/.test(t));
+  res.push(['Datenschutz: die vier Schriften sind eingebettet und geladen', ok.length === fams.length && faces.length >= 7, ok.length + '/' + fams.length + ' · ' + [...new Set(faces)].slice(0, 9).join(', ')]);
+  res.push(['Datenschutz: keine Verweise oder Anfragen an fremde Server beim Laden (kein Google Fonts)', !ext.length && !req.length && !css.length, ext.concat(req, css).slice(0, 3).join(' | ') || 'keine']);
   return res;
 },
 async function zweiSpuren() { // Wellenform mit zwei Spuren: Master (nach der Kette) oben, Original unten; Klick schaltet das Abhören um

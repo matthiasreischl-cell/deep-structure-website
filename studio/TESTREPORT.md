@@ -783,3 +783,16 @@ Testsong „Kein Aber – 1. Du weißt es“ (48 kHz, 16 Bit). App-Master in der
 
 ### Offen
 - Nulltest mit der echten Einstellungsdatei des Nutzers gegen seinen exportierten Master, sobald die Datei gesichert ist.
+
+## 36. Nachtrag 1.18.1: Schriften eingebettet (Datenschutz), CSP der Website (05.11.2026)
+
+Anlass: externe Prüfung. Das Studio lud vier Schriften von Google Fonts (IP-Übertragung an Google; in AT/DE Abmahnwelle), im Widerspruch zur Datenschutzerklärung.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Studio (Website-Fassung): Verweise auf fremde Server im HTML (`src`, `href`, `url()`) | keine |
+| Studio: Schriften geladen (Michroma 400, Barlow Condensed 500/600/700, IBM Plex Sans 400/500/600, JetBrains Mono 400/600) | 7/7 Proben, 9 Schnitte geladen (Browser-Test) |
+| Studio: Anfragen an fremde Server beim Laden | keine (Browser-Test; vorher: fonts.googleapis.com, fonts.gstatic.com) |
+| CSP Studio | `font-src data:`, `style-src` nur eigene/inline, kein googleapis/gstatic |
+| Browser-Tests gesamt | 183 bestanden, PC-Fassung bestanden |
+| Hauptseite, Impressum, Datenschutz mit neuer CSP (Chromium, lokal) | keine CSP-Verstöße beim Laden, in der Welt (#inside), beim Öffnen von Radio, Vinyl und Deck; Radio-Stream (a10.asurahosting.com:9170) wird angefragt (erlaubt) |

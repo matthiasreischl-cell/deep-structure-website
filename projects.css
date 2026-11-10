@@ -125,6 +125,61 @@
   .project-thumb:hover { opacity: 1; }
 }
 
+/* ---------- Spiel-Fenster (Demo im Browser) ---------- */
+.project-play { margin-right: 0; }
+.project-copy p.project-demo-note { margin: 4px 0 18px; font-size: 12.5px; color: var(--ink-faint, #9d8e72); letter-spacing: .02em; }
+.game-window {
+  position: fixed;
+  inset: clamp(0px, 2.2vw, 28px);
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-strong, rgba(201, 168, 106, .45));
+  background: #050403;
+  box-shadow: 0 0 0 100vmax rgba(3, 2, 1, .82), 0 30px 80px rgba(0, 0, 0, .8);
+  animation: game-window-in 260ms var(--ease-out, cubic-bezier(.23, 1, .32, 1));
+}
+.game-window:fullscreen { inset: 0; border: 0; }
+.game-window-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid var(--line, rgba(201, 168, 106, .22));
+  background: var(--surface, #12100c);
+}
+.game-window-title { display: flex; align-items: center; gap: 12px; min-width: 0; margin: 0; }
+.game-window-title strong { font-family: var(--font-display, Georgia, serif); font-size: 19px; font-weight: 600; color: var(--ink, #ecdfc6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.game-window-badge { flex: none; padding: 3px 9px; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #17120a; background: var(--gold, #c9a86a); }
+.game-window-tools { display: flex; gap: 6px; flex: none; }
+.game-window-button {
+  min-height: 36px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-soft, #c4b394);
+  background: transparent;
+  border: 1px solid var(--line, rgba(201, 168, 106, .22));
+  cursor: pointer;
+  transition: color 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+.game-window-button:focus-visible { outline: 2px solid var(--gold-bright, #dcbd80); outline-offset: 2px; }
+.game-window-button:active { transform: scale(.97); }
+@media (hover: hover) and (pointer: fine) {
+  .game-window-button:hover { color: var(--ink, #ecdfc6); border-color: var(--gold, #c9a86a); }
+  .game-window-close:hover { background: var(--gold-bright, #dcbd80); color: #17120a; }
+}
+.game-window-frame { flex: 1; width: 100%; min-height: 0; border: 0; background: #000; display: block; }
+@keyframes game-window-in { from { opacity: 0; transform: scale(.985); } to { opacity: 1; transform: none; } }
+@media (max-width: 760px) {
+  .game-window { inset: 0; border: 0; }
+  .game-window-title strong { font-size: 16px; }
+  .game-window-button { padding: 0 10px; }
+}
+@media (prefers-reduced-motion: reduce) { .game-window { animation: none; } }
+
 @media (max-width: 760px) {
   .project-row, .project-row--flip { grid-template-columns: 1fr; gap: 18px; margin-top: 36px; padding-top: 32px; }
   .project-row--flip .project-viewer { order: 0; }

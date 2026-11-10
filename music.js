@@ -232,7 +232,10 @@ function block(key, on) {
   if (blockers.size) stopAudible();
   else if (wanted) startAudible();
 }
-new MutationObserver(() => block('radio', document.body.classList.contains('radio-playing')))
+new MutationObserver(() => {
+  block('radio', document.body.classList.contains('radio-playing'));
+  block('game', document.body.classList.contains('game-open'));
+})
   .observe(document.body, { attributes: true, attributeFilter: ['class'] });
 document.addEventListener('play', event => {
   if (event.target instanceof HTMLVideoElement && !event.target.muted) block(event.target, true);

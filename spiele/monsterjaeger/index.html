@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Monsterjäger – Demo-Version</title>
+<meta name="robots" content="noindex">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="hud" class="hidden">
+  <div id="topbar">
+    <div id="clock"><span id="dayicon"></span><span id="daytext">Tag 1</span><div id="daybar"><div id="dayfill"></div></div></div>
+    <div id="resbar"></div>
+    <div id="topright">
+      <span id="pop" title="Dorfbewohner / Platz"></span>
+      <button class="sb" data-speed="0" title="Pause (P)">❚❚</button>
+      <button class="sb" data-speed="1" title="Normal">▶</button>
+      <button class="sb" data-speed="2" title="Schnell">▶▶</button>
+      <button class="sb" data-speed="4" title="Sehr schnell">▶▶▶</button>
+      <button id="btnMenu" title="Menü (Esc)">☰</button>
+    </div>
+  </div>
+
+  <div id="quest" class="parch"><div id="qtitle"></div><div id="qtext"></div><div id="qbtns"></div></div>
+  <div id="toasts"></div>
+
+  <div id="buildpanel" class="parch">
+    <div id="bptoggle" title="Baumenü ein-/ausklappen">⚒ Bauen</div>
+    <div id="bpbody">
+      <div id="bptabs"></div>
+      <div id="bpgrid"></div>
+      <div id="bptools">
+        <button data-tool="road" title="Weg bauen (T) – ziehen für Linien">🛤 Weg</button>
+        <button data-tool="unroad" title="Weg entfernen">✖ Weg</button>
+        <button data-tool="demolish" title="Gebäude abreißen">🔨 Abriss</button>
+        <button data-tool="rotate" title="Gebäude drehen (R oder Umschalt + Mausrad)" disabled>⟳ Drehen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="heropanel" class="parch">
+    <img id="heroimg" alt="">
+    <div id="herostats"><div id="heroname">Monsterjäger</div><div class="bar"><div id="herohp"></div></div><div id="herolvl"></div></div>
+    <div id="heroabil">
+      <button id="abRally" title="Schlachtruf (Q): Kämpfer in der Nähe +30% Schaden für 15 s">📯<span class="cd"></span></button>
+      <button id="abHoly" title="Weihwasser-Wurf (E): Flächenschaden, stark gegen Untote">💧<span class="cd"></span><span id="charges"></span></button>
+      <button id="abFind" title="Held finden (Leertaste)">⌖</button>
+    </div>
+  </div>
+
+  <div id="info" class="parch hidden"></div>
+
+  <div id="minimapwrap" class="parch"><canvas id="minimap" width="240" height="120"></canvas></div>
+  <div id="hint"></div>
+</div>
+
+<div id="title" class="screen">
+  <div id="titlebg"></div>
+  <div id="demobadge">Demo-Version</div>
+  <div id="titlebox">
+    <div class="tsub">Ein Aufbau- &amp; Strategiespiel</div>
+    <h1>Monsterjäger</h1>
+    <div class="tsub2">Das Land der Seuche</div>
+    <div id="loadbar"><div id="loadfill"></div></div>
+    <div id="titlebtns" class="hidden">
+      <button id="btnNew">Neues Spiel <small>mit Tutorial</small></button>
+      <button id="btnFree">Freies Spiel <small>ohne Tutorial</small></button>
+      <button id="btnLoad">Spielstand laden</button>
+      <button id="btnHelp">Steuerung</button>
+    </div>
+    <div id="demonote">Spielbare Demo: Tutorial in Grauweiler und die Befreiung von Mooskirchen. Das Spiel ist noch in Entwicklung.</div>
+    <div class="credit">© Deep Structure · Grafik nach den Vorlagen von Deep Structure</div>
+  </div>
+</div>
+
+<div id="menu" class="screen hidden">
+  <div class="parch dialog">
+    <h2>Menü</h2>
+    <button id="mResume">Weiterspielen</button>
+    <button id="mSave">Speichern</button>
+    <button id="mLoad">Laden</button>
+    <button id="mHelp">Steuerung</button>
+    <button id="mMusic">Musik: an</button>
+    <button id="mQuit">Hauptmenü</button>
+  </div>
+</div>
+
+<div id="help" class="screen hidden">
+  <div class="parch dialog wide">
+    <h2>Steuerung</h2>
+    <table>
+      <tr><td>Kamera bewegen</td><td>W A S D / Pfeiltasten, Bildschirmrand, rechte Maustaste ziehen, Minikarte</td></tr>
+      <tr><td>Zoomen</td><td>Mausrad (Handy: zwei Finger)</td></tr>
+      <tr><td>Auswählen</td><td>Linksklick, Rahmen ziehen für mehrere Kämpfer, H = Held</td></tr>
+      <tr><td>Bewegen / Angreifen</td><td>Rechtsklick (Handy: Kämpfer wählen, dann Ziel antippen)</td></tr>
+      <tr><td>Bauen</td><td>Gebäude im Baumenü wählen, mit R (oder Umschalt + Mausrad) drehen, Linksklick setzen, Rechtsklick/Esc beendet. Der Eingang leuchtet grün, wenn er an einer Straße liegt.</td></tr>
+      <tr><td>Wege</td><td>T, dann Linie ziehen. Wege machen alle schneller – am besten bis zum Eingang jedes Gebäudes.</td></tr>
+      <tr><td>Held</td><td>Q = Schlachtruf, E = Weihwasser-Wurf, Leertaste = zum Helden</td></tr>
+      <tr><td>Tempo</td><td>P = Pause, 1–3 = Geschwindigkeit</td></tr>
+      <tr><td>Speichern</td><td>F5 schnell speichern, F9 laden</td></tr>
+    </table>
+    <p class="small">Tipp: Träger bringen Waren automatisch dorthin, wo sie gebraucht werden. Hungrige Bewohner essen im Wirtshaus. Nachts greifen die Kreaturen aus den verseuchten Dörfern an – Wachtürme brauchen Steine als Munition.</p>
+    <button id="helpClose">Schließen</button>
+  </div>
+</div>
+
+<div id="endscreen" class="screen hidden">
+  <div class="parch dialog"><h2 id="endtitle"></h2><p id="endtext"></p><button id="endBtn">Hauptmenü</button></div>
+</div>
+
+<script src="mj.js"></script>
+</body>
+</html>

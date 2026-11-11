@@ -7,7 +7,7 @@ Reines HTML, CSS und JavaScript als ES-Module, ohne Build-Schritt.
 
 1. **Startseite:** Das Deep-Structure-Logo schwebt in 3D über dunklem Wasser. Die Ringe drehen sich
    waagrecht um das Dreieck (wie eine Armillarsphäre). Beim Klick taucht das Logo ein, und die Wellen
-   laufen hinter „The World you get in.“ aus.
+   laufen hinter „The World you step into.“ aus.
 2. **Welt:** Nach dem Eintreten (Adresse `#inside`) stehen vier Objekte im Wald:
    - **Musik:** Bassbox mit Signalring, öffnet das Deep Structure Radio (Live-Stream über Asura Hosting).
    - **Vinyl:** Platte mit Deep-Space-Label; elasticStage-Link zur veröffentlichten Vinyl.

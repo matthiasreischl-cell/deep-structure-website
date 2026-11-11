@@ -27,7 +27,7 @@ The object must appear to float partially on or immediately above a nearly black
 - Cursor movement creates visible local water ripples.
 - Proximity to the 3D symbol increases displacement/ripple intensity.
 - The symbol tilts on X/Y with smooth damping, shifts slightly in X/Y/Z, and idles with subtle floating motion.
-- Clicking/tapping the entrance runs the existing transition containing `The World you get in.`
+- Clicking/tapping the entrance runs the existing transition containing `The World you step into.`
 - After the transition, dispatch `deepstructure:entered` and set `#inside` as the hand-off for the future site.
 
 ### Technical constraints
@@ -50,7 +50,7 @@ The object must appear to float partially on or immediately above a nearly black
 4. The object's location visibly produces a displaced/darker water basin and expanding wave structure.
 5. Cursor movement produces additional local ripples.
 6. `DEEP STRUCTURE` is separate selectable/layout typography, not baked into an image.
-7. Clicking the entrance still displays `The World you get in.` before entering.
+7. Clicking the entrance still displays `The World you step into.` before entering.
 8. The page remains responsive and GitHub Pages compatible.
 
 ## 2. File structure

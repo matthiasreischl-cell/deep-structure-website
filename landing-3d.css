@@ -19,7 +19,7 @@ body.scene3d .depth-vignette {
 }
 body.scene3d .wordmark { filter: drop-shadow(0 2px 10px rgba(0, 0, 0, .9)); }
 /* Beim Eintreten bleibt das Wasser sichtbar: das Logo taucht ein, die Wellen laufen
-   hinter "The World you get in." aus, erst am Ende sinkt alles ins Dunkel. */
+   hinter "The World you step into." aus, erst am Ende sinkt alles ins Dunkel. */
 body.scene3d.entering #scene3d { animation: ds-water-out 3.1s ease forwards; }
 @keyframes ds-water-out { 0%, 62% { opacity: 1; filter: blur(0); } 100% { opacity: 0; filter: blur(4px); } }
 body.scene3d .transition {

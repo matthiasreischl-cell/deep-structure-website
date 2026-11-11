@@ -73,7 +73,7 @@
   body:has(.world-panel.is-open) .music-toggle { pointer-events: none; }
 }
 
-/* Während der Übergang „The World you get in.“ läuft, tritt der Knopf zurück */
+/* Während der Übergang „The World you step into.“ läuft, tritt der Knopf zurück */
 body.entering .music-control { opacity: 0; transition: opacity 300ms ease; }
 body:not(.entering) .music-control { transition: opacity 600ms ease; }
 

@@ -4,7 +4,7 @@
   auf einer dunklen Wasserfläche, die es spiegelt (planare Spiegelung) und auf
   Logo, Maus und Finger mit Wellen reagiert.
 
-  app.js bleibt zuständig für Klick, Übergang "The World you get in." und #inside.
+  app.js bleibt zuständig für Klick, Übergang "The World you step into." und #inside.
   Schlägt WebGL2/Three.js fehl, lädt index.html automatisch die alte Variante.
 */
 import * as THREE from './assets/vendor/three/three.module.min.js';
@@ -288,7 +288,7 @@ addEventListener('pointerdown', e => {
 }, { passive: true });
 
 /* Klick aufs Logo: die Ringe drehen hoch, das Logo taucht ins Wasser,
-   und die Wellen laufen hinter "The World you get in." aus. */
+   und die Wellen laufen hinter "The World you step into." aus. */
 const body = { y: 0, v: 0, flash: 0 };
 const dive = { active: false, start: 0 };
 button.addEventListener('click', () => {

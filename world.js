@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=7';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=8';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -414,6 +414,74 @@ function projectViewer(project) {
   return viewer;
 }
 
+// Spiel-Fenster: das Spiel läuft in einem eigenen Rahmen über der Welt.
+let gameWindow = null;
+document.addEventListener('fullscreenchange', () => {
+  if (gameWindow) gameWindow.full.textContent = document.fullscreenElement ? 'Vollbild beenden' : 'Vollbild';
+});
+function closeGameWindow() {
+  if (!gameWindow) return;
+  const { node, opener, onKey } = gameWindow;
+  gameWindow = null;
+  removeEventListener('keydown', onKey, true);
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  node.remove();
+  document.body.classList.remove('game-open');
+  panel.inert = false;
+  opener?.focus({ preventScroll: true });
+}
+
+function openGameWindow(game, opener) {
+  closeGameWindow();
+  const node = el('div', 'game-window');
+  node.setAttribute('role', 'dialog');
+  node.setAttribute('aria-modal', 'true');
+  node.setAttribute('aria-label', game.title);
+  const bar = el('div', 'game-window-bar');
+  const title = el('p', 'game-window-title');
+  title.append(el('strong', '', game.title.split(' · ')[0]), el('span', 'game-window-badge', 'Demo-Version'));
+  const tools = el('div', 'game-window-tools');
+  const full = el('button', 'game-window-button', 'Vollbild');
+  full.type = 'button';
+  const close = el('button', 'game-window-button game-window-close', 'Schließen ✕');
+  close.type = 'button';
+  close.setAttribute('aria-label', 'Spiel schließen');
+  tools.append(full, close);
+  bar.append(title, tools);
+  const frame = el('iframe', 'game-window-frame');
+  frame.title = game.title;
+  frame.src = game.src;
+  frame.allow = 'fullscreen; autoplay';
+  frame.setAttribute('allowfullscreen', '');
+  node.append(bar, frame);
+
+  if (!document.fullscreenEnabled) full.hidden = true;
+  full.addEventListener('click', () => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else node.requestFullscreen?.().then(() => frame.focus()).catch(() => {});
+  });
+  close.addEventListener('click', closeGameWindow);
+  frame.addEventListener('load', () => frame.focus());
+
+  // Tasten im Fenster gehören dem Spiel; Esc außerhalb des Spiels schließt nur das Spiel-Fenster.
+  const onKey = event => {
+    if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); closeGameWindow(); return; }
+    if (event.key !== 'Tab') return;
+    event.stopImmediatePropagation();
+    const controls = [full, close].filter(b => !b.hidden);
+    const order = [...controls, frame];
+    const index = order.indexOf(document.activeElement);
+    event.preventDefault();
+    order[(index + (event.shiftKey ? order.length - 1 : 1)) % order.length].focus();
+  };
+  addEventListener('keydown', onKey, true);
+  gameWindow = { node, opener, onKey, full };
+  document.body.append(node);
+  document.body.classList.add('game-open');
+  panel.inert = true;
+  close.focus({ preventScroll: true });
+}
+
 function openProgrammes() {
   const detail = el('article', 'programmes-detail');
   detail.append(el('h2', '', 'Apps & Spiele'));
@@ -428,6 +496,12 @@ function openProgrammes() {
     const section = el('section', 'project-row' + (index % 2 ? ' project-row--flip' : ''));
     const copy = el('div', 'project-copy');
     copy.append(el('p', 'project-status', project.status), el('h3', '', project.title), el('p', '', project.text));
+    if (project.play) {
+      const play = el('button', 'world-link world-link--primary project-play', '▶ ' + project.play.label);
+      play.type = 'button';
+      play.addEventListener('click', () => openGameWindow(project.play, play));
+      copy.append(play, el('p', 'project-demo-note', 'Demo-Version · noch in Entwicklung · Spielstand bleibt in deinem Browser'));
+    }
     if (project.link) {
       const link = el('a', 'world-link world-link--primary', project.link.label + ' ↗');
       link.href = project.link.href;

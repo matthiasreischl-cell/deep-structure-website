@@ -102,11 +102,18 @@ export const projects = [
   },
   {
     id: 'monsterjaeger',
-    title: 'Monsterjäger',
-    status: 'Spiel · in Entwicklung',
-    text: 'Dunkles Fantasy-Spiel um einen Jäger, verflucht, aber immer noch Mensch. Mit Schwert und Armbrust unterwegs auf der alten Landstraße.',
+    title: 'Monsterjäger – Das Land der Seuche',
+    status: 'Spiel · Demo-Version jetzt spielbar',
+    text: 'Aufbau- und Strategiespiel im Comic-Stil: Baue Grauweiler auf, verbinde Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und führe den Monsterjäger mit deiner Miliz gegen die verseuchten Nachbardörfer. Die Demo umfasst das Tutorial und die Befreiung von Mooskirchen. Läuft direkt im Browser, am besten am Computer mit Maus und Tastatur.',
+    play: {
+      label: 'Demo spielen',
+      src: './spiele/monsterjaeger/',
+      title: 'Monsterjäger · Demo-Version'
+    },
     images: [
-      { src: './assets/projects/monsterjaeger-spiel.webp', alt: 'Spielszene: der Monsterjäger kämpft auf der alten Landstraße gegen Untote' },
+      { src: './assets/projects/monsterjaeger-demo-dorf.webp', alt: 'Spielszene aus der Demo: das Dorf Grauweiler mit Mühle, Wirtshaus und Dorfbewohnern' },
+      { src: './assets/projects/monsterjaeger-demo-kampf.webp', alt: 'Spielszene aus der Demo: der Monsterjäger und seine Miliz kämpfen im verseuchten Mooskirchen' },
+      { src: './assets/projects/monsterjaeger-demo-titel.webp', alt: 'Titelbild der Demo-Version von Monsterjäger' },
       { src: './assets/projects/monsterjaeger-held.webp', alt: 'Figurenblatt des Monsterjägers mit Ausrüstung und Farbpalette' }
     ]
   },
@@ -137,7 +144,7 @@ export const projectDeck = [
   './assets/projects/thumb-monsterjaeger-held.webp',
   './assets/projects/thumb-clash-helden.webp',
   './assets/projects/thumb-studio.webp',
-  './assets/projects/thumb-monsterjaeger-spiel.webp',
+  './assets/projects/thumb-monsterjaeger-demo.webp',
   './assets/projects/thumb-clash-anlagen.webp',
   './assets/projects/thumb-trading-bot.webp'
 ];

@@ -104,14 +104,15 @@ export const projects = [
     id: 'monsterjaeger',
     title: 'Monsterjäger – Das Land der Seuche',
     status: 'Spiel · Demo-Version jetzt spielbar',
-    text: 'Aufbau- und Strategiespiel im Comic-Stil: Baue Grauweiler auf, verbinde Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und führe den Monsterjäger mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke – jeder Tag ist anders lang. Die Demo umfasst das Tutorial und die Befreiung von Mooskirchen. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
+    text: 'Aufbau- und Strategiespiel im Comic-Stil: Baue Grauweiler auf, verbinde Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und führe den Monsterjäger mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke – jeder Tag ist anders lang. Tagsüber versperrt eine Dornenhecke die verseuchten Dörfer, erst nachts öffnet sie sich – für die Kreaturen und für deine Kämpfer. Die Demo umfasst das Tutorial und die Befreiung von Mooskirchen. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
     play: {
       label: 'Demo spielen',
-      src: './spiele/monsterjaeger/?v=b9addd51',
+      src: './spiele/monsterjaeger/?v=d89b48db',
       title: 'Monsterjäger · Demo-Version'
     },
     images: [
       { src: './assets/projects/monsterjaeger-demo-dorf.webp', alt: 'Spielszene aus der Demo: das Dorf Grauweiler mit Mühle, Wirtshaus und Dorfbewohnern' },
+      { src: './assets/projects/monsterjaeger-demo-kreaturen.webp', alt: 'Spielszene aus der Demo: Zombies, Ghule, Seuchenhunde und eine Brut am Rand von Grauweiler' },
       { src: './assets/projects/monsterjaeger-demo-kampf.webp', alt: 'Spielszene aus der Demo: der Monsterjäger und seine Miliz kämpfen im verseuchten Mooskirchen zwischen den Seuchennestern' },
       { src: './assets/projects/monsterjaeger-demo-titel.webp', alt: 'Titelbild der Demo-Version von Monsterjäger' },
       { src: './assets/projects/monsterjaeger-held.webp', alt: 'Figurenblatt des Monsterjägers mit Ausrüstung und Farbpalette' }

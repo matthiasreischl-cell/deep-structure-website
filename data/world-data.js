@@ -107,7 +107,7 @@ export const projects = [
     text: 'Aufbau- und Strategiespiel im Comic-Stil: Baue Grauweiler auf, verbinde Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und führe den Monsterjäger mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke – jeder Tag ist anders lang. Die Demo umfasst das Tutorial und die Befreiung von Mooskirchen. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
     play: {
       label: 'Demo spielen',
-      src: './spiele/monsterjaeger/?v=59df416e',
+      src: './spiele/monsterjaeger/?v=256a6328',
       title: 'Monsterjäger · Demo-Version'
     },
     images: [

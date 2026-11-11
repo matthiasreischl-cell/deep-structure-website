@@ -150,7 +150,8 @@ background: linear-gradient(#2a1c10, #1a110a); border-bottom: 2px solid #6a4a26;
 #hint { display: none; }
 }
 #bptools button:disabled { opacity: 0.4; cursor: default; }
+.volrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 10px; font-size: 15px; }
+.volrow input { flex: 1; accent-color: #7a2a1a; }
 #demobadge { position: absolute; top: 14px; right: 16px; z-index: 60; padding: 6px 14px; font-family: 'IM Fell English SC', serif;
 font-size: 15px; letter-spacing: 3px; color: #1a0f08; background: #e8b84a; border: 2px solid #3a0e0a; transform: rotate(3deg); box-shadow: 0 4px 14px rgba(0,0,0,.6); }
 #demonote { margin-top: 14px; font-size: 14px; color: #d8c090; font-style: italic; max-width: 360px; margin-left: auto; margin-right: auto; }
-#mMusic { display: none; }

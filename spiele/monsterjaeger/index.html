@@ -6,14 +6,14 @@
 <title>Monsterjäger – Demo-Version</title>
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="style.css?v=fbbe8e86">
+<link rel="stylesheet" href="style.css?v=277c13ed">
 </head>
 <body>
 <canvas id="game"></canvas>
 
 <div id="hud" class="hidden">
   <div id="topbar">
-    <div id="clock"><span id="dayicon"></span><span id="daytext">Tag 1</span><div id="daybar"><div id="dayfill"></div></div></div>
+    <div id="clock"><span id="dayicon"></span><span id="daytext">Tag 1</span><span id="songtext"></span><div id="daybar"><div id="dayfill"></div></div></div>
     <div id="resbar"></div>
     <div id="topright">
       <span id="pop" title="Dorfbewohner / Platz"></span>
@@ -23,6 +23,7 @@
           <button id="btnMute" title="Musik stumm (M)">🔊</button>
           <input id="hudVol" type="range" min="0" max="100" step="5" aria-label="Lautstärke Musik">
           <span id="hudVolTxt"></span>
+          <div id="nowplaying"></div>
         </div>
       </div>
       <button class="sb" data-speed="0" title="Pause (P)">❚❚</button>
@@ -122,6 +123,6 @@
   <div class="parch dialog"><h2 id="endtitle"></h2><p id="endtext"></p><button id="endBtn">Hauptmenü</button></div>
 </div>
 
-<script src="mj.js?v=fbbe8e86"></script>
+<script src="mj.js?v=277c13ed"></script>
 </body>
 </html>

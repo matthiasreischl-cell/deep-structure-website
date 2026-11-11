@@ -153,11 +153,13 @@ background: linear-gradient(#2a1c10, #1a110a); border-bottom: 2px solid #6a4a26;
 .volrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 4px 0 10px; font-size: 15px; }
 .volrow input { flex: 1; accent-color: #7a2a1a; }
 #musicctl { position: relative; margin-right: 6px; }
-#musicpop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 40; display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #2a1c10; border: 1px solid #8a6a3a; border-radius: 4px; box-shadow: 0 6px 18px rgba(0,0,0,.6); white-space: nowrap; }
+#musicpop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 40; display: flex; flex-wrap: wrap; width: 270px; align-items: center; gap: 8px; padding: 8px 10px; background: #2a1c10; border: 1px solid #8a6a3a; border-radius: 4px; box-shadow: 0 6px 18px rgba(0,0,0,.6); white-space: nowrap; }
 #musicpop.hidden { display: none; }
-#musicpop input { width: 120px; accent-color: #c8a060; }
+#musicpop input { flex: 1; width: auto; accent-color: #c8a060; }
 #hudVolTxt { min-width: 34px; font-size: 13px; color: #f0dfb0; text-align: right; }
 #btnMusic.muted { color: #8a6a3a; text-decoration: line-through; }
+#songtext { margin-left: 8px; font-size: 13px; color: #c8a060; }
+#nowplaying { flex-basis: 100%; font-size: 12px; color: #d8c090; white-space: normal; }
 #demobadge { position: absolute; top: 14px; right: 16px; z-index: 60; padding: 6px 14px; font-family: 'IM Fell English SC', serif;
 font-size: 15px; letter-spacing: 3px; color: #1a0f08; background: #e8b84a; border: 2px solid #3a0e0a; transform: rotate(3deg); box-shadow: 0 4px 14px rgba(0,0,0,.6); }
 #demonote { margin-top: 14px; font-size: 14px; color: #d8c090; font-style: italic; max-width: 360px; margin-left: auto; margin-right: auto; }

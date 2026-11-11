@@ -106,13 +106,13 @@ background: linear-gradient(#2a1c10, #1a110a); border-bottom: 2px solid #6a4a26;
 #minimap { display: block; background: #0b0806; cursor: pointer; }
 #hint { position: fixed; bottom: 150px; right: 12px; color: #f0dfb0; font-size: 13px; text-shadow: 0 1px 2px #000; z-index: 5; pointer-events: none; text-align: right; }
 .screen { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(5,3,2,0.6); }
-#title { background: #000; }
-#titlebg { position: absolute; inset: 0; background-size: cover; background-position: center; filter: brightness(0.75); animation: drift 40s ease-in-out infinite alternate; }
-@keyframes drift { from { transform: scale(1.05) translateX(-1%); } to { transform: scale(1.12) translateX(1%); } }
-#titlebox { position: relative; text-align: center; color: #f0dfb0; padding: 30px 50px; background: radial-gradient(ellipse, rgba(10,6,4,0.75) 0%, rgba(10,6,4,0) 70%); }
-#titlebox h1 { font-family: 'Germania One', Georgia, serif; font-weight: normal; font-size: clamp(54px, 10vw, 110px); margin: 0; color: #f3e0b0; text-shadow: 0 4px 0 #3a0e0a, 0 0 30px rgba(0,0,0,0.9); letter-spacing: 2px; }
-.tsub { font-family: 'IM Fell English SC', serif; font-size: 18px; letter-spacing: 3px; color: #d8c090; }
-.tsub2 { font-family: 'IM Fell English', serif; font-style: italic; font-size: 26px; color: #e8b84a; margin-bottom: 20px; }
+#title { background: #000; align-items: flex-start; overflow: hidden; }
+#titlebg { position: absolute; inset: 0; background-size: cover; background-position: center top; transform-origin: 50% 0; animation: drift 50s ease-in-out infinite alternate; }
+@keyframes drift { from { transform: scale(1); } to { transform: scale(1.04); } }
+#titlebox { position: relative; margin-top: max(38vh, 21vw); text-align: center; color: #f0dfb0; padding: 10px 50px 24px; background: radial-gradient(ellipse, rgba(10,6,4,0.7) 0%, rgba(10,6,4,0) 70%); }
+#titlebox h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+.tsub { font-family: 'IM Fell English SC', serif; font-size: 16px; letter-spacing: 3px; color: #d8c090; text-shadow: 0 1px 4px #000; margin-bottom: 18px; }
+.tsub2 { font-family: 'IM Fell English', serif; font-style: italic; font-size: 28px; color: #e8b84a; text-shadow: 0 2px 6px #000, 0 0 18px #000; }
 #loadbar { width: 300px; height: 8px; margin: 20px auto; border: 1px solid #8a6a3a; background: #1a110a; }
 #loadfill { height: 100%; width: 0; background: #e8b84a; }
 #titlebtns { display: flex; flex-direction: column; gap: 10px; align-items: center; }
@@ -120,6 +120,14 @@ background: linear-gradient(#2a1c10, #1a110a); border-bottom: 2px solid #6a4a26;
 #titlebtns button small { display: block; font-size: 13px; color: #c8a868; font-family: 'IM Fell English', serif; font-style: italic; }
 #titlebtns button:hover, .dialog button:hover { border-color: #e8b84a; color: #fff; }
 .credit { margin-top: 24px; font-size: 13px; color: #a08860; font-style: italic; }
+@media (max-height: 820px) {
+#titlebox { margin-top: max(31vh, 15.5vw); padding-bottom: 10px; }
+.tsub2 { font-size: 24px; } .tsub { margin-bottom: 10px; font-size: 14px; }
+#titlebtns { gap: 6px; }
+#titlebtns button { padding: 6px 10px; font-size: 18px; }
+#titlebtns button small { font-size: 12px; }
+.credit { margin-top: 10px; }
+}
 .dialog { padding: 20px 30px; display: flex; flex-direction: column; gap: 8px; align-items: center; max-width: 92vw; }
 .dialog h2 { font-family: 'Germania One', Georgia, serif; font-weight: normal; font-size: 32px; color: var(--red); margin: 0 0 8px; }
 .dialog.wide { max-width: 640px; }
@@ -162,4 +170,4 @@ background: linear-gradient(#2a1c10, #1a110a); border-bottom: 2px solid #6a4a26;
 #nowplaying { flex-basis: 100%; font-size: 12px; color: #d8c090; white-space: normal; }
 #demobadge { position: absolute; top: 14px; right: 16px; z-index: 60; padding: 6px 14px; font-family: 'IM Fell English SC', serif;
 font-size: 15px; letter-spacing: 3px; color: #1a0f08; background: #e8b84a; border: 2px solid #3a0e0a; transform: rotate(3deg); box-shadow: 0 4px 14px rgba(0,0,0,.6); }
-#demonote { margin-top: 14px; font-size: 14px; color: #d8c090; font-style: italic; max-width: 360px; margin-left: auto; margin-right: auto; }
+#demonote { margin-top: 10px; font-size: 14px; color: #d8c090; font-style: italic; max-width: 360px; margin-left: auto; margin-right: auto; }

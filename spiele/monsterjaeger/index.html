@@ -6,7 +6,7 @@
 <title>Monsterjäger – Demo-Version</title>
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=d89b48db">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -17,6 +17,14 @@
     <div id="resbar"></div>
     <div id="topright">
       <span id="pop" title="Dorfbewohner / Platz"></span>
+      <div id="musicctl">
+        <button id="btnMusic" title="Musik (M = stumm)">♪</button>
+        <div id="musicpop" class="hidden">
+          <button id="btnMute" title="Musik stumm (M)">🔊</button>
+          <input id="hudVol" type="range" min="0" max="100" step="5" aria-label="Lautstärke Musik">
+          <span id="hudVolTxt"></span>
+        </div>
+      </div>
       <button class="sb" data-speed="0" title="Pause (P)">❚❚</button>
       <button class="sb" data-speed="1" title="Normal">▶</button>
       <button class="sb" data-speed="2" title="Schnell">▶▶</button>
@@ -102,6 +110,7 @@
       <tr><td>Wege</td><td>T, dann Linie ziehen. Wege machen alle schneller – am besten bis zum Eingang jedes Gebäudes.</td></tr>
       <tr><td>Held</td><td>Q = Schlachtruf, E = Weihwasser-Wurf, Leertaste = zum Helden</td></tr>
       <tr><td>Tempo</td><td>P = Pause, 1–3 = Geschwindigkeit</td></tr>
+      <tr><td>Musik</td><td>♪ oben rechts: lauter, leiser, stumm · M = stumm (der Tag läuft weiter)</td></tr>
       <tr><td>Speichern</td><td>F5 schnell speichern, F9 laden</td></tr>
     </table>
     <p class="small">Tipp: Träger bringen Waren automatisch dorthin, wo sie gebraucht werden. Hungrige Bewohner essen im Wirtshaus. Nachts greifen die Kreaturen aus den verseuchten Dörfern an – Wachtürme brauchen Steine als Munition.</p>
@@ -113,6 +122,6 @@
   <div class="parch dialog"><h2 id="endtitle"></h2><p id="endtext"></p><button id="endBtn">Hauptmenü</button></div>
 </div>
 
-<script src="mj.js"></script>
+<script src="mj.js?v=d89b48db"></script>
 </body>
 </html>

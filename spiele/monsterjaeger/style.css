@@ -164,7 +164,9 @@ background: linear-gradient(#2a1c10, #1a110a); border-bottom: 2px solid #6a4a26;
 #musicpop { position: absolute; top: calc(100% + 8px); right: 0; z-index: 40; display: flex; flex-wrap: wrap; width: 270px; align-items: center; gap: 8px; padding: 8px 10px; background: #2a1c10; border: 1px solid #8a6a3a; border-radius: 4px; box-shadow: 0 6px 18px rgba(0,0,0,.6); white-space: nowrap; }
 #musicpop.hidden { display: none; }
 #musicpop input { flex: 1; width: auto; accent-color: #c8a060; }
-#hudVolTxt { min-width: 34px; font-size: 13px; color: #f0dfb0; text-align: right; }
+#hudVolTxt, #hudSfxTxt { min-width: 34px; font-size: 13px; color: #f0dfb0; text-align: right; }
+#sfxrow { flex-basis: 100%; display: flex; align-items: center; gap: 8px; }
+#sfxrow > span:first-child { width: 30px; text-align: center; color: #f0dfb0; font-size: 16px; }
 #btnMusic.muted { color: #8a6a3a; text-decoration: line-through; }
 #songtext { margin-left: 8px; font-size: 13px; color: #c8a060; }
 #nowplaying { flex-basis: 100%; font-size: 12px; color: #d8c090; white-space: normal; }

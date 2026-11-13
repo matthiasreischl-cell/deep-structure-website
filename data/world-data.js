@@ -104,10 +104,10 @@ export const projects = [
     id: 'monsterjaeger',
     title: 'Monsterjäger – Das Land der Seuche',
     status: 'Spiel · Demo-Version jetzt spielbar',
-    text: 'Aufbau- und Strategiespiel im Comic-Stil: Baue Grauweiler auf, verbinde Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und führe den Monsterjäger mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke – jeder Tag ist anders lang. Tagsüber versperrt eine Dornenhecke die verseuchten Dörfer, erst nachts öffnet sie sich – für die Kreaturen und für deine Kämpfer. Die Demo umfasst das Tutorial und die Befreiung von Mooskirchen. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
+    text: 'Aufbau- und Strategiespiel im Comic-Stil: Baue Grauweiler auf, verbinde Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und führe den Monsterjäger mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke – jeder Tag ist anders lang. Tagsüber versperrt eine Dornenhecke die verseuchten Dörfer, erst nachts öffnet sie sich – für die Kreaturen und für deine Kämpfer. Die Demo umfasst das ganze Land: vom Tutorial in Grauweiler über sechs verseuchte Dörfer bis zum Herz der Seuche in Nebelstein. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
     play: {
       label: 'Demo spielen',
-      src: './spiele/monsterjaeger/?v=0ce60cb4',
+      src: './spiele/monsterjaeger/?v=ab4bdfec',
       title: 'Monsterjäger · Demo-Version'
     },
     images: [

@@ -256,6 +256,63 @@ body.gruft #buildpanel, body.gruft #heropanel, body.gruft #info, body.gruft #min
 #prolog .pnum { color: #8a7458; font-size: 13px; }
 #prolog button { cursor: pointer; }
 @media (max-width: 700px) { #prolog .prbar { flex-direction: column; } #prolog .cap { font-size: 18px; text-align: center; } }
+#voice.boss .vtext { color: #2a1408; }
+#voice.boss .vpor { filter: sepia(0.25) contrast(1.05); }
+#journal .dialog { max-width: 720px; }
+#journal .jrel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0 14px; }
+#journal .jr { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 8px 4px; background: rgba(60,38,20,0.12); border: 1px solid rgba(90,60,30,0.35); }
+#journal .jr img { width: 64px; height: 64px; }
+#journal .jr small { opacity: 0.75; }
+#journal .jr.fehlt img { filter: brightness(0); opacity: 0.3; }
+#journal .jbrief button { display: block; width: 100%; margin: 6px 0; }
+@media (max-width: 560px) { #journal .jrel { grid-template-columns: repeat(2, 1fr); } }
+.mj-lesefenster {
+color: #e9dcc2;
+background: #252019;
+border: 1px solid #776145;
+border-radius: 8px;
+width: min(94vw, 850px);
+max-height: 94dvh;
+padding: 0;
+}
+.mj-lesefenster::backdrop { background: #110d09c9; }
+.mj-lesen-kopf {
+display: flex; justify-content: space-between; align-items: center; gap: 12px;
+position: sticky; top: 0; z-index: 1;
+padding: 12px 16px; background: #252019; border-bottom: 1px solid #574732;
+}
+.mj-lesen-kopf h2 { margin: 0; font: 1.3rem/1.2 Georgia, serif; }
+.mj-lesefenster button {
+font: inherit; color: #ffedc8; background: #3d3125; padding: .37em .7em;
+border: 1px solid #8a714e; border-radius: 4px; cursor: pointer;
+}
+.mj-lesefenster button:hover { background: #52402c; }
+.mj-lesefenster button:focus-visible { outline: 2px solid #e7bd73; outline-offset: 2px; }
+.mj-lesen-inhalt { padding: 10px 10px 14px; }
+.mj-lesen-papier {
+position: relative; box-sizing: border-box;
+min-height: 65vh; width: min(100%, 560px); margin: 0 auto;
+display: grid; align-content: center; color: #301b11;
+font: clamp(1rem, 2.65vw, 1.28rem)/1.5 Georgia, serif;
+}
+.mj-lesen-textur { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; }
+.mj-lesen-text { position: relative; padding: 13% 15% 16%; }
+.mj-lesen-text p { margin: 0 0 .95em; }
+.mj-lesen-text .mj-lesen-ort { font-weight: bold; font-size: 1.2em; }
+.mj-lesen-adresse { display: flex; align-items: center; gap: .4rem; }
+.mj-lesen-schwaerzung {
+display: inline-block; width: min(44%, 10em); height: .73em;
+background: #261d16; clip-path: polygon(2% 18%, 96% 0%, 100% 65%, 96% 88%, 1% 100%, 4% 65%, 0% 37%);
+}
+.mj-lesen-signatur { display: flex; align-items: center; justify-content: space-between; margin-top: 1em; font-style: italic; }
+.mj-lesen-signatur img { display: block; width: clamp(33px, 11vw, 75px); height: auto; }
+.mj-lesen-comic { margin: 0; text-align: center; }
+.mj-lesen-comic img { width: 100%; display: block; height: auto; }
+.mj-lesen-comic figcaption { padding: .8em 1em; font: 1.15rem/1.4 Georgia, serif; }
+@media (max-width: 490px) {
+.mj-lesen-papier { min-height: auto; }
+.mj-lesen-text { padding: 15% 13% 16%; }
+}
 #demobadge { position: absolute; top: 14px; right: 16px; z-index: 60; padding: 6px 14px; font-family: 'IM Fell English SC', serif;
 font-size: 15px; letter-spacing: 3px; color: #1a0f08; background: #e8b84a; border: 2px solid #3a0e0a; transform: rotate(3deg); box-shadow: 0 4px 14px rgba(0,0,0,.6); }
 #demonote { margin-top: 10px; font-size: 14px; color: #d8c090; font-style: italic; max-width: 360px; margin-left: auto; margin-right: auto; }

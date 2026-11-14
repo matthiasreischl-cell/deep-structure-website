@@ -6,7 +6,7 @@
 <title>Monsterjäger – Demo-Version</title>
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="style.css?v=3bff6f74">
+<link rel="stylesheet" href="style.css?v=dae641d9">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -70,6 +70,15 @@
 
   <div id="minimapwrap" class="parch"><canvas id="minimap" width="240" height="120"></canvas></div>
   <div id="hint"></div>
+  
+  <div id="grufthud" class="hidden">
+    <div id="gstat" class="parch"><div class="gname">Elias</div><div class="bar"><div id="ghp"></div></div><div id="ghptxt"></div><div id="ginv"></div></div>
+    <div id="ggoal" class="parch"></div>
+    <div id="gprompt" class="hidden"></div>
+    <div id="gkeys">WASD laufen · Leertaste/Linksklick Schwert · E untersuchen · F Heiltrank · Q/Rechtsklick Weihwasser · Esc Menü</div>
+    <div id="gtouch"><div id="gjoy"><div></div></div>
+      <div id="gbtns"><button id="gbAtk" title="Schwert">⚔</button><button id="gbUse" title="Untersuchen">E</button><button id="gbPot" title="Heiltrank">🧪</button><button id="gbHoly" title="Weihwasser">💧</button><button id="gbMenu" title="Menü">☰</button></div></div>
+  </div>
 </div>
 
 <div id="title" class="screen">
@@ -125,10 +134,13 @@
   </div>
 </div>
 
+<div id="gruftload" class="screen hidden"><div class="gltext"><h2></h2><p></p></div></div>
+<div id="bookview" class="screen hidden"><div class="bookbox"><img alt="Das Buch der Siegel"><p></p><small>Klicken oder E zum Schließen</small></div></div>
+<div id="prolog" class="screen hidden"><img alt=""><div class="prbar"><div class="cap"></div><div class="prbtns"><span class="pnum"></span><button id="prSkip" class="pbtn">Überspringen</button><button id="prNext" class="pbtn">Weiter ›</button></div></div></div>
 <div id="endscreen" class="screen hidden">
   <div class="parch dialog"><h2 id="endtitle"></h2><p id="endtext"></p><button id="endBtn">Hauptmenü</button></div>
 </div>
 
-<script src="mj.js?v=3bff6f74"></script>
+<script src="mj.js?v=dae641d9"></script>
 </body>
 </html>

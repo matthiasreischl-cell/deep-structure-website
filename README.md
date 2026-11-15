@@ -14,7 +14,7 @@ Reines HTML, CSS und JavaScript als ES-Module, ohne Build-Schritt.
    - **Apps & Spiele:** Kartenstapel; öffnet Teaser-Video, Clash of the Universe, Monsterjäger,
      Mastering Studio (`/studio/`) und den Private AI Trading Bot. „Demo spielen“ bei Monsterjäger
      öffnet die Browser-Demo (`/spiele/monsterjaeger/`) in einem eigenen Fenster über der Welt.
-     Monsterjäger ist als Serie angelegt: `series` in `data/world-data.js` zeigt die Teile (Teil 1 spielbar, Teil 2 in Planung).
+     Monsterjäger ist als Serie aus vier Spielen angelegt: `series` in `data/world-data.js` zeigt die Teile mit ihrem Schwerpunkt (Teil I „Der Ursprung“ spielbar, II bis IV in Planung).
    - **Webshop:** Vitrine mit wechselnden Produkten. Solange `shop.open` in `data/world-data.js`
      auf `false` steht, zeigt sie „Im Aufbau“ und verweist auf die Vinyl.
 3. **Hintergrundmusik:** Lautsprecher-Knopf unten rechts. Vier Klavierstücke im Loop, leise.

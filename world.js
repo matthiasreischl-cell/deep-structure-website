@@ -378,11 +378,13 @@ function seriesStrip(series) {
   const list = el('ol', 'project-series-parts');
   series.parts.forEach(part => {
     const item = el('li', 'project-series-part' + (part.current ? ' is-current' : ''));
-    item.append(el('span', 'project-series-label', part.label), el('strong', '', part.title), el('span', 'project-series-state', part.state));
+    item.append(el('span', 'project-series-label', part.label), el('strong', '', part.title));
+    if (part.genre) item.append(el('span', 'project-series-genre', part.genre));
+    item.append(el('span', 'project-series-state', part.state));
     if (part.current) item.setAttribute('aria-current', 'true');
     list.append(item);
   });
-  list.append(el('li', 'project-series-more', '…'));
+  if (!series.complete) list.append(el('li', 'project-series-more', '…'));
   box.append(list);
   return box;
 }

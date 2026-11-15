@@ -111,12 +111,12 @@ export const projects = [
       parts: [
         { label: 'Teil I', title: 'Der Ursprung', genre: 'Aufbau und Überleben', state: 'Demo spielbar', current: true },
         { label: 'Teil II', title: 'Der Verfluchte', genre: 'Aufbau und Tower Defense', state: 'in Planung' },
-        { label: 'Teil III', title: 'Das Vermächtnis', genre: 'Aufbau, Hack and Slash, Schleichmissionen', state: 'in Planung' },
-        { label: 'Teil IV', title: 'Die Erlösung', genre: 'Action-Rollenspiel', state: 'in Planung' }
+        { label: 'Teil III', title: 'Das Vermächtnis', genre: 'Aufbau und Assassinen-Missionen', state: 'in Planung' },
+        { label: 'Teil IV', title: 'Die Erlösung', genre: 'Hack and Slash', state: 'in Planung' }
       ]
     },
     text: 'Aufbau, Strategie und Gruftkämpfe im Comic-Stil. Eine Seuche sucht das Land heim: Die Toten stehen wieder auf, und jede Nacht läutet in Nebelstein die Totenglocke. Elias, ein Jäger aus Grauweiler, wird gebissen – und überlebt als Einziger. Tagsüber baust du sein Dorf wieder auf, verbindest Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und ziehst mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Nachts hältst du stand, während die Dornenhecken sich öffnen. Fällt das letzte Nest, erhebt sich vor der entweihten Dorfkirche ihr Hüter: Moorleiche, Flussgeist, Krähenhexe, Knochenfürst und Feuerdämon. Unter jeder Kirche wartet eine Gruft – dort kämpfst du direkt, mit Schwester Ilse, Bruno oder der Jägerin an deiner Seite, und findest die Reliquien und die Briefe Severins, des Hirten der Toten. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
-    seriesNote: 'Der Ursprung erzählt, wie Elias zum Monsterjäger wurde – und woher sein Fluch stammt. Vier Spiele führen seine Geschichte weiter, jedes mit eigenem Schwerpunkt und eigener Musik: vom Aufbauspiel bis zum reinen Action-Rollenspiel. Die Welt bleibt mittelalterlich, Severin und der Orden vom Schwarzen Siegel bleiben Elias auf den Fersen.',
+    seriesNote: 'Der Ursprung erzählt, wie Elias zum Monsterjäger wurde – und woher sein Fluch stammt. Vier Spiele führen seine Geschichte weiter, jedes mit eigenem Schwerpunkt und eigener Musik: vom Aufbauspiel bis zum reinen Hack and Slash. Die Welt bleibt mittelalterlich, Severin und der Orden vom Schwarzen Siegel bleiben Elias auf den Fersen.',
     play: {
       label: 'Demo spielen',
       src: './spiele/monsterjaeger/?v=855ba236',

@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=14';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=15';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');

@@ -233,6 +233,7 @@ body.gruft #buildpanel, body.gruft #heropanel, body.gruft #info, body.gruft #min
 #gbtns { position: absolute; right: 16px; bottom: 24px; display: grid; grid-template-columns: repeat(2, 64px); gap: 10px; pointer-events: auto; }
 #gbtns button { width: 64px; height: 64px; border-radius: 50%; font-size: 26px; background: rgba(40,26,16,.8); color: #f0dfb8; border: 2px solid #8a6a40; touch-action: none; }
 #gbtns #gbAtk { grid-column: span 2; width: 138px; border-radius: 32px; }
+.d3-keys { display: none; }
 #gstat { bottom: auto; top: 54px; width: 200px; }
 }
 #gruftload { background: #050403 center/cover no-repeat; z-index: 55; display: flex; align-items: flex-end; justify-content: center; transition: opacity .8s; }

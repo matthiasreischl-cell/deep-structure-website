@@ -102,18 +102,21 @@ export const projects = [
   },
   {
     id: 'monsterjaeger',
-    title: 'Monsterjäger – Das Land der Seuche',
-    status: 'Spiel · Serie, Teil 1 · Demo jetzt spielbar',
-    // Monsterjäger ist als Serie angelegt: Teil 1 spielbar, Teil 2 in Planung
+    title: 'Monsterjäger I – Der Ursprung',
+    status: 'Spiel · Serie, Teil I · Demo jetzt spielbar',
+    // Monsterjäger ist als Serie aus vier Spielen angelegt: Teil I spielbar, II bis IV in Planung
     series: {
       name: 'Monsterjäger',
+      complete: true,
       parts: [
-        { label: 'Teil 1', title: 'Das Land der Seuche', state: 'Demo spielbar', current: true },
-        { label: 'Teil 2', title: 'Der verfluchte Jäger', state: 'in Planung' }
+        { label: 'Teil I', title: 'Der Ursprung', genre: 'Aufbau und Überleben', state: 'Demo spielbar', current: true },
+        { label: 'Teil II', title: 'Der Verfluchte', genre: 'Aufbau und Tower Defense', state: 'in Planung' },
+        { label: 'Teil III', title: 'Das Vermächtnis', genre: 'Aufbau, Hack and Slash, Schleichmissionen', state: 'in Planung' },
+        { label: 'Teil IV', title: 'Die Erlösung', genre: 'Action-Rollenspiel', state: 'in Planung' }
       ]
     },
-    text: 'Aufbau, Strategie und Gruftkämpfe im Comic-Stil. Als Elias, der Jäger, baust du Grauweiler wieder auf, verbindest Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und ziehst mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Fällt das letzte Nest, erhebt sich vor der entweihten Dorfkirche ihr Hüter: Moorleiche, Flussgeist, Krähenhexe, Knochenfürst und Feuerdämon. Unter jeder Kirche wartet eine Gruft – dort kämpfst du direkt, mit Schwester Ilse, Bruno und der Jägerin an deiner Seite, und findest die Reliquien und die Briefe Severins, des Hirten der Toten. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
-    seriesNote: 'Das Land der Seuche ist der erste Teil der Monsterjäger-Reihe. Die Geschichte um Elias, Severin und den Orden vom Schwarzen Siegel geht weiter.',
+    text: 'Aufbau, Strategie und Gruftkämpfe im Comic-Stil. Eine Seuche sucht das Land heim: Die Toten stehen wieder auf, und jede Nacht läutet in Nebelstein die Totenglocke. Elias, ein Jäger aus Grauweiler, wird gebissen – und überlebt als Einziger. Tagsüber baust du sein Dorf wieder auf, verbindest Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und ziehst mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Nachts hältst du stand, während die Dornenhecken sich öffnen. Fällt das letzte Nest, erhebt sich vor der entweihten Dorfkirche ihr Hüter: Moorleiche, Flussgeist, Krähenhexe, Knochenfürst und Feuerdämon. Unter jeder Kirche wartet eine Gruft – dort kämpfst du direkt, mit Schwester Ilse, Bruno oder der Jägerin an deiner Seite, und findest die Reliquien und die Briefe Severins, des Hirten der Toten. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
+    seriesNote: 'Der Ursprung erzählt, wie Elias zum Monsterjäger wurde – und woher sein Fluch stammt. Vier Spiele führen seine Geschichte weiter, jedes mit eigenem Schwerpunkt und eigener Musik: vom Aufbauspiel bis zum reinen Action-Rollenspiel. Die Welt bleibt mittelalterlich, Severin und der Orden vom Schwarzen Siegel bleiben Elias auf den Fersen.',
     play: {
       label: 'Demo spielen',
       src: './spiele/monsterjaeger/?v=855ba236',

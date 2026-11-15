@@ -103,20 +103,37 @@ export const projects = [
   {
     id: 'monsterjaeger',
     title: 'Monsterjäger – Das Land der Seuche',
-    status: 'Spiel · Demo-Version jetzt spielbar',
-    text: 'Aufbau- und Strategiespiel im Comic-Stil: Baue Grauweiler auf, verbinde Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und führe den Monsterjäger mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke – jeder Tag ist anders lang. Tagsüber versperrt eine Dornenhecke die verseuchten Dörfer, erst nachts öffnet sie sich – für die Kreaturen und für deine Kämpfer. Die Demo umfasst das ganze Land: vom Tutorial in Grauweiler über sechs verseuchte Dörfer bis zum Herz der Seuche in Nebelstein. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
+    status: 'Spiel · Serie, Teil 1 · Demo jetzt spielbar',
+    // Monsterjäger ist als Serie angelegt: Teil 1 spielbar, Teil 2 in Planung
+    series: {
+      name: 'Monsterjäger',
+      parts: [
+        { label: 'Teil 1', title: 'Das Land der Seuche', state: 'Demo spielbar', current: true },
+        { label: 'Teil 2', title: 'Der verfluchte Jäger', state: 'in Planung' }
+      ]
+    },
+    text: 'Aufbau, Strategie und Gruftkämpfe im Comic-Stil. Als Elias, der Jäger, baust du Grauweiler wieder auf, verbindest Holzfäller, Mühle, Bäckerei und Schmiede zu Warenketten und ziehst mit deiner Miliz gegen die Seuchennester der Nachbardörfer. Fällt das letzte Nest, erhebt sich vor der entweihten Dorfkirche ihr Hüter: Moorleiche, Flussgeist, Krähenhexe, Knochenfürst und Feuerdämon. Unter jeder Kirche wartet eine Gruft – dort kämpfst du direkt, mit Schwester Ilse, Bruno und der Jägerin an deiner Seite, und findest die Reliquien und die Briefe Severins, des Hirten der Toten. Die Musik von Deep Structure ist die Uhr des Spiels: Ein Tag dauert genau so lange wie seine sechs Stücke. Läuft direkt im Browser, am besten am Computer mit Maus, Tastatur und Ton.',
+    seriesNote: 'Das Land der Seuche ist der erste Teil der Monsterjäger-Reihe. Die Geschichte um Elias, Severin und den Orden vom Schwarzen Siegel geht weiter.',
     play: {
       label: 'Demo spielen',
-      src: './spiele/monsterjaeger/?v=53b9bb8c',
+      src: './spiele/monsterjaeger/?v=855ba236',
       title: 'Monsterjäger · Demo-Version'
     },
     images: [
-      { src: './assets/projects/monsterjaeger-demo-dorf.webp', alt: 'Spielszene aus der Demo: das Dorf Grauweiler mit Mühle, Wirtshaus und Dorfbewohnern' },
-      { src: './assets/projects/monsterjaeger-demo-soldaten.webp', alt: 'Spielszene aus der Demo in Nahansicht: Milizwachen, Speerträger, Bogenschütze, Schwertkämpfer und Hauptmann' },
-      { src: './assets/projects/monsterjaeger-demo-kreaturen.webp', alt: 'Spielszene aus der Demo: Zombies, Ghule, Seuchenhunde und eine Brut am Rand von Grauweiler' },
-      { src: './assets/projects/monsterjaeger-demo-kampf.webp', alt: 'Spielszene aus der Demo: der Monsterjäger und seine Miliz kämpfen im verseuchten Mooskirchen zwischen den Seuchennestern' },
-      { src: './assets/projects/monsterjaeger-demo-titel.webp', alt: 'Titelbild der Demo-Version von Monsterjäger' },
-      { src: './assets/projects/monsterjaeger-held.webp', alt: 'Figurenblatt des Monsterjägers mit Ausrüstung und Farbpalette' }
+      { src: './assets/projects/monsterjaeger-boss-moorleiche.webp', alt: 'Spielszene: Elias und seine Miliz kämpfen vor der entweihten Friedhofskirche von Mooskirchen gegen die Moorleiche' },
+      { src: './assets/projects/monsterjaeger-gruft-begleiter.webp', alt: 'Spielszene in der Gruft unter der Holzkirche von Krähenfeld: Elias mit seinen Begleitern gegen Skelette' },
+      { src: './assets/projects/monsterjaeger-boss-feuerdaemon.webp', alt: 'Spielszene: Der Feuerdämon speit vor der ausgebrannten Kirche von Aschenhain Feuer auf Elias' },
+      { src: './assets/projects/monsterjaeger-gruft-reliquie.webp', alt: 'Spielszene: Die Reliquienkammer der überfluteten Gruft von Schwarzbach mit dem Kelch auf dem Altar und dem Gruftwächter' },
+      { src: './assets/projects/monsterjaeger-boss-kraehenhexe.webp', alt: 'Spielszene: Die Krähenhexe in Krähenfeld mit ihrem Krähenschwarm – „Er sieht dich, Jäger.“' },
+      { src: './assets/projects/monsterjaeger-kirche-totenau.webp', alt: 'Spielszene: Die gereinigte Beinhauskirche von Totenau, der Abstieg in die Gruft liegt offen' },
+      { src: './assets/projects/monsterjaeger-abstieg-totenau.webp', alt: 'Ladebild beim Abstieg in das Beinhaus von Totenau: Elias mit der Laterne auf der Treppe' },
+      { src: './assets/projects/monsterjaeger-brief-severin.webp', alt: 'Ein Brief Severins an den Orden vom Schwarzen Siegel, gefunden in der Gruft von Schwarzbach' },
+      { src: './assets/projects/monsterjaeger-demo-dorf.webp', alt: 'Spielszene: das Dorf Grauweiler mit Mühle, Wirtshaus und Dorfbewohnern' },
+      { src: './assets/projects/monsterjaeger-demo-kampf.webp', alt: 'Spielszene: Elias und seine Miliz kämpfen im verseuchten Mooskirchen zwischen den Seuchennestern' },
+      { src: './assets/projects/monsterjaeger-demo-soldaten.webp', alt: 'Spielszene in Nahansicht: Milizwachen, Speerträger, Bogenschütze, Schwertkämpfer und Hauptmann' },
+      { src: './assets/projects/monsterjaeger-demo-kreaturen.webp', alt: 'Spielszene: Zombies, Ghule, Seuchenhunde und eine Brut am Rand von Grauweiler' },
+      { src: './assets/projects/monsterjaeger-demo-titel.webp', alt: 'Titelbild von Monsterjäger – Das Land der Seuche' },
+      { src: './assets/projects/monsterjaeger-held.webp', alt: 'Figurenblatt von Elias, dem Jäger, mit Ausrüstung und Farbpalette' }
     ]
   },
   {
@@ -147,6 +164,7 @@ export const projectDeck = [
   './assets/projects/thumb-clash-helden.webp',
   './assets/projects/thumb-studio.webp',
   './assets/projects/thumb-monsterjaeger-demo.webp',
+  './assets/projects/thumb-monsterjaeger-boss.webp',
   './assets/projects/thumb-clash-anlagen.webp',
   './assets/projects/thumb-trading-bot.webp'
 ];

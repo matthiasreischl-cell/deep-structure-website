@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=13';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=14';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -370,6 +370,23 @@ function playableVideo(src, poster, label, buttonText) {
   return wrap;
 }
 
+// Serie: die Teile nebeneinander, der spielbare Teil hervorgehoben
+function seriesStrip(series) {
+  const box = el('div', 'project-series');
+  box.setAttribute('aria-label', 'Serie ' + series.name);
+  box.append(el('span', 'project-series-name', 'Serie · ' + series.name));
+  const list = el('ol', 'project-series-parts');
+  series.parts.forEach(part => {
+    const item = el('li', 'project-series-part' + (part.current ? ' is-current' : ''));
+    item.append(el('span', 'project-series-label', part.label), el('strong', '', part.title), el('span', 'project-series-state', part.state));
+    if (part.current) item.setAttribute('aria-current', 'true');
+    list.append(item);
+  });
+  list.append(el('li', 'project-series-more', '…'));
+  box.append(list);
+  return box;
+}
+
 function projectViewer(project) {
   const viewer = el('div', 'project-viewer');
   const mainLink = el('a', 'project-main');
@@ -495,7 +512,10 @@ function openProgrammes() {
   projects.forEach((project, index) => {
     const section = el('section', 'project-row' + (index % 2 ? ' project-row--flip' : ''));
     const copy = el('div', 'project-copy');
-    copy.append(el('p', 'project-status', project.status), el('h3', '', project.title), el('p', '', project.text));
+    copy.append(el('p', 'project-status', project.status), el('h3', '', project.title));
+    if (project.series) copy.append(seriesStrip(project.series));
+    copy.append(el('p', '', project.text));
+    if (project.seriesNote) copy.append(el('p', 'project-series-note', project.seriesNote));
     if (project.play) {
       const play = el('button', 'world-link world-link--primary project-play', '▶ ' + project.play.label);
       play.type = 'button';

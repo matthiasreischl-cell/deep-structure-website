@@ -6,7 +6,7 @@
 <title>Monsterjäger – Demo-Version</title>
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="style.css?v=855ba236">
+<link rel="stylesheet" href="style.css?v=3ca41cfd">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -75,6 +75,8 @@
     <div id="gstat" class="parch"><div class="gname">Elias</div><div class="bar"><div id="ghp"></div></div><div id="ghptxt"></div><div id="ginv"></div><div id="d3-party" class="small"></div><div class="small d3-keys">X · Block halten · R · Armbrust</div></div>
     <div id="ggoal" class="parch"></div>
     <div id="gprompt" class="hidden"></div>
+    <aside id="d5-map" aria-label="Minikarte der Gruft"><h3>Minikarte</h3><canvas id="d5-map-canvas" width="208" height="155" aria-label="Erkundete Gänge und Elias’ Position"></canvas><p>Hell · Treppe &nbsp; Gold · Fund &nbsp; Rot · Gitter</p></aside>
+    <nav id="d5-actions" aria-label="Aktionen in der Gruft"></nav>
     <div id="gkeys">WASD laufen · Leertaste/Linksklick Schwert (gedrückt halten = Schlagfolge) · Umschalt Ausweichrolle · E untersuchen · F Heiltrank · Q/Rechtsklick Weihwasser · Esc Menü</div>
     <div id="gtouch"><div id="gjoy"><div></div></div>
       <div id="gbtns"><button id="gbAtk" title="Schwert">⚔</button><button id="gbRoll" title="Ausweichrolle">⤳</button><button id="gbUse" title="Untersuchen">E</button><button id="gbPot" title="Heiltrank">🧪</button><button id="gbHoly" title="Weihwasser">💧</button><button id="gbGuard" title="Block halten" aria-label="Block halten">⛨</button><button id="gbCrossbow" title="Armbrust" aria-label="Armbrust">➶</button><button id="gbMenu" title="Menü">☰</button></div></div>
@@ -142,6 +144,10 @@
   <div class="parch dialog"><h2 id="endtitle"></h2><p id="endtext"></p><button id="endBtn">Hauptmenü</button></div>
 </div>
 
-<script src="mj.js?v=855ba236"></script>
+
+<dialog id="d5-dialog" aria-labelledby="d5-dialog-title">
+  <header class="d5-dialog-header"><h2 id="d5-dialog-title"></h2><button type="button" id="d5-close">Schließen</button></header><div id="d5-dialog-body"></div>
+</dialog>
+<script src="mj.js?v=3ca41cfd"></script>
 </body>
 </html>

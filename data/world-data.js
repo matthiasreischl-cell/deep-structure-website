@@ -119,7 +119,7 @@ export const projects = [
     seriesNote: 'Der Ursprung erzählt, wie Elias zum Monsterjäger wurde – und woher sein Fluch stammt. Vier Spiele führen seine Geschichte weiter, jedes mit eigenem Schwerpunkt und eigener Musik: vom Aufbauspiel bis zum reinen Hack and Slash. Die Welt bleibt mittelalterlich, Severin und der Orden vom Schwarzen Siegel bleiben Elias auf den Fersen.',
     play: {
       label: 'Demo spielen',
-      src: './spiele/monsterjaeger/?v=72208ec1',
+      src: './spiele/monsterjaeger/?v=cabdef0d',
       title: 'Monsterjäger · Demo-Version'
     },
     images: [

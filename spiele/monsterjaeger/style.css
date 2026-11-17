@@ -25,6 +25,15 @@ background: linear-gradient(#2a1c10, #1a110a); border-bottom: 2px solid #6a4a26;
 .chip.low { color: #ff9a80; }
 .chip.sep { margin-left: 6px; }
 #topright { display: flex; gap: 4px; align-items: center; }
+.farm-short { display: none; }
+@media (max-width: 610px) {
+.farm-full { display: none; } .farm-short { display: inline; }
+#topbar:has(#wald-entrance:not([hidden])) #songtext { display: none; }
+}
+@media (max-width: 610px) {
+#topbar:has(#mine-entrance:not([hidden])) #songtext,
+#topright:has(#mine-entrance:not([hidden])) #pop { display: none; }
+}
 #pop { font-size: 15px; margin-right: 6px; white-space: nowrap; }
 #topright button { background: #3a2816; color: #f0dfb0; border: 1px solid #8a6a3a; padding: 4px 8px; border-radius: 3px; font-size: 13px; }
 #topright button.on { background: #8a6a3a; color: #1a110a; }
@@ -214,6 +223,7 @@ border-image-source: url(assets/ui/knopf_hover.png); background: none; color: #f
 #bossbar .btrack { height: 12px; background: rgba(20,8,6,0.85); border: 2px solid #8a6a3a; box-shadow: 0 2px 8px #000; }
 #bossfill { height: 100%; width: 100%; background: linear-gradient(#d23c32, #7a1410); transition: width 0.3s; }
 body.gruft #buildpanel, body.gruft #heropanel, body.gruft #info, body.gruft #minimapwrap, body.gruft #resbar, body.gruft #clock, body.gruft #hint, body.gruft #bossbar { display: none !important; }
+#moor-gift { position: absolute; top: 96px; left: 50%; transform: translateX(-50%); padding: 4px 10px; border: 1px solid #849d51; border-radius: 4px; background: #172213; color: #d8efa6; font-size: 13px; }
 #grufthud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
 #gstat { position: absolute; left: 12px; bottom: 14px; width: 250px; padding: 10px 14px; pointer-events: auto; }
 #gstat .gname { font-family: 'Germania One', Georgia, serif; font-size: 20px; color: #3a2414; }
@@ -387,6 +397,52 @@ body.gruft #gjoy { bottom: 121px; left: 12px; }
 body.gruft #ginv { gap: 5px; }
 body.gruft #ginv img { width: 22px; height: 22px; }
 @media (max-width: 760px) { body.gruft #quest { display: none; } }
+#schmiede19 {
+box-sizing: border-box;
+width: min(700px, calc(100vw - 24px));
+max-height: calc(100dvh - 24px);
+overflow: auto;
+padding: 20px;
+background: #1f1d19;
+color: #f5e8ce;
+border: 1px solid #a27b47;
+border-radius: 9px;
+box-shadow: 0 18px 55px #000b;
+font: 16px/1.35 Georgia, serif;
+}
+#schmiede19::backdrop { background: #140f0ad6; }
+#schmiede19 header { display: flex; justify-content: space-between; gap: 14px; align-items: start; }
+#schmiede19 h2 { margin: 0 0 8px; font: 26px/1.12 "Germania One", Georgia, serif; color: #ffe0a7; }
+#schmiede19 p { margin: 8px 0; }
+#schmiede19-gear { color: #f5e8ce; }
+#schmiede19-stock { color: #e8c58c; }
+#schmiede19-status { min-height: 1.35em; color: #ffe0a7; }
+#schmiede19-orders { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+#schmiede19-orders section { display: flex; flex-direction: column; padding: 12px; border: 1px solid #665035; border-radius: 5px; background: #30281f; }
+#schmiede19-orders h3 { margin: 0; color: #ffe0a7; font-size: 17px; }
+#schmiede19-orders p { margin: 6px 0; }
+#schmiede19 .schmiede19-preis { font-weight: bold; color: #f4d394; }
+#schmiede19 .schmiede19-hinweis { color: #ead6b6; }
+#schmiede19 .schmiede19-hinweis:empty { display: none; }
+#schmiede19 button {
+min-height: 38px;
+padding: 6px 12px;
+border: 1px solid #bc9259;
+border-radius: 4px;
+background: #48331e;
+color: #ffedcf;
+font: inherit;
+cursor: pointer;
+}
+#schmiede19-orders button { align-self: start; margin-top: auto; }
+#schmiede19 button:not(:disabled):hover { background: #62472b; }
+#schmiede19 button:disabled { color: #dbc7a9; background: #302820; border-color: #705c43; cursor: default; }
+#schmiede19 button:focus-visible { outline: 2px solid #ffe0a7; outline-offset: 2px; }
+@media (max-width: 550px) {
+#schmiede19 { padding: 12px; }
+#schmiede19 h2 { font-size: 22px; }
+#schmiede19-orders { grid-template-columns: 1fr; gap: 8px; }
+}
 #demobadge { position: absolute; top: 14px; right: 16px; z-index: 60; padding: 6px 14px; font-family: 'IM Fell English SC', serif;
 font-size: 15px; letter-spacing: 3px; color: #1a0f08; background: #e8b84a; border: 2px solid #3a0e0a; transform: rotate(3deg); box-shadow: 0 4px 14px rgba(0,0,0,.6); }
 #demonote { margin-top: 10px; font-size: 14px; color: #d8c090; font-style: italic; max-width: 360px; margin-left: auto; margin-right: auto; }

@@ -6,7 +6,7 @@
 <title>Monsterjäger – Demo-Version</title>
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="style.css?v=72208ec1">
+<link rel="stylesheet" href="style.css?v=cabdef0d">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -16,6 +16,10 @@
     <div id="clock"><span id="dayicon"></span><span id="daytext">Tag 1</span><span id="songtext"></span><div id="daybar"><div id="dayfill"></div></div></div>
     <div id="resbar"></div>
     <div id="topright">
+      <button type="button" id="mine-entrance" title="Zur alten Mine südwestlich von Totenau gehen" aria-label="Alte Mine" hidden>Mine</button>
+      <button type="button" id="farm-entrance" title="Zum ewigen Friedhof bei Grauweiler gehen" hidden>Friedhof</button>
+      <button type="button" id="moor-entrance" title="Zum Seuchenmoor bei Mooskirchen gehen" aria-label="Seuchenmoor" hidden><span class="farm-full">Seuchenmoor</span><span class="farm-short" aria-hidden="true">Moor</span></button>
+      <button type="button" id="wald-entrance" title="Zum Krähenwald südlich von Krähenfeld gehen" aria-label="Krähenwald" hidden><span class="farm-full">Krähenwald</span><span class="farm-short" aria-hidden="true">Wald</span></button>
       <span id="pop" title="Dorfbewohner / Platz"></span>
       <div id="musicctl">
         <button id="btnMusic" title="Musik (M = stumm)">♪</button>
@@ -74,6 +78,7 @@
   <div id="grufthud" class="hidden">
     <div id="gstat" class="parch"><div class="gname">Elias</div><div class="bar"><div id="ghp"></div></div><div id="ghptxt"></div><div id="ginv"></div><div id="d3-party" class="small"></div><div class="small d3-keys">X · Block halten · R · Armbrust</div></div>
     <div id="ggoal" class="parch"></div>
+    <output id="moor-gift" aria-live="off" hidden></output>
     <div id="gprompt" class="hidden"></div>
     <aside id="d5-map" aria-label="Minikarte der Gruft"><h3>Minikarte</h3><canvas id="d5-map-canvas" width="208" height="155" aria-label="Erkundete Gänge und Elias’ Position"></canvas><p>Hell · Treppe &nbsp; Gold · Fund &nbsp; Rot · Gitter</p></aside>
     <nav id="d5-actions" aria-label="Aktionen in der Gruft"></nav>
@@ -145,9 +150,17 @@
 </div>
 
 
+<dialog id="schmiede19" aria-labelledby="schmiede19-title">
+  <header><h2 id="schmiede19-title">Schmiedeaufträge für Elias</h2><button type="button" id="schmiede19-close" autofocus>Schließen</button></header>
+  <p id="schmiede19-gear"></p>
+  <p id="schmiede19-stock"></p>
+  <button type="button" id="schmiede19-equip" hidden></button>
+  <p id="schmiede19-status" role="status"></p>
+  <div id="schmiede19-orders"></div>
+</dialog>
 <dialog id="d5-dialog" aria-labelledby="d5-dialog-title">
   <header class="d5-dialog-header"><h2 id="d5-dialog-title"></h2><button type="button" id="d5-close">Schließen</button></header><div id="d5-dialog-body"></div>
 </dialog>
-<script src="mj.js?v=72208ec1"></script>
+<script src="mj.js?v=cabdef0d"></script>
 </body>
 </html>

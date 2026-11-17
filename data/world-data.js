@@ -122,6 +122,11 @@ export const projects = [
       src: './spiele/monsterjaeger/?v=cabdef0d',
       title: 'Monsterjäger · Demo-Version'
     },
+    trailer: {
+      src: './assets/games/monsterjaeger-trailer.mp4',
+      poster: './assets/games/monsterjaeger-trailer.jpg',
+      label: 'Gameplay-Trailer zu Monsterjäger I – Der Ursprung'
+    },
     images: [
       { src: './assets/projects/monsterjaeger-boss-moorleiche.webp', alt: 'Spielszene: Elias und seine Miliz kämpfen vor der entweihten Friedhofskirche von Mooskirchen gegen die Moorleiche' },
       { src: './assets/projects/monsterjaeger-gruft-begleiter.webp', alt: 'Spielszene in der Gruft unter der Holzkirche von Krähenfeld: Elias mit seinen Begleitern gegen Skelette' },

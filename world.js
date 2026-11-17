@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=15';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=16';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -341,12 +341,12 @@ function openVinyl() {
   openPanel(detail);
 }
 
-function playableVideo(src, poster, label, buttonText) {
+function playableVideo(src, poster, label, buttonText, preload = 'metadata') {
   const wrap = el('div', 'project-video');
   const video = el('video', 'games-pitch-video');
   video.controls = true;
   video.playsInline = true;
-  video.preload = 'metadata';
+  video.preload = preload;
   video.tabIndex = 0;
   if (poster) video.poster = poster;
   video.setAttribute('aria-label', label);
@@ -391,6 +391,10 @@ function seriesStrip(series) {
 
 function projectViewer(project) {
   const viewer = el('div', 'project-viewer');
+  if (project.trailer) {
+    const { src, poster, label } = project.trailer;
+    viewer.append(playableVideo(src, poster, label, 'Trailer abspielen', 'none'));
+  }
   const mainLink = el('a', 'project-main');
   mainLink.href = project.images[0].src;
   mainLink.target = '_blank';

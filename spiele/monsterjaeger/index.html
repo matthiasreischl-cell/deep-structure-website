@@ -6,7 +6,7 @@
 <title>Monsterjäger – Demo-Version</title>
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="style.css?v=cabdef0d">
+<link rel="stylesheet" href="style.css?v=3c142bc9">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -43,7 +43,7 @@
 
   <div id="voice" class="parch hidden"></div>
   <div id="bossbar" class="hidden"><div class="bname">Severin, der Hirte der Toten</div><div class="btrack"><div id="bossfill"></div></div></div>
-  <div id="quest" class="parch"><div id="qtitle"></div><div id="qtext"></div><div id="qbtns"></div></div>
+  <div id="quest" class="parch"><div id="qtitle"></div><div id="qtext"></div><div id="qbtns"></div><details id="daily03k"><summary>Tagesaufgaben</summary><div id="daily03k-body"></div></details></div>
   <div id="toasts"></div>
 
   <div id="buildpanel" class="parch">
@@ -52,9 +52,9 @@
       <div id="bptabs"></div>
       <div id="bpgrid"></div>
       <div id="bptools">
-        <button data-tool="road" title="Weg bauen (T) – ziehen für Linien">🛤 Weg</button>
+        <button data-tool="road" title="Weg bauen (T) · 1 Stein je Feld · ziehen für Linien">🛤 Weg</button>
         <button data-tool="unroad" title="Weg entfernen">✖ Weg</button>
-        <button data-tool="demolish" title="Gebäude abreißen">🔨 Abriss</button>
+        <button data-tool="demolish" title="Gebäude und Weinreben entfernen">🔨 Abriss</button>
         <button data-tool="rotate" title="Gebäude drehen (R oder Umschalt + Mausrad)" disabled>⟳ Drehen</button>
       </div>
     </div>
@@ -161,6 +161,6 @@
 <dialog id="d5-dialog" aria-labelledby="d5-dialog-title">
   <header class="d5-dialog-header"><h2 id="d5-dialog-title"></h2><button type="button" id="d5-close">Schließen</button></header><div id="d5-dialog-body"></div>
 </dialog>
-<script src="mj.js?v=cabdef0d"></script>
+<script src="mj.js?v=3c142bc9"></script>
 </body>
 </html>

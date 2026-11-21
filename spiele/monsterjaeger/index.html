@@ -6,7 +6,7 @@
 <title>Monsterjäger – Demo-Version</title>
 <meta name="robots" content="noindex">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
-<link rel="stylesheet" href="style.css?v=3c142bc9">
+<link rel="stylesheet" href="style.css?v=51f26b3f">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -45,6 +45,9 @@
   <div id="bossbar" class="hidden"><div class="bname">Severin, der Hirte der Toten</div><div class="btrack"><div id="bossfill"></div></div></div>
   <div id="quest" class="parch"><div id="qtitle"></div><div id="qtext"></div><div id="qbtns"></div><details id="daily03k"><summary>Tagesaufgaben</summary><div id="daily03k-body"></div></details></div>
   <div id="toasts"></div>
+  
+  <div id="dlg" class="dlg hidden" role="dialog" aria-live="polite"><div class="dlg-por"></div><div class="dlg-body"><div class="dlg-name"></div><div class="dlg-bubble"><div class="dlg-text"></div></div><div class="dlg-btns"><span class="dlg-count"></span><button type="button" class="dlg-next">Weiter ›</button><button type="button" class="dlg-x" title="Schließen">✕</button></div></div></div>
+  <div id="dlgwarn" class="dlgwarn hidden" role="status" aria-live="assertive"></div>
 
   <div id="buildpanel" class="parch">
     <div id="bptoggle" title="Baumenü ein-/ausklappen">⚒ Bauen</div>
@@ -161,6 +164,6 @@
 <dialog id="d5-dialog" aria-labelledby="d5-dialog-title">
   <header class="d5-dialog-header"><h2 id="d5-dialog-title"></h2><button type="button" id="d5-close">Schließen</button></header><div id="d5-dialog-body"></div>
 </dialog>
-<script src="mj.js?v=3c142bc9"></script>
+<script src="mj.js?v=51f26b3f"></script>
 </body>
 </html>

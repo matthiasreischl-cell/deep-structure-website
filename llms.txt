@@ -8,6 +8,7 @@ Nicht zu verwechseln mit dem Track „Deep Structure“ von Deadbeat oder der Co
 
 - [Über Deep Structure](https://deepstructure.world/ueber/): Musik, Internetradio, Vinyl, Spiele und alle Kanäle, mit häufigen Fragen
 - [Monsterjäger I – Der Ursprung](https://deepstructure.world/monsterjaeger/): Aufbau- und Strategiespiel im Comic-Stil mit Musik von Deep Structure, Demo im Browser spielbar
+- [Comics](https://deepstructure.world/comics/): Comics zu Monsterjäger und weitere kurze Geschichten, kostenlos als PDF (erste Ausgabe in Arbeit)
 - [Deep Structure Mastering Studio](https://deepstructure.world/studio/): Mastering im Browser für eigene Songs und KI-Musik, in Entwicklung
 - [Startseite mit Internetradio](https://deepstructure.world/): interaktive 3D-Welt mit Radio, Vinyl, Kanälen sowie Apps und Spielen
 

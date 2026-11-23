@@ -176,3 +176,34 @@ export const projectDeck = [
   './assets/projects/thumb-clash-anlagen.webp',
   './assets/projects/thumb-trading-bot.webp'
 ];
+
+/* Comics: kostenlos zum Herunterladen.
+   Neuer Comic = PDF (und optional CBZ) nach assets/comics/, Cover dazu, dann hier einen Eintrag ergänzen.
+   Beispiel:
+   {
+     id: 'monsterjaeger-01',
+     series: 'Monsterjäger',
+     number: 1,
+     title: 'Titel der Geschichte',
+     text: 'Worum es geht, in zwei, drei Sätzen.',
+     cover: './assets/comics/monsterjaeger-01-cover.webp',
+     pages: 24,
+     files: [
+       { format: 'PDF', href: './assets/comics/monsterjaeger-01.pdf', size: '18 MB' },
+       { format: 'CBZ', href: './assets/comics/monsterjaeger-01.cbz', size: '20 MB' }
+     ],
+     shopUrl: ''   // später: Link zum Kauf, falls der Comic nicht gratis ist
+   }
+   Neueste Ausgabe zuerst eintragen. Bitte auch die Seite comics/index.html ergänzen (für Google). */
+export const comics = [];
+
+export const comicsShelf = {
+  caption: 'Geschichten aus der Welt von Deep Structure',
+  intro: 'Comics aus der Welt von Deep Structure: die Geschichten hinter Monsterjäger – Elias’ Vergangenheit, der Orden vom Schwarzen Siegel und die Mächte, die im Hintergrund wirken – und weitere kurze Geschichten. Kostenlos zum Herunterladen.',
+  // Cover für den Comicstapel in der Welt, solange es noch keine eigenen Cover gibt
+  covers: [
+    './assets/projects/monsterjaeger-abstieg-totenau.webp',
+    './assets/projects/monsterjaeger-boss-kraehenhexe.webp',
+    './assets/projects/monsterjaeger-brief-severin.webp'
+  ]
+};

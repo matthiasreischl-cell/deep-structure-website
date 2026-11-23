@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck } from './data/world-data.js?v=16';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck, comics, comicsShelf } from './data/world-data.js?v=17';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -11,8 +11,8 @@ const header = document.querySelector('.world-header');
 const footer = document.querySelector('.world-footer');
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 const mobileQuery = matchMedia('(max-width: 760px)');
-const desktopLayout = { vinyl: [21, 47, 25], radio: [50, 39, 65], programmes: [79, 47, 20], shop: [50, 80, 10] };
-const mobileLayout = { radio: [50, 22, 0], vinyl: [50, 44, 0], programmes: [50, 65, 0], shop: [50, 85, 0] };
+const desktopLayout = { vinyl: [21, 41, 25], radio: [50, 39, 65], programmes: [79, 44, 20], comics: [20, 74, 15], shop: [50, 80, 10] };
+const mobileLayout = { radio: [50, 18, 0], vinyl: [50, 35, 0], programmes: [50, 52, 0], comics: [50, 70, 0], shop: [50, 87, 0] };
 const interactiveObjects = [];
 let active = false;
 let pointerNX = 0;
@@ -266,14 +266,105 @@ function openShop() {
   openPanel(detail);
 }
 
+// Comics als kleiner Heftstapel: vorne die neueste Ausgabe, dahinter zwei weitere Hefte.
+function comicCovers() {
+  const own = comics.map(comic => comic.cover).filter(Boolean);
+  return [...own, ...comicsShelf.covers].slice(0, 3);
+}
+
+function comicStack() {
+  const stack = el('span', 'comic-stack');
+  stack.setAttribute('aria-hidden', 'true');
+  const covers = comicCovers();
+  ['back', 'middle', 'front'].forEach((position, index) => {
+    const issue = el('span', 'comic-issue comic-issue--' + position);
+    issue.style.setProperty('--cover', 'url("' + covers[(2 - index) % covers.length] + '")');
+    if (position === 'front') {
+      const masthead = el('span', 'comic-masthead');
+      masthead.append(el('span', 'comic-masthead-brand', 'Deep Structure'), el('span', 'comic-masthead-title', 'Comics'));
+      issue.append(masthead, el('span', 'comic-number', '#' + (comics[0]?.number ?? 1)));
+    }
+    stack.append(issue);
+  });
+  if (!comics.length) stack.append(el('span', 'comic-tag', 'Bald'));
+  return stack;
+}
+
+function createComics() {
+  const button = el('button', 'world-object world-object--comics');
+  button.type = 'button';
+  button.dataset.worldId = 'comics';
+  button.dataset.depth = '.36';
+  button.dataset.phase = '1.1';
+  button.setAttribute('aria-label', 'Comics von Deep Structure öffnen');
+  button.append(comicStack(), label('Comics', comics.length ? 'Gratis zum Herunterladen' : 'Erste Ausgabe erscheint bald'));
+  button.addEventListener('click', openComics);
+  return button;
+}
+
+function comicCard(comic) {
+  const card = el('article', 'comic-card');
+  if (comic.cover) {
+    const cover = el('img', 'comic-card-cover');
+    cover.src = comic.cover;
+    cover.alt = 'Cover: ' + comic.title;
+    cover.loading = 'lazy';
+    card.append(cover);
+  }
+  const copy = el('div', 'comic-card-copy');
+  const kicker = [comic.series, comic.number != null ? '#' + comic.number : '', comic.pages ? comic.pages + ' Seiten' : ''].filter(Boolean).join(' · ');
+  if (kicker) copy.append(el('p', 'project-status', kicker));
+  copy.append(el('h3', '', comic.title));
+  if (comic.text) copy.append(el('p', '', comic.text));
+  const actions = el('div', 'comic-card-actions');
+  (comic.files || []).forEach((file, index) => {
+    const link = el('a', 'world-link' + (index === 0 ? ' world-link--primary' : ''), file.format + ' herunterladen' + (file.size ? ' (' + file.size + ')' : ''));
+    link.href = file.href;
+    link.setAttribute('download', '');
+    actions.append(link);
+  });
+  if (comic.shopUrl) actions.append(externalLink('Im Shop kaufen', comic.shopUrl));
+  copy.append(actions);
+  card.append(copy);
+  return card;
+}
+
+function openComics() {
+  const detail = el('article', 'comics-detail');
+  detail.append(el('h2', '', 'Comics'));
+  detail.append(el('p', 'detail-intro', comicsShelf.intro));
+  if (comics.length) {
+    const list = el('div', 'comic-list');
+    comics.forEach(comic => list.append(comicCard(comic)));
+    detail.append(list);
+    detail.append(el('p', 'comics-note', 'PDF lässt sich auf jedem Gerät lesen. CBZ ist für Comic-Reader-Apps gedacht.'));
+  } else {
+    const soon = el('div', 'comics-soon');
+    soon.append(comicStack());
+    const copy = el('div', 'comics-soon-copy');
+    copy.append(el('p', 'shop-status', 'In Arbeit · erscheint bald'));
+    copy.append(el('h3', '', 'Die erste Ausgabe entsteht gerade'));
+    copy.append(el('p', '', 'Kurze Geschichten mit 10 bis 30 Seiten. Den Anfang machen Comics zu Monsterjäger, die erzählen, was im Spiel nur angedeutet wird.'));
+    const game = el('a', 'world-link world-link--primary', 'Monsterjäger kennenlernen');
+    game.href = './monsterjaeger/';
+    copy.append(game);
+    soon.append(copy);
+    detail.append(soon);
+  }
+  const page = el('a', 'world-link', 'Alle Comics auf einer Seite');
+  page.href = './comics/';
+  detail.append(page);
+  openPanel(detail);
+}
+
 function renderWorld() {
   const fragment = document.createDocumentFragment();
   fragment.append(createVinyl());
-  fragment.append(createRadio(), createProgrammes(), createShop());
+  fragment.append(createRadio(), createProgrammes(), createComics(), createShop());
   objectsLayer.replaceChildren(fragment);
   interactiveObjects.push(...objectsLayer.querySelectorAll('.world-object'));
   applyLayout();
-  [['Musik', openRadio], ['Vinyl', openVinyl], ['Apps & Spiele', openProgrammes], ['Webshop', openShop]].forEach(([title, action]) => {
+  [['Musik', openRadio], ['Vinyl', openVinyl], ['Apps & Spiele', openProgrammes], ['Comics', openComics], ['Webshop', openShop]].forEach(([title, action]) => {
     const button = el('button', '', title);
     button.type = 'button';
     if (title === 'Webshop') button.className = 'shop-nav-link';

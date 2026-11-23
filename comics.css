@@ -1,0 +1,134 @@
+/* Comics: Heftstapel in der Welt und das Comic-Fenster. */
+
+/* ---------- Heftstapel in der Welt ---------- */
+.world-object--comics { --comic-size: clamp(6px, min(.62vw, .95vh), 8.4px); z-index: 5; }
+.comic-stack {
+  position: relative;
+  display: block;
+  width: 24em;
+  height: 21em;
+  font-size: var(--comic-size);
+}
+.comic-issue {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12.6em;
+  height: 18em;
+  margin: -9em 0 0 -6.3em;
+  box-sizing: border-box;
+  border-radius: .25em;
+  background: #120f0b var(--cover, none) center / cover no-repeat;
+  box-shadow: 0 1.4em 2.4em rgba(0, 0, 0, .7), 0 .25em .5em rgba(0, 0, 0, .55);
+  overflow: hidden;
+  transition: transform 420ms cubic-bezier(.23, 1, .32, 1), filter 300ms ease;
+}
+/* Heftrücken: schmaler, heller Streifen links */
+.comic-issue::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: .5em;
+  background: linear-gradient(90deg, rgba(255, 240, 210, .28), rgba(0, 0, 0, .35));
+}
+.comic-issue--back { transform: translate(-3.6em, .4em) rotate(-9deg); filter: brightness(.5) saturate(.8); }
+.comic-issue--middle { transform: translate(3.4em, .8em) rotate(7deg); filter: brightness(.66) saturate(.85); }
+.comic-issue--front { transform: rotate(-1.5deg); outline: 1px solid #8a6c41; background-size: auto 122%; background-position: 50% 0; }
+
+.comic-masthead {
+  position: absolute;
+  inset: 0 0 auto;
+  padding: .7em .8em .6em 1.2em;
+  display: flex;
+  flex-direction: column;
+  gap: .15em;
+  background: linear-gradient(180deg, rgba(8, 7, 5, .96), rgba(8, 7, 5, .82) 70%, rgba(8, 7, 5, 0));
+  text-align: left;
+}
+.comic-masthead-brand {
+  font-family: var(--font-text, Inter, sans-serif);
+  font-size: .82em;
+  letter-spacing: .2em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: #c9a86a;
+}
+.comic-masthead-title {
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 2.5em;
+  line-height: 1;
+  font-weight: 600;
+  color: #f1e2c3;
+  text-shadow: 0 .08em .2em rgba(0, 0, 0, .8);
+}
+.comic-number {
+  position: absolute;
+  right: .7em;
+  bottom: .7em;
+  padding: .25em .55em;
+  font-family: var(--font-display, Georgia, serif);
+  font-size: 1.5em;
+  font-weight: 600;
+  color: #1a140c;
+  background: linear-gradient(180deg, #e7cf98, #c9a86a);
+  border-radius: .15em;
+}
+/* Schild „Bald“, solange es noch keine Ausgabe gibt */
+.comic-tag {
+  position: absolute;
+  right: .4em;
+  top: .2em;
+  z-index: 2;
+  padding: .45em 1em .5em;
+  font-family: var(--font-text, Inter, sans-serif);
+  font-size: 1.25em;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: #1a140c;
+  background: linear-gradient(180deg, #e7cf98, #c9a86a);
+  border-radius: .25em;
+  box-shadow: 0 .4em 1em rgba(0, 0, 0, .55);
+  transform: rotate(7deg);
+}
+.world-object--comics .world-object-label { top: calc(100% + .4em); }
+
+@media (hover: hover) and (pointer: fine) {
+  .world-object--comics:hover .comic-issue--back { transform: translate(-5.6em, .6em) rotate(-14deg); filter: brightness(.7); }
+  .world-object--comics:hover .comic-issue--middle { transform: translate(5.4em, 1em) rotate(11deg); filter: brightness(.82); }
+  .world-object--comics:hover .comic-issue--front { transform: translateY(-.6em) rotate(0deg); }
+}
+.world-object--comics:focus-visible .comic-issue--front { transform: translateY(-.6em) rotate(0deg); }
+.world-object--comics:active .comic-issue--front { transform: rotate(-1.5deg) scale(.97); }
+
+/* ---------- Comic-Fenster ---------- */
+.comics-detail { padding: clamp(40px, 5.5vw, 68px) clamp(24px, 5.5vw, 68px); }
+.comics-detail h3 { font-family: var(--font-display, Georgia, serif); font-weight: 500; font-size: clamp(22px, 2.4vw, 28px); line-height: 1.2; color: #eadbc0; }
+.comics-detail > h2 { margin-top: 0; }
+.comics-detail .detail-intro { max-width: 62ch; }
+.comic-list { display: grid; gap: 28px; margin: 28px 0; }
+.comic-card { display: grid; grid-template-columns: minmax(130px, 200px) 1fr; gap: 24px; align-items: start; padding-top: 24px; border-top: 1px solid #a9865033; }
+.comic-card-cover { width: 100%; height: auto; aspect-ratio: 2 / 3; object-fit: cover; border: 1px solid #a9865055; box-shadow: 0 12px 26px rgba(0, 0, 0, .55); }
+.comic-card-copy h3 { margin: 4px 0 10px; }
+.comic-card-actions { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 16px; }
+.comics-note { font-size: 12px; color: #b6a689; }
+.comics-soon { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; margin: 28px 0; }
+.comics-soon .comic-stack { --comic-size: 8px; }
+.comics-soon-copy h3 { margin: 6px 0 10px; }
+.comics-detail > .world-link { display: inline-block; margin-top: 8px; }
+
+@media (max-width: 760px) {
+  .world-scene { min-height: 1620px; }
+  .world-header .world-index { flex-wrap: wrap; justify-content: center; }
+  .world-object--comics { --comic-size: 7.2px; }
+  .comics-detail { padding: 64px 22px 36px; }
+  .comic-card { grid-template-columns: 110px 1fr; gap: 16px; }
+  .comics-soon { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comic-issue { transition: none; }
+  .world-object--comics:hover .comic-issue--back,
+  .world-object--comics:hover .comic-issue--middle,
+  .world-object--comics:hover .comic-issue--front { transform: none; }
+}

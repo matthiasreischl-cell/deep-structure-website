@@ -7,8 +7,8 @@
   <meta name="referrer" content="no-referrer" />
   <!-- Sicherheitsgurt (Content-Security-Policy): nur eigene Dateien; fremd erlaubt sind nur der Radio-Stream und dessen Titelanzeige (asurahosting). Eigene Rahmen (frame-src 'self') nur für die Spiel-Demos unter /spiele/. Neue fremde Dienste (z. B. Webshop-Einbindung) hier ergänzen. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: https://a10.asurahosting.com:9170; connect-src 'self' https://a10.asurahosting.com; worker-src 'self' blob:; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests" />
-  <meta name="description" content="Deep Structure Internetradio — dunkle Geschichten und Drum & Bass. Entdecke veröffentlichte Vinyl, Apps und Spiele." />
-  <title>Deep Structure — Internetradio, Vinyl, Apps &amp; Spiele, Webshop</title>
+  <meta name="description" content="Deep Structure – Drum &amp; Bass und dunkle Geschichten aus der Steiermark. Internetradio hören, Vinyl wie „The Forest Does Not Forget“ entdecken und das Browserspiel Monsterjäger spielen." />
+  <title>Deep Structure – Drum &amp; Bass, Vinyl, Internetradio &amp; Spiele</title>
   <link rel="canonical" href="https://deepstructure.world/" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Deep Structure" />
@@ -21,6 +21,72 @@
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="Das Deep-Structure-Logo mit Ringen und Dreieck schwebt über dunklem Wasser" />
   <meta name="twitter:card" content="summary_large_image" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://deepstructure.world/#website",
+        "url": "https://deepstructure.world/",
+        "name": "Deep Structure",
+        "inLanguage": "de",
+        "publisher": { "@id": "https://deepstructure.world/#artist" }
+      },
+      {
+        "@type": "MusicGroup",
+        "@id": "https://deepstructure.world/#artist",
+        "name": "Deep Structure",
+        "url": "https://deepstructure.world/",
+        "description": "Drum & Bass mit dunklen, erzählerischen Themen, dazu Vinyl, ein eigenes Internetradio und selbst entwickelte Spiele.",
+        "genre": ["Drum and Bass", "Electronic"],
+        "image": "https://deepstructure.world/assets/og-deep-structure.jpg",
+        "logo": "https://deepstructure.world/assets/icons/icon-512.png",
+        "foundingLocation": { "@type": "Place", "name": "Steiermark, Österreich" },
+        "member": { "@type": "Person", "name": "Matthias Reischl" },
+        "sameAs": [
+          "https://open.spotify.com/artist/7D3ibrgZdvhQDorWcjcR8T",
+          "https://soundcloud.com/deepstructure-269845164",
+          "https://deepstructures.bandcamp.com/",
+          "https://www.youtube.com/@DeepStructure-k8u",
+          "https://www.youtube.com/channel/UCXFT31NeGwDTmFq6G8YT84g",
+          "https://www.tiktok.com/@deep.structure",
+          "https://music.amazon.de/artists/B0H6SPJ4P1",
+          "https://elasticstage.com/deep-structure"
+        ]
+      },
+      {
+        "@type": "MusicAlbum",
+        "name": "The Forest Does Not Forget",
+        "byArtist": { "@id": "https://deepstructure.world/#artist" },
+        "genre": "Drum and Bass",
+        "numTracks": 12,
+        "image": "https://deepstructure.world/assets/albums/the-forest-does-not-forget.jpg",
+        "description": "Dunkle Folklore trifft auf Drum & Bass. 12″ Vinyl mit Booklet, limitierte Auflage.",
+        "albumRelease": {
+          "@type": "MusicRelease",
+          "name": "The Forest Does Not Forget (Vinyl)",
+          "musicReleaseFormat": "https://schema.org/VinylFormat",
+          "url": "https://elasticstage.com/deep-structure/releases/the-forest-does-not-forget-album"
+        }
+      },
+      {
+        "@type": "RadioStation",
+        "name": "Deep Structure Radio",
+        "url": "https://deepstructure.world/",
+        "description": "Internetradio mit dunklen Märchen, Tragödien und Drum & Bass, Kapitel für Kapitel."
+      },
+      {
+        "@type": "VideoGame",
+        "@id": "https://deepstructure.world/monsterjaeger/#game",
+        "name": "Monsterjäger I – Der Ursprung",
+        "url": "https://deepstructure.world/monsterjaeger/",
+        "gamePlatform": "Webbrowser",
+        "author": { "@id": "https://deepstructure.world/#artist" }
+      }
+    ]
+  }
+  </script>
   <link rel="icon" href="./favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="./assets/icons/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="./assets/icons/icon-192.png" />
@@ -36,7 +102,7 @@
   <link rel="stylesheet" href="story-world.css?v=7" />
   <link rel="stylesheet" href="cursor.css?v=1" />
   <link rel="stylesheet" href="landing-3d.css?v=4" />
-  <link rel="stylesheet" href="polish.css?v=4" />
+  <link rel="stylesheet" href="polish.css?v=5" />
   <link rel="stylesheet" href="speaker.css?v=3" />
   <link rel="stylesheet" href="projects.css?v=4" />
   <link rel="stylesheet" href="music.css?v=3" />
@@ -48,13 +114,14 @@
   <div class="noise" aria-hidden="true"></div>
 
   <main class="landing" id="landing">
+    <h1 class="visually-hidden">Deep Structure – Drum &amp; Bass, Vinyl, Internetradio und Spiele</h1>
     <button class="logo-button" id="enterButton" type="button" aria-label="Enter Deep Structure">
       <span class="water-shadow" aria-hidden="true"></span>
       <span class="symbol-stage" id="symbolStage" aria-hidden="true"></span>
       <span class="symbol-reflection" aria-hidden="true"></span>
       <span class="wordmark">DEEP STRUCTURE</span>
     </button>
-    <nav class="landing-legal" aria-label="Rechtliches"><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></nav>
+    <nav class="landing-legal" aria-label="Weitere Seiten"><a href="./ueber/" title="Über Deep Structure">Über</a><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></nav>
   </main>
 
   <div class="transition" id="transition" aria-hidden="true">
@@ -76,7 +143,7 @@
       </header>
       <footer class="world-footer">
         <span>Dunkle Geschichten. Drum &amp; Bass. Eigene Welten.</span>
-        <nav class="world-legal" aria-label="Rechtliches"><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></nav>
+        <nav class="world-legal" aria-label="Weitere Seiten"><a href="./ueber/">Über</a><a href="./monsterjaeger/">Monsterjäger</a><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></nav>
       </footer>
 
       <div class="world-panel" id="worldPanel" role="dialog" aria-modal="true" aria-label="Deep Structure – Bereich" aria-hidden="true">

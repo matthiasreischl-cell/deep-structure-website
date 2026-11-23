@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://deepstructure.world/</loc></url>
-  <url><loc>https://deepstructure.world/studio/</loc></url>
+  <url><loc>https://deepstructure.world/</loc><lastmod>2026-11-23</lastmod></url>
+  <url><loc>https://deepstructure.world/ueber/</loc><lastmod>2026-11-23</lastmod></url>
+  <url><loc>https://deepstructure.world/monsterjaeger/</loc><lastmod>2026-11-23</lastmod></url>
+  <url><loc>https://deepstructure.world/studio/</loc><lastmod>2026-11-23</lastmod></url>
   <url><loc>https://deepstructure.world/impressum.html</loc></url>
   <url><loc>https://deepstructure.world/datenschutz.html</loc></url>
 </urlset>

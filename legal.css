@@ -27,3 +27,21 @@ p { margin: 12px 0; }
 .legal-content code { font-size: .82em; overflow-wrap: anywhere; }
 .legal-content h1 { overflow-wrap: anywhere; }
 .legal-content h2 { scroll-margin-top: 24px; }
+
+/* Inhaltsseiten (Über Deep Structure, Monsterjäger) */
+.page-figure { margin: 28px 0; }
+.page-figure img { display: block; width: 100%; height: auto; border: 1px solid #a9865044; }
+.page-figure figcaption { margin-top: 8px; color: #b6a689; font-size: 13px; line-height: 1.5; }
+.page-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 20px 0; }
+.page-gallery img { display: block; width: 100%; height: auto; border: 1px solid #a9865044; }
+.page-list { padding-left: 1.2em; }
+.page-list li { margin: 6px 0; }
+.page-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; padding: 0; list-style: none; }
+.page-links a { display: inline-block; padding: 9px 14px; border: 1px solid #a9865066; background: #17120c; text-decoration: none; font-size: 14px; }
+.page-links a:hover { border-color: #d5b783; }
+.page-cta { display: inline-block; margin: 8px 0; padding: 12px 18px; border: 1px solid #a98650; background: #231a10; text-decoration: none; }
+.faq h3 { font-family: var(--font-display, Georgia, serif); font-size: 19px; font-weight: 600; margin: 22px 0 4px; color: #eadbc0; }
+.faq p { margin-top: 4px; }
+.page-cover { display: grid; grid-template-columns: 180px 1fr; gap: 22px; align-items: start; margin: 18px 0; }
+.page-cover img { width: 100%; height: auto; border: 1px solid #a9865044; }
+@media (max-width: 520px) { .page-cover { grid-template-columns: 1fr; } .page-cover img { max-width: 260px; } }

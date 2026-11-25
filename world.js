@@ -1,4 +1,4 @@
-import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck, comics, comicsShelf } from './data/world-data.js?v=17';
+import { vinylReleases, channels, shop, radio, vinylShelf, projects, projectsTeaser, projectDeck, comics, comicsShelf, videos, videoGroups, videoShelf } from './data/world-data.js?v=18';
 
 const world = document.getElementById('world');
 const scene = document.getElementById('worldScene');
@@ -11,8 +11,8 @@ const header = document.querySelector('.world-header');
 const footer = document.querySelector('.world-footer');
 const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
 const mobileQuery = matchMedia('(max-width: 760px)');
-const desktopLayout = { vinyl: [21, 41, 25], radio: [50, 39, 65], programmes: [79, 44, 20], comics: [20, 74, 15], shop: [50, 80, 10] };
-const mobileLayout = { radio: [50, 18, 0], vinyl: [50, 35, 0], programmes: [50, 52, 0], comics: [50, 70, 0], shop: [50, 87, 0] };
+const desktopLayout = { vinyl: [21, 41, 25], radio: [50, 39, 65], programmes: [79, 41, 20], comics: [20, 74, 15], shop: [50, 80, 10], videos: [80, 73, 15] };
+const mobileLayout = { radio: [50, 15, 0], vinyl: [50, 29.5, 0], programmes: [50, 44, 0], comics: [50, 59, 0], videos: [50, 74, 0], shop: [50, 89, 0] };
 const interactiveObjects = [];
 let active = false;
 let pointerNX = 0;
@@ -357,14 +357,141 @@ function openComics() {
   openPanel(detail);
 }
 
+// Videos als alter Röhrenfernseher: auf dem Bildschirm laufen die Vorschaubilder der Videos durch.
+function tvSet() {
+  const tv = el('span', 'tv-set');
+  tv.setAttribute('aria-hidden', 'true');
+  const antenna = el('span', 'tv-antenna');
+  antenna.append(el('i'), el('i'));
+  const body = el('span', 'tv-body');
+  const screen = el('span', 'tv-screen');
+  const posters = videos.map(video => video.poster).filter(Boolean).slice(0, 6);
+  posters.forEach((src, index) => {
+    const face = el('span', 'tv-face');
+    face.style.backgroundImage = 'url("' + src + '")';
+    face.style.animationDelay = (index * 4 - posters.length * 4) + 's';
+    screen.append(face);
+  });
+  screen.style.setProperty('--tv-cycle', (posters.length * 4) + 's');
+  screen.append(el('span', 'tv-scan'), el('span', 'tv-play'));
+  const side = el('span', 'tv-side');
+  side.append(el('span', 'tv-knob'), el('span', 'tv-knob tv-knob--small'), el('span', 'tv-grille'));
+  body.append(screen, side);
+  tv.append(antenna, body, el('span', 'tv-feet'));
+  if (videos.length) tv.append(el('span', 'comic-tag tv-tag', 'Neu'));
+  return tv;
+}
+
+function createVideos() {
+  const button = el('button', 'world-object world-object--videos');
+  button.type = 'button';
+  button.dataset.worldId = 'videos';
+  button.dataset.depth = '.38';
+  button.dataset.phase = '2.6';
+  button.setAttribute('aria-label', 'Videos von Deep Structure öffnen');
+  button.append(tvSet(), label('Videos', videoShelf.caption));
+  button.addEventListener('click', () => openVideos());
+  return button;
+}
+
+function videoMeta(video) {
+  return [video.kind, video.duration].filter(Boolean).join(' · ');
+}
+
+function openVideos(startId) {
+  const playable = videos.filter(video => video.src);
+  let current = playable.find(video => video.id === startId) || playable[0];
+  const detail = el('article', 'videos-detail');
+  detail.append(el('h2', '', 'Videos'));
+  detail.append(el('p', 'detail-intro', videoShelf.intro));
+
+  const cards = [];
+  if (current) {
+    const stage = el('section', 'video-stage');
+    const player = el('video', 'video-stage-player');
+    player.controls = true;
+    player.playsInline = true;
+    player.preload = 'metadata';
+    const copy = el('div', 'video-stage-copy');
+    const meta = el('p', 'project-status');
+    const title = el('h3');
+    const text = el('p');
+    copy.append(meta, title, text);
+    stage.append(player, copy);
+    detail.append(stage);
+
+    const show = (video, autoplay) => {
+      current = video;
+      player.pause();
+      player.poster = video.poster || '';
+      player.setAttribute('aria-label', video.title + ' – ' + video.kind);
+      const source = el('source');
+      source.src = video.src;
+      source.type = 'video/mp4';
+      player.replaceChildren(source, externalLink('Video öffnen', video.src));
+      player.load();
+      meta.textContent = videoMeta(video);
+      title.textContent = video.title;
+      text.textContent = video.text || '';
+      cards.forEach(card => card.toggleAttribute('aria-current', card.dataset.videoId === video.id));
+      if (autoplay) {
+        stage.scrollIntoView({ behavior: motionQuery.matches ? 'auto' : 'smooth', block: 'start' });
+        stopRadio();
+        player.play().catch(() => {});
+      }
+    };
+    player.addEventListener('play', stopRadio);
+    detail.showVideo = show;
+    requestAnimationFrame(() => show(current, false));
+  }
+
+  videoGroups.forEach(group => {
+    const items = videos.filter(video => video.group === group.id);
+    if (!items.length) return;
+    detail.append(el('h3', 'video-group-title', group.title));
+    const grid = el('div', 'video-grid');
+    items.forEach(video => {
+      const card = el(video.src ? 'button' : 'a', 'video-card');
+      card.dataset.videoId = video.id;
+      if (video.src) {
+        card.type = 'button';
+        card.addEventListener('click', () => detail.showVideo?.(video, true));
+      } else {
+        card.href = video.url;
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+      }
+      const thumb = el('span', 'video-card-thumb');
+      if (video.poster) {
+        const img = el('img');
+        img.src = video.poster;
+        img.alt = '';
+        img.loading = 'lazy';
+        thumb.append(img);
+      }
+      if (video.duration) thumb.append(el('span', 'video-card-time', video.duration));
+      thumb.append(el('span', 'video-card-play', video.src ? '▶' : '↗'));
+      card.append(thumb, el('span', 'video-card-title', video.title), el('span', 'video-card-kind', video.kind + (video.src ? '' : ' · extern')));
+      cards.push(card);
+      grid.append(card);
+    });
+    detail.append(grid);
+  });
+
+  const page = el('a', 'world-link', 'Alle Videos auf einer Seite');
+  page.href = './videos/';
+  detail.append(page);
+  openPanel(detail);
+}
+
 function renderWorld() {
   const fragment = document.createDocumentFragment();
   fragment.append(createVinyl());
-  fragment.append(createRadio(), createProgrammes(), createComics(), createShop());
+  fragment.append(createRadio(), createProgrammes(), createComics(), createVideos(), createShop());
   objectsLayer.replaceChildren(fragment);
   interactiveObjects.push(...objectsLayer.querySelectorAll('.world-object'));
   applyLayout();
-  [['Musik', openRadio], ['Vinyl', openVinyl], ['Apps & Spiele', openProgrammes], ['Comics', openComics], ['Webshop', openShop]].forEach(([title, action]) => {
+  [['Musik', openRadio], ['Vinyl', openVinyl], ['Apps & Spiele', openProgrammes], ['Comics', openComics], ['Videos', () => openVideos()], ['Webshop', openShop]].forEach(([title, action]) => {
     const button = el('button', '', title);
     button.type = 'button';
     if (title === 'Webshop') button.className = 'shop-nav-link';

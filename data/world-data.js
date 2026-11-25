@@ -207,3 +207,73 @@ export const comicsShelf = {
     './assets/projects/monsterjaeger-brief-severin.webp'
   ]
 };
+
+/* Videos: die Bibliothek aller Videos von Deep Structure (Fernseher in der Welt und Seite /videos/).
+   Neuestes Video zuerst eintragen. Gruppen: 'musik' (Musikvideos) oder 'trailer' (Trailer & Teaser).
+   - Eigene Datei: MP4 nach assets/videos/ (am besten unter 50 MB, H.264, 720p oder 1080p),
+     Vorschaubild als WebP daneben, dann `src` und `poster` eintragen. Das Video läuft direkt hier.
+   - Video, das nur auf YouTube oder TikTok liegt: statt `src` einfach `url` eintragen (plus `poster`).
+     Dann öffnet die Karte das Video auf der jeweiligen Plattform in einem neuen Tab.
+   Bitte auch die Seite videos/index.html ergänzen (für Google). */
+export const videos = [
+  {
+    id: 'rumpelstilzchen-c64',
+    group: 'musik',
+    title: 'Rumpelstilzchen – Feuerkreis',
+    kind: 'Musikvideo · C64-Pixel-Look',
+    duration: '4:30',
+    text: 'Das Grimm-Märchen erzählt wie ein Commodore-64-Spiel aus den 80ern: vom Ladebildschirm über drei Nächte am Spinnrad bis zum Tanz im Feuerkreis. 320 × 200 Pixel, 16 Farben, jede Szene auf den Beat geschnitten.',
+    src: './assets/videos/rumpelstilzchen-feuerkreis-c64.mp4',
+    poster: './assets/videos/rumpelstilzchen-feuerkreis-c64.webp'
+  },
+  {
+    id: 'rumpelstilzchen-liedtext',
+    group: 'musik',
+    title: 'Rumpelstilzchen – Feuerkreis',
+    kind: 'Musikvideo mit Liedtext',
+    duration: '4:20',
+    text: 'Die gemalte Fassung zum Mitlesen: Im Wald brodelt der Kessel, und Rumpelstilzchen tanzt ums Feuer. Ein dunkles Märchen zwischen Drum & Bass und 16-Bit.',
+    src: './assets/videos/rumpelstilzchen-feuerkreis-liedtext.mp4',
+    poster: './assets/videos/rumpelstilzchen-feuerkreis-liedtext.webp'
+  },
+  {
+    id: 'monsterjaeger-trailer',
+    group: 'trailer',
+    title: 'Monsterjäger I – Der Ursprung',
+    kind: 'Gameplay-Trailer',
+    duration: '0:43',
+    text: 'Aufbau bei Tag, Abwehr bei Nacht und Kämpfe in den Grüften: der erste Blick auf das Spiel, mit Musik von Deep Structure.',
+    src: './assets/games/monsterjaeger-trailer.mp4',
+    poster: './assets/games/monsterjaeger-trailer.jpg'
+  },
+  {
+    id: 'clash-teaser',
+    group: 'trailer',
+    title: 'Clash of the Universe',
+    kind: 'Teaser',
+    duration: '2:00',
+    text: 'Sci-Fi-Tower-Defense im Comic-Stil: die Basis gegen die Maschinen von Shadow of the Universe.',
+    src: './assets/games/clash-shadow-teaser.mp4',
+    poster: './assets/projects/clash-title.webp'
+  },
+  {
+    id: 'games-pitch',
+    group: 'trailer',
+    title: 'Deep Structure Games',
+    kind: 'Pitch-Video',
+    duration: '0:10',
+    text: 'Das Logo-Intro der Spiele von Deep Structure: Das Zeichen erwacht.',
+    src: './assets/games/deep-structure-games-pitch.mp4',
+    poster: './assets/videos/deep-structure-games-pitch.webp'
+  }
+];
+
+export const videoGroups = [
+  { id: 'musik', title: 'Musikvideos' },
+  { id: 'trailer', title: 'Trailer & Teaser' }
+];
+
+export const videoShelf = {
+  caption: 'Musikvideos · Trailer · Clips',
+  intro: 'Alle Videos von Deep Structure an einem Ort: Musikvideos zu den Märchen und Geschichten, dazu Trailer und Teaser zu den Spielen.'
+};

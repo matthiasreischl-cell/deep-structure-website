@@ -15,6 +15,10 @@ Reines HTML, CSS und JavaScript als ES-Module, ohne Build-Schritt.
      Mastering Studio (`/studio/`) und den Private AI Trading Bot. „Demo spielen“ bei Monsterjäger
      öffnet die Browser-Demo (`/spiele/monsterjaeger/`) in einem eigenen Fenster über der Welt.
      Monsterjäger ist als Serie aus vier Spielen angelegt: `series` in `data/world-data.js` zeigt die Teile mit ihrem Schwerpunkt (Teil I „Der Ursprung“ spielbar, II bis IV in Planung).
+   - **Comics:** Heftstapel; öffnet die Comic-Ausgaben (Einträge in `comics` in `data/world-data.js`, Seite `/comics/`).
+   - **Videos:** Röhrenfernseher, auf dem die Vorschaubilder durchlaufen; öffnet die Video-Bibliothek mit
+     großem Player oben und allen Videos darunter (Musikvideos, Trailer & Teaser). Inhalte in `videos`
+     in `data/world-data.js`, dazu die Seite `/videos/` für Suchmaschinen.
    - **Webshop:** Vitrine mit wechselnden Produkten. Solange `shop.open` in `data/world-data.js`
      auf `false` steht, zeigt sie „Im Aufbau“ und verweist auf die Vinyl.
 3. **Hintergrundmusik:** Lautsprecher-Knopf unten rechts. Vier Klavierstücke im Loop, leise.
@@ -47,6 +51,16 @@ von Impressum oder Datenschutz innerhalb von 30 Minuten.
 - `robots.txt`, `sitemap.xml`: für Suchmaschinen
 
 Three.js liegt lokal unter `assets/vendor/three/`; es werden keine Skripte von fremden Servern geladen.
+
+## Neues Video eintragen
+
+1. MP4 (H.264) nach `assets/videos/` legen, am besten unter 50 MB (GitHub erlaubt höchstens 100 MB pro Datei).
+   Große Dateien vorher verkleinern, zum Beispiel auf 720p:
+   `ffmpeg -i quelle.mp4 -vf scale=1280:-2 -c:v libx264 -crf 26 -c:a aac -b:a 128k -movflags +faststart ziel.mp4`
+2. Vorschaubild (16:9, WebP) daneben legen.
+3. In `data/world-data.js` bei `videos` oben einen Eintrag ergänzen (`src` und `poster`).
+   Videos, die nur auf YouTube oder TikTok liegen, bekommen statt `src` eine `url` und öffnen dort.
+4. In `videos/index.html` einen Eintrag ergänzen (für Google).
 
 ## Lokale Vorschau
 

@@ -45,3 +45,8 @@ p { margin: 12px 0; }
 .page-cover { display: grid; grid-template-columns: 180px 1fr; gap: 22px; align-items: start; margin: 18px 0; }
 .page-cover img { width: 100%; height: auto; border: 1px solid #a9865044; }
 @media (max-width: 520px) { .page-cover { grid-template-columns: 1fr; } .page-cover img { max-width: 260px; } }
+/* Seite /videos/: ein Eintrag je Video */
+.video-entry { margin: 34px 0; padding-top: 26px; border-top: 1px solid #a9865033; }
+.video-entry video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #000; border: 1px solid #a9865044; }
+.video-entry h3 { margin: 14px 0 4px; }
+.video-entry .legal-kicker { margin: 0; }

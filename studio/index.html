@@ -7,7 +7,7 @@
 <meta name="referrer" content="no-referrer">
 <meta name="theme-color" content="#03060A">
 <title>Deep Structure Mastering Studio – in Entwicklung</title>
-<meta name="description" content="Mastering-Studio für KI-Musik und eigene Songs: Song-Check, Reparatur typischer KI-Artefakte, Mastering-Kette, Album-Mastering. Derzeit in Entwicklung – Updates und Beta-Zugang per E-Mail.">
+<meta name="description" content="Mastering-Studio für KI-Musik und eigene Songs: Song-Check, Reparatur typischer KI-Artefakte, Mastering-Kette, Album-Mastering, Stems und DnB Composer mit Drum Machine und Instrumenten. Derzeit in Entwicklung (Version 1.22) – Updates und Beta-Zugang per E-Mail.">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
@@ -54,6 +54,11 @@ audio{width:100%;height:40px;color-scheme:dark}
 .vinyl ol{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .vinyl li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:6px}
 .vinyl li span{font:600 16px var(--f-d);letter-spacing:.08em;text-transform:uppercase}.vinyl li span em{font-style:normal;color:var(--muted);font-weight:600;margin-left:8px;letter-spacing:.04em}
+.sub{font:600 20px var(--f-d);letter-spacing:.08em;text-transform:uppercase;color:var(--text);margin:26px 0 12px}
+.sub em{font-style:normal;font-size:12px;letter-spacing:.18em;color:var(--gold);border:1px solid #5a4a26;border-radius:99px;padding:2px 10px;margin-left:10px;vertical-align:middle}
+ul.changes{list-style:none;padding:0;display:grid;gap:8px}
+ul.changes li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+ul.changes b{display:inline-block;min-width:44px;font:700 16px var(--f-d);letter-spacing:.06em;color:var(--ice)}
 @media (max-width:760px){.vinyl{grid-template-columns:1fr}}
 </style>
 </head>
@@ -68,9 +73,9 @@ audio{width:100%;height:40px;color-scheme:dark}
   <div class="hero">
     <span class="eyebrow">Mastering für KI-Musik und eigene Songs</span>
     <h1>Deep Structure<br>Mastering Studio</h1>
-    <div class="status"><span class="pill"><i></i>In Entwicklung</span><small>Noch nicht öffentlich verfügbar · Beta-Test mit einem kleinen Kreis</small></div>
-    <p class="lead">Ein Mastering-Studio, das im Browser auf deinem eigenen Gerät läuft: Es prüft deinen Song, repariert typische Schwächen von KI-Musik und bringt ihn mit einer vollständigen Mastering-Kette auf Veröffentlichungsniveau. Deine Audiodateien verlassen dabei dein Gerät nicht.</p>
-    <figure><img src="studio-ansicht.webp" alt="Ansicht des Studios: Wellenform, Song-Check mit Bewertung, Pegelanzeigen" width="1376" height="800"><figcaption>Song-Check mit Hinweisen, Wellenform-Editor und Pegelanzeigen (Ansicht aus einer früheren Entwicklungsversion).</figcaption></figure>
+    <div class="status"><span class="pill"><i></i>In Entwicklung</span><small>Aktueller Stand: Version 1.22 · Noch nicht öffentlich verfügbar · Beta-Test mit einem kleinen Kreis</small></div>
+    <p class="lead">Ein Mastering-Studio, das auf deinem eigenen Gerät läuft: Es prüft deinen Song, repariert typische Schwächen von KI-Musik und bringt ihn mit einer vollständigen Mastering-Kette auf Veröffentlichungsniveau. Dazu kommen ein Bereich für Stems und der DnB Composer, mit dem du eigene Beats und ganze Instrumentalstücke baust. Deine Audiodateien verlassen dabei dein Gerät nicht.</p>
+    <figure><img src="studio-mastering.webp" alt="Mastering-Ansicht des Studios: Umschalter Mastering, DnB Composer und Stems, Wellenform von Master und Original, Song-Check mit Bewertung und Pegelanzeigen" width="1600" height="930"><figcaption>Mastering-Ansicht in Version 1.22: Master und Original übereinander, Song-Check mit Hinweisen und Pegelanzeigen.</figcaption></figure>
   </div>
 
   <section id="hoerbeispiele">
@@ -119,26 +124,67 @@ audio{width:100%;height:40px;color-scheme:dark}
     <p class="note">Beide Knöpfe öffnen dein E-Mail-Programm mit einer vorbereiteten Nachricht; gesendet wird erst, wenn du selbst auf „Senden“ klickst. Es gibt keinen Newsletter-Dienst und keine Weitergabe: Ich schreibe dir persönlich. Abmelden geht jederzeit mit einer kurzen Antwort. Einzelheiten: <a href="../datenschutz.html#anfragen">Datenschutz</a>.</p>
   </section>
 
-  <section>
-    <h2>Woran gearbeitet wird</h2>
+  <section id="funktionen">
+    <h2>Was das Studio kann</h2>
+    <p class="lead" style="font-size:16px">Drei Bereiche, oben im Studio umschaltbar: Mastering, DnB Composer und Stems.</p>
+
+    <h3 class="sub">Mastering</h3>
     <div class="grid">
       <div class="card"><h3>Song-Check</h3><p>Misst Lautheit (LUFS), True Peak, Dynamik, Klangbalance und Stereobild und zeigt, wo dein Track schwächelt, mit Vorschlägen per Klick.</p></div>
       <div class="card"><h3>KI-Artefakte</h3><p>Findet Glitzern, Flattern, Knackser, stehende Störtöne und Rauschteppiche, typisch für KI-generierte Musik, und glättet sie gezielt.</p></div>
-      <div class="card"><h3>Stimme</h3><p>Entzischer und Rauschteppich-Entfernung zwischen Gesang und Beat, nur in der Mitte, sehr zurückhaltend einstellbar.</p></div>
+      <div class="card"><h3>Stimme und Höhen</h3><p>Entzischer, Rauschteppich-Entfernung zwischen Gesang und Beat und „Rassel entfernen“ für Scheppern und Zischen in den Höhen. Gesang, Instrumente und Hi-Hat-Schläge bleiben dabei stehen.</p></div>
       <div class="card"><h3>Drum-Reparatur</h3><p>Glättet sandige und metallische Drums, ergänzt Ausklang und Punch und unterlegt Kick und Snare auf Wunsch mit sauberen Klängen.</p></div>
       <div class="card"><h3>Mastering-Kette</h3><p>8-Band-Equalizer mit Kerbfiltern, 3-Band-Kompressor, Sättigung, Stereobreite mit Bass-Mono und True-Peak-Limiter.</p></div>
-      <div class="card"><h3>Vergleichen</h3><p>Pegelgleicher A/B-Vergleich mit Original und Referenz-Track.</p></div>
-      <div class="card"><h3>Album</h3><p>Mehrere Songs als Album: Lautheit ausbalancieren, Versionen verwalten, eigene Einstellungen auf das ganze Album übertragen.</p></div>
+      <div class="card"><h3>Vergleichen</h3><p>Pegelgleicher A/B-Vergleich mit Original und Referenz-Track, Master und Original als zwei Spuren übereinander.</p></div>
+      <div class="card"><h3>Mein Stil</h3><p>Das Studio lernt aus Masters, die du ausdrücklich bestätigst, und schlägt beim nächsten Song passende Einstellungen vor.</p></div>
+      <div class="card"><h3>Album</h3><p>Mehrere Songs als Album: Lautheit ausbalancieren, Versionen verwalten, eigene Einstellungen auf das ganze Album übertragen, Review und Freigabe Song für Song.</p></div>
       <div class="card"><h3>Export</h3><p>WAV 16/24/32 Bit, MP3 und OGG, mit Nachmessung der fertigen Datei.</p></div>
       <div class="card"><h3>MIDI-Controller</h3><p>Regler, Fader, Jogwheel und Pads eines DJ- oder MIDI-Controllers frei belegen, mit Crossfader für den Original/Master-Vergleich.</p></div>
     </div>
+
+    <h3 class="sub">DnB Composer <em>neu</em></h3>
+    <figure><img src="studio-composer.webp" alt="DnB Composer: Drum Machine mit sechs Spuren, Patterns von Intro bis Drop, Pattern-Kette mit 4:30 Minuten und darunter acht Instrumentenspuren mit Piano-Roll" width="1600" height="930" loading="lazy"><figcaption>Der DnB Composer mit Drum Machine, benannten Abschnitten von Intro bis Drop und acht Instrumentenspuren.</figcaption></figure>
+    <div class="grid" style="margin-top:12px">
+      <div class="card"><h3>Drum Machine</h3><p>Step-Sequencer mit Kick, Snare, Hi-Hats, Percussion und Ghost-Snare. Eigene Klangerzeugung ohne Samples, fertige Klänge und Grundmuster für Drum and Bass, Jungle, Liquid, House, Techno, Psytrance, Synthwave und Retro-Beats.</p></div>
+      <div class="card"><h3>Beat beschreiben</h3><p>Ein Pattern-Generator mit Varianten und ein Textfeld: Du beschreibst den Beat mit Stichwörtern wie „jungle, dumpf, 170“, das Studio baut ein passendes Muster und zeigt, was es erkannt hat.</p></div>
+      <div class="card"><h3>Instrumente</h3><p>Bis zu acht Spuren: DnB-Synth (Reese, Growl, Wobble, Pads, Sub), Retro-Synth im Klang von Super Nintendo und Mega Drive, Konzertflügel, Upright-Klavier, Violine und Holzbläser aus echten Aufnahmen.</p></div>
+      <div class="card"><h3>Piano-Roll und Einspielen</h3><p>Noten setzen und ziehen, Tonart-Hilfe, Einspielen mit Bildschirm-Klaviatur, PC-Tastatur oder MIDI-Keyboard.</p></div>
+      <div class="card"><h3>Lange Stücke</h3><p>Bis zu 64 Abschnitte mit Namen (Intro, Aufbau, Drop …), je bis 256 Steps, in einer Kette bis 9:30 Minuten, mit Anzeige der Gesamtdauer.</p></div>
+      <div class="card"><h3>Spiel-Effekte</h3><p>Sprung, Münze, Power-up, Laser, Explosion und mehr im 16-Bit-Klang, als WAV oder OGG für eigene Spiele.</p></div>
+      <div class="card"><h3>Export</h3><p>WAV, MIDI mit einer Spur je Instrument, einzelne Spuren als Stems oder direkt weiter ins Mastering.</p></div>
+    </div>
+
+    <h3 class="sub">Stems <em>neu</em></h3>
+    <div class="grid">
+      <div class="card"><h3>Gezielt bearbeiten</h3><p>Gesang, Drums und Rest eines Songs getrennt anpassen: Pegel, Stummschalten in einer Auswahl, Entzischer, Rauschteppich und Rassel je Spur.</p></div>
+      <div class="card"><h3>Spektral-Editor</h3><p>Im Spektrogramm einen Bereich aus Zeit und Frequenz markieren und nur dort absenken, etwa ein einzelnes Störgeräusch.</p></div>
+      <div class="card"><h3>Sauber zurückführen</h3><p>Nur deine Änderungen gehen in den Song zurück. Ohne Änderung bleibt er probengenau das Original, Trennfehler landen nie im Ergebnis.</p></div>
+      <div class="card"><h3>Trennen per Knopf</h3><p>In der PC-Fassung trennt ein kleiner Helfer die Spuren direkt aus dem Studio heraus, lokal auf deinem Rechner. Stems aus anderen Programmen lassen sich ebenso laden.</p></div>
+    </div>
+
+    <h3 class="sub">Mit Claude oder ChatGPT arbeiten <em>PC-Fassung</em></h3>
+    <div class="grid">
+      <div class="card"><h3>Sprache statt Regler</h3><p>Über einen lokalen MCP-Server kann ein KI-Assistent wie Claude oder ChatGPT das Studio bedienen: Songs prüfen, ganze Alben mastern, Beats und Instrumentalstücke im Composer bauen und exportieren.</p></div>
+      <div class="card"><h3>Sicher eingegrenzt</h3><p>Der Server arbeitet nur in Ordnern, die du freigibst, legt Exporte immer als neue Dateien an, überschreibt keine Originale und hebt jeden früheren Projektstand auf.</p></div>
+    </div>
     <p class="note">Der Funktionsumfang kann sich bis zur Veröffentlichung noch ändern.</p>
+  </section>
+
+  <section id="neu">
+    <h2>Neu seit Version 1.18</h2>
+    <ul class="plain changes">
+      <li><b>1.22</b> Lange Stücke im Composer: 64 benannte Abschnitte, bis 256 Steps, Kette bis 9:30 Minuten.</li>
+      <li><b>1.21</b> Instrumente im Composer: DnB-Synth, Retro-Synth (16 Bit), Flügel, Upright-Klavier, Violine, Holzbläser, Piano-Roll und Spiel-Effekte. Akkorde, Notenbearbeitung und Stem-Export auch über Claude und ChatGPT.</li>
+      <li><b>1.20</b> Neuer Bereich Stems mit Spektral-Editor und Trennen per Knopf. Neue, einfacher geschriebene Anleitung auf Deutsch und Englisch.</li>
+      <li><b>1.19</b> DnB Composer mit Drum Machine, Klangauswahl und weiteren elektronischen Stilen. „Rassel entfernen“ für Scheppern und Zischen in den Höhen.</li>
+    </ul>
   </section>
 
   <section>
     <h2>Datenschutz</h2>
     <ul class="plain">
-      <li>Die Audiobearbeitung läuft vollständig auf deinem Gerät. Es gibt keinen Server, der deine Songs empfängt.</li>
+      <li>Die Audiobearbeitung läuft vollständig auf deinem Gerät. Es gibt keinen Server, der deine Songs empfängt. Das gilt auch für den Composer, die Stem-Trennung und den MCP-Server.</li>
+      <li>Steuerst du das Studio über Claude oder ChatGPT, gehen deine Anweisungen und die Antworten des Studios (zum Beispiel Messwerte oder Notenlisten) an den jeweiligen KI-Dienst, die Audiodateien selbst nicht.</li>
       <li>Diese Seite verwendet keine Cookies, keine Analyse und lädt nichts von fremden Servern.</li>
       <li>Sprache des Studios: Deutsch und Englisch.</li>
     </ul>

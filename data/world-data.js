@@ -147,8 +147,8 @@ export const projects = [
   {
     id: 'studio',
     title: 'Deep Structure Mastering Studio',
-    status: 'In Entwicklung · Beta-Test',
-    text: 'Mastering direkt im Browser: Song-Check, Reparatur typischer KI-Artefakte, Equalizer, Kompressor, Limiter und Export als WAV, MP3 oder OGG. Alles läuft auf deinem Gerät. Noch in Entwicklung – Updates und Beta-Zugang per E-Mail.',
+    status: 'In Entwicklung · Beta-Test · Version 1.22',
+    text: 'Mastering auf deinem eigenen Gerät: Song-Check, Reparatur typischer KI-Artefakte, Equalizer, Kompressor, Limiter und Export als WAV, MP3 oder OGG. Neu: Stems für Gesang, Drums und Rest sowie der DnB Composer mit Drum Machine, Synths, Klavier, Violine und Holzbläsern. Noch in Entwicklung – Updates und Beta-Zugang per E-Mail.',
     link: { label: 'Mehr erfahren', href: './studio/' },
     images: [
       { src: './assets/projects/studio.webp', alt: 'Oberfläche des Deep Structure Mastering Studio' }

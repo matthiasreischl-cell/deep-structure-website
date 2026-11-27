@@ -1,7 +1,10 @@
-# Deep Structure — Website
+# Deep Structure CT — Website
 
-Website von Deep Structure auf [deepstructure.world](https://deepstructure.world/) (GitHub Pages).
+Website von Deep Structure Creative Technologies (kurz Deep Structure CT) auf [deepstructure.world](https://deepstructure.world/) (GitHub Pages).
 Reines HTML, CSS und JavaScript als ES-Module, ohne Build-Schritt.
+
+Der gemeinsame Auftritt lautet „DEEP STRUCTURE CT / Creative Technologies / Musik · Games · Software · Web“.
+Die Musik erscheint weiterhin unter dem Künstlernamen Deep Structure; Produktnamen bleiben eigenständig.
 
 ## Ablauf
 

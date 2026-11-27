@@ -7,15 +7,15 @@
   <meta name="referrer" content="no-referrer" />
   <!-- Sicherheitsgurt (Content-Security-Policy): nur eigene Dateien; fremd erlaubt sind nur der Radio-Stream und dessen Titelanzeige (asurahosting). Eigene Rahmen (frame-src 'self') nur für die Spiel-Demos unter /spiele/. Neue fremde Dienste (z. B. Webshop-Einbindung) hier ergänzen. -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; media-src 'self' blob: https://a10.asurahosting.com:9170; connect-src 'self' https://a10.asurahosting.com; worker-src 'self' blob:; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; upgrade-insecure-requests" />
-  <meta name="description" content="Deep Structure – Drum &amp; Bass und dunkle Geschichten aus der Steiermark. Internetradio hören, Vinyl wie „The Forest Does Not Forget“ entdecken und das Browserspiel Monsterjäger spielen." />
-  <title>Deep Structure – Drum &amp; Bass, Vinyl, Internetradio &amp; Spiele</title>
+  <meta name="description" content="Deep Structure CT – Creative Technologies: Musik, Games, Software und Web. Kreative Medien, eigene Welten und digitale Entwicklung von Matthias Reischl aus der Steiermark." />
+  <title>Deep Structure CT – Creative Technologies</title>
   <link rel="canonical" href="https://deepstructure.world/" />
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Deep Structure" />
+  <meta property="og:site_name" content="Deep Structure CT" />
   <meta property="og:locale" content="de_AT" />
   <meta property="og:url" content="https://deepstructure.world/" />
-  <meta property="og:title" content="Deep Structure — Internetradio, Drum &amp; Bass und eigene Welten" />
-  <meta property="og:description" content="Dunkle Geschichten und Drum &amp; Bass. Radio hören, Vinyl entdecken, Apps und Spiele von Deep Structure." />
+  <meta property="og:title" content="Deep Structure CT – Creative Technologies" />
+  <meta property="og:description" content="Musik · Games · Software · Web. Kreative Medien, eigene Welten und digitale Entwicklung von Matthias Reischl." />
   <meta property="og:image" content="https://deepstructure.world/assets/og-deep-structure.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
@@ -29,7 +29,8 @@
         "@type": "WebSite",
         "@id": "https://deepstructure.world/#website",
         "url": "https://deepstructure.world/",
-        "name": "Deep Structure",
+        "name": "Deep Structure Creative Technologies",
+        "alternateName": "Deep Structure CT",
         "inLanguage": "de",
         "publisher": { "@id": "https://deepstructure.world/#artist" }
       },
@@ -109,6 +110,7 @@
   <link rel="stylesheet" href="shop.css?v=3" />
   <link rel="stylesheet" href="comics.css?v=1" />
   <link rel="stylesheet" href="videos.css?v=1" />
+  <link rel="stylesheet" href="brand.css?v=1" />
 </head>
 <body>
   <canvas id="fluid" aria-hidden="true"></canvas>
@@ -116,14 +118,18 @@
   <div class="noise" aria-hidden="true"></div>
 
   <main class="landing" id="landing">
-    <h1 class="visually-hidden">Deep Structure – Drum &amp; Bass, Vinyl, Internetradio und Spiele</h1>
-    <button class="logo-button" id="enterButton" type="button" aria-label="Enter Deep Structure">
+    <h1 class="visually-hidden">Deep Structure CT – Creative Technologies: Musik, Games, Software und Web</h1>
+    <button class="logo-button" id="enterButton" type="button" aria-label="Deep Structure CT – Creative Technologies betreten">
       <span class="water-shadow" aria-hidden="true"></span>
       <span class="symbol-stage" id="symbolStage" aria-hidden="true"></span>
       <span class="symbol-reflection" aria-hidden="true"></span>
-      <span class="wordmark">DEEP STRUCTURE</span>
+      <span class="landing-brand">
+        <span class="wordmark">DEEP STRUCTURE CT</span>
+        <span class="brand-subtitle">Creative Technologies</span>
+        <span class="brand-services">Musik · Games · Software · Web</span>
+      </span>
     </button>
-    <nav class="landing-legal" aria-label="Weitere Seiten"><a href="./ueber/" title="Über Deep Structure">Über</a><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></nav>
+    <nav class="landing-legal" aria-label="Weitere Seiten"><a href="./ueber/" title="Über Deep Structure CT">Über</a><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></nav>
   </main>
 
   <div class="transition" id="transition" aria-hidden="true">
@@ -132,7 +138,7 @@
   </div>
 
   <div class="inside" id="inside" aria-hidden="true" inert>
-    <section class="world" id="world" aria-label="Deep Structure World" tabindex="-1">
+    <section class="world" id="world" aria-label="Die Welt von Deep Structure CT" tabindex="-1">
       <div class="world-haze" aria-hidden="true"></div>
       <div class="world-scene" id="worldScene">
         <div class="world-core" aria-hidden="true"></div>
@@ -140,15 +146,15 @@
       </div>
 
       <header class="world-header">
-        <h1><a class="world-home" href="./" title="Zur Startseite mit dem Logo">DEEP STRUCTURE <span>INTERNETRADIO</span></a></h1>
+        <h1><a class="world-home" href="./" title="Zur Startseite mit dem Logo">DEEP STRUCTURE CT<span class="brand-subtitle">Creative Technologies</span><span class="brand-services">Musik · Games · Software · Web</span></a></h1>
         <nav class="world-index" id="worldIndex" aria-label="Bereiche"></nav>
       </header>
       <footer class="world-footer">
-        <span>Dunkle Geschichten. Drum &amp; Bass. Eigene Welten.</span>
+        <span>Musik · Games · Software · Web</span>
         <nav class="world-legal" aria-label="Weitere Seiten"><a href="./ueber/">Über</a><a href="./monsterjaeger/">Monsterjäger</a><a href="./comics/">Comics</a><a href="./videos/">Videos</a><a href="./impressum.html">Impressum</a><a href="./datenschutz.html">Datenschutz</a></nav>
       </footer>
 
-      <div class="world-panel" id="worldPanel" role="dialog" aria-modal="true" aria-label="Deep Structure – Bereich" aria-hidden="true">
+      <div class="world-panel" id="worldPanel" role="dialog" aria-modal="true" aria-label="Deep Structure CT – Bereich" aria-hidden="true">
         <div class="world-panel-card">
           <button class="world-panel-close" id="worldPanelClose" type="button" aria-label="Schließen"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></button>
           <div id="worldPanelCard"></div>

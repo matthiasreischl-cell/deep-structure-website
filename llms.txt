@@ -1,12 +1,14 @@
-# Deep Structure
+# Deep Structure CT – Creative Technologies
 
-> Deep Structure ist das Musik- und Kunstprojekt von Matthias Reischl aus der Steiermark (Österreich). Im Mittelpunkt steht Drum & Bass mit dunklen, erzählerischen Themen aus Märchen, Folklore und Tragödien. Dazu kommen Vinyl, ein eigenes Internetradio und selbst entwickelte Spiele und Apps. Website: https://deepstructure.world/
+> Deep Structure CT – Creative Technologies ist der gemeinsame Auftritt von Matthias Reischl aus der Steiermark für Musik, Games, Software und Webprojekte. Die Musik erscheint weiterhin unter dem Künstlernamen Deep Structure. Dazu entstehen eigene Spiele, Anwendungen, Comics und Videos. Website: https://deepstructure.world/
 
 Nicht zu verwechseln mit dem Track „Deep Structure“ von Deadbeat oder der Compilation-Reihe „Deep Structures“.
 
+Der gewerbliche Start von Deep Structure Creative Technologies ist für Jänner 2027 geplant.
+
 ## Seiten
 
-- [Über Deep Structure](https://deepstructure.world/ueber/): Musik, Internetradio, Vinyl, Spiele und alle Kanäle, mit häufigen Fragen
+- [Über Deep Structure CT](https://deepstructure.world/ueber/): Musik, Games, Software, Webprojekte und alle Kanäle, mit häufigen Fragen
 - [Monsterjäger I – Der Ursprung](https://deepstructure.world/monsterjaeger/): Aufbau- und Strategiespiel im Comic-Stil mit Musik von Deep Structure, Demo im Browser spielbar
 - [Comics](https://deepstructure.world/comics/): Comics zu Monsterjäger und weitere kurze Geschichten, kostenlos als PDF (erste Ausgabe in Arbeit)
 - [Videos](https://deepstructure.world/videos/): Alle Videos von Deep Structure – Musikvideos (z. B. Rumpelstilzchen – Feuerkreis im C64-Pixel-Look und mit Liedtext) sowie Trailer und Teaser zu den Spielen
